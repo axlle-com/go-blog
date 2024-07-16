@@ -1,26 +1,43 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"sync"
+)
 
 type Config struct {
-	Port  string `mapstructure:"PORT"`
-	DBUrl string `mapstructure:"DB_URL"`
+	Port   string `mapstructure:"PORT"`
+	DBUrl  string `mapstructure:"DB_URL"`
+	KeyJWT string `mapstructure:"KEY_JWT"`
 }
 
-func LoadConfig() (c Config, err error) {
-	viper.AddConfigPath("./pkg/common/config/envs")
-	viper.SetConfigName("dev")
-	viper.SetConfigType("env")
+var (
+	once     sync.Once
+	instance *Config
+)
 
-	viper.AutomaticEnv()
+func LoadConfig() (err error) {
+	once.Do(func() {
+		viper.AddConfigPath("./pkg/common/envs")
+		viper.SetConfigName("dev")
+		viper.SetConfigType("env")
+		viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
+		if err = viper.ReadInConfig(); err != nil {
+			return
+		}
 
-	if err != nil {
-		return
-	}
-
-	err = viper.Unmarshal(&c)
-
+		instance = &Config{}
+		err = viper.Unmarshal(instance)
+	})
 	return
+}
+
+func GetConfig() *Config {
+	if instance == nil {
+		if err := LoadConfig(); err != nil {
+			panic("Ошибка загрузки конфигурации: " + err.Error())
+		}
+	}
+	return instance
 }

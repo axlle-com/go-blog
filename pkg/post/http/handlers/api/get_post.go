@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/axlle-com/blog/pkg/post"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +10,7 @@ import (
 func (h handler) GetPost(c *gin.Context) {
 	id := c.Param("id")
 
-	var post post.Post
+	var post models.Post
 
 	if result := h.DB.First(&post, id); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)

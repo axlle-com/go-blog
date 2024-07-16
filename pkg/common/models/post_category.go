@@ -1,7 +1,6 @@
-package post_category
+package models
 
 import (
-	. "github.com/axlle-com/blog/pkg/post"
 	"gorm.io/gorm"
 	"time"
 )

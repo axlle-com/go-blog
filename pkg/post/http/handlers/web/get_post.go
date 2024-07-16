@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/pkg/post"
+	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	post "github.com/axlle-com/blog/pkg/post/handlers/api"
+	post "github.com/axlle-com/blog/pkg/post/http/handlers/api"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

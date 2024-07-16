@@ -1,7 +1,6 @@
-package post
+package models
 
 import (
-	. "github.com/axlle-com/blog/pkg/post_category"
 	"gorm.io/gorm"
 	"time"
 )
@@ -41,5 +40,4 @@ type Post struct {
 	CreatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"created_at"`
 	UpdatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"updated_at"`
 	DeletedAt          gorm.DeletedAt `gorm:"index;type:timestamp;default:null" json:"deleted_at"`
-	PostCategory       *PostCategory
 }

@@ -1,8 +1,7 @@
 package db
 
 import (
-	"github.com/axlle-com/blog/pkg/post"
-	"github.com/axlle-com/blog/pkg/user"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -15,8 +14,8 @@ func Init(url string) *gorm.DB {
 		log.Fatalln(err)
 	}
 
-	err = db.AutoMigrate(&post.Post{})
-	err = db.AutoMigrate(&user.User{})
+	err = db.AutoMigrate(&models.Post{})
+	err = db.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatalln(err)
 	}

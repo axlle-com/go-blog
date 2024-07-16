@@ -1,18 +1,19 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/post"
+	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-type AddPostRequestBody struct {
+type UpdatePostRequestBody struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
 
-func (h handler) AddPost(c *gin.Context) {
-	body := AddPostRequestBody{}
+func (h handler) UpdatePost(c *gin.Context) {
+	id := c.Param("id")
+	body := UpdatePostRequestBody{}
 
 	// получаем тело запроса
 	if err := c.BindJSON(&body); err != nil {
@@ -20,14 +21,16 @@ func (h handler) AddPost(c *gin.Context) {
 		return
 	}
 
-	var post post.Post
+	var post Post
 
-	post.Title = body.Title
-
-	if result := h.DB.Create(&post); result.Error != nil {
+	if result := h.DB.First(&post, id); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)
 		return
 	}
 
-	c.JSON(http.StatusCreated, &post)
+	post.Title = body.Title
+
+	h.DB.Save(&post)
+
+	c.JSON(http.StatusOK, &post)
 }

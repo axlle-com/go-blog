@@ -1,4 +1,4 @@
 /.idea/
 /pgdata/
-/pkg/common/envs/.env
 /src/app.css
+/pkg/common/envs/dev.env

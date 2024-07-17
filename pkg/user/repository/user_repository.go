@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/gorm"
 )
@@ -18,11 +19,12 @@ type userRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository {
-	return &userRepository{db: db}
+func NewUserRepository() UserRepository {
+	return &userRepository{db: db.GetDB()}
 }
 
 func (r *userRepository) CreateUser(user *models.User) error {
+	user.SetPasswordHash()
 	return r.db.Create(user).Error
 }
 
@@ -43,6 +45,7 @@ func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (r *userRepository) UpdateUser(user *models.User) error {
+	user.SetPasswordHash()
 	return r.db.Save(user).Error
 }
 

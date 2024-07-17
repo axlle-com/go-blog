@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func (h handler) CreatePost(c *gin.Context) {
+func CreatePost(c *gin.Context) {
 	body := models.CreatePostRequest{}
-	postRepo := repository.NewPostRepository(h.DB)
+	postRepo := repository.NewPostRepository()
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

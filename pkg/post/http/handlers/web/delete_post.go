@@ -1,23 +1,27 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/post/repository"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (h handler) DeletePost(c *gin.Context) {
+func DeletePost(c *gin.Context) {
 	id := c.Param("id")
-
-	var post models.Post
-
-	if result := h.DB.First(&post, id); result.Error != nil {
-		c.AbortWithError(http.StatusNotFound, result.Error)
+	postRepo := repository.NewPostRepository()
+	num, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		log.Println("Ошибка преобразования:", err)
 		return
 	}
 
-	h.DB.Delete(&post)
+	if err := postRepo.DeletePost(uint(num)); err != nil {
+		c.AbortWithError(http.StatusNotFound, err)
+		return
+	}
 
 	c.Status(http.StatusOK)
 }

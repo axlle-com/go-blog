@@ -1,25 +1,21 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/common/middleware"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type handler struct {
-	DB *gorm.DB
-}
+func RegisterRoutes(r *gin.Engine) {
+	r.GET("/:alias", GetPost)
+	r.GET("/posts", GetPosts)
 
-func RegisterRoutes(r *gin.Engine, db *gorm.DB) {
-	h := &handler{
-		DB: db,
+	protected := r.Group("/admin")
+	protected.Use(middleware.AuthRequired())
+	{
+		protected.POST("/posts", CreatePost)
+		protected.GET("/posts", GetPosts)
+		protected.GET("/posts/:id", GetPost)
+		protected.PUT("/posts/:id", UpdatePost)
+		protected.DELETE("/posts/:id", DeletePost)
 	}
-
-	r.POST("/admin/posts", h.CreatePost)
-	r.GET("/admin/posts", h.GetPosts)
-	r.GET("/admin/posts/:id", h.GetPost)
-	r.PUT("/admin/posts/:id", h.UpdatePost)
-	r.DELETE("/admin/posts/:id", h.DeletePost)
-
-	r.GET("/:alias", h.GetPost)
-	r.GET("/posts", h.GetPosts)
 }

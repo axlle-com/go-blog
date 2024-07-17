@@ -6,7 +6,6 @@ import (
 )
 
 type PostCategory struct {
-	gorm.Model
 	ID                 uint           `gorm:"primaryKey;autoIncrement;not null" json:"id"`
 	PostCategoryID     uint           `gorm:"type:int;default:null;index;" json:"post_category_id"`
 	Render             string         `gorm:"type:varchar(255);default:null" json:"render"`
@@ -29,6 +28,6 @@ type PostCategory struct {
 	CSS                string         `gorm:"type:longtext;default:null" json:"css"`
 	CreatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"created_at"`
 	UpdatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"updated_at"`
-	DeletedAt          gorm.DeletedAt `gorm:"index;type:timestamp;default:null" json:"deleted_at"`
+	DeletedAt          gorm.DeletedAt `gorm:"index;type:timestamp;default:null;index" json:"deleted_at"`
 	Posts              []*Post
 }

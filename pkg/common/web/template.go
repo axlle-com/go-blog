@@ -8,8 +8,8 @@ import (
 )
 
 func InitTemplate(router *gin.Engine) {
-	router.Static("/src", "./src")
-	templates := loadTemplates("templates")
+	router.Static("/public", "./src/public")
+	templates := loadTemplates("src/templates")
 	router.SetHTMLTemplate(templates)
 	//router.LoadHTMLGlob("templates/**/**/*")
 }

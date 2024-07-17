@@ -5,10 +5,13 @@ import (
 	"sync"
 )
 
+const SessionsName = "web_session"
+
 type Config struct {
-	Port   string `mapstructure:"PORT"`
-	DBUrl  string `mapstructure:"DB_URL"`
-	KeyJWT string `mapstructure:"KEY_JWT"`
+	Port      string `mapstructure:"PORT"`
+	DBUrl     string `mapstructure:"DB_URL"`
+	KeyJWT    string `mapstructure:"KEY_JWT"`
+	KeyCookie string `mapstructure:"KEY_COOKIE"`
 }
 
 var (

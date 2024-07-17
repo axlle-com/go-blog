@@ -1,16 +1,16 @@
 package api
 
 import (
+	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func (h handler) GetPosts(c *gin.Context) {
+func GetPosts(c *gin.Context) {
 	var posts []models.Post
-
-	if result := h.DB.Find(&posts); result.Error != nil {
+	h := db.GetDB()
+	if result := h.Find(&posts); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)
 		return
 	}

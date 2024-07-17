@@ -10,9 +10,26 @@ import (
 )
 
 func InitMinify() {
+	adminCSS := []string{
+		"src/resources/font/inter/inter.min.css",
+		"src/resources/font/play/play.css",
+		"src/resources/plugins/material-design-icons-iconfont/material-design-icons.min.css",
+		"src/resources/plugins/fontawesome-free/css/all.min.css",
+		"src/resources/plugins/simplebar/simplebar.min.css",
+		"src/resources/plugins/summernote/summernote-bs4.css",
+		"src/resources/plugins/select2/css/select2.min.css",
+		"src/resources/plugins/flatpickr/flatpickr.min.css",
+		"src/resources/plugins/noty/noty.css",
+		"src/resources/plugins/noty/themes/relax.css",
+		"src/resources/plugins/fancybox/fancybox.css",
+		"src/resources/admin/css/style.css",
+		"src/resources/admin/css/sidebar-dark.min.css",
+		"src/resources/plugins/sweetalert2/sweetalert2.min.css",
+	}
+
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
-	mergeAndMinifyFiles(m, "text/css", []string{"src/css/bootstrap.min.css"}, "src/app.css")
+	mergeAndMinifyFiles(m, "text/css", adminCSS, "src/public/admin/app.css")
 }
 
 func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {

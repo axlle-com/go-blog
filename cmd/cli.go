@@ -4,6 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	db2 "github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/models"
+	. "github.com/axlle-com/blog/pkg/user/db"
+	"log"
 	"os"
 	"strings"
 )
@@ -23,6 +27,15 @@ func main() {
 var Commands = map[string]func(){
 	"hello": func() {
 		fmt.Println("Hello!")
+	},
+	"seed": func() {
+		SeedUsers(100)
+	},
+	"migrate": func() {
+		db := db2.GetDB()
+		if err := db.AutoMigrate(&models.Post{}, &models.User{}); err != nil {
+			log.Fatalln(err)
+		}
 	},
 }
 

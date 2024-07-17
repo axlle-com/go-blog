@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,9 +12,9 @@ type AddPostRequestBody struct {
 	Content string `json:"content"`
 }
 
-func (h handler) AddPost(c *gin.Context) {
+func AddPost(c *gin.Context) {
 	body := AddPostRequestBody{}
-
+	h := db.GetDB()
 	// получаем тело запроса
 	if err := c.BindJSON(&body); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -24,7 +25,7 @@ func (h handler) AddPost(c *gin.Context) {
 
 	post.Title = body.Title
 
-	if result := h.DB.Create(&post); result.Error != nil {
+	if result := h.Create(&post); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)
 		return
 	}

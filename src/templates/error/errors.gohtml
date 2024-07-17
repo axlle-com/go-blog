@@ -1,0 +1,7 @@
+{{ define "errors"}}
+    <ul style="color: red;">
+        {{range .Errors}}
+            <li><strong>{{.Field}}:</strong> {{.Message}}</li>
+        {{end}}
+    </ul>
+{{ end}}

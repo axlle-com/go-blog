@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type UpdatePostRequestBody struct {
@@ -12,10 +12,10 @@ type UpdatePostRequestBody struct {
 	Content string `json:"content"`
 }
 
-func (h handler) UpdatePost(c *gin.Context) {
+func UpdatePost(c *gin.Context) {
 	id := c.Param("id")
 	body := UpdatePostRequestBody{}
-
+	h := db.GetDB()
 	// получаем тело запроса
 	if err := c.BindJSON(&body); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -24,14 +24,14 @@ func (h handler) UpdatePost(c *gin.Context) {
 
 	var post models.Post
 
-	if result := h.DB.First(&post, id); result.Error != nil {
+	if result := h.First(&post, id); result.Error != nil {
 		c.AbortWithError(http.StatusNotFound, result.Error)
 		return
 	}
 
 	post.Title = body.Title
 
-	h.DB.Save(&post)
+	h.Save(&post)
 
 	c.JSON(http.StatusOK, &post)
 }

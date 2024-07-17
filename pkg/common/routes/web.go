@@ -4,14 +4,13 @@ import (
 	post "github.com/axlle-com/blog/pkg/post/http/handlers/web"
 	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
-func InitializeWebRoutes(r *gin.Engine, db *gorm.DB) {
+func InitializeWebRoutes(r *gin.Engine) {
 	r.GET("/", ShowIndexPage)
-	post.RegisterRoutes(r, db)
-	user.RegisterRoutes(r, db)
+	post.RegisterRoutes(r)
+	user.RegisterRoutes(r)
 }
 
 func ShowIndexPage(c *gin.Context) {

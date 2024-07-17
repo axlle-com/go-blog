@@ -1,55 +1,55 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/config"
+	. "github.com/axlle-com/blog/pkg/common/errors"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
-	"github.com/axlle-com/blog/pkg/user/repository"
+	"github.com/axlle-com/blog/pkg/user/service"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
+	"log"
 	"net/http"
-	"time"
 )
 
-func (h handler) Login(c *gin.Context) {
-
+func Auth(c *gin.Context) {
 	var authInput AuthInput
-	userRepo := repository.NewUserRepository(h.DB)
+	session := sessions.Default(c)
 
-	if err := c.ShouldBindJSON(&authInput); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&authInput); err != nil {
+		errors := ParseBindError(err)
+		for _, bindError := range errors {
+			session.AddFlash(FlashErrorString(bindError))
+		}
+		if err := session.Save(); err != nil {
+			log.Println(err)
+		}
+		c.Redirect(http.StatusFound, "/login")
 		return
 	}
 
-	var userFound, err = userRepo.GetUserByEmail(authInput.Email)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if userFound == nil || userFound.ID == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(userFound.PasswordHash), []byte(authInput.Password)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid password or login"})
-		return
-	}
-
-	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  userFound.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	token, err := generateToken.SignedString([]byte(config.GetConfig().KeyJWT))
-
+	userFound, err := service.Auth(authInput)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
+		session.AddFlash(
+			FlashErrorString(
+				BindError{
+					Field:   GeneralFieldName,
+					Message: err.Error(),
+				},
+			),
+		)
+		err := session.Save()
+		if err != nil {
+			log.Println(err)
+		}
+		c.Redirect(http.StatusFound, "/login")
+		return
 	}
 
-	c.JSON(200, gin.H{
-		"token": token,
-	})
+	session.Set("user_id", userFound.ID)
+	if err := session.Save(); err != nil {
+		log.Println(err)
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin")
 }

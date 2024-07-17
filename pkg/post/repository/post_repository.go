@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/gorm"
 )
@@ -18,8 +19,8 @@ type postRepository struct {
 	db *gorm.DB
 }
 
-func NewPostRepository(db *gorm.DB) PostRepository {
-	return &postRepository{db: db}
+func NewPostRepository() PostRepository {
+	return &postRepository{db: db.GetDB()}
 }
 
 func (r *postRepository) CreatePost(post *models.Post) error {

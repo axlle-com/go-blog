@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	db2 "github.com/axlle-com/blog/pkg/common/db"
+	DB "github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
-	. "github.com/axlle-com/blog/pkg/user/db"
+	post "github.com/axlle-com/blog/pkg/post/db"
+	user "github.com/axlle-com/blog/pkg/user/db"
 	"log"
 	"os"
 	"strings"
@@ -29,13 +30,43 @@ var Commands = map[string]func(){
 		fmt.Println("Hello!")
 	},
 	"seed": func() {
-		SeedUsers(100)
+		user.SeedUsers(100)
+		post.SeedPosts(100)
 	},
 	"migrate": func() {
-		db := db2.GetDB()
-		if err := db.AutoMigrate(&models.Post{}, &models.User{}); err != nil {
+		db := DB.GetDB()
+		err := db.AutoMigrate(
+			&models.Post{},
+			&models.User{},
+			&models.PostCategory{},
+			&models.Template{},
+		)
+		if err != nil {
 			log.Fatalln(err)
 		}
+	},
+	"refill": func() {
+		db := DB.GetDB()
+		err := db.Migrator().DropTable(
+			&models.Post{},
+			&models.User{},
+			&models.PostCategory{},
+			&models.Template{},
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		err = db.AutoMigrate(
+			&models.Post{},
+			&models.User{},
+			&models.PostCategory{},
+			&models.Template{},
+		)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		user.SeedUsers(100)
+		post.SeedPosts(100)
 	},
 }
 

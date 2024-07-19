@@ -10,7 +10,7 @@ func Index(c *gin.Context) {
 		http.StatusOK,
 		"admin.index",
 		gin.H{
-			"Title": "Авторизация",
+			"Title": "dashboard",
 		},
 	)
 }

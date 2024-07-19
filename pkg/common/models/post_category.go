@@ -1,33 +1,29 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type PostCategory struct {
-	ID                 uint           `gorm:"primaryKey;autoIncrement;not null" json:"id"`
-	PostCategoryID     uint           `gorm:"type:int;default:null;index;" json:"post_category_id"`
-	Render             string         `gorm:"type:varchar(255);default:null" json:"render"`
-	MetaTitle          string         `gorm:"type:varchar(100);default:null" json:"meta_title"`
-	MetaDescription    string         `gorm:"type:varchar(200);default:null" json:"meta_description"`
-	Alias              string         `gorm:"type:varchar(255);default:null;unique" json:"alias"`
-	URL                string         `gorm:"type:varchar(1000);default:null;unique" json:"url"`
-	IsPublished        uint8          `gorm:"type:smallint;default:1" json:"is_published"`
-	IsFavourites       uint8          `gorm:"type:smallint;default:0" json:"is_favourites"`
-	IsWatermark        uint8          `gorm:"type:smallint;default:1" json:"is_watermark"`
-	IsSitemap          uint8          `gorm:"type:smallint;default:1" json:"is_sitemap"`
-	Image              string         `gorm:"type:varchar(255);default:null" json:"image"`
-	ShowImage          uint8          `gorm:"type:smallint;default:1" json:"show_image"`
-	Title              string         `gorm:"type:varchar(255);not null;index" json:"title"`
-	TitleShort         string         `gorm:"type:varchar(150);default:null" json:"title_short"`
-	Description        string         `gorm:"type:text;default:null" json:"description"`
-	PreviewDescription string         `gorm:"type:text;default:null" json:"preview_description"`
-	Sort               uint           `gorm:"type:int;default:0" json:"sort"`
-	Script             string         `gorm:"type:longtext;default:null" json:"script"`
-	CSS                string         `gorm:"type:longtext;default:null" json:"css"`
-	CreatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"created_at"`
-	UpdatedAt          time.Time      `gorm:"type:timestamp;default:current_timestamp" json:"updated_at"`
-	DeletedAt          gorm.DeletedAt `gorm:"index;type:timestamp;default:null;index" json:"deleted_at"`
-	Posts              []*Post
+	ID                 uint       `gorm:"primaryKey" json:"id"`
+	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
+	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
+	MetaTitle          *string    `gorm:"size:100" json:"meta_title,omitempty"`
+	MetaDescription    *string    `gorm:"size:200" json:"meta_description,omitempty"`
+	Alias              string     `gorm:"size:255;unique" json:"alias"`
+	URL                string     `gorm:"size:1000;unique" json:"url"`
+	IsPublished        *bool      `gorm:"default:true" json:"is_published,omitempty"`
+	IsFavourites       *bool      `gorm:"default:false" json:"is_favourites,omitempty"`
+	IsWatermark        *bool      `gorm:"default:true" json:"is_watermark,omitempty"`
+	IsSitemap          *bool      `gorm:"default:true" json:"is_sitemap,omitempty"`
+	Image              *string    `gorm:"size:255" json:"image,omitempty"`
+	ShowImage          *bool      `gorm:"default:true" json:"show_image,omitempty"`
+	Title              string     `gorm:"size:255;not null" json:"title"`
+	TitleShort         *string    `gorm:"size:150" json:"title_short,omitempty"`
+	Description        *string    `gorm:"type:text" json:"description,omitempty"`
+	PreviewDescription *string    `gorm:"type:text" json:"preview_description,omitempty"`
+	Sort               *uint      `gorm:"default:0" json:"sort,omitempty"`
+	CreatedAt          *time.Time `json:"created_at,omitempty"`
+	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
+	DeletedAt          *time.Time `json:"deleted_at,;index;omitempty"`
 }

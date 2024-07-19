@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/js"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,9 +28,30 @@ func InitMinify() {
 		"src/resources/plugins/sweetalert2/sweetalert2.min.css",
 	}
 
+	adminJS := []string{
+		"src/resources/plugins/jquery-3-6-0/jquery.min.js",
+		"src/resources/plugins/bootstrap-4-6-1/js/bootstrap.bundle.js",
+		"src/resources/plugins/simplebar/simplebar.min.js",
+		"src/resources/plugins/feather-icons/feather.min.js",
+		"src/resources/plugins/summernote/summernote-bs4.min.js",
+		"src/resources/plugins/select2/js/select2.full.js",
+		"src/resources/plugins/select2/js/i18n/ru.js",
+		"src/resources/plugins/flatpickr/flatpickr.js",
+		"src/resources/plugins/flatpickr/l10n/ru.js",
+		"src/resources/plugins/noty/noty.js",
+		"src/resources/plugins/inputmask/jquery.inputmask.js",
+		"src/resources/plugins/fancybox/fancybox.umd.js",
+		"src/resources/plugins/sweetalert2/sweetalert2.all.min.js",
+		"src/resources/plugins/sortablejs/Sortable.min.js",
+		"src/resources/plugins/js/script.min.js",
+		"src/resources/plugins/date-format/date-format.js",
+	}
+
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
+	m.AddFunc("application/javascript", js.Minify)
 	mergeAndMinifyFiles(m, "text/css", adminCSS, "src/public/admin/app.css")
+	mergeAndMinifyFiles(m, "application/javascript", adminJS, "src/public/admin/app.js")
 }
 
 func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {

@@ -18,15 +18,7 @@
 <body class="container">
 {{ template "header" . }}
 {{ template "menu" . }}
-{{range .payload }}
-    <!--Create the link for the article based on its ID-->
-    <a href="/article/view/{{.ID}}">
-        <!--Display the title of the article -->
-        <h2>Первый {{.Title}}</h2>
-    </a>
-    <!--Display the content of the article-->
-    <p>{{.Content}}</p>
-{{end}}
+
 {{ template "footer" . }}
 </body>
 </html>

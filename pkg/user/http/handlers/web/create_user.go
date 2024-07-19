@@ -38,7 +38,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	user := User{
-		Email:        authInput.Email,
+		Email:        &authInput.Email,
 		PasswordHash: string(passwordHash),
 	}
 

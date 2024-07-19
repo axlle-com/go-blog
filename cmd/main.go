@@ -24,7 +24,7 @@ func main() {
 	})
 	router.Use(sessions.Sessions(config.SessionsName, store))
 
-	web.InitMinify()
+	//web.InitMinify()
 	web.InitTemplate(router)
 	routes.InitializeWebRoutes(router)
 	routes.InitializeApiRoutes(router)

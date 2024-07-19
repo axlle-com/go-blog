@@ -17,10 +17,10 @@ func GetPosts(c *gin.Context) {
 
 	c.HTML(
 		http.StatusOK,
-		"index",
+		"admin.post",
 		gin.H{
-			"title":   "Home Page",
-			"payload": posts,
+			"title": "Home Page",
+			"posts": posts,
 		},
 	)
 }

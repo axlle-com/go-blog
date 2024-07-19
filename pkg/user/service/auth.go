@@ -37,7 +37,7 @@ func Auth(authInput AuthInput) (userFound *User, err error) {
 	if err != nil {
 		return
 	}
-	userFound.AuthToken = token
+	userFound.AuthToken = &token
 
 	return
 }

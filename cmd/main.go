@@ -10,6 +10,20 @@ import (
 )
 
 func main() {
+	// Создаем или открываем файл для логов
+	//f, err := os.OpenFile("/var/log/app/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer f.Close()
+	//
+	//// Настраиваем логгер
+	//log.SetOutput(f)
+	//
+	//// Пример логов
+	//log.Println("Это информационное сообщение")
+	//log.Println("Это сообщение об ошибке")
+
 	cfg := config.GetConfig()
 	router := gin.Default()
 	err := router.SetTrustedProxies(nil)

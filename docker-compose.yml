@@ -2,32 +2,30 @@ version: '3.8'
 
 services:
   app:
-    image: golang:1.22-alpine
+    build: .
     container_name: app
-    working_dir: /app
+    networks:
+      - projects_network
+    ports:
+      - "8080:3000"
     volumes:
       - ./:/app
-#    command: sh -c "go run main.go"
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=example
-      - DB_NAME=blog
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+      - filebeat
 
   postgres:
     image: postgres:16-alpine
     restart: always
     container_name: postgres
+    networks:
+      - projects_network
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: postgres
     ports:
-      - "127.0.0.1:5433:5432"
+      - "5433:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -35,5 +33,61 @@ services:
       retries: 5
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"  # Увеличьте до 1 ГБ или больше
+      - xpack.security.enabled=false  # Отключение безопасности для упрощения
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=name
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - projects_network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    build: docker/kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#      - ELASTICSEARCH_USERNAME=elastic
+#      - ELASTICSEARCH_PASSWORD=name
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - projects_network
+    volumes:
+      - ./docker/kibana/init.sh:/usr/local/bin/kibana-init.sh
+    entrypoint: ["/usr/local/bin/kibana-init.sh"]
+
+  filebeat:
+    build: docker/filebeat
+    volumes:
+      - /var/log/app:/var/log/app
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - projects_network
+
 volumes:
   pgdata:
+  esdata:
+    driver: local
+
+networks:
+  projects_network:
+    external: true

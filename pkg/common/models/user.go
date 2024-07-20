@@ -27,7 +27,7 @@ type User struct {
 	PasswordResetToken *string    `gorm:"size:255;unique" json:"password_reset_token,omitempty"`
 	CreatedAt          *time.Time `json:"created_at,omitempty"`
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
-	DeletedAt          *time.Time `json:"deleted_at,;index;omitempty"`
+	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 func (u *User) SetPasswordHash() {

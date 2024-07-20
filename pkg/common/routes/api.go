@@ -6,5 +6,9 @@ import (
 )
 
 func InitializeApiRoutes(r *gin.Engine) {
-	post.RegisterRoutes(r)
+	r.POST("/api/posts", post.AddPost)
+	r.GET("/api/posts", post.GetPosts)
+	r.GET("/api/posts/:id", post.GetPost)
+	r.PUT("/api/posts/:id", post.UpdatePost)
+	r.DELETE("/api/posts/:id", post.DeletePost)
 }

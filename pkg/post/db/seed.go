@@ -4,6 +4,7 @@ import (
 	. "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	. "github.com/axlle-com/blog/pkg/post/repository"
+	"github.com/axlle-com/blog/pkg/search"
 	"github.com/bxcodec/faker/v3"
 	"log"
 	"math/rand"
@@ -11,6 +12,11 @@ import (
 )
 
 func SeedPosts(n int) {
+	client := search.NewElasticsearch()
+	err := client.CreateIndex("post")
+	if err != nil {
+		log.Printf("Failed to create index: %v", err.Error())
+	}
 	for i := 0; i < n; i++ {
 		post := Post{
 			TemplateID:         UintPtr(100),
@@ -21,15 +27,15 @@ func SeedPosts(n int) {
 			URL:                faker.URL(),
 			IsPublished:        IntToBoolPtr(),
 			IsFavourites:       IntToBoolPtr(),
-			IsComments:         IntToBoolPtr(),
-			IsImagePost:        IntToBoolPtr(),
-			IsImageCategory:    IntToBoolPtr(),
-			IsWatermark:        IntToBoolPtr(),
-			IsSitemap:          IntToBoolPtr(),
+			HasComments:        IntToBoolPtr(),
+			ShowImagePost:      IntToBoolPtr(),
+			ShowImageCategory:  IntToBoolPtr(),
+			MakeWatermark:      IntToBoolPtr(),
+			InSitemap:          IntToBoolPtr(),
 			Media:              StrPtr(faker.Word()),
 			Title:              faker.Sentence(),
 			TitleShort:         StrPtr(faker.Sentence()),
-			PreviewDescription: StrPtr(faker.Paragraph()),
+			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
 			ShowDate:           IntToBoolPtr(),
 			DatePub:            ParseDate(faker.Date()),
@@ -48,6 +54,11 @@ func SeedPosts(n int) {
 		err := NewPostRepository().CreatePost(&post)
 		if err != nil {
 			log.Printf("Failed to create user %d: %v", i, err.Error())
+		} else {
+			err := client.AddPost(&post)
+			if err != nil {
+				continue
+			}
 		}
 	}
 

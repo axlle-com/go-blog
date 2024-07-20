@@ -13,7 +13,6 @@ func Login(c *gin.Context) {
 	userID := session.Get("user_id")
 	if userID != nil {
 		c.Redirect(http.StatusFound, "/")
-		c.Abort()
 		return
 	}
 

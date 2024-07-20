@@ -9,5 +9,5 @@ type Template struct {
 	Resource  *string    `gorm:"size:255" json:"resource,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedAt *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 }

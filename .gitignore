@@ -1,5 +1,5 @@
 /.idea/
 /pgdata/
 /src/app.css
-/pkg/common/envs/dev.env
 /src/resources/
+/dev.env

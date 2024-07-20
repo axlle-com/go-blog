@@ -1,4 +1,4 @@
-package web
+package api
 
 import (
 	. "github.com/axlle-com/blog/pkg/user/http/models"

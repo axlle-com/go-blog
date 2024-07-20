@@ -21,7 +21,7 @@ var (
 
 func LoadConfig() (err error) {
 	once.Do(func() {
-		viper.AddConfigPath("./pkg/common/envs")
+		viper.AddConfigPath(".")
 		viper.SetConfigName("dev")
 		viper.SetConfigType("env")
 		viper.AutomaticEnv()

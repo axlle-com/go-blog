@@ -40,8 +40,8 @@ func main() {
 
 	//web.InitMinify()
 	web.InitTemplate(router)
-	routes.InitializeWebRoutes(router)
 	routes.InitializeApiRoutes(router)
+	routes.InitializeWebRoutes(router)
 
 	err = router.Run(cfg.Port)
 	if err != nil {

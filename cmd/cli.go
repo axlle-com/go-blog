@@ -7,6 +7,8 @@ import (
 	DB "github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
 	post "github.com/axlle-com/blog/pkg/post/db"
+	postCategory "github.com/axlle-com/blog/pkg/post_category/db"
+	template "github.com/axlle-com/blog/pkg/template/db"
 	user "github.com/axlle-com/blog/pkg/user/db"
 	"log"
 	"os"
@@ -32,6 +34,8 @@ var Commands = map[string]func(){
 	"seed": func() {
 		user.SeedUsers(100)
 		post.SeedPosts(100)
+		postCategory.SeedPostCategory(100)
+		template.SeedTemplate(100)
 	},
 	"migrate": func() {
 		db := DB.GetDB()
@@ -65,7 +69,9 @@ var Commands = map[string]func(){
 		if err != nil {
 			log.Fatalln(err)
 		}
+		template.SeedTemplate(100)
 		user.SeedUsers(100)
+		postCategory.SeedPostCategory(100)
 		post.SeedPosts(100)
 	},
 }

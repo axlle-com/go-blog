@@ -15,6 +15,7 @@ type PostRepository interface {
 }
 
 type postRepository struct {
+	*models.Paginate
 	db *gorm.DB
 }
 
@@ -44,7 +45,7 @@ func (r *postRepository) DeletePost(id uint) error {
 
 func (r *postRepository) GetAllPosts() ([]models.Post, error) {
 	var posts []models.Post
-	if err := r.db.Find(&posts).Error; err != nil {
+	if err := r.db.Scopes(r.GetPaginate(0, 0)).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil

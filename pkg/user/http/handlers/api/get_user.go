@@ -22,7 +22,7 @@ func GetUser(c *gin.Context) {
 	h := repository.NewUserRepository()
 	var result *models.User
 
-	if result, err = h.GetUserProviderByID(uintValue); err != nil {
+	if result, err = h.GetUserByID(uintValue); err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}

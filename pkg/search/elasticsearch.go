@@ -117,6 +117,38 @@ func (e *elasticsearchClient) AddPost(post *models.Post) error {
 	return nil
 }
 
+func (e *elasticsearchClient) AddPostCategory(postCategory *models.PostCategory) error {
+	data, err := json.Marshal(*postCategory)
+	if err != nil {
+		return err
+	}
+
+	req := esapi.IndexRequest{
+		Index:      "posts",
+		DocumentID: fmt.Sprintf("%d", time.Now().UnixNano()),
+		Body:       bytes.NewReader(data),
+		Refresh:    "true",
+	}
+
+	res, err := req.Do(context.Background(), e.client)
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("err: " + err.Error())
+		}
+	}(res.Body)
+
+	if res.IsError() {
+		return fmt.Errorf("error indexing document ID=%s", res.String())
+	}
+
+	log.Println("Indexed post successfully")
+	return nil
+}
+
 func (e *elasticsearchClient) SearchPosts(query string) ([]models.Post, error) {
 	var posts []models.Post
 

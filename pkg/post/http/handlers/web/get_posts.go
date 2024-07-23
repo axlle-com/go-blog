@@ -1,26 +1,36 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
+	post "github.com/axlle-com/blog/pkg/post/repository"
+	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
+	template "github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
 func GetPosts(c *gin.Context) {
-	var posts []models.Post
-	h := db.GetDB()
-	if result := h.Find(&posts); result.Error != nil {
-		c.AbortWithError(http.StatusNotFound, result.Error)
-		return
+	posts, err := post.NewPostRepository().GetAllPosts()
+	if err != nil {
+		log.Println(err)
+	}
+	categories, err := postCategory.NewPostCategoryRepository().GetAllPostCategories()
+	if err != nil {
+		log.Println(err)
+	}
+	templates, err := template.NewTemplateRepository().GetAllTemplates()
+	if err != nil {
+		log.Println(err)
 	}
 
 	c.HTML(
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title": "Home Page",
-			"posts": posts,
+			"title":      "Страница постов",
+			"posts":      posts,
+			"categories": categories,
+			"templates":  templates,
 		},
 	)
 }

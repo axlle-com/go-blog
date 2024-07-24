@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/gorm"
+	"log"
 )
 
 type UserRepository interface {
@@ -13,6 +14,7 @@ type UserRepository interface {
 	UpdateUser(user *models.User) error
 	DeleteUser(id uint) error
 	GetAllUsers() ([]models.User, error)
+	GetAllIds() ([]uint, error)
 }
 
 type userRepository struct {
@@ -59,4 +61,12 @@ func (r *userRepository) GetAllUsers() ([]models.User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (r *userRepository) GetAllIds() ([]uint, error) {
+	var ids []uint
+	if err := r.db.Model(&models.User{}).Pluck("id", &ids).Error; err != nil {
+		log.Println("Failed to fetch IDs from the database: %v", err)
+	}
+	return ids, nil
 }

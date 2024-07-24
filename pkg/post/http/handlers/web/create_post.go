@@ -10,7 +10,7 @@ import (
 
 func CreatePost(c *gin.Context) {
 	body := models.CreatePostRequest{}
-	postRepo := repository.NewPostRepository()
+	postRepo := repository.NewRepository()
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

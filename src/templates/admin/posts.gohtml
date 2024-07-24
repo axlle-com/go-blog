@@ -1,7 +1,7 @@
 {{ define "admin.posts" }}
     {{ template "admin.header" . }}
     <div class="main-body">
-{{/*        {{ Breadcrumbs::render('posts') }}*/}}
+        {{/*        {{ Breadcrumbs::render('posts') }}*/}}
         <h5>{{ .Title }}</h5>
         <div class="card js-index-card">
             <div class="card-body js-index-card-inner">
@@ -31,7 +31,7 @@
                                     <input
                                             form="index-form-filter"
                                             type="text"
-{{/*                                            value="{{ !empty($post['id']) ? $post['id'] : '' }}"*/}}
+                                            {{/*                                            value="{{ !empty($post['id']) ? $post['id'] : '' }}"*/}}
                                             name="id"
                                             class="form-control form-control-sm border-primary"
                                             placeholder="Номер">
@@ -43,7 +43,7 @@
                                     <input
                                             form="index-form-filter"
                                             name="title"
-{{/*                                            value="{{ !empty($post['title']) ? $post['title'] : '' }}"*/}}
+                                            {{/*                                            value="{{ !empty($post['title']) ? $post['title'] : '' }}"*/}}
                                             type="text"
                                             class="form-control form-control-sm border-primary"
                                             placeholder="Заголовок">
@@ -60,14 +60,14 @@
                                             data-select2-search="true"
                                             name="post_category_id">
                                         <option></option>
-{{/*                                        @foreach ($postCategories as $item)*/}}
-{{/*                                        <option value="{{ $item['id'] }}"*/}}
-{{/*                                                {{ !empty($post[*/}}
-{{/*                                        'post_category_id']) && $post['post_category_id'] === $item['id'] ? 'selected' :*/}}
-{{/*                                        '' }}>*/}}
-{{/*                                        {{ $item['title'] }}*/}}
-{{/*                                        </option>*/}}
-{{/*                                        @endforeach*/}}
+                                        {{/*                                        @foreach ($postCategories as $item)*/}}
+                                        {{/*                                        <option value="{{ $item['id'] }}"*/}}
+                                        {{/*                                                {{ !empty($post[*/}}
+                                        {{/*                                        'post_category_id']) && $post['post_category_id'] === $item['id'] ? 'selected' :*/}}
+                                        {{/*                                        '' }}>*/}}
+                                        {{/*                                        {{ $item['title'] }}*/}}
+                                        {{/*                                        </option>*/}}
+                                        {{/*                                        @endforeach*/}}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -82,13 +82,13 @@
                                             data-select2-search="true"
                                             name="render">
                                         <option></option>
-{{/*                                        @foreach ($renders as $key => $item)*/}}
-{{/*                                        <option value="{{ $key }}"*/}}
-{{/*                                                {{ !empty($post[*/}}
-{{/*                                        'render']) && $post['render'] === $key ? 'selected' : '' }}>*/}}
-{{/*                                        {{ $item }}*/}}
-{{/*                                        </option>*/}}
-{{/*                                        @endforeach*/}}
+                                        {{/*                                        @foreach ($renders as $key => $item)*/}}
+                                        {{/*                                        <option value="{{ $key }}"*/}}
+                                        {{/*                                                {{ !empty($post[*/}}
+                                        {{/*                                        'render']) && $post['render'] === $key ? 'selected' : '' }}>*/}}
+                                        {{/*                                        {{ $item }}*/}}
+                                        {{/*                                        </option>*/}}
+                                        {{/*                                        @endforeach*/}}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -103,13 +103,13 @@
                                             data-select2-search="true"
                                             name="user_id">
                                         <option></option>
-{{/*                                        @foreach ($users as $item)*/}}
-{{/*                                        <option value="{{ $item['id'] }}"*/}}
-{{/*                                                {{ !empty($post[*/}}
-{{/*                                        'user_id']) && $post['user_id'] === $item['id'] ? 'selected' : '' }}>*/}}
-{{/*                                        {{ $item['first_name'] . ' ' . $item['last_name'] }}*/}}
-{{/*                                        </option>*/}}
-{{/*                                        @endforeach*/}}
+                                        {{/*                                        @foreach ($users as $item)*/}}
+                                        {{/*                                        <option value="{{ $item['id'] }}"*/}}
+                                        {{/*                                                {{ !empty($post[*/}}
+                                        {{/*                                        'user_id']) && $post['user_id'] === $item['id'] ? 'selected' : '' }}>*/}}
+                                        {{/*                                        {{ $item['first_name'] . ' ' . $item['last_name'] }}*/}}
+                                        {{/*                                        </option>*/}}
+                                        {{/*                                        @endforeach*/}}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -120,7 +120,7 @@
                                             form="index-form-filter"
                                             type="text"
                                             name="date"
-{{/*                                            value="{{ !empty($post['date']) ? $post['date'] : '' }}"*/}}
+                                            {{/*                                            value="{{ !empty($post['date']) ? $post['date'] : '' }}"*/}}
                                             class="form-control form-control-sm border-primary date-range-picker flatpickr-input"
                                             placeholder="Дата создания"
                                             readonly="readonly">
@@ -152,59 +152,59 @@
                         </thead>
                         <tbody>
                         {{range .posts }}
-                        <tr class="js-producer-table">
-                            <td>
-                                <div class="custom-control custom-control-nolabel custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input"
-                                           id="checkbox-{{.ID}}">
-                                    <label for="checkbox-{{.ID}}" class="custom-control-label"></label>
-                                </div>
-                            </td>
-                            <td class="td-col-button-details text-center">
-                                <a href="#detail-{{.ID}}"
-                                   class="detail-toggle text-secondary"
-                                   data-toggle="collapse"
-                                   role="button"
-                                   aria-expanded="false"
-                                   aria-controls="detail-{{.ID}}">
-                                </a>
-                            </td>
-                            <td class="td-col-id">{{.ID}}</td>
-{{/*                            <td class="td-col-title">{{ $item->title_short ?: $item->title }}</td>*/}}
-{{/*                            <td class="td-col-title">{{ $item->category_title_short ?: $item->category_title }}</td>*/}}
-{{/*                            <td>{{ $item->render }}</td>*/}}
-{{/*                            <td class="td-col-autor">{{ $item->user_last_name }}</td>*/}}
-{{/*                            <td class="td-col-date">{{ $item->created_at->format('d.m.Y H:i:s') }}</td>*/}}
-{{/*                            <td class="td-col-action text-center">*/}}
-{{/*                                <div class="btn-group btn-group-xs" role="group">*/}}
-{{/*                                    <a href="{{ route('admin.post.edit',['post' => $item->id ]) }}"*/}}
-{{/*                                       class="btn btn-link btn-icon bigger-130 text-success">*/}}
-{{/*                                        <i data-feather="edit"></i>*/}}
-{{/*                                    </a>*/}}
-{{/*                                    <a href="{{ route('admin.post.edit',['post' => $item->id ]) }}"*/}}
-{{/*                                       class="btn btn-link btn-icon bigger-130 text-info" target="_blank">*/}}
-{{/*                                        <i data-feather="printer"></i>*/}}
-{{/*                                    </a>*/}}
-{{/*                                    <a href="{{ route('admin.post.destroy',['post' => $item->id ]) }}"*/}}
-{{/*                                       class="btn btn-link btn-icon bigger-130 text-danger"*/}}
-{{/*                                       data-js-post-table-id="{{ $item->id }}">*/}}
-{{/*                                        <i data-feather="trash"></i>*/}}
-{{/*                                    </a>*/}}
-{{/*                                </div>*/}}
-{{/*                            </td>*/}}
-                        </tr>
-                        <tr class="detail-row collapse" id="detail->{{.ID}}">
-{{/*                            <td colspan="10">*/}}
-{{/*                                <ul class="data-detail ml-5">*/}}
-{{/*                                    <li><span>Заголовок: </span> <span>{{ $item->title }}</span></li>*/}}
-{{/*                                    <li><span>Описание короткое: </span>*/}}
-{{/*                                        <span>{{ $item->preview_description }}</span>*/}}
-{{/*                                    </li>*/}}
-{{/*                                    <li><span>Заголовок SEO: </span> <span>{{ $item->meta_title }}</span></li>*/}}
-{{/*                                    <li><span>Описание SEO: </span> <span>{{ $item->meta_description }}</span></li>*/}}
-{{/*                                </ul>*/}}
-{{/*                            </td>*/}}
-                        </tr>
+                            <tr class="js-producer-table">
+                                <td>
+                                    <div class="custom-control custom-control-nolabel custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input"
+                                               id="checkbox-{{.ID}}">
+                                        <label for="checkbox-{{.ID}}" class="custom-control-label"></label>
+                                    </div>
+                                </td>
+                                <td class="td-col-button-details text-center">
+                                    <a href="#detail-{{.ID}}"
+                                       class="detail-toggle text-secondary"
+                                       data-toggle="collapse"
+                                       role="button"
+                                       aria-expanded="false"
+                                       aria-controls="detail-{{.ID}}">
+                                    </a>
+                                </td>
+                                <td class="td-col-id">{{.ID}}</td>
+                                <td class="td-col-title">{{ .TitleShort }}</td>
+                                <td class="td-col-title">{{ .CategoryTitleShort }}</td>
+                                <td>{{ .TemplateTitle }}</td>
+                                <td class="td-col-autor">{{ .UserLastName }}</td>
+                                <td class="td-col-date">{{ .Date }}</td>
+                                <td class="td-col-action text-center">
+                                    <div class="btn-group btn-group-xs" role="group">
+                                        <a href="{{ .Date }}"
+                                           class="btn btn-link btn-icon bigger-130 text-success">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <a href="{{ .Date }}"
+                                           class="btn btn-link btn-icon bigger-130 text-info" target="_blank">
+                                            <i data-feather="printer"></i>
+                                        </a>
+                                        <a href="{{ .Date }}"
+                                           class="btn btn-link btn-icon bigger-130 text-danger"
+                                           data-js-post-table-id="{{ .Date }}">
+                                            <i data-feather="trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="detail-row collapse" id="detail-{{.ID}}">
+                                <td colspan="10">
+                                    <ul class="data-detail ml-5">
+                                        <li><span>Заголовок: </span> <span>{{ .Title }}</span></li>
+                                        <li><span>Описание короткое: </span>
+                                            <span>{{ .DescriptionPreview }}</span>
+                                        </li>
+                                        <li><span>Заголовок SEO: </span> <span>{{ .MetaTitle }}</span></li>
+                                        <li><span>Описание SEO: </span> <span>{{ .MetaDescription }}</span></li>
+                                    </ul>
+                                </td>
+                            </tr>
                         {{ end }}
                         </tbody>
                     </table>
@@ -233,7 +233,7 @@
                             </button>
                         </div>
                     </div>
-{{/*                    {!! $models->links($pagination) !!}*/}}
+                    {{/*                    {!! $models->links($pagination) !!}*/}}
                 </div>
             </div>
         </div>

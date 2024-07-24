@@ -28,7 +28,7 @@ func Init(url string) *gorm.DB {
 			log.Fatalln(err)
 		}
 	})
-	return db
+	return db.Debug()
 }
 
 func GetDB() *gorm.DB {

@@ -6,6 +6,7 @@ import (
 
 type Post struct {
 	ID                 uint       `gorm:"primaryKey" json:"id"`
+	UserID             uint       `gorm:"index" json:"user_id"`
 	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
 	MetaTitle          *string    `gorm:"size:100" json:"meta_title,omitempty"`
@@ -27,8 +28,6 @@ type Post struct {
 	ShowDate           *bool      `gorm:"default:true" json:"show_date,omitempty"`
 	DatePub            *time.Time `json:"date_pub,omitempty"`
 	DateEnd            *time.Time `json:"date_end,omitempty"`
-	ControlDatePub     *bool      `gorm:"default:false" json:"control_date_pub,omitempty"`
-	ControlDateEnd     *bool      `gorm:"default:false" json:"control_date_end,omitempty"`
 	Image              *string    `gorm:"size:255" json:"image,omitempty"`
 	Hits               *uint      `gorm:"default:0" json:"hits,omitempty"`
 	Sort               *int       `gorm:"default:0" json:"sort,omitempty"`

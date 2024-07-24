@@ -17,7 +17,7 @@ type User struct {
 	Email              *string    `gorm:"size:255;unique" json:"email,omitempty"`
 	IsEmail            *bool      `gorm:"default:false" json:"is_email,omitempty"`
 	IsPhone            *bool      `gorm:"default:false" json:"is_phone,omitempty"`
-	Status             int16      `gorm:"default:0" json:"status"`
+	Status             int8       `gorm:"default:0" json:"status"`
 	Avatar             *string    `gorm:"size:255" json:"avatar,omitempty"`
 	Password           string     `gorm:"-" json:"password"`
 	PasswordHash       string     `gorm:"size:255;not null" json:"password_hash"`

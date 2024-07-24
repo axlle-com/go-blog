@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Paginate struct{}
 
-func (p *Paginate) GetPaginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
+func (p *Paginate) SetPaginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if page <= 0 {
 			page = 1

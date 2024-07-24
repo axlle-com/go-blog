@@ -9,7 +9,27 @@
     background-position: center;
 }
 
+/***** template *****/
+.main-header form {
+    margin-bottom: 0;
+}
+
 /***** table *****/
+.table-responsive table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid #ddd;
+}
+
+.table-responsive table td li span:last-child{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 1000px;
+    display: inline-block;
+}
+
 table td.td-col-30,
 table th.td-col-30 {
     width: 30%;

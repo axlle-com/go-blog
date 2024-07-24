@@ -10,7 +10,7 @@ import (
 )
 
 func GetPosts(c *gin.Context) {
-	posts, err := post.NewPostRepository().GetAllPosts()
+	posts, err := post.NewRepository().GetPaginate(0, 20)
 	if err != nil {
 		log.Println(err)
 	}
@@ -25,7 +25,7 @@ func GetPosts(c *gin.Context) {
 
 	c.HTML(
 		http.StatusOK,
-		"admin.post",
+		"admin.posts",
 		gin.H{
 			"title":      "Страница постов",
 			"posts":      posts,

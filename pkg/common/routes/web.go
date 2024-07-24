@@ -13,7 +13,6 @@ func InitializeWebRoutes(r *gin.Engine) {
 	r.GET("/login", user.Login)
 	r.POST("/auth", user.Auth)
 	r.POST("/user", user.CreateUser)
-	r.GET("/:alias", post.GetPost)
 	r.GET("/posts", post.GetPosts)
 
 	protected := r.Group("/admin")
@@ -26,6 +25,7 @@ func InitializeWebRoutes(r *gin.Engine) {
 		protected.PUT("/posts/:id", post.UpdatePost)
 		protected.DELETE("/posts/:id", post.DeletePost)
 	}
+	r.GET("/:alias", post.GetPost)
 }
 
 func ShowIndexPage(c *gin.Context) {

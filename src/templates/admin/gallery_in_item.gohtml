@@ -1,0 +1,100 @@
+{{ define "admin.galleryInItem" }}
+    <div class="catalog-tabs">
+        {{ if false }}
+            {{ range .post.galleries }}
+                <div class="js-galleries-general-block">
+                    <input
+                            type="hidden"
+                            name="galleries[{{ .ID }}][gallery_id]"
+                            value="{{ .ID }}">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="control-label button-100" for="js-gallery-input-{{ .ID }}">
+                                <a type="button" class="btn btn-primary catalog-tabs-add">
+                                    Загрузить фото
+                                </a>
+                            </label>
+                            <input
+                                    type="file"
+                                    id="js-gallery-input-{{ .ID }}"
+                                    data-js-gallery-id="{{ .ID }}"
+                                    class="custom-input-file js-gallery-input"
+                                    name=""
+                                    multiple
+                                    accept="image/*">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="parts-gallery js-gallery-block-saved sortable swap">
+                                @foreach ($gallery->images as $image)
+                                <div class="md-block-5 js-gallery-item sort-handle">
+                                    <div class="img rounded">
+                                        <input
+                                                type="hidden"
+                                                name="galleries[{{ .ID }}][images][{{ .ID }}][id]"
+                                                value="{{ .ID }}">
+                                        @include('admin.inc.image', ['model' => $image, 'gallery' => true])
+                                    </div>
+                                    <div>
+                                        <div class="form-group small">
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Заголовок"
+                                                    name="galleries[{{ .ID }}][images][{{ .ID }}][title]"
+                                                    value="{{ .Title }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Описание"
+                                                    name="galleries[{{ .ID }}][images][{{ .ID }}][description]"
+                                                    value="{{ .Desc }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Сортировка"
+                                                    type="number"
+                                                    name="galleries[{{ .ID }}][images][{{ .ID }}][sort]"
+                                                    value="{{ .ID }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{ end }}
+        {{ else }}
+            <div class="js-galleries-general-block">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label class="control-label button-100" for="js-gallery-input-0">
+                            <a type="button" class="btn btn-primary catalog-tabs-add">
+                                Загрузить фото
+                            </a>
+                        </label>
+                        <input
+                                type="file"
+                                id="js-gallery-input-0"
+                                data-js-gallery-id=""
+                                class="custom-input-file js-gallery-input"
+                                name=""
+                                multiple
+                                accept="image/*">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="parts-gallery js-gallery-block-saved sortable swap"></div>
+                    </div>
+                </div>
+            </div>
+        {{ end }}
+    </div>
+{{ end }}

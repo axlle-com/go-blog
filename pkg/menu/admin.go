@@ -14,18 +14,18 @@ type Menu struct {
 
 func NewMenu(currentRoute string) []Menu {
 	var routes = []Menu{
-		{Path: "/admin", Name: "Dashboard", Ico: template.HTML("<i data-feather=\"globe\"></i>")},
+		{Path: "/admin/", Name: "Dashboard", Ico: template.HTML("<i data-feather=\"globe\"></i>")},
 		{Path: "/admin/posts", Name: "Посты", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 	}
 
+	baseRoute := extractBaseRoute(currentRoute)
 	for i := range routes {
-		if extractBaseRoute(routes[i].Path) == currentRoute {
+		if routes[i].Path == baseRoute {
 			routes[i].IsActive = true
 		} else {
 			routes[i].IsActive = false
 		}
 	}
-
 	return routes
 }
 

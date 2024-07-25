@@ -2,18 +2,18 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
-	models "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/common/models"
 	post "github.com/axlle-com/blog/pkg/post/models"
 	"gorm.io/gorm"
 )
 
-type Repository interface {
-	CreatePost(post *models.Post) error
-	GetPostByID(id uint) (*models.Post, error)
-	UpdatePost(post *models.Post) error
-	DeletePost(id uint) error
-	GetAllPosts() ([]models.Post, error)
-	GetPaginate(page, pageSize int) ([]post.Post, error)
+type PostRepository interface {
+	Create(post *models.Post) error
+	GetByID(id uint) (*models.Post, error)
+	Update(post *models.Post) error
+	Delete(id uint) error
+	GetAll() ([]models.Post, error)
+	GetPaginate(page, pageSize int) ([]post.Post, int, error)
 }
 
 type repository struct {
@@ -21,15 +21,15 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() Repository {
+func NewRepository() PostRepository {
 	return &repository{db: db.GetDB()}
 }
 
-func (r *repository) CreatePost(post *models.Post) error {
+func (r *repository) Create(post *models.Post) error {
 	return r.db.Create(post).Error
 }
 
-func (r *repository) GetPostByID(id uint) (*models.Post, error) {
+func (r *repository) GetByID(id uint) (*models.Post, error) {
 	var model models.Post
 	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
@@ -37,15 +37,15 @@ func (r *repository) GetPostByID(id uint) (*models.Post, error) {
 	return &model, nil
 }
 
-func (r *repository) UpdatePost(post *models.Post) error {
+func (r *repository) Update(post *models.Post) error {
 	return r.db.Save(post).Error
 }
 
-func (r *repository) DeletePost(id uint) error {
+func (r *repository) Delete(id uint) error {
 	return r.db.Delete(&models.Post{}, id).Error
 }
 
-func (r *repository) GetAllPosts() ([]models.Post, error) {
+func (r *repository) GetAll() ([]models.Post, error) {
 	var posts []models.Post
 	if err := r.db.Find(&posts).Error; err != nil {
 		return nil, err
@@ -53,9 +53,11 @@ func (r *repository) GetAllPosts() ([]models.Post, error) {
 	return posts, nil
 }
 
-func (r *repository) GetPaginate(page, pageSize int) ([]post.Post, error) {
+func (r *repository) GetPaginate(page, pageSize int) ([]post.Post, int, error) {
 	var posts []post.Post
+	var total int64
 
+	r.db.Model(&post.Post{}).Count(&total)
 	err := r.db.Table("posts").
 		Scopes(r.SetPaginate(page, pageSize)).
 		Select("posts.*," +
@@ -70,7 +72,7 @@ func (r *repository) GetPaginate(page, pageSize int) ([]post.Post, error) {
 		Joins("left join templates on templates.id = posts.template_id").
 		Scan(&posts).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return posts, nil
+	return posts, int(total), nil
 }

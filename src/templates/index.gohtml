@@ -1,25 +1,71 @@
 {{ define "index" }}
-<!doctype html>
-<html>
+    {{ template "header" . }}
 
-<head>
-    <!--Use the `title` variable to set the title of the page-->
-    <title>{{ .title }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta charset="UTF-8">
 
-    <!--Use bootstrap to make the application look nice-->
-    <link rel="stylesheet" href="/src/app.css">
-    <script async src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-            crossorigin="anonymous"></script>
-</head>
+    <!-- About Section -->
+    <section id="about" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center">О себе</h2>
+            <p class="text-center">Я опытный разработчик веб-приложений с многолетним опытом работы в различных областях. Мои навыки включают создание эффективных решений и высококачественный дизайн.</p>
+        </div>
+    </section>
 
-<body class="container">
-{{ template "header" . }}
-{{ template "menu" . }}
+    <!-- Services Section -->
+    <section id="services" class="py-5">
+        <div class="container">
+            <h2 class="text-center">Услуги</h2>
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Service 1">
+                        <div class="card-body">
+                            <h5 class="card-title">Услуга 1</h5>
+                            <p class="card-text">Описание первой услуги. Является отличным выбором для вашей компании.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Service 2">
+                        <div class="card-body">
+                            <h5 class="card-title">Услуга 2</h5>
+                            <p class="card-text">Описание второй услуги. Мы предлагаем высокое качество и надежность.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Service 3">
+                        <div class="card-body">
+                            <h5 class="card-title">Услуга 3</h5>
+                            <p class="card-text">Описание третьей услуги. Идеально подходит для ваших нужд и требований.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-{{ template "footer" . }}
-</body>
-</html>
+    <!-- Contact Section -->
+    <section id="contact" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center">Контакты</h2>
+            <p class="text-center">Свяжитесь со мной через один из следующих способов:</p>
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <h5>Email</h5>
+                    <p>email@example.com</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h5>Телефон</h5>
+                    <p>(123) 456-7890</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h5>Социальные сети</h5>
+                    <p><a href="#">Twitter</a> | <a href="#">LinkedIn</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{ template "footer" . }}
 {{end}}

@@ -5,9 +5,11 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func InitTemplate(router *gin.Engine) {
+	router.Static("/favicon.ico", "./src/public/favicon.ico")
 	router.Static("/public", "./src/public")
 	templates := loadTemplates("src/templates")
 	router.SetHTMLTemplate(templates)
@@ -15,7 +17,12 @@ func InitTemplate(router *gin.Engine) {
 }
 
 func loadTemplates(templatesDir string) *template.Template {
-	tmpl := template.New("")
+	tmpl := template.New("").Funcs(template.FuncMap{
+		"add":  add,
+		"sub":  sub,
+		"mul":  mul,
+		"date": date,
+	})
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -32,4 +39,14 @@ func loadTemplates(templatesDir string) *template.Template {
 		panic(err)
 	}
 	return tmpl
+}
+
+func add(x, y int) int { return x + y }
+func sub(x, y int) int { return x - y }
+func mul(x, y int) int { return x * y }
+func date(timePtr *time.Time) string {
+	if timePtr == nil {
+		return ""
+	}
+	return timePtr.Format("02.01.2006 15:04:05")
 }

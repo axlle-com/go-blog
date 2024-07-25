@@ -8,8 +8,10 @@ import (
 	"github.com/axlle-com/blog/pkg/common/models"
 	post "github.com/axlle-com/blog/pkg/post/db"
 	postCategory "github.com/axlle-com/blog/pkg/post_category/db"
+	rights "github.com/axlle-com/blog/pkg/rights/db"
 	template "github.com/axlle-com/blog/pkg/template/db"
 	user "github.com/axlle-com/blog/pkg/user/db"
+	"gorm.io/gorm"
 	"log"
 	"os"
 	"strings"
@@ -32,10 +34,12 @@ var Commands = map[string]func(){
 		fmt.Println("Hello!")
 	},
 	"seed": func() {
-		user.SeedUsers(100)
-		post.SeedPosts(100)
-		postCategory.SeedPostCategory(100)
 		template.SeedTemplate(100)
+		rights.SeedPermissions()
+		rights.SeedRoles()
+		user.SeedUsers(100)
+		postCategory.SeedPostCategory(100)
+		post.SeedPosts(100)
 	},
 	"migrate": func() {
 		db := DB.GetDB()
@@ -44,6 +48,8 @@ var Commands = map[string]func(){
 			&models.User{},
 			&models.PostCategory{},
 			&models.Template{},
+			&models.Role{},
+			&models.Permission{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -51,11 +57,14 @@ var Commands = map[string]func(){
 	},
 	"refill": func() {
 		db := DB.GetDB()
+		dropIntermediateTables(db)
 		err := db.Migrator().DropTable(
 			&models.Post{},
 			&models.User{},
 			&models.PostCategory{},
 			&models.Template{},
+			&models.Role{},
+			&models.Permission{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -65,11 +74,15 @@ var Commands = map[string]func(){
 			&models.User{},
 			&models.PostCategory{},
 			&models.Template{},
+			&models.Role{},
+			&models.Permission{},
 		)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		template.SeedTemplate(100)
+		rights.SeedPermissions()
+		rights.SeedRoles()
 		user.SeedUsers(100)
 		postCategory.SeedPostCategory(100)
 		post.SeedPosts(100)
@@ -95,5 +108,21 @@ func handleCommands() {
 		}
 		input = strings.TrimSpace(input)
 		handleCommand(input)
+	}
+}
+
+func dropIntermediateTables(db *gorm.DB) {
+	migrator := db.Migrator()
+	intermediateTables := []string{
+		"user_has_role",
+		"user_has_permission",
+		"role_has_permission",
+	}
+	for _, table := range intermediateTables {
+		if err := migrator.DropTable(table); err != nil {
+			fmt.Println("Error dropping table:", table, err)
+			return
+		}
+		fmt.Println("Dropped intermediate table:", table)
 	}
 }

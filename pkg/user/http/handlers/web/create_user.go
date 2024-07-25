@@ -13,14 +13,14 @@ import (
 func CreateUser(c *gin.Context) {
 
 	var authInput AuthInput
-	userRepo := repository.NewUserRepository()
+	userRepo := repository.NewRepository()
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var userFound, err = userRepo.GetUserByEmail(authInput.Email)
+	var userFound, err = userRepo.GetByEmail(authInput.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -38,11 +38,11 @@ func CreateUser(c *gin.Context) {
 	}
 
 	user := User{
-		Email:        &authInput.Email,
+		Email:        authInput.Email,
 		PasswordHash: string(passwordHash),
 	}
 
-	if err := userRepo.CreateUser(&user); err != nil {
+	if err := userRepo.Create(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

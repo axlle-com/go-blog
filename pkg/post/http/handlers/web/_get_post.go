@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/menu"
 	postRepo "github.com/axlle-com/blog/pkg/post/repository"
 	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
@@ -8,20 +9,34 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 )
 
-func (controller *controller) GetPost(c *gin.Context) {
-	id := controller.getID(c)
-	if id == 0 {
+func GetPostReserve(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.HTML(http.StatusNotFound, "admin.404", gin.H{
+			"title":   "404 Not Found",
+			"content": "errors.404.gohtml",
+		})
 		return
 	}
 
-	user := controller.getUser(c)
-	if user == nil {
+	userData, exists := c.Get("user")
+	if !exists {
+		c.Redirect(http.StatusFound, "/login")
+		c.Abort()
+		return
+	}
+	user, ok := userData.(models.User)
+	if !ok {
+		c.Redirect(http.StatusFound, "/login")
+		c.Abort()
 		return
 	}
 
-	post, err := postRepo.NewRepository().GetByID(id)
+	post, err := postRepo.NewRepository().GetByID(uint(id))
 	if err != nil {
 		log.Println(err)
 		c.HTML(http.StatusNotFound, "admin.404", gin.H{

@@ -27,7 +27,6 @@ func InitMinify() {
 		"src/resources/admin/css/sidebar-dark.min.css",
 		"src/resources/plugins/sweetalert2/sweetalert2.min.css",
 	}
-
 	adminJS := []string{
 		"src/resources/plugins/jquery-3-6-0/jquery.min.js",
 		"src/resources/plugins/bootstrap-4-6-1/js/bootstrap.bundle.js",
@@ -47,11 +46,21 @@ func InitMinify() {
 		"src/resources/plugins/date-format/date-format.js",
 	}
 
+	CSS := []string{
+		"src/resources/plugins/bootstrap-5.0.2-dist/css/bootstrap.min.css",
+	}
+	JS := []string{
+		"src/resources/plugins/bootstrap-5.0.2-dist/js/bootstrap.min.js",
+	}
+
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("application/javascript", js.Minify)
 	mergeAndMinifyFiles(m, "text/css", adminCSS, "src/public/admin/app.css")
 	mergeAndMinifyFiles(m, "application/javascript", adminJS, "src/public/admin/app.js")
+
+	mergeAndMinifyFiles(m, "text/css", CSS, "src/public/app.css")
+	mergeAndMinifyFiles(m, "application/javascript", JS, "src/public/app.js")
 }
 
 func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {

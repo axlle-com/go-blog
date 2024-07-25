@@ -7,28 +7,30 @@ import (
 	"log"
 )
 
-type PostCategoryRepository interface {
-	CreatePostCategory(postCategory *models.PostCategory) error
-	GetPostCategoryByID(id uint) (*models.PostCategory, error)
-	UpdatePostCategory(postCategory *models.PostCategory) error
-	DeletePostCategory(id uint) error
-	GetAllPostCategories() ([]models.PostCategory, error)
+type Repository interface {
+	Create(postCategory *models.PostCategory) error
+	GetByID(id uint) (*models.PostCategory, error)
+	Update(postCategory *models.PostCategory) error
+	Delete(id uint) error
+	GetAll() ([]models.PostCategory, error)
 	GetAllIds() ([]uint, error)
+	GetPaginate(page, pageSize int) ([]models.PostCategory, error)
 }
 
-type postCategoryRepository struct {
+type repository struct {
+	*models.Paginate
 	db *gorm.DB
 }
 
-func NewPostCategoryRepository() PostCategoryRepository {
-	return &postCategoryRepository{db: db.GetDB()}
+func NewRepository() Repository {
+	return &repository{db: db.GetDB()}
 }
 
-func (r *postCategoryRepository) CreatePostCategory(postCategory *models.PostCategory) error {
+func (r *repository) Create(postCategory *models.PostCategory) error {
 	return r.db.Create(postCategory).Error
 }
 
-func (r *postCategoryRepository) GetPostCategoryByID(id uint) (*models.PostCategory, error) {
+func (r *repository) GetByID(id uint) (*models.PostCategory, error) {
 	var postCategory models.PostCategory
 	if err := r.db.First(&postCategory, id).Error; err != nil {
 		return nil, err
@@ -36,15 +38,15 @@ func (r *postCategoryRepository) GetPostCategoryByID(id uint) (*models.PostCateg
 	return &postCategory, nil
 }
 
-func (r *postCategoryRepository) UpdatePostCategory(postCategory *models.PostCategory) error {
+func (r *repository) Update(postCategory *models.PostCategory) error {
 	return r.db.Save(postCategory).Error
 }
 
-func (r *postCategoryRepository) DeletePostCategory(id uint) error {
+func (r *repository) Delete(id uint) error {
 	return r.db.Delete(&models.PostCategory{}, id).Error
 }
 
-func (r *postCategoryRepository) GetAllPostCategories() ([]models.PostCategory, error) {
+func (r *repository) GetAll() ([]models.PostCategory, error) {
 	var postCategories []models.PostCategory
 	if err := r.db.Find(&postCategories).Error; err != nil {
 		return nil, err
@@ -52,10 +54,20 @@ func (r *postCategoryRepository) GetAllPostCategories() ([]models.PostCategory, 
 	return postCategories, nil
 }
 
-func (r *postCategoryRepository) GetAllIds() ([]uint, error) {
+func (r *repository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.PostCategory{}).Pluck("id", &ids).Error; err != nil {
 		log.Println("Failed to fetch IDs from the database: %v", err)
 	}
 	return ids, nil
+}
+
+func (r *repository) GetPaginate(page, pageSize int) ([]models.PostCategory, error) {
+	var models []models.PostCategory
+
+	err := r.db.Model(models).Scopes(r.SetPaginate(page, pageSize)).Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+	return models, nil
 }

@@ -19,10 +19,10 @@ func GetUser(c *gin.Context) {
 	}
 
 	uintValue := uint(value)
-	h := repository.NewUserRepository()
+	h := repository.NewRepository()
 	var result *models.User
 
-	if result, err = h.GetUserByID(uintValue); err != nil {
+	if result, err = h.GetByID(uintValue); err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}

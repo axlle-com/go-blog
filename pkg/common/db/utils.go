@@ -1,10 +1,17 @@
 package db
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
+	"strconv"
 	"time"
 )
+
+func RandBool() bool {
+	value := rand.Intn(2)
+	result := value != 0
+	return result
+}
 
 func IntToBoolPtr() *bool {
 	value := rand.Intn(2)
@@ -13,10 +20,10 @@ func IntToBoolPtr() *bool {
 }
 
 func ParseDate(dateStr string) *time.Time {
-	layout := "2006-01-02"
+	layout := "02.01.2006"
 	date, err := time.Parse(layout, dateStr)
 	if err != nil {
-		fmt.Println("Error parsing date:", err)
+		log.Println("Error parsing date:", err)
 		return nil
 	}
 	return &date
@@ -35,10 +42,33 @@ func UintPtr(u int) *uint {
 	return &v
 }
 
-func IntPtr(i int) *int {
-	return &i
+func IDStrPtr(id string) *uint {
+	v, err := strconv.Atoi(id)
+	if err != nil {
+		return nil
+	}
+	newID := uint(v)
+	return &newID
 }
 
-func Float32Ptr(f float32) *float32 {
-	return &f
+func CheckStr(num string) bool {
+	return num == "1"
+}
+
+func IntStr(num string) int {
+	v, err := strconv.ParseInt(num, 10, 0)
+	if err != nil {
+		return 0
+	}
+	newNum := int(v)
+	return newNum
+}
+
+func IntStrPtr(num string) *int {
+	v, err := strconv.ParseInt(num, 10, 0)
+	if err != nil {
+		return nil
+	}
+	newNum := int(v)
+	return &newNum
 }

@@ -60,14 +60,11 @@
                                             data-select2-search="true"
                                             name="post_category_id">
                                         <option></option>
-                                        {{/*                                        @foreach ($postCategories as $item)*/}}
-                                        {{/*                                        <option value="{{ $item['id'] }}"*/}}
-                                        {{/*                                                {{ !empty($post[*/}}
-                                        {{/*                                        'post_category_id']) && $post['post_category_id'] === $item['id'] ? 'selected' :*/}}
-                                        {{/*                                        '' }}>*/}}
-                                        {{/*                                        {{ $item['title'] }}*/}}
-                                        {{/*                                        </option>*/}}
-                                        {{/*                                        @endforeach*/}}
+                                        {{ range .categories }}
+                                            <option value="{{ .ID }}">
+                                                {{ .Title }}
+                                            </option>
+                                        {{ end }}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -82,13 +79,11 @@
                                             data-select2-search="true"
                                             name="render">
                                         <option></option>
-                                        {{/*                                        @foreach ($renders as $key => $item)*/}}
-                                        {{/*                                        <option value="{{ $key }}"*/}}
-                                        {{/*                                                {{ !empty($post[*/}}
-                                        {{/*                                        'render']) && $post['render'] === $key ? 'selected' : '' }}>*/}}
-                                        {{/*                                        {{ $item }}*/}}
-                                        {{/*                                        </option>*/}}
-                                        {{/*                                        @endforeach*/}}
+                                        {{ range .templates }}
+                                            <option value="{{ .ID }}">
+                                                {{ .Title }}
+                                            </option>
+                                        {{ end }}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -103,13 +98,11 @@
                                             data-select2-search="true"
                                             name="user_id">
                                         <option></option>
-                                        {{/*                                        @foreach ($users as $item)*/}}
-                                        {{/*                                        <option value="{{ $item['id'] }}"*/}}
-                                        {{/*                                                {{ !empty($post[*/}}
-                                        {{/*                                        'user_id']) && $post['user_id'] === $item['id'] ? 'selected' : '' }}>*/}}
-                                        {{/*                                        {{ $item['first_name'] . ' ' . $item['last_name'] }}*/}}
-                                        {{/*                                        </option>*/}}
-                                        {{/*                                        @endforeach*/}}
+                                        {{ range .users }}
+                                            <option value="{{ .ID }}">
+                                                {{ .LastName }}
+                                            </option>
+                                        {{ end }}
                                     </select>
                                     <i data-toggle="clear" class="material-icons">clear</i>
                                 </label>
@@ -177,17 +170,17 @@
                                 <td class="td-col-date">{{ .Date }}</td>
                                 <td class="td-col-action text-center">
                                     <div class="btn-group btn-group-xs" role="group">
-                                        <a href="{{ .Date }}"
+                                        <a href="/admin/posts/{{ .ID }}"
                                            class="btn btn-link btn-icon bigger-130 text-success">
                                             <i data-feather="edit"></i>
                                         </a>
-                                        <a href="{{ .Date }}"
+                                        <a href="/admin/posts/print/{{ .ID }}"
                                            class="btn btn-link btn-icon bigger-130 text-info" target="_blank">
                                             <i data-feather="printer"></i>
                                         </a>
-                                        <a href="{{ .Date }}"
+                                        <a href="/admin/posts/delete/{{ .ID }}"
                                            class="btn btn-link btn-icon bigger-130 text-danger"
-                                           data-js-post-table-id="{{ .Date }}">
+                                           data-js-table-id="{{ .ID }}">
                                             <i data-feather="trash"></i>
                                         </a>
                                     </div>
@@ -233,7 +226,11 @@
                             </button>
                         </div>
                     </div>
-                    {{/*                    {!! $models->links($pagination) !!}*/}}
+                    <div>
+                        {{ if .paginator.HasPages }}
+                            {{ template "admin.paginator" .paginator }}
+                        {{ end }}
+                    </div>
                 </div>
             </div>
         </div>

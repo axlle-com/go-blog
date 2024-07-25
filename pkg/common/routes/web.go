@@ -9,23 +9,25 @@ import (
 )
 
 func InitializeWebRoutes(r *gin.Engine) {
+	postController := post.NewController(r)
+
 	r.GET("/", ShowIndexPage)
 	r.GET("/login", user.Login)
 	r.POST("/auth", user.Auth)
 	r.POST("/user", user.CreateUser)
-	r.GET("/posts", post.GetPosts)
 
 	protected := r.Group("/admin")
 	protected.Use(middleware.AuthRequired())
 	{
 		protected.GET("/", user.Index)
+		protected.GET("/logout", user.Logout)
 		protected.POST("/posts", post.CreatePost)
-		protected.GET("/posts", post.GetPosts)
-		protected.GET("/posts/:id", post.GetPost)
-		protected.PUT("/posts/:id", post.UpdatePost)
+		protected.GET("/posts", postController.GetPosts)
+		protected.GET("/posts/:id", postController.GetPost)
+		protected.PUT("/posts/:id", postController.UpdatePost)
 		protected.DELETE("/posts/:id", post.DeletePost)
 	}
-	r.GET("/:alias", post.GetPost)
+	r.GET("/:alias", post.GetPostFront)
 }
 
 func ShowIndexPage(c *gin.Context) {

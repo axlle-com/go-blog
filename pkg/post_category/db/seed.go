@@ -12,7 +12,7 @@ import (
 )
 
 func SeedPostCategory(n int) {
-	ids, _ := repository.NewTemplateRepository().GetAllIds()
+	ids, _ := repository.NewRepository().GetAllIds()
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
@@ -37,7 +37,7 @@ func SeedPostCategory(n int) {
 			DeletedAt:          nil,
 		}
 
-		err := NewPostCategoryRepository().CreatePostCategory(&postCategory)
+		err := NewRepository().Create(&postCategory)
 		if err != nil {
 			log.Printf("Failed to create user %d: %v", i, err.Error())
 		}

@@ -18,7 +18,7 @@ func DeletePost(c *gin.Context) {
 		return
 	}
 
-	if err := postRepo.DeletePost(uint(num)); err != nil {
+	if err := postRepo.Delete(uint(num)); err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}

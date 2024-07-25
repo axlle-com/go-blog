@@ -12,14 +12,14 @@ import (
 
 func Auth(c *gin.Context) {
 	var authInput AuthInput
-	userRepo := repository.NewUserRepository()
+	userRepo := repository.NewRepository()
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var userFound, err = userRepo.GetUserByEmail(authInput.Email)
+	var userFound, err = userRepo.GetByEmail(authInput.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -41,7 +41,7 @@ func Auth(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate token"})
 	}
 
-	if err := userRepo.UpdateUser(userFound); err != nil {
+	if err := userRepo.Update(userFound); err != nil {
 		return
 	}
 

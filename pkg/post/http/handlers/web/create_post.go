@@ -21,7 +21,7 @@ func CreatePost(c *gin.Context) {
 
 	post.Title = body.Title
 
-	if err := postRepo.CreatePost(&post); err != nil {
+	if err := postRepo.Create(&post); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

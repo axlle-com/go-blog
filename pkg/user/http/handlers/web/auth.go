@@ -23,7 +23,6 @@ func Auth(c *gin.Context) {
 			log.Println(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
-		return
 	}
 
 	userFound, err := service.Auth(authInput)
@@ -41,14 +40,13 @@ func Auth(c *gin.Context) {
 			log.Println(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
-		return
 	}
 
 	session.Set("user_id", userFound.ID)
+	session.Set("user", userFound)
 	if err := session.Save(); err != nil {
 		log.Println(err)
 		c.Redirect(http.StatusFound, "/login")
-		return
 	}
 
 	c.Redirect(http.StatusFound, "/admin")

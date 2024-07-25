@@ -4,10 +4,13 @@ import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
 func GetPost(c *gin.Context) {
+	currentRoute := c.MustGet("currentRoute").(string)
+	log.Println(currentRoute)
 	id := c.Param("id")
 	h := db.GetDB()
 	var post Post

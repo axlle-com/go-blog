@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/gob"
 	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/middleware"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/common/routes"
 	"github.com/axlle-com/blog/pkg/common/web"
 	"github.com/gin-contrib/sessions"
@@ -24,6 +27,7 @@ func main() {
 	//log.Println("Это информационное сообщение")
 	//log.Println("Это сообщение об ошибке")
 
+	gob.Register(models.User{})
 	cfg := config.GetConfig()
 	router := gin.Default()
 	err := router.SetTrustedProxies(nil)
@@ -37,6 +41,7 @@ func main() {
 		Path:   "/",
 	})
 	router.Use(sessions.Sessions(config.SessionsName, store))
+	router.Use(middleware.CurrentRouteMiddleware())
 
 	//web.InitMinify()
 	web.InitTemplate(router)

@@ -1,6 +1,8 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/menu"
 	post "github.com/axlle-com/blog/pkg/post/repository"
 	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
 	template "github.com/axlle-com/blog/pkg/template/repository"
@@ -22,7 +24,15 @@ func GetPosts(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-
+	userData, exists := c.Get("user")
+	if !exists {
+		c.Redirect(http.StatusFound, "/login")
+	}
+	user, ok := userData.(models.User)
+	if !ok {
+		c.Redirect(http.StatusFound, "/login")
+	}
+	currentRoute := c.MustGet("currentRoute").(string)
 	c.HTML(
 		http.StatusOK,
 		"admin.posts",
@@ -31,6 +41,8 @@ func GetPosts(c *gin.Context) {
 			"posts":      posts,
 			"categories": categories,
 			"templates":  templates,
+			"user":       user,
+			"menu":       menu.NewMenu(currentRoute),
 		},
 	)
 }

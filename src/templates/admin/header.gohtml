@@ -20,6 +20,16 @@
         </a>
     </div>
     <div class="sidebar-body">
+        <ul class="nav treeview mb-4" data-accordion>
+            {{range .menu}}
+                <li class="nav-item">
+                    <a class="nav-link has-icon {{if .IsActive}}active{{end}}"
+                       href="{{ .Path }}">
+                        {{ .Ico}} {{ .Name}}
+                    </a>
+                </li>
+            {{ end }}
+        </ul>
 
     </div>
     <!-- /Sidebar body -->
@@ -63,10 +73,10 @@
                               style="background-image: url('background.jpg'); background-size: cover;background-position: center;">
                         </span>
                         <div class="media-body ml-2 text-nowrap">
-                            <h6 class="mb-0"> </h6>
+                            <h6 class="mb-0"></h6>
                             <ul>
                                 @foreach ($user->getSessionRoles() as $roleName)
-                                <li class="text-gray-400 font-size-sm"> </li>
+                                <li class="text-gray-400 font-size-sm"></li>
                                 @endforeach
                             </ul>
                         </div>

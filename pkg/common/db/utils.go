@@ -20,6 +20,10 @@ func IntToBoolPtr() *bool {
 }
 
 func ParseDate(dateStr string) *time.Time {
+	if dateStr == "" {
+		return nil
+	}
+
 	layout := "02.01.2006"
 	date, err := time.Parse(layout, dateStr)
 	if err != nil {
@@ -53,6 +57,14 @@ func IDStrPtr(id string) *uint {
 
 func CheckStr(num string) bool {
 	return num == "1"
+}
+
+func SortStr(num string) int {
+	v, err := strconv.Atoi(num)
+	if err != nil {
+		return 0
+	}
+	return v
 }
 
 func IntStr(num string) int {

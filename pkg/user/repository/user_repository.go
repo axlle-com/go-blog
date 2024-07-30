@@ -15,6 +15,7 @@ type UserRepository interface {
 	Delete(id uint) error
 	GetAll() ([]models.User, error)
 	GetAllIds() ([]uint, error)
+	GetByEmailWithRights(email string) (*models.User, error)
 }
 
 type repository struct {

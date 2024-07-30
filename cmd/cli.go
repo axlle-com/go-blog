@@ -6,6 +6,7 @@ import (
 	"fmt"
 	DB "github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/models"
+	gallery "github.com/axlle-com/blog/pkg/gallery/models"
 	post "github.com/axlle-com/blog/pkg/post/db"
 	postCategory "github.com/axlle-com/blog/pkg/post_category/db"
 	rights "github.com/axlle-com/blog/pkg/rights/db"
@@ -50,6 +51,8 @@ var Commands = map[string]func(){
 			&models.Template{},
 			&models.Role{},
 			&models.Permission{},
+			&gallery.Gallery{},
+			&gallery.GalleryImage{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -65,6 +68,8 @@ var Commands = map[string]func(){
 			&models.Template{},
 			&models.Role{},
 			&models.Permission{},
+			&gallery.Gallery{},
+			&gallery.GalleryImage{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -76,6 +81,8 @@ var Commands = map[string]func(){
 			&models.Template{},
 			&models.Role{},
 			&models.Permission{},
+			&gallery.Gallery{},
+			&gallery.GalleryImage{},
 		)
 		if err != nil {
 			log.Fatalln(err)

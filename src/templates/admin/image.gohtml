@@ -1,0 +1,27 @@
+{{ define "admin.image" }}
+    <div class="img block-image js-image-block">
+        {{ if ne .Image nil }}
+            <div class="image-box"
+                 style="background-image: url({{ .URL }}); background-size: cover;background-position: center;">
+            </div>
+            <div class="overlay-content text-center justify-content-end">
+                <div class="btn-group mb-1" role="group">
+                    <a data-fancybox href="{{ .URL }}">
+                        <button type="button" class="btn btn-link btn-icon text-danger">
+                            <i class="material-icons">zoom_in</i>
+                        </button>
+                    </a>
+                    <button
+                            type="button"
+                            class="btn btn-link btn-icon text-danger"
+                            data-js-image-href="{{ .URL }}"
+                            data-js-image-model="{{ .URL }}"
+                            data-js-image-id="{{ .URL }}"
+                            data-js-image-array-id="">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
+            </div>
+        {{ end }}
+    </div>
+{{ end}}

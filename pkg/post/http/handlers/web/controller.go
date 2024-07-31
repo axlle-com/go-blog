@@ -25,10 +25,11 @@ func (controller *controller) getID(c *gin.Context) uint {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{
-			"Title":   "404 Not Found",
-			"Content": "errors.404.gohtml",
+		c.JSON(http.StatusNotFound, gin.H{
+			"title":   "404 Not Found",
+			"content": "errors.404.gohtml",
 		})
+		c.Abort()
 	}
 	return uint(id)
 }

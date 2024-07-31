@@ -1,0 +1,25 @@
+{{ define "admin.galleryImage" }}
+    <div class="img block-image js-image-block">
+        <div class="image-box"
+             style="background-image: url({{ .File }}); background-size: cover;background-position: center;">
+        </div>
+        <div class="overlay-content text-center justify-content-end">
+            <div class="btn-group mb-1" role="group">
+                <a data-fancybox href="{{ .File }}">
+                    <button type="button" class="btn btn-link btn-icon text-danger">
+                        <i class="material-icons">zoom_in</i>
+                    </button>
+                </a>
+                <button
+                        type="button"
+                        class="btn btn-link btn-icon text-danger"
+                        data-js-image-href="{{ .File }}"
+                        data-js-image-model="{{ .File }}"
+                        data-js-image-id="{{ .File }}"
+                        data-js-image-array-id="">
+                    <i class="material-icons">delete</i>
+                </button>
+            </div>
+        </div>
+    </div>
+{{ end}}

@@ -2,10 +2,11 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type GalleryRepository interface {
@@ -15,6 +16,7 @@ type GalleryRepository interface {
 	Delete(id uint) error
 	GetAll() ([]models.Gallery, error)
 	GetAllIds() ([]uint, error)
+	GetAllForResource(contracts.Resource) ([]*models.Gallery, error)
 }
 
 type galleryRepository struct {
@@ -38,15 +40,6 @@ func (r *galleryRepository) GetByID(id uint) (*models.Gallery, error) {
 	return &gallery, nil
 }
 
-func (r *galleryRepository) GetByEmail(email string) (*models.Gallery, error) {
-	var gallery models.Gallery
-	if err := r.db.Where("email = ?", email).First(&gallery).Error; err != nil {
-		return nil, err
-	}
-	r.db.Preload("Roles.Permissions").Preload("Permissions").Find(&gallery)
-	return &gallery, nil
-}
-
 func (r *galleryRepository) Update(gallery *models.Gallery) error {
 	return r.db.Save(gallery).Error
 }
@@ -63,10 +56,22 @@ func (r *galleryRepository) GetAll() ([]models.Gallery, error) {
 	return galleries, nil
 }
 
+func (r *galleryRepository) GetAllForResource(c contracts.Resource) ([]*models.Gallery, error) {
+	var galleries []*models.Gallery
+	err := r.db.
+		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").
+		Where("r.resource_id = ?", c.GetID()).
+		Where("r.resource = ?", c.GetResource()).
+		Model(&models.Gallery{}).
+		Preload("GalleryImage").
+		Find(&galleries).Error
+	return galleries, err
+}
+
 func (r *galleryRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.Gallery{}).Pluck("id", &ids).Error; err != nil {
-		log.Println("Failed to fetch IDs from the database: %v", err)
+		logger.New().Error(err)
 	}
 	return ids, nil
 }

@@ -2,9 +2,9 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type Repository interface {
@@ -57,7 +57,7 @@ func (r *repository) GetAll() ([]models.PostCategory, error) {
 func (r *repository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.PostCategory{}).Pluck("id", &ids).Error; err != nil {
-		log.Println("Failed to fetch IDs from the database: %v", err)
+		logger.New().Error(err)
 	}
 	return ids, nil
 }

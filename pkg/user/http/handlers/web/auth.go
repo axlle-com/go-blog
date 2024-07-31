@@ -2,11 +2,11 @@ package web
 
 import (
 	. "github.com/axlle-com/blog/pkg/common/errors"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -20,7 +20,7 @@ func Auth(c *gin.Context) {
 			session.AddFlash(FlashErrorString(bindError))
 		}
 		if err := session.Save(); err != nil {
-			log.Println(err)
+			logger.New().Error(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
@@ -39,7 +39,7 @@ func Auth(c *gin.Context) {
 		)
 		err := session.Save()
 		if err != nil {
-			log.Println(err)
+			logger.New().Error(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
@@ -48,7 +48,7 @@ func Auth(c *gin.Context) {
 	session.Set("user_id", userFound.ID)
 	session.Set("user", userFound)
 	if err := session.Save(); err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
 		return

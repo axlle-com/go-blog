@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/menu"
 	post "github.com/axlle-com/blog/pkg/post/models"
@@ -26,22 +27,22 @@ func (controller *controller) GetPosts(c *gin.Context) {
 
 	users, err := userRepo.NewRepository().GetAll()
 	if err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 	}
 
 	categories, err := postCategory.NewRepository().GetAll()
 	if err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 	}
 
 	templates, err := template.NewRepository().GetAllTemplates()
 	if err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 	}
 
 	posts, total, err := postRepo.NewRepository().GetPaginate(paginator.GetPage(), paginator.GetPageSize())
 	if err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 	}
 	log.Printf("Total time: %v", time.Since(start))
 	paginator.SetTotal(total)

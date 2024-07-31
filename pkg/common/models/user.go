@@ -2,9 +2,9 @@ package models
 
 import (
 	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"time"
 )
 
@@ -38,7 +38,7 @@ func (u *User) SetPasswordHash() {
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Println(err)
+		logger.New().Error(err)
 	}
 	u.PasswordHash = string(passwordHash)
 }
@@ -52,6 +52,7 @@ func (u *User) SetAuthToken() (token string, err error) {
 	token, err = generateToken.SignedString([]byte(config.GetConfig().KeyJWT))
 
 	if err != nil {
+		logger.New().Error(err)
 		return
 	}
 	u.AuthToken = &token

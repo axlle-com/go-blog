@@ -53,6 +53,7 @@ var Commands = map[string]func(){
 			&models.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
+			&gallery.GalleryHasResource{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -70,6 +71,7 @@ var Commands = map[string]func(){
 			&models.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
+			&gallery.GalleryHasResource{},
 		)
 		if err != nil {
 			log.Fatalln(err)
@@ -83,6 +85,7 @@ var Commands = map[string]func(){
 			&models.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
+			&gallery.GalleryHasResource{},
 		)
 		if err != nil {
 			log.Fatalln(err)

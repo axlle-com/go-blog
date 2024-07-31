@@ -1,7 +1,7 @@
 package db
 
 import (
-	"log"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"math/rand"
 	"strconv"
 	"time"
@@ -27,7 +27,7 @@ func ParseDate(dateStr string) *time.Time {
 	layout := "02.01.2006"
 	date, err := time.Parse(layout, dateStr)
 	if err != nil {
-		log.Println("Error parsing date:", err)
+		logger.New().Error(err)
 		return nil
 	}
 	return &date

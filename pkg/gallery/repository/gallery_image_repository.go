@@ -2,16 +2,16 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	common "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type GalleryImageRepository interface {
-	Create(gallery *models.GalleryImage) error
+	Create(image *models.GalleryImage) error
 	GetByID(id uint) (*models.GalleryImage, error)
-	Update(gallery *models.GalleryImage) error
+	Update(image *models.GalleryImage) error
 	Delete(id uint) error
 	GetAll() ([]models.GalleryImage, error)
 	GetAllIds() ([]uint, error)
@@ -26,29 +26,29 @@ func NewGalleryImageRepository() GalleryImageRepository {
 	return &galleryImageRepository{db: db.GetDB()}
 }
 
-func (r *galleryImageRepository) Create(gallery *models.GalleryImage) error {
-	return r.db.Create(gallery).Error
+func (r *galleryImageRepository) Create(image *models.GalleryImage) error {
+	return r.db.Create(image).Error
 }
 
 func (r *galleryImageRepository) GetByID(id uint) (*models.GalleryImage, error) {
-	var gallery models.GalleryImage
-	if err := r.db.First(&gallery, id).Error; err != nil {
+	var image models.GalleryImage
+	if err := r.db.First(&image, id).Error; err != nil {
 		return nil, err
 	}
-	return &gallery, nil
+	return &image, nil
 }
 
 func (r *galleryImageRepository) GetByEmail(email string) (*models.GalleryImage, error) {
-	var gallery models.GalleryImage
-	if err := r.db.Where("email = ?", email).First(&gallery).Error; err != nil {
+	var image models.GalleryImage
+	if err := r.db.Where("email = ?", email).First(&image).Error; err != nil {
 		return nil, err
 	}
-	r.db.Preload("Roles.Permissions").Preload("Permissions").Find(&gallery)
-	return &gallery, nil
+	r.db.Preload("Roles.Permissions").Preload("Permissions").Find(&image)
+	return &image, nil
 }
 
-func (r *galleryImageRepository) Update(gallery *models.GalleryImage) error {
-	return r.db.Save(gallery).Error
+func (r *galleryImageRepository) Update(image *models.GalleryImage) error {
+	return r.db.Select("GalleryID", "Title", "Description", "Sort").Save(image).Error
 }
 
 func (r *galleryImageRepository) Delete(id uint) error {
@@ -56,17 +56,17 @@ func (r *galleryImageRepository) Delete(id uint) error {
 }
 
 func (r *galleryImageRepository) GetAll() ([]models.GalleryImage, error) {
-	var galleries []models.GalleryImage
-	if err := r.db.Find(&galleries).Error; err != nil {
+	var images []models.GalleryImage
+	if err := r.db.Find(&images).Error; err != nil {
 		return nil, err
 	}
-	return galleries, nil
+	return images, nil
 }
 
 func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.GalleryImage{}).Pluck("id", &ids).Error; err != nil {
-		log.Println("Failed to fetch IDs from the database: %v", err)
+		logger.New().Error(err)
 	}
 	return ids, nil
 }

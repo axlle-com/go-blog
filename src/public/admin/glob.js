@@ -132,9 +132,7 @@ const _glob = {
                     }
                     this.payload = data;
                 } else if (object instanceof jQuery) {
-
                     this.form = object;
-
                     this.action = this.form.attr('action');
                     this.payload = new FormData(this.form[0]);
                 } else {

@@ -2,8 +2,8 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
-	post "github.com/axlle-com/blog/pkg/post/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/post/models"
 	"gorm.io/gorm"
 )
 
@@ -13,23 +13,23 @@ type PostRepository interface {
 	Update(post *models.Post) error
 	Delete(id uint) error
 	GetAll() ([]models.Post, error)
-	GetPaginate(page, pageSize int) ([]post.Post, int, error)
+	GetPaginate(page, pageSize int) ([]models.PostResponse, int, error)
 }
 
-type repository struct {
-	*models.Paginate
+type postRepository struct {
+	*common.Paginate
 	db *gorm.DB
 }
 
-func NewRepository() PostRepository {
-	return &repository{db: db.GetDB()}
+func NewPostRepository() PostRepository {
+	return &postRepository{db: db.GetDB()}
 }
 
-func (r *repository) Create(post *models.Post) error {
+func (r *postRepository) Create(post *models.Post) error {
 	return r.db.Create(post).Error
 }
 
-func (r *repository) GetByID(id uint) (*models.Post, error) {
+func (r *postRepository) GetByID(id uint) (*models.Post, error) {
 	var model models.Post
 	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
@@ -37,15 +37,15 @@ func (r *repository) GetByID(id uint) (*models.Post, error) {
 	return &model, nil
 }
 
-func (r *repository) Update(post *models.Post) error {
+func (r *postRepository) Update(post *models.Post) error {
 	return r.db.Save(post).Error
 }
 
-func (r *repository) Delete(id uint) error {
+func (r *postRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Post{}, id).Error
 }
 
-func (r *repository) GetAll() ([]models.Post, error) {
+func (r *postRepository) GetAll() ([]models.Post, error) {
 	var posts []models.Post
 	if err := r.db.Find(&posts).Error; err != nil {
 		return nil, err
@@ -53,20 +53,22 @@ func (r *repository) GetAll() ([]models.Post, error) {
 	return posts, nil
 }
 
-func (r *repository) GetPaginate(page, pageSize int) ([]post.Post, int, error) {
-	var posts []post.Post
+func (r *postRepository) GetPaginate(page, pageSize int) ([]models.PostResponse, int, error) {
+	var posts []models.PostResponse
 	var total int64
 
-	r.db.Model(&post.Post{}).Count(&total)
+	r.db.Model(&models.Post{}).Count(&total)
 	err := r.db.Table("posts").
 		Scopes(r.SetPaginate(page, pageSize)).
-		Select("posts.*," +
-			"post_categories.title as category_title," +
-			"post_categories.title_short as category_title_short," +
-			"templates.title as template_title," +
-			"templates.name as template_name," +
-			"users.first_name as user_first_name," +
-			"users.last_name as user_last_name").
+		Select(
+			"posts.*",
+			"post_categories.title as category_title",
+			"post_categories.title_short as category_title_short",
+			"templates.title as template_title",
+			"templates.name as template_name",
+			"users.first_name as user_first_name",
+			"users.last_name as user_last_name",
+		).
 		Joins("left join post_categories on post_categories.id = posts.post_category_id").
 		Joins("left join users on users.id = posts.user_id").
 		Joins("left join templates on templates.id = posts.template_id").

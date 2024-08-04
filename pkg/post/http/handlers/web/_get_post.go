@@ -3,8 +3,7 @@ package web
 import (
 	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/menu"
-	postRepo "github.com/axlle-com/blog/pkg/post/repository"
-	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
+	"github.com/axlle-com/blog/pkg/post/repository"
 	template "github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -36,7 +35,7 @@ func GetPostReserve(c *gin.Context) {
 		return
 	}
 
-	post, err := postRepo.NewRepository().GetByID(uint(id))
+	post, err := repository.NewPostRepository().GetByID(uint(id))
 	if err != nil {
 		log.Println(err)
 		c.HTML(http.StatusNotFound, "admin.404", gin.H{
@@ -46,7 +45,7 @@ func GetPostReserve(c *gin.Context) {
 		return
 	}
 
-	categories, err := postCategory.NewRepository().GetAll()
+	categories, err := repository.NewCategoryRepository().GetAll()
 	if err != nil {
 		log.Println(err)
 	}

@@ -12,7 +12,7 @@ all: network up
 .PHONY: up
 up: network
 	@echo "Starting Docker Compose projects..."
-	@docker-compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) up -d $(SERVICES)
+	@docker compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) up -d $(SERVICES)
 
 # Цель для пересборки Docker-образов и перезапуска контейнеров
 .PHONY: rebuild
@@ -26,7 +26,7 @@ rebuild: network
 .PHONY: down
 down:
 	@echo "Stopping Docker Compose projects..."
-	@docker-compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) down -v
+	@docker compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) down -v
 
 # Цель для создания сети, если она не существует
 .PHONY: network

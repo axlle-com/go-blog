@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"time"
+)
 
 type Gallery struct {
 	ID           uint            `gorm:"primary_key" json:"id"`
@@ -13,4 +17,45 @@ type Gallery struct {
 	UpdatedAt    *time.Time      `json:"updated_at,omitempty"`
 	DeletedAt    *time.Time      `gorm:"index" json:"deleted_at,omitempty"`
 	GalleryImage []*GalleryImage `json:"images,omitempty"`
+}
+
+func (g *Gallery) GetID() uint {
+	return g.ID
+}
+
+func (g *Gallery) GetTitle() *string {
+	return g.Title
+}
+
+func (g *Gallery) GetDescription() *string {
+	return g.Description
+}
+
+func (g *Gallery) GetSort() int {
+	return g.Sort
+}
+
+func (g *Gallery) GetImage() *string {
+	return g.Image
+}
+
+func (g *Gallery) GetURL() *string {
+	return g.URL
+}
+
+func (g *Gallery) GetDate() *time.Time {
+	return g.CreatedAt
+}
+
+func (g *Gallery) GetImages() []contracts.GalleryImage {
+	images := make([]contracts.GalleryImage, len(g.GalleryImage))
+	for i, image := range g.GalleryImage {
+		images[i] = image
+	}
+	return images
+}
+
+func (g *Gallery) Attach(r contracts.Resource) error {
+
+	return errors.New("это новая ошибка")
 }

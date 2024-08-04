@@ -15,6 +15,7 @@ type GalleryImageRepository interface {
 	Delete(id uint) error
 	GetAll() ([]models.GalleryImage, error)
 	GetAllIds() ([]uint, error)
+	CountForGallery(id uint) int64
 }
 
 type galleryImageRepository struct {
@@ -35,15 +36,6 @@ func (r *galleryImageRepository) GetByID(id uint) (*models.GalleryImage, error) 
 	if err := r.db.First(&image, id).Error; err != nil {
 		return nil, err
 	}
-	return &image, nil
-}
-
-func (r *galleryImageRepository) GetByEmail(email string) (*models.GalleryImage, error) {
-	var image models.GalleryImage
-	if err := r.db.Where("email = ?", email).First(&image).Error; err != nil {
-		return nil, err
-	}
-	r.db.Preload("Roles.Permissions").Preload("Permissions").Find(&image)
 	return &image, nil
 }
 
@@ -69,4 +61,13 @@ func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 		logger.New().Error(err)
 	}
 	return ids, nil
+}
+
+func (r *galleryImageRepository) CountForGallery(id uint) int64 {
+	var count int64
+	result := r.db.Model(&models.GalleryImage{}).Where("gallery_id = ?", id).Count(&count)
+	if result.Error != nil {
+		logger.New().Error(result.Error)
+	}
+	return count
 }

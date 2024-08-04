@@ -74,7 +74,7 @@ const _image = {
             denyButtonText: 'Отменить',
         }).then((result) => {
             if (result.isConfirmed) {
-                const request = new _glob.request(obj).setPreloader('.js-product');
+                const request = new _glob.request(obj).setMethod('delete').setPreloader('.js-product');
                 request.send((response) => {
                     if (response.status) {
                         image.remove();
@@ -146,13 +146,11 @@ const _image = {
                 idGall = arr[0];
                 id = arr[1];
             }
-            let idBd = $(this).attr('data-js-image-id');
-            let model = $(this).attr('data-js-image-model');
-            if (idBd && model) {
-                _this.confirm({_method: 'DELETE', model, action}, image)
-            } else {
+            if (idGall && id) {
                 delete _glob.images[idGall]['images'][id];
                 image.remove();
+            } else {
+                _this.confirm({action}, image)
             }
         });
     },

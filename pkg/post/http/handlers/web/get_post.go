@@ -4,28 +4,27 @@ import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/menu"
-	postRepo "github.com/axlle-com/blog/pkg/post/repository"
-	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
+	"github.com/axlle-com/blog/pkg/post/repository"
 	template "github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
 
-func (controller *controller) GetPost(c *gin.Context) {
-	id := controller.getID(c)
+func (c *controller) GetPost(ctx *gin.Context) {
+	id := c.getID(ctx)
 	if id == 0 {
 		return
 	}
 
-	user := controller.getUser(c)
+	user := c.getUser(ctx)
 	if user == nil {
 		return
 	}
 
-	post, err := postRepo.NewRepository().GetByID(id)
+	post, err := repository.NewPostRepository().GetByID(id)
 	if err != nil {
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{
+		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{
 			"title":   "404 Not Found",
 			"content": "errors.404.gohtml",
 		})
@@ -34,7 +33,7 @@ func (controller *controller) GetPost(c *gin.Context) {
 
 	post.Galleries = gallery.NewProvider().GetAllForResource(post)
 
-	categories, err := postCategory.NewRepository().GetAll()
+	categories, err := repository.NewCategoryRepository().GetAll()
 	if err != nil {
 		logger.New().Error(err)
 	}
@@ -44,7 +43,7 @@ func (controller *controller) GetPost(c *gin.Context) {
 		logger.New().Error(err)
 	}
 	log.Println(post.Galleries)
-	c.HTML(
+	ctx.HTML(
 		http.StatusOK,
 		"admin.post",
 		gin.H{
@@ -52,7 +51,7 @@ func (controller *controller) GetPost(c *gin.Context) {
 			"user":       user,
 			"categories": categories,
 			"templates":  templates,
-			"menu":       menu.NewMenu(c.FullPath()),
+			"menu":       menu.NewMenu(ctx.FullPath()),
 			"post":       post,
 		},
 	)

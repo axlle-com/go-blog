@@ -11,7 +11,7 @@ import (
 
 func DeletePost(c *gin.Context) {
 	id := c.Param("id")
-	postRepo := repository.NewRepository()
+	postRepo := repository.NewPostRepository()
 	num, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		log.Println("Ошибка преобразования:", err)

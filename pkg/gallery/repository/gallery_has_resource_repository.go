@@ -7,25 +7,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type GalleryHasResourceRepository interface {
+type GalleryResourceRepository interface {
 	GetByResourceAndID(id uint, resource string, galleryID uint) (*models.GalleryHasResource, error)
 	Create(*models.GalleryHasResource) error
 }
 
-type galleryHasResourceRepository struct {
+type galleryResourceRepository struct {
 	*common.Paginate
 	db *gorm.DB
 }
 
-func NewGalleryHasResourceRepository() GalleryHasResourceRepository {
-	return &galleryHasResourceRepository{db: db.GetDB()}
+func NewGalleryResourceRepository() GalleryResourceRepository {
+	return &galleryResourceRepository{db: db.GetDB()}
 }
 
-func (r *galleryHasResourceRepository) Create(galleryHasResource *models.GalleryHasResource) error {
+func (r *galleryResourceRepository) Create(galleryHasResource *models.GalleryHasResource) error {
 	return r.db.Create(galleryHasResource).Error
 }
 
-func (r *galleryHasResourceRepository) GetByResourceAndID(id uint, resource string, galleryID uint) (*models.GalleryHasResource, error) {
+func (r *galleryResourceRepository) GetByResourceAndID(id uint, resource string, galleryID uint) (*models.GalleryHasResource, error) {
 	var galleryHasResource models.GalleryHasResource
 	if err := r.db.
 		Where("resource_id = ?", id).

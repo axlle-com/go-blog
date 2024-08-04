@@ -8,11 +8,11 @@ import (
 
 func Attach(r contracts.Resource, g *models.Gallery) error {
 	hasRepo, err := repository.
-		NewGalleryHasResourceRepository().
+		NewGalleryResourceRepository().
 		GetByResourceAndID(r.GetID(), r.GetResource(), g.ID)
 	if err != nil || hasRepo == nil {
 		err = repository.
-			NewGalleryHasResourceRepository().
+			NewGalleryResourceRepository().
 			Create(
 				&models.GalleryHasResource{
 					ResourceID: r.GetID(),
@@ -26,11 +26,11 @@ func Attach(r contracts.Resource, g *models.Gallery) error {
 
 func Detach(r contracts.Resource, g *models.Gallery) error {
 	hasRepo, err := repository.
-		NewGalleryHasResourceRepository().
+		NewGalleryResourceRepository().
 		GetByResourceAndID(r.GetID(), r.GetResource(), g.ID)
 	if err != nil || hasRepo == nil {
 		err = repository.
-			NewGalleryHasResourceRepository().
+			NewGalleryResourceRepository().
 			Create(
 				&models.GalleryHasResource{
 					ResourceID: r.GetID(),

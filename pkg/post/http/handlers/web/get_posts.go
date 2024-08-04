@@ -2,11 +2,10 @@ package web
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/common/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/menu"
-	post "github.com/axlle-com/blog/pkg/post/models"
-	postRepo "github.com/axlle-com/blog/pkg/post/repository"
-	postCategory "github.com/axlle-com/blog/pkg/post_category/repository"
+	"github.com/axlle-com/blog/pkg/post/models"
+	"github.com/axlle-com/blog/pkg/post/repository"
 	template "github.com/axlle-com/blog/pkg/template/repository"
 	userRepo "github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/gin-gonic/gin"
@@ -16,11 +15,11 @@ import (
 	"time"
 )
 
-func (controller *controller) GetPosts(c *gin.Context) {
+func (c *controller) GetPosts(ctx *gin.Context) {
 	start := time.Now()
-	paginator := models.NewPaginator(c)
+	paginator := common.NewPaginator(ctx)
 
-	user := controller.getUser(c)
+	user := c.getUser(ctx)
 	if user == nil {
 		return
 	}
@@ -30,7 +29,7 @@ func (controller *controller) GetPosts(c *gin.Context) {
 		logger.New().Error(err)
 	}
 
-	categories, err := postCategory.NewRepository().GetAll()
+	categories, err := repository.NewCategoryRepository().GetAll()
 	if err != nil {
 		logger.New().Error(err)
 	}
@@ -40,13 +39,13 @@ func (controller *controller) GetPosts(c *gin.Context) {
 		logger.New().Error(err)
 	}
 
-	posts, total, err := postRepo.NewRepository().GetPaginate(paginator.GetPage(), paginator.GetPageSize())
+	posts, total, err := repository.NewPostRepository().GetPaginate(paginator.GetPage(), paginator.GetPageSize())
 	if err != nil {
 		logger.New().Error(err)
 	}
 	log.Printf("Total time: %v", time.Since(start))
 	paginator.SetTotal(total)
-	c.HTML(
+	ctx.HTML(
 		http.StatusOK,
 		"admin.posts",
 		gin.H{
@@ -56,37 +55,37 @@ func (controller *controller) GetPosts(c *gin.Context) {
 			"templates":  templates,
 			"user":       user,
 			"users":      users,
-			"menu":       menu.NewMenu(c.FullPath()),
+			"menu":       menu.NewMenu(ctx.FullPath()),
 			"total":      total,
 			"paginator":  paginator,
 		},
 	)
 }
 
-func GetPostsGo(c *gin.Context) {
+func GetPostsGo(ctx *gin.Context) {
 	start := time.Now()
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 
-	userData, exists := c.Get("user")
+	userData, exists := ctx.Get("user")
 	if !exists {
-		c.Redirect(http.StatusFound, "/login")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
-	user, ok := userData.(models.User)
+	user, ok := userData.(common.User)
 	if !ok {
-		c.Redirect(http.StatusFound, "/login")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
 
-	paginator := models.NewPaginator(c)
-	var users []models.User
+	paginator := common.NewPaginator(ctx)
+	var users []common.User
 	var categories []models.PostCategory
-	var templates []models.Template
-	var posts []post.Post
+	var templates []common.Template
+	var posts []models.PostResponse
 	var total int
 
 	wg.Add(1)
@@ -105,7 +104,7 @@ func GetPostsGo(c *gin.Context) {
 	go func() {
 		defer wg.Done()
 		var err error
-		categories, err = postCategory.NewRepository().GetAll()
+		categories, err = repository.NewCategoryRepository().GetAll()
 		if err != nil {
 			mu.Lock()
 			log.Println(err)
@@ -129,7 +128,7 @@ func GetPostsGo(c *gin.Context) {
 	go func() {
 		defer wg.Done()
 		var err error
-		posts, total, err = postRepo.NewRepository().GetPaginate(paginator.GetPage(), paginator.GetPageSize())
+		posts, total, err = repository.NewPostRepository().GetPaginate(paginator.GetPage(), paginator.GetPageSize())
 		if err != nil {
 			mu.Lock()
 			log.Println(err)
@@ -140,7 +139,7 @@ func GetPostsGo(c *gin.Context) {
 	wg.Wait()
 	log.Printf("Total time: %v", time.Since(start))
 	paginator.SetTotal(total)
-	c.HTML(
+	ctx.HTML(
 		http.StatusOK,
 		"admin.posts",
 		gin.H{
@@ -150,7 +149,7 @@ func GetPostsGo(c *gin.Context) {
 			"templates":  templates,
 			"user":       user,
 			"users":      users,
-			"menu":       menu.NewMenu(c.FullPath()),
+			"menu":       menu.NewMenu(ctx.FullPath()),
 			"total":      total,
 			"paginator":  paginator,
 		},

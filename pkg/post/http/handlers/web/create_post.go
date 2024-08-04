@@ -1,8 +1,8 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/post/http/models"
+	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 
 func CreatePost(c *gin.Context) {
 	body := models.CreatePostRequest{}
-	postRepo := repository.NewRepository()
+	postRepo := repository.NewPostRepository()
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

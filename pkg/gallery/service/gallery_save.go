@@ -13,6 +13,9 @@ import (
 	"sync"
 )
 
+type GalleriesCollections map[string]ImagesCollections
+type ImagesCollections map[string]*models.GalleryImage
+
 func SaveFromForm(c *gin.Context) []*models.Gallery {
 	err := c.Request.ParseMultipartForm(32 << 20) // Устанавливаем максимальный размер для multipart/form-data
 	if err != nil {
@@ -23,65 +26,8 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 	title, _ := c.Get("title")
 	titleStr, _ := title.(string)
 
-	form := c.Request.MultipartForm
-	images := make(map[string]map[string]*models.GalleryImage)
-	fileHeaders := make(map[string]*multipart.FileHeader)
-	re := regexp.MustCompile(`^galleries\[(.+?)\]\[images\]\[(.+?)\]\[(.+)\]$`)
-
-	for key, values := range form.Value {
-		if matches := re.FindStringSubmatch(key); matches != nil {
-			galleryID := matches[1]
-			imageID := matches[2]
-			field := matches[3]
-
-			if _, ok := images[galleryID]; !ok {
-				images[galleryID] = make(map[string]*models.GalleryImage)
-			}
-
-			if _, ok := images[galleryID][imageID]; !ok {
-				images[galleryID][imageID] = &models.GalleryImage{}
-			}
-
-			image := images[galleryID][imageID]
-			switch field {
-			case "title":
-				image.Title = db.StrPtr(values[0])
-			case "description":
-				image.Description = db.StrPtr(values[0])
-			case "sort":
-				image.Sort, _ = strconv.Atoi(values[0])
-			}
-		}
-	}
-
-	for _, headers := range form.File {
-		for _, header := range headers {
-			if !isImageFile(header) {
-				continue
-			}
-			contentDisposition := header.Header.Get("Content-Disposition")
-			re := regexp.MustCompile(`name="(galleries\[(.+?)\]\[images\]\[(.+?)\]\[file\])"`)
-			if matches := re.FindStringSubmatch(contentDisposition); matches != nil {
-				galleryID := matches[2]
-				imageID := matches[3]
-
-				if _, ok := images[galleryID]; !ok {
-					images[galleryID] = make(map[string]*models.GalleryImage)
-				}
-
-				if _, ok := images[galleryID][imageID]; !ok {
-					image := &models.GalleryImage{FileHeader: header}
-					images[galleryID][imageID] = image
-				} else {
-					images[galleryID][imageID].FileHeader = header
-				}
-
-				if _, ok := fileHeaders[imageID]; !ok {
-					fileHeaders[imageID] = header
-				}
-			}
-		}
-	}
+	images := parseFormValue(c)
+	images = parseFormFile(c, images)
 
 	var group sync.WaitGroup
 	var mutex sync.Mutex
@@ -132,6 +78,68 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 	}
 	group.Wait()
 	return galleries
+}
+
+func parseFormValue(c *gin.Context) GalleriesCollections {
+	form := c.Request.MultipartForm
+	re := regexp.MustCompile(`^galleries\[(.+?)\]\[images\]\[(.+?)\]\[(.+)\]$`)
+	images := make(GalleriesCollections)
+
+	for key, values := range form.Value {
+		if matches := re.FindStringSubmatch(key); matches != nil {
+			galleryID := matches[1]
+			imageID := matches[2]
+			field := matches[3]
+
+			if _, ok := images[galleryID]; !ok {
+				images[galleryID] = make(ImagesCollections)
+			}
+
+			if _, ok := images[galleryID][imageID]; !ok {
+				images[galleryID][imageID] = &models.GalleryImage{}
+			}
+
+			image := images[galleryID][imageID]
+			switch field {
+			case "title":
+				image.Title = db.StrPtr(values[0])
+			case "description":
+				image.Description = db.StrPtr(values[0])
+			case "sort":
+				image.Sort, _ = strconv.Atoi(values[0])
+			}
+		}
+	}
+	return images
+}
+
+func parseFormFile(c *gin.Context, images GalleriesCollections) GalleriesCollections {
+	form := c.Request.MultipartForm
+	for _, headers := range form.File {
+		for _, header := range headers {
+			if !isImageFile(header) {
+				continue
+			}
+			contentDisposition := header.Header.Get("Content-Disposition")
+			re := regexp.MustCompile(`name="(galleries\[(.+?)\]\[images\]\[(.+?)\]\[file\])"`)
+			if matches := re.FindStringSubmatch(contentDisposition); matches != nil {
+				galleryID := matches[2]
+				imageID := matches[3]
+
+				if _, ok := images[galleryID]; !ok {
+					images[galleryID] = make(ImagesCollections)
+				}
+
+				if _, ok := images[galleryID][imageID]; !ok {
+					image := &models.GalleryImage{FileHeader: header}
+					images[galleryID][imageID] = image
+				} else {
+					images[galleryID][imageID].FileHeader = header
+				}
+			}
+		}
+	}
+	return images
 }
 
 func isImageFile(fileHeader *multipart.FileHeader) bool {

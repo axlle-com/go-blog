@@ -5,10 +5,10 @@ import (
 	"flag"
 	"fmt"
 	DB "github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/models"
 	post "github.com/axlle-com/blog/pkg/post/db"
-	postCategory "github.com/axlle-com/blog/pkg/post_category/db"
+	"github.com/axlle-com/blog/pkg/post/models"
 	rights "github.com/axlle-com/blog/pkg/rights/db"
 	template "github.com/axlle-com/blog/pkg/template/db"
 	user "github.com/axlle-com/blog/pkg/user/db"
@@ -39,18 +39,18 @@ var Commands = map[string]func(){
 		rights.SeedPermissions()
 		rights.SeedRoles()
 		user.SeedUsers(100)
-		postCategory.SeedPostCategory(100)
+		post.SeedPostCategory(100)
 		post.SeedPosts(100)
 	},
 	"migrate": func() {
 		db := DB.GetDB()
 		err := db.AutoMigrate(
 			&models.Post{},
-			&models.User{},
+			&common.User{},
 			&models.PostCategory{},
-			&models.Template{},
-			&models.Role{},
-			&models.Permission{},
+			&common.Template{},
+			&common.Role{},
+			&common.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -64,11 +64,11 @@ var Commands = map[string]func(){
 		dropIntermediateTables(db)
 		err := db.Migrator().DropTable(
 			&models.Post{},
-			&models.User{},
+			&common.User{},
 			&models.PostCategory{},
-			&models.Template{},
-			&models.Role{},
-			&models.Permission{},
+			&common.Template{},
+			&common.Role{},
+			&common.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -78,11 +78,11 @@ var Commands = map[string]func(){
 		}
 		err = db.AutoMigrate(
 			&models.Post{},
-			&models.User{},
+			&common.User{},
 			&models.PostCategory{},
-			&models.Template{},
-			&models.Role{},
-			&models.Permission{},
+			&common.Template{},
+			&common.Role{},
+			&common.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -94,7 +94,7 @@ var Commands = map[string]func(){
 		rights.SeedPermissions()
 		rights.SeedRoles()
 		user.SeedUsers(100)
-		postCategory.SeedPostCategory(100)
+		post.SeedPostCategory(100)
 		post.SeedPosts(100)
 	},
 }

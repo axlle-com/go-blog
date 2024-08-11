@@ -2,18 +2,35 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app
     container_name: app
     networks:
       - projects_network
     ports:
       - "8080:3000"
     volumes:
+      - ./docker/.env:/app/.env
+      - ./docker/.env:/.env
       - ./:/app
     depends_on:
       - postgres
       - filebeat
       - redis
+
+#  cli:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      target: cli
+#    container_name: cli
+#    volumes:
+#      - ./docker/.env:/cli/.env
+#      - ./:/cli
+#    networks:
+#      - projects_network
 
   postgres:
     image: postgres:16-alpine
@@ -41,7 +58,7 @@ services:
     networks:
       - projects_network
     ports:
-      - "6379:6379"
+      - "6380:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -76,8 +93,8 @@ services:
     build: docker/kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-#      - ELASTICSEARCH_USERNAME=elastic
-#      - ELASTICSEARCH_PASSWORD=name
+    #      - ELASTICSEARCH_USERNAME=elastic
+    #      - ELASTICSEARCH_PASSWORD=name
     ports:
       - "5601:5601"
     depends_on:
@@ -87,7 +104,7 @@ services:
       - projects_network
     volumes:
       - ./docker/kibana/init.sh:/usr/local/bin/kibana-init.sh
-    entrypoint: ["/usr/local/bin/kibana-init.sh"]
+    entrypoint: [ "/usr/local/bin/kibana-init.sh" ]
 
   filebeat:
     build: docker/filebeat

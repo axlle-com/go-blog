@@ -38,7 +38,34 @@ func (r *postRepository) GetByID(id uint) (*models.Post, error) {
 }
 
 func (r *postRepository) Update(post *models.Post) error {
-	return r.db.Save(post).Error
+	return r.db.Select(
+		"UserID",
+		"TemplateID",
+		"PostCategoryID",
+		"MetaTitle",
+		"MetaDescription",
+		"Alias",
+		"URL",
+		"IsPublished",
+		"IsFavourites",
+		"HasComments",
+		"ShowImagePost",
+		"ShowImageCategory",
+		"MakeWatermark",
+		"InSitemap",
+		"Media",
+		"Title",
+		"TitleShort",
+		"DescriptionPreview",
+		"Description",
+		"ShowDate",
+		"DatePub",
+		"DateEnd",
+		"Image",
+		"Hits",
+		"Sort",
+		"Stars",
+	).Save(post).Error
 }
 
 func (r *postRepository) Delete(id uint) error {
@@ -72,6 +99,7 @@ func (r *postRepository) GetPaginate(page, pageSize int) ([]models.PostResponse,
 		Joins("left join post_categories on post_categories.id = posts.post_category_id").
 		Joins("left join users on users.id = posts.user_id").
 		Joins("left join templates on templates.id = posts.template_id").
+		Order("posts.id ASC").
 		Scan(&posts).Error
 	if err != nil {
 		return nil, 0, err

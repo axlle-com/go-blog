@@ -4,3 +4,4 @@
 /src/resources/
 /dev.env
 /src/public/uploads/
+/.env

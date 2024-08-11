@@ -1,8 +1,11 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"mime/multipart"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -45,6 +48,17 @@ func (gi *GalleryImage) GetFile() string {
 	return gi.File
 }
 
+func (gi *GalleryImage) GetFilePath() string {
+	absPath, err := filepath.Abs("src" + gi.File)
+	if err != nil {
+		logger.New().Error(err)
+	}
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+		logger.New().Error(err)
+	}
+	return absPath
+}
+
 func (gi *GalleryImage) GetDate() *time.Time {
 	return gi.CreatedAt
 }
@@ -53,6 +67,17 @@ func (gi *GalleryImage) GetGallery() contracts.Gallery {
 	return gi.Gallery
 }
 
-func (gi *GalleryImage) AfterDelete() {
-
+func (gi *GalleryImage) AfterDelete() error {
+	err := os.Remove(gi.GetFilePath())
+	if err != nil {
+		return err
+	}
+	count := NewGalleryImageRepository().CountForGallery(gi.GalleryID)
+	if count == 0 {
+		err := NewGalleryRepository().Delete(gi.GalleryID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

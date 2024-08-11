@@ -15,10 +15,7 @@ func GetPostReserve(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{
-			"title":   "404 Not Found",
-			"content": "errors.404.gohtml",
-		})
+		c.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -38,10 +35,7 @@ func GetPostReserve(c *gin.Context) {
 	post, err := repository.NewPostRepository().GetByID(uint(id))
 	if err != nil {
 		log.Println(err)
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{
-			"title":   "404 Not Found",
-			"content": "errors.404.gohtml",
-		})
+		c.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 

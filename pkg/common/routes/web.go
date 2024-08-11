@@ -23,7 +23,7 @@ func InitializeWebRoutes(r *gin.Engine) {
 	{
 		protected.GET("/", user.Index)
 		protected.GET("/logout", user.Logout)
-		protected.POST("/posts", post.CreatePost)
+		protected.POST("/posts", postController.CreatePost)
 		protected.GET("/posts", postController.GetPosts)
 		protected.GET("/posts/:id", postController.GetPost)
 		protected.PUT("/posts/:id", postController.UpdatePost)

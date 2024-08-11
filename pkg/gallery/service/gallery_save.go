@@ -4,7 +4,6 @@ import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/http"
@@ -33,7 +32,7 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 	var mutex sync.Mutex
 	var galleries []*models.Gallery
 	for galleryID, imagesMap := range images {
-		galleryRepo := repository.NewGalleryRepository()
+		galleryRepo := models.NewGalleryRepository()
 		var gallery = &models.Gallery{Title: &titleStr}
 		galleries = append(galleries, gallery)
 

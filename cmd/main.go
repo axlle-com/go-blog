@@ -37,6 +37,8 @@ func main() {
 	store := db.InitRedis(cfg)
 	router.Use(sessions.Sessions(config.SessionsName, store))
 
+	db.Init(cfg.DBUrl)
+
 	//web.InitMinify()
 	web.InitTemplate(router)
 	routes.InitializeApiRoutes(router)

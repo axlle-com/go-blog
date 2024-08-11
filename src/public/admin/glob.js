@@ -224,7 +224,7 @@ const _glob = {
                 },
                 success: function (response) {
                     _this.setData(response).defaultBehavior();
-                    if (callback) {
+                    if (!!callback) {
                         callback(response);
                     }
                 },
@@ -253,13 +253,8 @@ const _glob = {
 
         setData(response) {
             this.response = response;
-            if (response.status) {
-                this.data = response.data;
-                this.form ? this.form[0].reset() : null;
-            } else {
-                this.data = null;
-                this.errorResponse(response, this.form);
-            }
+            this.data = response.data;
+            this.form ? this.form[0].reset() : null;
             return this;
         }
 
@@ -413,7 +408,7 @@ const _glob = {
         }
     },
     uuid: function () {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             const r = Math.random() * 16 | 0,
                 v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);

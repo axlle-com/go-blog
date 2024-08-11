@@ -7,7 +7,6 @@ import (
 	"github.com/axlle-com/blog/pkg/post/repository"
 	template "github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -24,10 +23,7 @@ func (c *controller) GetPost(ctx *gin.Context) {
 
 	post, err := repository.NewPostRepository().GetByID(id)
 	if err != nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{
-			"title":   "404 Not Found",
-			"content": "errors.404.gohtml",
-		})
+		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -42,7 +38,6 @@ func (c *controller) GetPost(ctx *gin.Context) {
 	if err != nil {
 		logger.New().Error(err)
 	}
-	log.Println(post.Galleries)
 	ctx.HTML(
 		http.StatusOK,
 		"admin.post",

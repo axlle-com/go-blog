@@ -1,6 +1,8 @@
 package errors
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func FlashErrorString(field BindError) string {
 	jsonError, _ := json.Marshal(field)
@@ -13,7 +15,7 @@ func ParseFlashes(flashes []interface{}) map[string]*BindError {
 		var fe BindError
 		err := json.Unmarshal([]byte(flash.(string)), &fe)
 		if err == nil {
-			errorMessages[fe.Field] = &fe
+			errorMessages[toSnakeCase(fe.Field)] = &fe
 		}
 	}
 	return errorMessages

@@ -20,10 +20,7 @@ func GetPostFront(c *gin.Context) {
 	var post models.Post
 
 	if result := h.First(&post, id); result.Error != nil {
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{
-			"title":   "404 Not Found",
-			"content": "errors/404.gohtml",
-		})
+		c.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 

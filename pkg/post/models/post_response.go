@@ -11,5 +11,8 @@ type PostResponse struct {
 }
 
 func (p *PostResponse) Date() string {
+	if p.CreatedAt == nil {
+		return ""
+	}
 	return p.CreatedAt.Format("02.01.2006 15:04:05")
 }

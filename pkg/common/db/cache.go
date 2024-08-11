@@ -7,7 +7,7 @@ import (
 )
 
 func InitRedis(cfg *config.Config) redis.Store {
-	store, err := redis.NewStore(10, "tcp", "127.0.0.1:6379", "", []byte(cfg.KeyCookie))
+	store, err := redis.NewStore(10, "tcp", cfg.RedisHost+":"+cfg.RedisPort, "", []byte(cfg.KeyCookie))
 	if err != nil {
 		panic(err)
 	}

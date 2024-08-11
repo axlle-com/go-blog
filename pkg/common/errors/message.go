@@ -3,10 +3,11 @@ package errors
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"unicode"
 )
 
 func message(fieldErr validator.FieldError) (message string) {
-	fieldName := fieldErr.Field()
+	fieldName := toSnakeCase(fieldErr.Field())
 	tag := fieldErr.Tag()
 	switch tag {
 	case "required":
@@ -21,4 +22,19 @@ func message(fieldErr validator.FieldError) (message string) {
 		message = fmt.Sprintf("%s is invalid", fieldName)
 	}
 	return
+}
+
+func toSnakeCase(str string) string {
+	var result []rune
+	for i, r := range str {
+		if unicode.IsUpper(r) {
+			// Добавляем нижнее подчеркивание перед каждой заглавной буквой, если это не начало строки
+			if i > 0 && (unicode.IsLower(rune(str[i-1])) || (i < len(str)-1 && unicode.IsLower(rune(str[i+1])))) {
+				result = append(result, '_')
+			}
+			r = unicode.ToLower(r)
+		}
+		result = append(result, r)
+	}
+	return string(result)
 }

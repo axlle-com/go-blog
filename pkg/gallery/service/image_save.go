@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"path/filepath"
@@ -21,7 +20,7 @@ func SaveImage(image *models.GalleryImage, c *gin.Context) error {
 	}
 
 	var imageOld *models.GalleryImage
-	imageRepo := repository.NewGalleryImageRepository()
+	imageRepo := models.NewGalleryImageRepository()
 	if image.ID != 0 {
 		imageOld, _ = imageRepo.GetByID(image.ID)
 	}

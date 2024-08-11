@@ -13,7 +13,7 @@ var (
 	instance *gorm.DB
 )
 
-func Init(url string) *gorm.DB {
+func Init(url string) {
 	var err error
 	once.Do(func() {
 		instance, err = gorm.Open(postgres.Open(url), &gorm.Config{})
@@ -21,12 +21,11 @@ func Init(url string) *gorm.DB {
 			log.Fatalln(err)
 		}
 	})
-	return instance.Debug()
 }
 
 func GetDB() *gorm.DB {
 	if instance == nil {
-		instance = Init(config.GetConfig().DBUrl)
+		Init(config.GetConfig().DBUrl)
 	}
 	return instance
 }

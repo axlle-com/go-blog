@@ -9,6 +9,7 @@ type GalleryImage interface {
 	GetDescription() *string
 	GetSort() int
 	GetFile() string
+	GetFilePath() string
 	GetDate() *time.Time
 	GetGallery() Gallery
 }

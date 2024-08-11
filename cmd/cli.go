@@ -26,7 +26,8 @@ func main() {
 	if command != "" {
 		handleCommand(command)
 	} else {
-		handleCommands()
+		fmt.Println("No task provided. Use -command=name to specify a task.")
+		os.Exit(1)
 	}
 }
 

@@ -46,13 +46,11 @@ const _form = {
                 request.setMethod(method);
             }
             request.send((response) => {
-                if (response.status) {
-                    let html = $(response.data.view);
-                    _this._block.html(html);
-                    _glob.images = {};
-                    _config.run();
-                    Swal.fire('Сохранено', '', 'success');
-                }
+                let html = $(response.data.view);
+                _this._block.html(html);
+                _glob.images = {};
+                _config.run();
+                Swal.fire('Сохранено', '', 'success');
             });
         }
     },
@@ -76,10 +74,12 @@ const _image = {
             if (result.isConfirmed) {
                 const request = new _glob.request(obj).setMethod('delete').setPreloader('.js-product');
                 request.send((response) => {
-                    if (response.status) {
-                        image.remove();
-                        _glob.noty.success('Изображение удалено', '', 'success');
+                    if (response.message) {
+                        _glob.noty.success(response.message);
+                    } else {
+                        _glob.noty.success('Изображение удалено');
                     }
+                    image.remove();
                 });
             } else if (result.isDenied) {
                 Swal.fire('Изображение не удалено', '', 'info');
@@ -113,7 +113,7 @@ const _image = {
                 $(image).html(imageBlock);
                 _config.fancybox();
             }
-            _glob.noty.success('Нажните сохранить, что бы загрузить изображение');
+            _glob.noty.success('Нажните сохранить, что бы загрузить изображение', "", "success");
         });
     },
     delete: function () {

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"time"
 )
@@ -56,6 +55,16 @@ func (g *Gallery) GetImages() []contracts.GalleryImage {
 }
 
 func (g *Gallery) Attach(r contracts.Resource) error {
-
-	return errors.New("это новая ошибка")
+	repo := NewGalleryResourceRepository()
+	hasRepo, err := repo.GetByResourceAndID(r.GetID(), r.GetResource(), g.ID)
+	if err != nil || hasRepo == nil {
+		err = repo.Create(
+			&GalleryHasResource{
+				ResourceID: r.GetID(),
+				Resource:   r.GetResource(),
+				GalleryID:  g.ID,
+			},
+		)
+	}
+	return err
 }

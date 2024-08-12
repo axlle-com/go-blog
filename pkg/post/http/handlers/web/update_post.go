@@ -29,6 +29,8 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 		return
 	}
 	form.ID = post.ID
+	form.Image = post.Image
+	form.UploadImageFile(ctx)
 
 	err = postRepo.Update(form)
 	if err != nil {

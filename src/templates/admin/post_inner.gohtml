@@ -190,8 +190,8 @@
                                     <div class="col-md-4">
                                         <fieldset class="form-block">
                                             <legend>Изображение</legend>
-                                            {{ template "admin.image" }}
-                                            {{ template "admin.image_empty" }}
+                                            {{ template "admin.image" .post }}
+                                            {{ template "admin.image_empty" .post }}
                                             <div class="form-group">
                                                 <div class="custom-control custom-checkbox">
                                                     <input type="hidden" name="show_image_post" value="0">

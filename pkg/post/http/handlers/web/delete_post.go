@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DeletePost(c *gin.Context) {
-	id := c.Param("id")
+func (c *controller) DeletePost(ctx *gin.Context) {
+	id := ctx.Param("id")
 	postRepo := repository.NewPostRepository()
 	num, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -19,9 +19,9 @@ func DeletePost(c *gin.Context) {
 	}
 
 	if err := postRepo.Delete(uint(num)); err != nil {
-		c.AbortWithError(http.StatusNotFound, err)
+		ctx.AbortWithError(http.StatusNotFound, err)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	ctx.Status(http.StatusOK)
 }

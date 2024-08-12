@@ -1,7 +1,14 @@
 package models
 
 import (
+	"fmt"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -61,4 +68,28 @@ func (p *Post) GetID() uint {
 
 func (p *Post) GetResource() string {
 	return "posts"
+}
+
+func (p *Post) DeleteImageFile() {
+	err := os.Remove("src/" + *p.Image)
+	if err != nil {
+		logger.New().Error(err)
+	}
+	p.Image = nil
+}
+
+func (p *Post) UploadImageFile(ctx *gin.Context) {
+	_, file, _ := ctx.Request.FormFile("file")
+	if file != nil {
+		newFileName := fmt.Sprintf("/public/uploads/%s/%d/%s%s", p.GetResource(), p.ID, uuid.New().String(), filepath.Ext(file.Filename))
+		if err := ctx.SaveUploadedFile(file, "src"+newFileName); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ctx.Abort()
+			return
+		}
+		if p.Image != nil {
+			p.DeleteImageFile()
+		}
+		p.Image = &newFileName
+	}
 }

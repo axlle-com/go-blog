@@ -13,6 +13,8 @@ type Controller interface {
 	GetPost(*gin.Context)
 	GetPosts(*gin.Context)
 	UpdatePost(*gin.Context)
+	DeletePost(*gin.Context)
+	DeletePostImage(*gin.Context)
 	CreatePost(*gin.Context)
 }
 

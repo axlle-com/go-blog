@@ -27,7 +27,8 @@ func InitializeWebRoutes(r *gin.Engine) {
 		protected.GET("/posts", postController.GetPosts)
 		protected.GET("/posts/:id", postController.GetPost)
 		protected.PUT("/posts/:id", postController.UpdatePost)
-		protected.DELETE("/posts/:id", post.DeletePost)
+		protected.DELETE("/posts/:id", postController.DeletePost)
+		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
 	r.GET("/:alias", post.GetPostFront)

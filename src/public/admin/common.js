@@ -113,7 +113,7 @@ const _image = {
                 $(image).html(imageBlock);
                 _config.fancybox();
             }
-            _glob.noty.success('Нажните сохранить, что бы загрузить изображение', "", "success");
+            _glob.noty.success('Нажните сохранить, что бы загрузить изображение');
         });
     },
     delete: function () {

@@ -13,7 +13,7 @@ import (
 )
 
 func Auth(authInput AuthInput) (userFound *User, err error) {
-	userRepo := repository.NewRepository()
+	userRepo := repository.NewRepo()
 	userFound, err = userRepo.GetByEmail(authInput.Email)
 
 	if err != nil && err != gorm.ErrRecordNotFound {

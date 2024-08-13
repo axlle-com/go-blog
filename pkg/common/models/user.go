@@ -5,6 +5,7 @@ import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
+	"regexp"
 	"time"
 )
 
@@ -32,6 +33,16 @@ type User struct {
 	Permissions        []Permission `gorm:"many2many:user_has_permission;" json:"permissions,omitempty"`
 }
 
+func (u *User) Creating() {
+	u.SetPasswordHash()
+	u.SetPhone()
+}
+
+func (u *User) Updating() {
+	u.SetPasswordHash()
+	u.SetPhone()
+}
+
 func (u *User) SetPasswordHash() {
 	if u.Password == "" {
 		return
@@ -57,4 +68,37 @@ func (u *User) SetAuthToken() (token string, err error) {
 	}
 	u.AuthToken = &token
 	return
+}
+
+func (u *User) SetPhone() {
+	if u.Phone != nil {
+		if ok, phone := ValidateAndCleanPhone(*u.Phone); ok {
+			u.Phone = &phone
+			return
+		}
+	}
+	u.Phone = nil
+}
+
+func ValidateAndCleanPhone(phone string) (bool, string) {
+	re := regexp.MustCompile(`\D`)
+	cleanedPhone := re.ReplaceAllString(phone, "")
+
+	if len(cleanedPhone) != 11 {
+		if len(cleanedPhone) == 10 {
+			cleanedPhone = "7" + cleanedPhone
+			return true, cleanedPhone
+		}
+		return false, cleanedPhone
+	}
+
+	if cleanedPhone[0] != '7' && cleanedPhone[0] != '8' {
+		return false, cleanedPhone
+	}
+
+	if cleanedPhone[0] == '8' {
+		cleanedPhone = "7" + cleanedPhone[1:]
+	}
+
+	return true, cleanedPhone
 }

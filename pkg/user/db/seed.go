@@ -16,9 +16,7 @@ func SeedUsers(n int) {
 		firstName := faker.FirstName()
 		lastName := faker.LastName()
 		phone := faker.Phonenumber()
-		avatar := faker.URL()
 		password := faker.Password()
-		passwordHash := faker.Password()
 		rememberToken := faker.UUIDDigit()
 		authKey := faker.UUIDDigit()
 		authToken := faker.UUIDHyphenated()
@@ -34,9 +32,7 @@ func SeedUsers(n int) {
 			IsEmail:            IntToBoolPtr(),
 			IsPhone:            IntToBoolPtr(),
 			Status:             int8(rand.Intn(10)),
-			Avatar:             &avatar,
 			Password:           password,
-			PasswordHash:       passwordHash,
 			RememberToken:      &rememberToken,
 			AuthKey:            &authKey,
 			AuthToken:          &authToken,
@@ -44,17 +40,13 @@ func SeedUsers(n int) {
 			CreatedAt:          &createdAt,
 			UpdatedAt:          &updatedAt,
 		}
-		err := NewRepository().Create(&user)
+		err := NewRepo().Create(&user)
 		if err != nil {
 			log.Printf("Failed to create user %d: %v", i, err.Error())
 		}
 	}
 
-	firstName := faker.FirstName()
-	lastName := faker.LastName()
-	phone := faker.Phonenumber()
-	avatar := faker.URL()
-	passwordHash := faker.Password()
+	phone := "+7-900-111-22-33"
 	rememberToken := faker.UUIDDigit()
 	authKey := faker.UUIDDigit()
 	authToken := faker.UUIDHyphenated()
@@ -64,16 +56,14 @@ func SeedUsers(n int) {
 
 	role, _ := rights.NewRoleRepository().GetByName("admin")
 	user := User{
-		FirstName:          firstName,
-		LastName:           lastName,
+		FirstName:          "Admin",
+		LastName:           "Admin",
 		Phone:              &phone,
 		Email:              "axlle@mail.ru",
-		IsEmail:            IntToBoolPtr(),
-		IsPhone:            IntToBoolPtr(),
-		Status:             int8(rand.Intn(10)),
-		Avatar:             &avatar,
+		IsEmail:            BoolToBoolPtr(true),
+		IsPhone:            BoolToBoolPtr(true),
+		Status:             10,
 		Password:           "123456",
-		PasswordHash:       passwordHash,
 		RememberToken:      &rememberToken,
 		AuthKey:            &authKey,
 		AuthToken:          &authToken,
@@ -83,7 +73,7 @@ func SeedUsers(n int) {
 		Roles:              []Role{*role},
 	}
 
-	err := NewRepository().Create(&user)
+	err := NewRepo().Create(&user)
 	if err != nil {
 		log.Printf("Failed to create user %d: %v", n, err.Error())
 	}

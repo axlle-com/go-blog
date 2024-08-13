@@ -19,7 +19,7 @@ func GetUser(c *gin.Context) {
 	}
 
 	uintValue := uint(value)
-	h := repository.NewRepository()
+	h := repository.NewRepo()
 	var result *models.User
 
 	if result, err = h.GetByID(uintValue); err != nil {

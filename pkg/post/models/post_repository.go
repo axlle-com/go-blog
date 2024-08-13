@@ -1,43 +1,47 @@
-package repository
+package models
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
-	"github.com/axlle-com/blog/pkg/post/models"
 	"gorm.io/gorm"
 )
 
 type PostRepository interface {
-	Create(post *models.Post) error
-	GetByID(id uint) (*models.Post, error)
-	Update(post *models.Post) error
+	Create(post *Post) error
+	GetByID(id uint) (*Post, error)
+	Update(post *Post) error
 	Delete(id uint) error
-	GetAll() ([]models.Post, error)
-	GetPaginate(page, pageSize int) ([]models.PostResponse, int, error)
+	GetAll() ([]Post, error)
+	GetPaginate(page, pageSize int) ([]PostResponse, int, error)
+	GetByAlias(alias string) (*Post, error)
+	GetByAliasNotID(alias string, id uint) (*Post, error)
 }
 
 type postRepository struct {
 	*common.Paginate
 	db *gorm.DB
+	c  int
 }
 
-func NewPostRepository() PostRepository {
+func NewPostRepo() PostRepository {
 	return &postRepository{db: db.GetDB()}
 }
 
-func (r *postRepository) Create(post *models.Post) error {
+func (r *postRepository) Create(post *Post) error {
+	post.Creating()
 	return r.db.Create(post).Error
 }
 
-func (r *postRepository) GetByID(id uint) (*models.Post, error) {
-	var model models.Post
+func (r *postRepository) GetByID(id uint) (*Post, error) {
+	var model Post
 	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
 	}
 	return &model, nil
 }
 
-func (r *postRepository) Update(post *models.Post) error {
+func (r *postRepository) Update(post *Post) error {
+	post.Updating()
 	return r.db.Select(
 		"UserID",
 		"TemplateID",
@@ -69,22 +73,22 @@ func (r *postRepository) Update(post *models.Post) error {
 }
 
 func (r *postRepository) Delete(id uint) error {
-	return r.db.Delete(&models.Post{}, id).Error
+	return r.db.Delete(&Post{}, id).Error
 }
 
-func (r *postRepository) GetAll() ([]models.Post, error) {
-	var posts []models.Post
+func (r *postRepository) GetAll() ([]Post, error) {
+	var posts []Post
 	if err := r.db.Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
 }
 
-func (r *postRepository) GetPaginate(page, pageSize int) ([]models.PostResponse, int, error) {
-	var posts []models.PostResponse
+func (r *postRepository) GetPaginate(page, pageSize int) ([]PostResponse, int, error) {
+	var posts []PostResponse
 	var total int64
 
-	r.db.Model(&models.Post{}).Count(&total)
+	r.db.Model(&Post{}).Count(&total)
 	err := r.db.Table("posts").
 		Scopes(r.SetPaginate(page, pageSize)).
 		Select(
@@ -105,4 +109,20 @@ func (r *postRepository) GetPaginate(page, pageSize int) ([]models.PostResponse,
 		return nil, 0, err
 	}
 	return posts, int(total), nil
+}
+
+func (r *postRepository) GetByAlias(alias string) (*Post, error) {
+	var post Post
+	if err := r.db.Where("alias = ?", alias).First(&post).Error; err != nil {
+		return nil, err
+	}
+	return &post, nil
+}
+
+func (r *postRepository) GetByAliasNotID(alias string, id uint) (*Post, error) {
+	var post Post
+	if err := r.db.Where("alias = ?", alias).Where("id <> ?", id).First(&post).Error; err != nil {
+		return nil, err
+	}
+	return &post, nil
 }

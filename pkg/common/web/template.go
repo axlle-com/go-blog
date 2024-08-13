@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"html/template"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -18,10 +19,11 @@ func InitTemplate(router *gin.Engine) {
 
 func loadTemplates(templatesDir string) *template.Template {
 	tmpl := template.New("").Funcs(template.FuncMap{
-		"add":  add,
-		"sub":  sub,
-		"mul":  mul,
-		"date": date,
+		"add":   add,
+		"sub":   sub,
+		"mul":   mul,
+		"date":  date,
+		"query": query,
 	})
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -49,4 +51,12 @@ func date(timePtr *time.Time) string {
 		return ""
 	}
 	return timePtr.Format("02.01.2006 15:04:05")
+}
+func query(u url.Values, s string) string {
+	param, ok := u[s]
+	if ok {
+		// TODO
+		return param[0]
+	}
+	return ""
 }

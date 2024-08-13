@@ -67,14 +67,14 @@ func (gi *GalleryImage) GetGallery() contracts.Gallery {
 	return gi.Gallery
 }
 
-func (gi *GalleryImage) AfterDelete() error {
+func (gi *GalleryImage) Deleted() error {
 	err := os.Remove(gi.GetFilePath())
 	if err != nil {
 		return err
 	}
 	count := NewGalleryImageRepository().CountForGallery(gi.GalleryID)
 	if count == 0 {
-		err := NewGalleryRepository().Delete(gi.GalleryID)
+		err = NewGalleryRepository().Delete(gi.GalleryID)
 		if err != nil {
 			return err
 		}

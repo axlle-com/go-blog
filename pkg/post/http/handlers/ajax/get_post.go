@@ -1,4 +1,4 @@
-package web
+package ajax
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (c *webController) GetPost(ctx *gin.Context) {
+func (c *controller) GetPost(ctx *gin.Context) {
 	id := c.getID(ctx)
 	if id == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})

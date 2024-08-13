@@ -16,13 +16,13 @@ const _auth = {
 };
 const _form = {
     _block: {},
-    confirm: function () {
+    confirm: function (button, title) {
         const _this = this;
-        _this._block.on('click', '.js-save-button', function (e) {
+        _this._block.on('click', button, function (e) {
             const saveButton = $(this);
             Swal.fire({
                 icon: 'warning',
-                title: 'Вы уверены что хотите сохранить все изменения?',
+                title: title,
                 text: 'Изменения нельзя будет отменить',
                 showDenyButton: true,
                 confirmButtonText: 'Сохранить',
@@ -57,7 +57,8 @@ const _form = {
     run: function (selector) {
         this._block = $(selector);
         if (this._block.length) {
-            this.confirm();
+            this.confirm('.js-save-button', 'Вы уверены что хотите сохранить все изменения?');
+            this.confirm('.js-delete-button', 'Вы уверены что хотите удалить?');
         }
     }
 };

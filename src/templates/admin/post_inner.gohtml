@@ -1,402 +1,411 @@
-{{ define "admin.postInner" }}
-    <form id="global-form" action="/admin/posts/{{ .post.ID }}" method="put">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="list-with-gap mb-2">
-                            <button type="button" class="btn btn-success js-save-button">Сохранить</button>
-                            <a type="button" class="btn btn-secondary" href="/admin/posts">Выйти</a>
-                        </div>
-                        <div class="list-with-gap mb-2">
-                            <ul class="nav nav-gap-x-1 mt-3" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link nav-link-faded active"
-                                       id="home-tab-faded"
-                                       data-toggle="tab"
-                                       href="#home-page"
-                                       role="tab"
-                                       aria-controls="home-page"
-                                       aria-selected="false">Основное</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link nav-link-faded"
-                                       id="profile-tab-faded"
-                                       data-toggle="tab"
-                                       href="#tab2Faded"
-                                       role="tab"
-                                       aria-controls="tab2Faded"
-                                       aria-selected="false">Галерея</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link nav-link-faded"
-                                       id="info-block-tab-faded"
-                                       data-toggle="tab"
-                                       href="#tab3Faded"
-                                       role="tab"
-                                       aria-controls="tab3Faded"
-                                       aria-selected="true">Инфо-блоки</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link nav-link-faded"
-                                       id="settings-tab-faded"
-                                       data-toggle="tab"
-                                       href="#tab4Faded"
-                                       role="tab"
-                                       aria-controls="tab4Faded"
-                                       aria-selected="true">Настройки</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="tab-content">
-                            <div class="tab-pane fade active show"
-                                 id="home-page"
-                                 role="tabpanel"
-                                 aria-labelledby="home-tab-faded">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <fieldset class="form-block">
-                                            <legend>Связь данных</legend>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Категория</label>
-                                                <select
-                                                        class="form-control select2"
-                                                        data-placeholder="Категория"
-                                                        data-select2-search="true"
-                                                        name="post_category_id"
-                                                        data-validator="post_category_id">
-                                                    <option></option>
-                                                    {{ range .categories}}
-                                                        <option value="{{ .ID }}" {{ if eq .ID $.post.GetCategoryID }}selected{{ end }}>
-                                                            {{ .Title }}
-                                                        </option>
-                                                    {{ end }}
-                                                </select>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Шаблон</label>
-                                                <select
-                                                        class="form-control select2"
-                                                        data-placeholder="Шаблон"
-                                                        data-select2-search="true"
-                                                        name="template_id"
-                                                        data-validator="template_id">
-                                                    <option></option>
-                                                    {{ range .templates}}
-                                                        <option value="{{ .ID }}" {{ if eq .ID $.post.GetTemplateID }}selected{{ end }}>
-                                                            {{ .Title }}
-                                                        </option>
-                                                    {{ end }}
-                                                </select>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
-                                            <legend>Ссылка</legend>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Алиас</label>
-                                                <input
-                                                        class="form-control form-shadow"
-                                                        placeholder="Алиас"
-                                                        name="alias"
-                                                        id="alias"
-                                                        value="{{ .post.Alias }}"
-                                                        data-validator="alias">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Ссылка</label>
-                                                <input
-                                                        class="form-control form-shadow"
-                                                        placeholder="Ссылка"
-                                                        name="url"
-                                                        id="url"
-                                                        value="{{ .post.URL }}"
-                                                        data-validator="url">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
-                                            <legend>Заголовок</legend>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Обычный</label>
-                                                <input
-                                                        class="form-control form-shadow"
-                                                        placeholder="Обычный"
-                                                        name="title"
-                                                        id="title"
-                                                        value="{{ .post.Title }}"
-                                                        data-validator-required
-                                                        data-validator="title">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Короткий</label>
-                                                <input
-                                                        class="form-control form-shadow"
-                                                        placeholder="Короткий"
-                                                        name="title_short"
-                                                        id="title_short"
-                                                        value="{{ .post.TitleShort }}"
-                                                        data-validator="title_short">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Короткое описание</label>
-                                                <textarea
-                                                        class="form-control form-shadow"
-                                                        placeholder="Короткое описание"
-                                                        name="description_preview"
-                                                        id="description_preview"
-                                                        data-validator="description_preview">{{ .post.DescriptionPreview }}</textarea>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
-                                            <legend>SEO</legend>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Заголовок SEO</label>
-                                                <input
-                                                        class="form-control form-shadow"
-                                                        placeholder="Заголовок SEO"
-                                                        name="meta_title"
-                                                        id="meta_title"
-                                                        value="{{ .post.MetaTitle }}"
-                                                        data-validator-required
-                                                        data-validator="meta_title">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                            <div class="form-group small">
-                                                <label for="blogTitle">Описание SEO</label>
-                                                <textarea
-                                                        class="form-control form-shadow"
-                                                        placeholder="Описание SEO"
-                                                        name="meta_description"
-                                                        id="meta_description"
-                                                        data-validator-required
-                                                        data-validator="meta_description">{{ .post.MetaDescription }}</textarea>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </fieldset>
+{{ define "admin.post_inner" }}
+    {{ if eq .post.ID 0 }}
+        <form id="global-form" action="/admin/posts" method="post">
+    {{ else}}
+        <form id="global-form" action="/admin/posts/{{ .post.ID }}" method="put">
+    {{ end }}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="list-with-gap mb-2">
+                        <button type="button" class="btn btn-success js-save-button">Сохранить</button>
+                        <a type="button" class="btn btn-secondary" href="/admin/posts">Выйти</a>
+                    </div>
+                    <div class="list-with-gap mb-2">
+                        <ul class="nav nav-gap-x-1 mt-3" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded active"
+                                   id="home-tab-faded"
+                                   data-toggle="tab"
+                                   href="#home-page"
+                                   role="tab"
+                                   aria-controls="home-page"
+                                   aria-selected="false">Основное</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="profile-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab2Faded"
+                                   role="tab"
+                                   aria-controls="tab2Faded"
+                                   aria-selected="false">Галерея</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="info-block-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab3Faded"
+                                   role="tab"
+                                   aria-controls="tab3Faded"
+                                   aria-selected="true">Инфо-блоки</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="settings-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab4Faded"
+                                   role="tab"
+                                   aria-controls="tab4Faded"
+                                   aria-selected="true">Настройки</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show"
+                             id="home-page"
+                             role="tabpanel"
+                             aria-labelledby="home-tab-faded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <fieldset class="form-block">
+                                        <legend>Связь данных</legend>
                                         <div class="form-group small">
+                                            <label for="blogTitle">Категория</label>
+                                            <select
+                                                    class="form-control select2"
+                                                    data-placeholder="Категория"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="post_category_id"
+                                                    data-validator="post_category_id">
+                                                <option></option>
+                                                {{ range .categories}}
+                                                    <option value="{{ .ID }}"
+                                                            {{ if eq .ID $.post.GetCategoryID }}selected{{ end }}>
+                                                        {{ .Title }}
+                                                    </option>
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Шаблон</label>
+                                            <select
+                                                    class="form-control select2"
+                                                    data-placeholder="Шаблон"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="template_id"
+                                                    data-validator="template_id">
+                                                <option></option>
+                                                {{ range .templates}}
+                                                    <option value="{{ .ID }}"
+                                                            {{ if eq .ID $.post.GetTemplateID }}selected{{ end }}>
+                                                        {{ .Title }}
+                                                    </option>
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Ссылка</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Алиас</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Алиас"
+                                                    name="alias"
+                                                    id="alias"
+                                                    value="{{ .post.Alias }}"
+                                                    data-validator="alias">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Ссылка</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Ссылка"
+                                                    name="url"
+                                                    id="url"
+                                                    value="{{ .post.URL }}"
+                                                    data-validator="url" disabled>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Заголовок</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Обычный</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Обычный"
+                                                    name="title"
+                                                    id="title"
+                                                    value="{{ .post.Title }}"
+                                                    data-validator-required
+                                                    data-validator="title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Короткий</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Короткий"
+                                                    name="title_short"
+                                                    id="title_short"
+                                                    value="{{ .post.GetTitleShort }}"
+                                                    data-validator="title_short">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Короткое описание</label>
+                                            <textarea
+                                                    class="form-control form-shadow"
+                                                    placeholder="Короткое описание"
+                                                    name="description_preview"
+                                                    id="description_preview"
+                                                    data-validator="description_preview">{{ .post.DescriptionPreview }}</textarea>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>SEO</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Заголовок SEO</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Заголовок SEO"
+                                                    name="meta_title"
+                                                    id="meta_title"
+                                                    value="{{ .post.MetaTitle }}"
+                                                    data-validator-required
+                                                    data-validator="meta_title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Описание SEO</label>
+                                            <textarea
+                                                    class="form-control form-shadow"
+                                                    placeholder="Описание SEO"
+                                                    name="meta_description"
+                                                    id="meta_description"
+                                                    data-validator-required
+                                                    data-validator="meta_description">{{ .post.MetaDescription }}</textarea>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <div class="form-group small">
                                                     <textarea
                                                             name="description"
                                                             id="description"
-                                                            class="form-control summernote-500">{{ .post.Description }}
-                                                    </textarea>
-                                        </div>
+                                                            class="form-control summernote-500">{{ .post.Description }}</textarea>
                                     </div>
-                                    <div class="col-md-4">
-                                        <fieldset class="form-block">
-                                            <legend>Изображение</legend>
-                                            {{ template "admin.image" .post }}
-                                            {{ template "admin.image_empty" .post }}
-                                            <div class="form-group">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input type="hidden" name="show_image_post" value="0">
-                                                    <input
-                                                            type="checkbox"
-                                                            class="custom-control-input"
-                                                            name="show_image_post"
-                                                            id="show_image_post"
-                                                            {{ if .post.ShowImagePost }}
-                                                                checked
-                                                            {{ end }}
-                                                            value="1">
-                                                    <label class="custom-control-label" for="show_image_post">
-                                                        Отобразить изображение
-                                                    </label>
-                                                    <div class="invalid-feedback"></div>
-                                                </div>
-                                                <div class="custom-control custom-checkbox">
-                                                    <input
-                                                            type="checkbox"
-                                                            class="custom-control-input"
-                                                            name="show_image_category"
-                                                            id="show_image_category"
-                                                            {{ if .post.ShowImageCategory }}
-                                                                checked
-                                                            {{ end }}
-                                                            value="1">
-                                                    <label class="custom-control-label" for="show_image_category">
-                                                        Отобразить изображение в категории
-                                                    </label>
-                                                </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <fieldset class="form-block">
+                                        <legend>Изображение</legend>
+                                        {{ template "admin.image" .post }}
+                                        {{ template "admin.image_empty" .post }}
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="hidden" name="show_image_post" value="0">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="show_image_post"
+                                                        id="show_image_post"
+                                                        {{ if .post.ShowImagePost }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label" for="show_image_post">
+                                                    Отобразить изображение
+                                                </label>
+                                                <div class="invalid-feedback"></div>
                                             </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
                                             <div class="custom-control custom-checkbox">
                                                 <input
                                                         type="checkbox"
                                                         class="custom-control-input"
-                                                        name="has_comments"
-                                                        id="has_comments"
-                                                        {{ if .post.HasComments }}
+                                                        name="show_image_category"
+                                                        id="show_image_category"
+                                                        {{ if .post.ShowImageCategory }}
                                                             checked
                                                         {{ end }}
                                                         value="1">
-                                                <label class="custom-control-label" for="has_comments">
-                                                    Подключить комментарии
+                                                <label class="custom-control-label" for="show_image_category">
+                                                    Отобразить изображение в категории
                                                 </label>
                                             </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
-                                            <legend>Публикация</legend>
-                                            <div class="input-group datepicker-wrap form-group">
-                                                <label for="blogTitle">Дата публикации</label>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <div class="custom-control custom-checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    class="custom-control-input"
+                                                    name="has_comments"
+                                                    id="has_comments"
+                                                    {{ if .post.HasComments }}
+                                                        checked
+                                                    {{ end }}
+                                                    value="1">
+                                            <label class="custom-control-label" for="has_comments">
+                                                Подключить комментарии
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Публикация</legend>
+                                        <div class="input-group datepicker-wrap form-group">
+                                            <label for="blogTitle">Дата публикации</label>
+                                            <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    name="date_pub"
+                                                    value="{{ .post.DatePub | date }}"
+                                                    placeholder="Укажите дату"
+                                                    autocomplete="off"
+                                                    data-input>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-light btn-icon"
+                                                        type="button"
+                                                        title="Choose date"
+                                                        data-toggle>
+                                                    <i class="material-icons">calendar_today</i>
+                                                </button>
+                                                <button class="btn btn-light btn-icon"
+                                                        type="button"
+                                                        title="Clear"
+                                                        data-clear>
+                                                    <i class="material-icons">close</i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
                                                 <input
-                                                        type="text"
-                                                        class="form-control"
-                                                        name="date_pub"
-                                                        value="{{ .post.DatePub | date }}"
-                                                        placeholder="Укажите дату"
-                                                        autocomplete="off"
-                                                        data-input>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-light btn-icon"
-                                                            type="button"
-                                                            title="Choose date"
-                                                            data-toggle>
-                                                        <i class="material-icons">calendar_today</i>
-                                                    </button>
-                                                    <button class="btn btn-light btn-icon"
-                                                            type="button"
-                                                            title="Clear"
-                                                            data-clear>
-                                                        <i class="material-icons">close</i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input
-                                                            type="checkbox"
-                                                            class="custom-control-input"
-                                                            name="is_published"
-                                                            id="is_published"
-                                                            {{ if .post.IsPublished }}
-                                                                checked
-                                                            {{ end }}
-                                                            value="1">
-                                                    <label class="custom-control-label" for="is_published">Опубликовано</label>
-                                                    <div class="invalid-feedback"></div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input
-                                                            type="checkbox"
-                                                            class="custom-control-input"
-                                                            name="show_date"
-                                                            id="show_date"
-                                                            {{ if .post.ShowDate }}
-                                                                checked
-                                                            {{ end }}
-                                                            value="1">
-                                                    <label class="custom-control-label" for="show_date">
-                                                        Показывать дату в посте
-                                                    </label>
-                                                    <div class="invalid-feedback"></div>
-                                                </div>
-                                            </div>
-                                            <div class="input-group datepicker-wrap form-group">
-                                                <label for="blogTitle">Дата окончания публикации</label>
-                                                <input
-                                                        type="text"
-                                                        class="form-control"
-                                                        name="date_end"
-                                                        value="{{ .post.DateEnd | date }}"
-                                                        placeholder="Укажите дату"
-                                                        autocomplete="off"
-                                                        data-input>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-light btn-icon" type="button"
-                                                            title="Choose date" data-toggle>
-                                                        <i class="material-icons">calendar_today</i>
-                                                    </button>
-                                                    <button class="btn btn-light btn-icon" type="button"
-                                                            title="Clear" data-clear>
-                                                        <i class="material-icons">close</i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input
-                                                            type="checkbox"
-                                                            class="custom-control-input"
-                                                            name="is_favourites"
-                                                            id="is_favourites"
-                                                            {{ if .post.IsFavourites }}
-                                                                checked
-                                                            {{ end }}
-                                                            value="1">
-                                                    <label class="custom-control-label" for="is_favourites">Избранное</label>
-                                                    <div class="invalid-feedback"></div>
-                                                </div>
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="form-block">
-                                            <legend>Сортировка</legend>
-                                            <div class="form-group">
-                                                <input
-                                                        type="number"
-                                                        class="form-control form-shadow"
-                                                        placeholder="Сортировка"
-                                                        name="sort"
-                                                        value="{{ .post.Sort }}">
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="is_published"
+                                                        id="is_published"
+                                                        {{ if .post.IsPublished }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label"
+                                                       for="is_published">Опубликовано</label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
-                                        </fieldset>
-
-                                        <fieldset class="form-block">
-                                            <legend>Меню</legend>
-                                            <div class="form-group">
-                                                <select
-                                                        class="form-control select2"
-                                                        name="menus[]"
-                                                        id="menu"
-                                                        data-validator="menus"
-                                                        multiple
-                                                        data-placeholder="Выберете меню">
-                                                    <option value=""></option>
-                                                </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="show_date"
+                                                        id="show_date"
+                                                        {{ if .post.ShowDate }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label" for="show_date">
+                                                    Показывать дату в посте
+                                                </label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
-                                        </fieldset>
-
-                                        <fieldset class="form-block">
-                                            <legend>Виджеты</legend>
-                                            <div class="form-group">
-                                                <select
-                                                        class="form-control select2"
-                                                        name="widgets[]"
-                                                        id="widgets"
-                                                        data-validator="widgets"
-                                                        multiple
-                                                        data-placeholder="Выберете виджет">
-                                                    <option value=""></option>
-                                                </select>
+                                        </div>
+                                        <div class="input-group datepicker-wrap form-group">
+                                            <label for="blogTitle">Дата окончания публикации</label>
+                                            <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    name="date_end"
+                                                    value="{{ .post.DateEnd | date }}"
+                                                    placeholder="Укажите дату"
+                                                    autocomplete="off"
+                                                    data-input>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-light btn-icon" type="button"
+                                                        title="Choose date" data-toggle>
+                                                    <i class="material-icons">calendar_today</i>
+                                                </button>
+                                                <button class="btn btn-light btn-icon" type="button"
+                                                        title="Clear" data-clear>
+                                                    <i class="material-icons">close</i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="is_favourites"
+                                                        id="is_favourites"
+                                                        {{ if .post.IsFavourites }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label"
+                                                       for="is_favourites">Избранное</label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
-                                        </fieldset>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Сортировка</legend>
+                                        <div class="form-group">
+                                            <input
+                                                    type="number"
+                                                    class="form-control form-shadow"
+                                                    placeholder="Сортировка"
+                                                    name="sort"
+                                                    value="{{ .post.Sort }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
 
-                                    </div>
+                                    <fieldset class="form-block">
+                                        <legend>Меню</legend>
+                                        <div class="form-group">
+                                            <select
+                                                    class="form-control select2"
+                                                    name="menus[]"
+                                                    id="menu"
+                                                    data-validator="menus"
+                                                    multiple
+                                                    data-placeholder="Выберете меню">
+                                                <option value=""></option>
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+
+                                    <fieldset class="form-block">
+                                        <legend>Виджеты</legend>
+                                        <div class="form-group">
+                                            <select
+                                                    class="form-control select2"
+                                                    name="widgets[]"
+                                                    id="widgets"
+                                                    data-validator="widgets"
+                                                    multiple
+                                                    data-placeholder="Выберете виджет">
+                                                <option value=""></option>
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
-                                 aria-labelledby="profile-tab-faded">
-                                {{ template "admin.galleryInItem" . }}
-                            </div>
-                            <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
-                                 aria-labelledby="info-block-tab-faded">
-                                {{/*                                        @include('admin.inc.info_block')*/}}
-                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
+                             aria-labelledby="profile-tab-faded">
+                            {{ template "admin.galleryInItem" . }}
+                        </div>
+                        <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
+                             aria-labelledby="info-block-tab-faded">
+                            {{/*                                        @include('admin.inc.info_block')*/}}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+        </form>
 {{ end }}

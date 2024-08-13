@@ -8,7 +8,9 @@ import (
 
 type GalleryResourceRepository interface {
 	GetByResourceAndID(id uint, resource string, galleryID uint) (*GalleryHasResource, error)
+	GetByID(uint) (*GalleryHasResource, error)
 	Create(*GalleryHasResource) error
+	Delete(uint) error
 }
 
 type galleryResourceRepository struct {
@@ -34,4 +36,18 @@ func (r *galleryResourceRepository) GetByResourceAndID(id uint, resource string,
 		return nil, err
 	}
 	return &galleryHasResource, nil
+}
+
+func (r *galleryResourceRepository) GetByID(id uint) (*GalleryHasResource, error) {
+	var galleryHasResource GalleryHasResource
+	if err := r.db.
+		Where("gallery_id = ?", id).
+		First(&galleryHasResource).Error; err != nil {
+		return nil, err
+	}
+	return &galleryHasResource, nil
+}
+
+func (r *galleryResourceRepository) Delete(id uint) error {
+	return r.db.Where("gallery_id = ?", id).Delete(&GalleryHasResource{}).Error
 }

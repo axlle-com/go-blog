@@ -13,7 +13,7 @@ import (
 func CreateUser(c *gin.Context) {
 
 	var authInput AuthInput
-	userRepo := repository.NewRepository()
+	userRepo := repository.NewRepo()
 
 	if err := c.ShouldBindJSON(&authInput); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

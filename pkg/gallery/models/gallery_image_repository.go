@@ -43,7 +43,13 @@ func (r *galleryImageRepository) Update(image *GalleryImage) error {
 }
 
 func (r *galleryImageRepository) Delete(id uint) error {
-	return r.db.Delete(&GalleryImage{}, id).Error
+	g, err := r.GetByID(id)
+	if err == nil {
+		if err = r.db.Delete(&GalleryImage{}, id).Error; err == nil {
+			return g.Deleted()
+		}
+	}
+	return err
 }
 
 func (r *galleryImageRepository) GetAll() ([]GalleryImage, error) {

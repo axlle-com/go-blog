@@ -19,6 +19,10 @@ func IntToBoolPtr() *bool {
 	return &result
 }
 
+func BoolToBoolPtr(b bool) *bool {
+	return &b
+}
+
 func ParseDate(dateStr string) *time.Time {
 	if dateStr == "" {
 		return nil

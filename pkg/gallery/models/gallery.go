@@ -68,3 +68,12 @@ func (g *Gallery) Attach(r contracts.Resource) error {
 	}
 	return err
 }
+
+func (g *Gallery) Deleted() error {
+	repo := NewGalleryResourceRepository()
+	has, err := repo.GetByID(g.ID)
+	if err == nil || has != nil {
+		return repo.Delete(g.ID)
+	}
+	return err
+}

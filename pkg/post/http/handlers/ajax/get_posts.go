@@ -1,4 +1,4 @@
-package web
+package ajax
 
 import (
 	common "github.com/axlle-com/blog/pkg/common/models"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (c *webController) GetPosts(ctx *gin.Context) {
+func (c *controller) GetPosts(ctx *gin.Context) {
 	start := time.Now()
 	paginator := common.NewPaginator(ctx)
 

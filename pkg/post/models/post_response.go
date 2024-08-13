@@ -16,3 +16,27 @@ func (p *PostResponse) Date() string {
 	}
 	return p.CreatedAt.Format("02.01.2006 15:04:05")
 }
+
+func (p *PostResponse) GetTitleShort() string {
+	if p.TitleShort == nil {
+		return p.Title
+	}
+	return *p.TitleShort
+}
+
+func (p *PostResponse) GetTemplateTitle() string {
+	if p.TemplateTitle == nil {
+		return ""
+	}
+	return *p.TemplateTitle
+}
+
+func (p *PostResponse) GetCategoryTitleShort() string {
+	if p.CategoryTitleShort == nil {
+		if p.CategoryTitle == nil {
+			return ""
+		}
+		return *p.CategoryTitle
+	}
+	return *p.CategoryTitleShort
+}

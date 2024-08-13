@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/axlle-com/blog/pkg/common/middleware"
 	gallery "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
+	postAjax "github.com/axlle-com/blog/pkg/post/http/handlers/ajax"
 	post "github.com/axlle-com/blog/pkg/post/http/handlers/web"
 	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,8 @@ import (
 )
 
 func InitializeWebRoutes(r *gin.Engine) {
-	postController := post.NewController(r)
+	postController := postAjax.NewController(r)
+	postWebController := post.NewWebController(r)
 	galleryController := gallery.NewController(r)
 
 	r.GET("/", ShowIndexPage)
@@ -23,12 +25,14 @@ func InitializeWebRoutes(r *gin.Engine) {
 	{
 		protected.GET("/", user.Index)
 		protected.GET("/logout", user.Logout)
-		protected.POST("/posts", postController.CreatePost)
-		protected.GET("/posts", postController.GetPosts)
-		protected.GET("/posts/:id", postController.GetPost)
-		protected.PUT("/posts/:id", postController.UpdatePost)
-		protected.DELETE("/posts/:id", postController.DeletePost)
-		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
+		protected.GET("/posts", postWebController.GetPosts)
+		protected.GET("/posts/:id", postWebController.GetPost)
+		protected.GET("/posts/form", postWebController.CreatePost)
+
+		protected.POST("/posts", postController.CreatePostHandler())
+		protected.PUT("/posts/:id", postController.UpdatePostHandler())
+		protected.DELETE("/posts/:id", postController.DeletePostHandler())
+		protected.DELETE("/posts/:id/image", postController.DeletePostImageHandler())
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
 	r.GET("/:alias", post.GetPostFront)

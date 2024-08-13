@@ -23,12 +23,12 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() UserRepository {
+func NewRepo() UserRepository {
 	return &repository{db: db.GetDB()}
 }
 
 func (r *repository) Create(user *models.User) error {
-	user.SetPasswordHash()
+	user.Creating()
 	return r.db.Create(user).Error
 }
 
@@ -62,7 +62,7 @@ func (r *repository) GetByEmailWithRights(email string) (*models.User, error) {
 }
 
 func (r *repository) Update(user *models.User) error {
-	user.SetPasswordHash()
+	user.Updating()
 	return r.db.Save(user).Error
 }
 

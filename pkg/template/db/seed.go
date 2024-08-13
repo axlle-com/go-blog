@@ -20,7 +20,7 @@ func SeedTemplate(n int) {
 		template.CreatedAt = &now
 		template.UpdatedAt = &now
 
-		err := repository.NewRepository().CreateTemplate(&template)
+		err := repository.NewRepo().CreateTemplate(&template)
 		if err != nil {
 			log.Printf("Failed to create template %d: %v", i, err.Error())
 		}

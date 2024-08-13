@@ -10,6 +10,7 @@ import (
 type Logger interface {
 	Request(*gin.Context)
 	Error(error)
+	Fatal(error)
 	Info(string)
 }
 
@@ -60,6 +61,16 @@ func (f *log) Error(err error) {
 		"line":     f.line,
 		"function": f.function,
 	}).Error("An error occurred")
+}
+
+func (f *log) Fatal(err error) {
+	f.logger.WithFields(logrus.Fields{
+		"error":    err,
+		"file":     f.file,
+		"line":     f.line,
+		"function": f.function,
+	}).Error("An error occurred")
+	panic(err.Error())
 }
 
 func (f *log) Info(message string) {

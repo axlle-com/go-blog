@@ -21,7 +21,7 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() TemplateRepository {
+func NewRepo() TemplateRepository {
 	return &repository{db: db.GetDB()}
 }
 

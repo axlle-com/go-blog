@@ -22,10 +22,7 @@ func (c *controller) getID(ctx *gin.Context) uint {
 	idParam := ctx.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"title":   "404 Not Found",
-			"content": "errors.404.gohtml",
-		})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
 	}
 	return uint(id)
@@ -35,10 +32,7 @@ func (c *controller) getImageID(ctx *gin.Context) uint {
 	idParam := ctx.Param("image_id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"title":   "404 Not Found",
-			"content": "errors.404.gohtml",
-		})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
 	}
 	return uint(id)

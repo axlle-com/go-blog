@@ -3,7 +3,6 @@ package db
 import (
 	. "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/post/models"
-	. "github.com/axlle-com/blog/pkg/post/repository"
 	templateRepo "github.com/axlle-com/blog/pkg/template/repository"
 	userRepo "github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/bxcodec/faker/v3"
@@ -13,9 +12,9 @@ import (
 )
 
 func SeedPosts(n int) {
-	ids, _ := templateRepo.NewRepository().GetAllIds()
-	idsCategory, _ := NewCategoryRepository().GetAllIds()
-	idsUser, _ := userRepo.NewRepository().GetAllIds()
+	ids, _ := templateRepo.NewRepo().GetAllIds()
+	idsCategory, _ := NewCategoryRepo().GetAllIds()
+	idsUser, _ := userRepo.NewRepo().GetAllIds()
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
@@ -27,8 +26,6 @@ func SeedPosts(n int) {
 			UserID:             &randomUserID,
 			MetaTitle:          StrPtr(faker.Sentence()),
 			MetaDescription:    StrPtr(faker.Sentence()),
-			Alias:              faker.Username(),
-			URL:                faker.URL(),
 			IsPublished:        RandBool(),
 			IsFavourites:       RandBool(),
 			HasComments:        RandBool(),
@@ -53,7 +50,7 @@ func SeedPosts(n int) {
 			DeletedAt:          nil,
 		}
 
-		err := NewPostRepository().Create(&post)
+		err := NewPostRepo().Create(&post)
 		if err != nil {
 			log.Printf("Failed to create user %d: %v", i, err.Error())
 		}
@@ -63,7 +60,7 @@ func SeedPosts(n int) {
 }
 
 func SeedPostCategory(n int) {
-	ids, _ := templateRepo.NewRepository().GetAllIds()
+	ids, _ := templateRepo.NewRepo().GetAllIds()
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
@@ -88,7 +85,7 @@ func SeedPostCategory(n int) {
 			DeletedAt:          nil,
 		}
 
-		err := NewCategoryRepository().Create(&postCategory)
+		err := NewCategoryRepo().Create(&postCategory)
 		if err != nil {
 			log.Printf("Failed to create user %d: %v", i, err.Error())
 		}

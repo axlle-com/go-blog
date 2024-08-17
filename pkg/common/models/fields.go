@@ -6,9 +6,6 @@ import (
 	"reflect"
 )
 
-type Cache struct {
-}
-
 func GetChangedFields(original, updated interface{}) map[string]interface{} {
 	changedFields := make(map[string]interface{})
 
@@ -24,7 +21,7 @@ func GetChangedFields(original, updated interface{}) map[string]interface{} {
 
 	if originalValue.Kind() != reflect.Struct {
 		if updatedValue.Kind() != reflect.Struct {
-			logger.New().Error(errors.New("Both original and updated must be structs"))
+			logger.Error(errors.New("Both original and updated must be structs"))
 			return changedFields
 		} else {
 			return fillUpdatedValue(updatedValue)
@@ -32,7 +29,7 @@ func GetChangedFields(original, updated interface{}) map[string]interface{} {
 	}
 
 	if originalValue.Type() != updatedValue.Type() {
-		logger.New().Error(errors.New("The types of the original and updated structs do not match"))
+		logger.Error(errors.New("The types of the original and updated structs do not match"))
 		return changedFields
 	}
 

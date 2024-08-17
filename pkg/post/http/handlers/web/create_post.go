@@ -10,7 +10,7 @@ import (
 )
 
 func (c *webController) CreatePost(ctx *gin.Context) {
-	user := c.getUser(ctx)
+	user := c.GetUser(ctx)
 	if user == nil {
 		return
 	}
@@ -18,12 +18,12 @@ func (c *webController) CreatePost(ctx *gin.Context) {
 	post := &Post{}
 	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	templates, err := template.NewRepo().GetAllTemplates()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	ctx.HTML(
 		http.StatusOK,

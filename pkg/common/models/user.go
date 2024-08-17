@@ -49,7 +49,7 @@ func (u *User) SetPasswordHash() {
 	}
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	u.PasswordHash = string(passwordHash)
 }
@@ -63,7 +63,7 @@ func (u *User) SetAuthToken() (token string, err error) {
 	token, err = generateToken.SignedString([]byte(config.GetConfig().KeyJWT))
 
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 		return
 	}
 	u.AuthToken = &token

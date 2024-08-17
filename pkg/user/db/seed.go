@@ -1,7 +1,7 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/db"
+	db "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	rights "github.com/axlle-com/blog/pkg/rights/repository"
 	. "github.com/axlle-com/blog/pkg/user/repository"
@@ -29,8 +29,8 @@ func SeedUsers(n int) {
 			LastName:           lastName,
 			Phone:              &phone,
 			Email:              faker.Email(),
-			IsEmail:            IntToBoolPtr(),
-			IsPhone:            IntToBoolPtr(),
+			IsEmail:            db.IntToBoolPtr(),
+			IsPhone:            db.IntToBoolPtr(),
 			Status:             int8(rand.Intn(10)),
 			Password:           password,
 			RememberToken:      &rememberToken,
@@ -60,8 +60,8 @@ func SeedUsers(n int) {
 		LastName:           "Admin",
 		Phone:              &phone,
 		Email:              "axlle@mail.ru",
-		IsEmail:            BoolToBoolPtr(true),
-		IsPhone:            BoolToBoolPtr(true),
+		IsEmail:            db.BoolToBoolPtr(true),
+		IsPhone:            db.BoolToBoolPtr(true),
 		Status:             10,
 		Password:           "123456",
 		RememberToken:      &rememberToken,

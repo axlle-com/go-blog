@@ -57,7 +57,7 @@ func (r *categoryRepository) GetAll() ([]PostCategory, error) {
 func (r *categoryRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&PostCategory{}).Pluck("id", &ids).Error; err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	return ids, nil
 }

@@ -51,10 +51,10 @@ func (gi *GalleryImage) GetFile() string {
 func (gi *GalleryImage) GetFilePath() string {
 	absPath, err := filepath.Abs("src" + gi.File)
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	return absPath
 }

@@ -12,14 +12,14 @@ type Container interface {
 	Category() CategoryRepository
 	Template() TemplateRepository
 	Request() *PostRequest
-	GalleryProvider() provider.Provider
+	Gallery() provider.Provider
 }
 
 type container struct {
 	postRepository     PostRepository
 	categoryRepository CategoryRepository
 	templateRepository TemplateRepository
-	galleryProvider    provider.Provider
+	gallery            provider.Provider
 	request            *PostRequest
 }
 
@@ -55,9 +55,9 @@ func (c *container) Request() *PostRequest {
 	return c.request
 }
 
-func (c *container) GalleryProvider() provider.Provider {
-	if c.galleryProvider == nil {
-		c.galleryProvider = provider.NewProvider()
+func (c *container) Gallery() provider.Provider {
+	if c.gallery == nil {
+		c.gallery = provider.NewProvider()
 	}
-	return c.galleryProvider
+	return c.gallery
 }

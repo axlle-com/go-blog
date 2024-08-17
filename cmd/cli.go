@@ -61,6 +61,7 @@ var Commands = map[string]func(){
 		}
 	},
 	"refill": func() {
+		DB.NewCache().ResetUsersSession()
 		db := DB.GetDB()
 		dropIntermediateTables(db)
 		err := db.Migrator().DropTable(

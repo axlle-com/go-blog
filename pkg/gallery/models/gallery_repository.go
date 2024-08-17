@@ -68,7 +68,9 @@ func (r *galleryRepository) GetAllForResource(c contracts.Resource) ([]*Gallery,
 		Where("r.resource_id = ?", c.GetID()).
 		Where("r.resource = ?", c.GetResource()).
 		Model(&Gallery{}).
-		Preload("GalleryImage").
+		Preload("GalleryImage", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sort ASC")
+		}).
 		Find(&galleries).Error
 	return galleries, err
 }
@@ -76,7 +78,7 @@ func (r *galleryRepository) GetAllForResource(c contracts.Resource) ([]*Gallery,
 func (r *galleryRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&Gallery{}).Pluck("id", &ids).Error; err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	return ids, nil
 }

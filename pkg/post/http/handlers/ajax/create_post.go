@@ -1,10 +1,8 @@
 package ajax
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/gallery/service"
 	. "github.com/axlle-com/blog/pkg/post/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +13,7 @@ func (c *controller) createPost(ctx *gin.Context, ctr Container) {
 	if form == nil {
 		return
 	}
-	form.UserID = &c.getUser(ctx).ID
+	form.UserID = &c.GetUser(ctx).ID
 	err := form.UploadImageFile(ctx)
 	if err := form.UploadImageFile(ctx); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -28,22 +26,22 @@ func (c *controller) createPost(ctx *gin.Context, ctr Container) {
 	}
 
 	ctx.Set("title", form.Title)
-	galleries := service.SaveFromForm(ctx)
+	galleries := ctr.Gallery().SaveFromForm(ctx)
 	for _, gallery := range galleries {
 		err := gallery.Attach(form)
 		if err != nil {
-			logger.New().Error(err)
+			logger.Error(err)
 		}
 	}
 
 	categories, err := ctr.Category().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	templates, err := ctr.Template().GetAllTemplates()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	data := gin.H{
@@ -52,20 +50,9 @@ func (c *controller) createPost(ctx *gin.Context, ctr Container) {
 		"post":       form,
 	}
 
-	var buf bytes.Buffer
-	originalWriter := ctx.Writer
-
-	wrappedWriter := &ResponseWriterWrapper{
-		ResponseWriter: ctx.Writer,
-		Buffer:         &buf,
-	}
-	ctx.Writer = wrappedWriter
-	ctx.HTML(http.StatusOK, "admin.post_inner", data)
-
-	ctx.Writer = originalWriter
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"view": buf.String(),
+			"view": c.RenderView("admin.post_inner", data, ctx),
 			"url":  fmt.Sprintf("/admin/posts/%d", form.ID),
 			"post": form,
 		},

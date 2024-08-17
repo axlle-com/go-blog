@@ -14,7 +14,7 @@ func (c *webController) GetPosts(ctx *gin.Context) {
 	start := time.Now()
 	paginator := common.NewPaginator(ctx)
 
-	user := c.getUser(ctx)
+	user := c.GetUser(ctx)
 	if user == nil {
 		return
 	}

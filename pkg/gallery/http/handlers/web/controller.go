@@ -18,7 +18,7 @@ type controller struct {
 	engine *gin.Engine
 }
 
-func (c *controller) getID(ctx *gin.Context) uint {
+func (c *controller) GetID(ctx *gin.Context) uint {
 	idParam := ctx.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {

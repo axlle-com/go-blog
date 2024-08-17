@@ -22,13 +22,13 @@ func (c *controller) CreatePostHandler() gin.HandlerFunc {
 func (c *controller) DeletePostHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		container := NewContainer()
-		c.DeletePost(ctx, container)
+		c.deletePost(ctx, container)
 	}
 }
 
 func (c *controller) DeletePostImageHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		container := NewContainer()
-		c.DeletePostImage(ctx, container)
+		c.deletePostImage(ctx, container)
 	}
 }

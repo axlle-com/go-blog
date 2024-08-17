@@ -1,6 +1,7 @@
 package web
 
 import (
+	db "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/errors"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
@@ -20,7 +21,7 @@ func Auth(c *gin.Context) {
 			session.AddFlash(FlashErrorString(bindError))
 		}
 		if err := session.Save(); err != nil {
-			logger.New().Error(err)
+			logger.Error(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
@@ -39,7 +40,7 @@ func Auth(c *gin.Context) {
 		)
 		err := session.Save()
 		if err != nil {
-			logger.New().Error(err)
+			logger.Error(err)
 		}
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
@@ -47,8 +48,12 @@ func Auth(c *gin.Context) {
 	}
 	session.Set("user_id", userFound.ID)
 	session.Set("user", userFound)
+	sessionID := session.ID()
+	cache := db.NewCache()
+	cache.AddUserSession(userFound.ID, sessionID)
+
 	if err := session.Save(); err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 		c.Redirect(http.StatusFound, "/login")
 		c.Abort()
 		return

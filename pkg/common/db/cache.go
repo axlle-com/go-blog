@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 )
@@ -16,4 +17,8 @@ func InitRedis(cfg *config.Config) redis.Store {
 		Path:   "/",
 	})
 	return store
+}
+
+func NewCache() models.Cache {
+	return models.NewRedisClient()
 }

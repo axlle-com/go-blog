@@ -92,9 +92,12 @@ func (p *Post) Updating() {
 }
 
 func (p *Post) DeleteImageFile() {
+	if p.Image == nil {
+		return
+	}
 	err := os.Remove("src/" + *p.Image)
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	p.Image = nil
 }
@@ -104,7 +107,7 @@ func (p *Post) UploadImageFile(ctx *gin.Context) error {
 	if file != nil {
 		newFileName := fmt.Sprintf("/public/uploads/%s/%d/%s%s", p.GetResource(), p.ID, uuid.New().String(), filepath.Ext(file.Filename))
 		if err := ctx.SaveUploadedFile(file, "src"+newFileName); err != nil {
-			logger.New().Error(err)
+			logger.Error(err)
 			return err
 		}
 		if p.Image != nil {
@@ -136,7 +139,7 @@ func (p *Post) setAlias() {
 			if err == gorm.ErrRecordNotFound {
 				break
 			} else if err != nil {
-				logger.New().Fatal(err)
+				logger.Fatal(err)
 				break
 			}
 			aliasString = fmt.Sprintf("%s-%d", p.Alias, counter)
@@ -191,7 +194,7 @@ func (p *Post) GetDirty() string {
 	if len(p.dirty) > 0 {
 		jsonData, err := json.Marshal(p.dirty)
 		if err != nil {
-			logger.New().Fatal(err)
+			logger.Fatal(err)
 		}
 		return string(jsonData)
 	}

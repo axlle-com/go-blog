@@ -31,7 +31,7 @@ func ParseDate(dateStr string) *time.Time {
 	layout := "02.01.2006"
 	date, err := time.Parse(layout, dateStr)
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 		return nil
 	}
 	return &date

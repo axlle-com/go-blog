@@ -8,7 +8,7 @@ import (
 )
 
 func (c *controller) DeleteImage(ctx *gin.Context) {
-	id := c.getID(ctx)
+	id := c.GetID(ctx)
 	if id == 0 {
 		return
 	}
@@ -36,7 +36,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 
 	err = imageRepo.Delete(image.ID)
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to delete file: " + err.Error(),
 		})

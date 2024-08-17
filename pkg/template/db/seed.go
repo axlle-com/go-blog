@@ -1,7 +1,7 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/db"
+	db "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/bxcodec/faker/v3"
@@ -16,7 +16,7 @@ func SeedTemplate(n int) {
 		now := time.Now()
 		template.Title = faker.Sentence()
 		template.Name = faker.Username()
-		template.Resource = StrPtr(faker.Username())
+		template.Resource = db.StrPtr(faker.Username())
 		template.CreatedAt = &now
 		template.UpdatedAt = &now
 

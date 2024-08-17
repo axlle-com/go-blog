@@ -11,13 +11,13 @@ import (
 )
 
 func (c *webController) GetPost(ctx *gin.Context) {
-	id := c.getID(ctx)
+	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	user := c.getUser(ctx)
+	user := c.GetUser(ctx)
 	if user == nil {
 		return
 	}
@@ -32,12 +32,12 @@ func (c *webController) GetPost(ctx *gin.Context) {
 
 	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	templates, err := template.NewRepo().GetAllTemplates()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	ctx.HTML(
 		http.StatusOK,

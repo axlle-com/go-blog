@@ -63,7 +63,7 @@ func (r *galleryImageRepository) GetAll() ([]GalleryImage, error) {
 func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&GalleryImage{}).Pluck("id", &ids).Error; err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 	return ids, nil
 }
@@ -72,7 +72,7 @@ func (r *galleryImageRepository) CountForGallery(id uint) int64 {
 	var count int64
 	result := r.db.Model(&GalleryImage{}).Where("gallery_id = ?", id).Count(&count)
 	if result.Error != nil {
-		logger.New().Error(result.Error)
+		logger.Error(result.Error)
 	}
 	return count
 }

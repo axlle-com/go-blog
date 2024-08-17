@@ -11,6 +11,7 @@ import (
 func GetPostFront(c *gin.Context) {
 	alias := c.Param("alias")
 	if !isValidAlias(alias) {
+		c.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
 		c.Abort()
 		return
 	}
@@ -20,7 +21,7 @@ func GetPostFront(c *gin.Context) {
 	var post models.Post
 
 	if result := h.First(&post, id); result.Error != nil {
-		c.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
 		return
 	}
 

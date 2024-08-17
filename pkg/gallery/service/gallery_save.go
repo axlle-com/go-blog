@@ -18,7 +18,7 @@ type ImagesCollections map[string]*models.GalleryImage
 func SaveFromForm(c *gin.Context) []*models.Gallery {
 	err := c.Request.ParseMultipartForm(32 << 20) // Устанавливаем максимальный размер для multipart/form-data
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 		return nil
 	}
 
@@ -34,13 +34,11 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 	for galleryID, imagesMap := range images {
 		galleryRepo := models.NewGalleryRepository()
 		var gallery = &models.Gallery{Title: &titleStr}
-		galleries = append(galleries, gallery)
-
 		id, err := strconv.Atoi(galleryID)
 		if err != nil {
 			err = galleryRepo.Create(gallery)
 			if err != nil {
-				logger.New().Error(err)
+				logger.Error(err)
 				continue
 			}
 		} else {
@@ -48,11 +46,12 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 			if err != nil {
 				err = galleryRepo.Create(gallery)
 				if err != nil {
-					logger.New().Error(err)
+					logger.Error(err)
 					continue
 				}
 			}
 		}
+		galleries = append(galleries, gallery)
 
 		for i, image := range imagesMap {
 			image.GalleryID = gallery.ID
@@ -65,7 +64,7 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 				err := SaveImage(image, c)
 				if err != nil {
 					mutex.Lock()
-					logger.New().Error(err)
+					logger.Error(err)
 					mutex.Unlock()
 				} else {
 					mutex.Lock()
@@ -149,7 +148,7 @@ func isImageFile(fileHeader *multipart.FileHeader) bool {
 	defer func(file multipart.File) {
 		err := file.Close()
 		if err != nil {
-			logger.New().Error(err)
+			logger.Error(err)
 		}
 	}(file)
 

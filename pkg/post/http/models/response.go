@@ -24,22 +24,22 @@ func NewResponse(p common.Paginator) *Response {
 func (r *Response) GetForWeb() gin.H {
 	users, err := userRepo.NewRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	templates, err := template.NewRepo().GetAllTemplates()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	posts, total, err := NewPostRepo().GetPaginate(r.paginator.GetPage(), r.paginator.GetPageSize())
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	r.paginator.SetTotal(total)
@@ -58,22 +58,22 @@ func (r *Response) GetForWeb() gin.H {
 func (r *Response) GetForAjax() gin.H {
 	users, err := userRepo.NewRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	templates, err := template.NewRepo().GetAllTemplates()
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	posts, total, err := NewPostRepo().GetPaginate(r.paginator.GetPage(), r.paginator.GetPageSize())
 	if err != nil {
-		logger.New().Error(err)
+		logger.Error(err)
 	}
 
 	r.paginator.SetTotal(total)

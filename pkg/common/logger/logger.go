@@ -55,6 +55,7 @@ func (f *log) Request(c *gin.Context) {
 }
 
 func (f *log) Error(err error) {
+	f.logger.SetLevel(logrus.ErrorLevel)
 	f.logger.WithFields(logrus.Fields{
 		"error":    err,
 		"file":     f.file,
@@ -64,6 +65,7 @@ func (f *log) Error(err error) {
 }
 
 func (f *log) Fatal(err error) {
+	f.logger.SetLevel(logrus.FatalLevel)
 	f.logger.WithFields(logrus.Fields{
 		"error":    err,
 		"file":     f.file,
@@ -75,4 +77,16 @@ func (f *log) Fatal(err error) {
 
 func (f *log) Info(message string) {
 	f.logger.Info(message)
+}
+
+func Error(err error) {
+	New().Error(err)
+}
+
+func Fatal(err error) {
+	New().Fatal(err)
+}
+
+func Info(message string) {
+	New().Info(message)
 }

@@ -81,6 +81,19 @@ func SetEmptyStringPointersToNil(v interface{}) {
 	}
 }
 
+func SetZeroPointersToNil(v interface{}) {
+	val := reflect.ValueOf(v).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		if field.Kind() == reflect.Ptr && field.Elem().CanUint() {
+			str := field.Elem().Uint()
+			if str == 0 {
+				field.Set(reflect.Zero(field.Type()))
+			}
+		}
+	}
+}
+
 func fillUpdatedValue(updatedValue reflect.Value) map[string]interface{} {
 	changedFields := make(map[string]interface{})
 	numFields := updatedValue.NumField()

@@ -15,7 +15,7 @@ func ParseFlashes(flashes []interface{}) map[string]*BindError {
 		var fe BindError
 		err := json.Unmarshal([]byte(flash.(string)), &fe)
 		if err == nil {
-			errorMessages[toSnakeCase(fe.Field)] = &fe
+			errorMessages[ToSnakeCase(fe.Field)] = &fe
 		}
 	}
 	return errorMessages

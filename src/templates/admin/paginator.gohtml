@@ -2,7 +2,7 @@
     <ul class="pagination pagination-sm mb-0 ml-sm-auto mt-1 mt-sm-0">
         {{ if gt .GetPage 1 }}
             <li class="page-item">
-                <a class="page-link" href="/admin/posts?page={{ sub .GetPage 1 }}"><i data-feather="chevron-left"></i></a>
+                <a class="page-link" href="/admin/posts?page={{ sub .GetPage 1 }}{{ .GetQuery}}"><i data-feather="chevron-left"></i></a>
             </li>
         {{ else }}
             <li class="disabled" aria-disabled="true"><span class="page-link"><i data-feather="chevron-left"></i></span></li>
@@ -15,14 +15,14 @@
                 {{ if eq $.GetPage . }}
                     <li class="page-item active"><span class="page-link">{{.}}</span></li>
                 {{ else }}
-                    <li class="page-item"><a class="page-link" href="/admin/posts?page={{.}}">{{.}}</a></li>
+                    <li class="page-item"><a class="page-link" href="/admin/posts?page={{.}}{{ $.GetQuery}}">{{.}}</a></li>
                 {{ end }}
             {{ end }}
         {{ end }}
 
         {{ if lt (mul .GetPage .GetPageSize) .GetTotal }}
             <li class="page-item">
-                <a class="page-link" href="/admin/posts?page={{ add .GetPage 1 }}"><i data-feather="chevron-right"></i></a>
+                <a class="page-link" href="/admin/posts?page={{ add .GetPage 1 }}{{ .GetQuery}}"><i data-feather="chevron-right"></i></a>
             </li>
         {{ else }}
             <li class="disabled" aria-disabled="true"><span class="page-link"><i data-feather="chevron-right"></i></span></li>

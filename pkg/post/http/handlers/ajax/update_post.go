@@ -2,7 +2,9 @@ package ajax
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
+	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/post/service"
+	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -40,9 +42,9 @@ func (c *controller) updatePost(ctx *gin.Context, ctr Container) {
 		return
 	}
 	ctx.Set("title", form.Title)
-	galleries := ctr.Gallery().SaveFromForm(ctx)
-	for _, gallery := range galleries {
-		err := gallery.Attach(form)
+	galleries := gallery.Provider().SaveFromForm(ctx)
+	for _, g := range galleries {
+		err := g.Attach(form)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -53,12 +55,9 @@ func (c *controller) updatePost(ctx *gin.Context, ctr Container) {
 		logger.Error(err)
 	}
 
-	templates, err := ctr.Template().GetAllTemplates()
-	if err != nil {
-		logger.Error(err)
-	}
+	templates := template.Provider().GetAll()
 
-	form.Galleries = ctr.Gallery().GetAllForResource(form)
+	form.Galleries = gallery.Provider().GetAllForResource(form)
 
 	data := gin.H{
 		"categories": categories,

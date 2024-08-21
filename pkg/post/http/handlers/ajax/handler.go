@@ -12,23 +12,16 @@ func (c *controller) UpdatePostHandler() gin.HandlerFunc {
 	}
 }
 
-func (c *controller) CreatePostHandler() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		container := NewContainer()
-		c.createPost(ctx, container)
-	}
-}
-
-func (c *controller) DeletePostHandler() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		container := NewContainer()
-		c.deletePost(ctx, container)
-	}
-}
-
 func (c *controller) DeletePostImageHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		container := NewContainer()
 		c.deletePostImage(ctx, container)
+	}
+}
+
+func (c *controller) FilterPostHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		container := NewContainer()
+		c.filterPosts(ctx, container)
 	}
 }

@@ -11,3 +11,19 @@ type Template struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	DeletedAt *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 }
+
+func (t *Template) GetID() uint {
+	return t.ID
+}
+
+func (t *Template) GetTitle() string {
+	return t.Title
+}
+
+func (t *Template) GetName() string {
+	return t.Title
+}
+
+func (t *Template) GetResource() string {
+	return t.Title
+}

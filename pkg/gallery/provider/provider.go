@@ -8,29 +8,38 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Provider interface {
-	GetAllForResource(contracts.Resource) []*models.Gallery
-	SaveFromForm(*gin.Context) []*models.Gallery
+type Gallery interface {
+	GetAllForResource(contracts.Resource) []contracts.Gallery
+	SaveFromForm(*gin.Context) []contracts.Gallery
 }
 
-func NewProvider() Provider {
-	return &providerGallery{}
+func Provider() Gallery {
+	return &provider{}
 }
 
-type providerGallery struct {
+type provider struct {
 }
 
-func (p *providerGallery) GetAllForResource(c contracts.Resource) []*models.Gallery {
+func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
+	var collection []contracts.Gallery
 	galleries, err := models.
 		NewGalleryRepository().
 		GetAllForResource(c)
 	if err == nil {
-		return galleries
+		for _, gallery := range galleries {
+			collection = append(collection, gallery)
+		}
+		return collection
 	}
 	logger.Error(err)
 	return nil
 }
 
-func (p *providerGallery) SaveFromForm(c *gin.Context) []*models.Gallery {
-	return service.SaveFromForm(c)
+func (p *provider) SaveFromForm(c *gin.Context) []contracts.Gallery {
+	var collection []contracts.Gallery
+	galleries := service.SaveFromForm(c)
+	for _, gallery := range galleries {
+		collection = append(collection, gallery)
+	}
+	return collection
 }

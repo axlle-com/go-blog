@@ -3,8 +3,8 @@ package db
 import (
 	. "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/post/models"
-	templateRepo "github.com/axlle-com/blog/pkg/template/repository"
-	userRepo "github.com/axlle-com/blog/pkg/user/repository"
+	template "github.com/axlle-com/blog/pkg/template/provider"
+	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
 	"log"
 	"math/rand"
@@ -12,9 +12,9 @@ import (
 )
 
 func SeedPosts(n int) {
-	ids, _ := templateRepo.NewRepo().GetAllIds()
+	ids := template.Provider().GetAllIds()
 	idsCategory, _ := NewCategoryRepo().GetAllIds()
-	idsUser, _ := userRepo.NewRepo().GetAllIds()
+	idsUser := user.Provider().GetAllIds()
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
@@ -41,7 +41,7 @@ func SeedPosts(n int) {
 			ShowDate:           RandBool(),
 			DatePub:            ParseDate("02.01.2006"),
 			DateEnd:            ParseDate("02.01.2006"),
-			Image:              StrPtr(faker.Word()),
+			Image:              StrPtr("/public/uploads/img/404.svg"),
 			Hits:               uint(rand.Intn(1000)),
 			Sort:               rand.Intn(100),
 			Stars:              rand.Float32() * 5,
@@ -60,7 +60,7 @@ func SeedPosts(n int) {
 }
 
 func SeedPostCategory(n int) {
-	ids, _ := templateRepo.NewRepo().GetAllIds()
+	ids := template.Provider().GetAllIds()
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
@@ -78,7 +78,7 @@ func SeedPostCategory(n int) {
 			TitleShort:         StrPtr(faker.Sentence()),
 			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
-			Image:              StrPtr(faker.Word()),
+			Image:              StrPtr("/public/uploads/img/404.svg"),
 			Sort:               UintPtr(100),
 			CreatedAt:          TimePtr(time.Now()),
 			UpdatedAt:          TimePtr(time.Now()),

@@ -21,7 +21,7 @@ func (c *webController) CreatePost(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	templates, err := template.NewRepo().GetAllTemplates()
+	templates, err := template.NewRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

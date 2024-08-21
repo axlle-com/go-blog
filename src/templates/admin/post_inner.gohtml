@@ -146,7 +146,7 @@
                                                     placeholder="Короткий"
                                                     name="title_short"
                                                     id="title_short"
-                                                    value="{{ .post.GetTitleShort }}"
+                                                    value="{{ ptrStr .post.TitleShort }}"
                                                     data-validator="title_short">
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -157,7 +157,7 @@
                                                     placeholder="Короткое описание"
                                                     name="description_preview"
                                                     id="description_preview"
-                                                    data-validator="description_preview">{{ .post.DescriptionPreview }}</textarea>
+                                                    data-validator="description_preview">{{ ptrStr .post.DescriptionPreview }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -170,7 +170,7 @@
                                                     placeholder="Заголовок SEO"
                                                     name="meta_title"
                                                     id="meta_title"
-                                                    value="{{ .post.MetaTitle }}"
+                                                    value="{{ ptrStr .post.MetaTitle }}"
                                                     data-validator-required
                                                     data-validator="meta_title">
                                             <div class="invalid-feedback"></div>
@@ -183,7 +183,7 @@
                                                     name="meta_description"
                                                     id="meta_description"
                                                     data-validator-required
-                                                    data-validator="meta_description">{{ .post.MetaDescription }}</textarea>
+                                                    data-validator="meta_description">{{ ptrStr .post.MetaDescription }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -395,7 +395,7 @@
                         </div>
                         <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
                              aria-labelledby="profile-tab-faded">
-                            {{ template "admin.galleryInItem" . }}
+                            {{ template "admin.gallery_in_item" . }}
                         </div>
                         <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
                              aria-labelledby="info-block-tab-faded">

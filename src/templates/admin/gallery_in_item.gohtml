@@ -1,23 +1,23 @@
-{{ define "admin.galleryInItem" }}
+{{ define "admin.gallery_in_item" }}
     <div class="catalog-tabs">
         {{ if .post.Galleries }}
             {{ range .post.Galleries }}
                 <div class="js-galleries-general-block">
                     <input
                             type="hidden"
-                            name="galleries[{{ .ID }}][gallery_id]"
-                            value="{{ .ID }}">
+                            name="galleries[{{ .GetID }}][gallery_id]"
+                            value="{{ .GetID }}">
                     <div class="row">
                         <div class="col-md-12">
-                            <label class="control-label button-100" for="js-gallery-input-{{ .ID }}">
+                            <label class="control-label button-100" for="js-gallery-input-{{ .GetID }}">
                                 <a type="button" class="btn btn-primary catalog-tabs-add">
                                     Загрузить фото
                                 </a>
                             </label>
                             <input
                                     type="file"
-                                    id="js-gallery-input-{{ .ID }}"
-                                    data-js-gallery-id="{{ .ID }}"
+                                    id="js-gallery-input-{{ .GetID }}"
+                                    data-js-gallery-id="{{ .GetID }}"
                                     class="custom-input-file js-gallery-input"
                                     name=""
                                     multiple
@@ -27,30 +27,30 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="parts-gallery js-gallery-block-saved sortable swap">
-                                {{ range .GalleryImage }}
+                                {{ range .GetImages }}
                                 <div class="md-block-5 js-gallery-item sort-handle">
                                     <div class="img rounded">
                                         <input
                                                 type="hidden"
-                                                name="galleries[{{ .GalleryID }}][images][{{ .ID }}][id]"
-                                                value="{{ .ID }}">
-                                        {{ template "admin.galleryImage" . }}
+                                                name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][id]"
+                                                value="{{ .GetID }}">
+                                        {{ template "admin.gallery_image" . }}
                                     </div>
                                     <div>
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
                                                     placeholder="Заголовок"
-                                                    name="galleries[{{ .GalleryID }}][images][{{ .ID }}][title]"
-                                                    value="{{ .Title }}">
+                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][title]"
+                                                    value="{{ .GetTitle }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
                                                     placeholder="Описание"
-                                                    name="galleries[{{ .GalleryID }}][images][{{ .ID }}][description]"
-                                                    value="{{ .Description }}">
+                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][description]"
+                                                    value="{{ .GetDescription }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -58,8 +58,8 @@
                                                     class="form-control form-shadow"
                                                     placeholder="Сортировка"
                                                     type="number"
-                                                    name="galleries[{{ .GalleryID }}][images][{{ .ID }}][sort]"
-                                                    value="{{ .Sort }}">
+                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][sort]"
+                                                    value="{{ .GetSort }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>

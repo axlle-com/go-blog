@@ -6,12 +6,13 @@ import (
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	common "github.com/axlle-com/blog/pkg/common/models"
-	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -46,7 +47,7 @@ type Post struct {
 	CreatedAt          *time.Time             `json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
 	UpdatedAt          *time.Time             `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time             `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
-	Galleries          []*models.Gallery      `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	Galleries          []contracts.Gallery    `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	dirty              map[string]interface{} `ignore:"true"`
 	original           *Post                  `ignore:"true"`
 }
@@ -93,6 +94,9 @@ func (p *Post) Updating() {
 
 func (p *Post) DeleteImageFile() {
 	if p.Image == nil {
+		return
+	}
+	if strings.HasPrefix(*p.Image, "/public/uploads/img/") {
 		return
 	}
 	err := os.Remove("src/" + *p.Image)
@@ -166,13 +170,6 @@ func (p *Post) setTitleShort() {
 	}
 }
 
-func (p *Post) GetTitleShort() string {
-	if p.TitleShort == nil {
-		return ""
-	}
-	return *p.TitleShort
-}
-
 func (p *Post) setDate() {
 	if p.DatePub == nil || p.DatePub.IsZero() {
 		p.DatePub = nil
@@ -201,7 +198,7 @@ func (p *Post) GetDirty() string {
 	return ""
 }
 
-func (p *Post) isDirty(f string) bool {
-	_, ok := p.dirty[f]
+func (p *Post) isDirty(s string) bool {
+	_, ok := p.dirty[s]
 	return ok
 }

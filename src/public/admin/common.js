@@ -62,6 +62,35 @@ const _form = {
         }
     }
 };
+const _filter = {
+    _block: {},
+    send: function () {
+        const _this = this;
+        _this._block.on('click', '.js-filter-button', function (e) {
+            const form = $('#index-form-filter');
+            const method = form.attr('method');
+            if (form) {
+                const request = new _glob.request(form).setPreloader('.js-product');
+                if (method) {
+                    request.setMethod(method);
+                }
+                request.send((response) => {
+                    let html = $(response.data.view);
+                    _this._block.html(html);
+                    _glob.images = {};
+                    _config.run();
+                });
+            }
+        });
+
+    },
+    run: function (selector) {
+        this._block = $(selector);
+        if (this._block.length) {
+            this.send(selector);
+        }
+    }
+};
 const _image = {
     confirm: (obj, image) => {
         Swal.fire({
@@ -420,6 +449,7 @@ const _config = {
 $(document).ready(function () {
     _glob.run();
     _form.run('.a-block-inner');
+    _filter.run('.a-block-inner');
     _image.run();
     _infoBlock.run();
     _config.run();

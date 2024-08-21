@@ -28,14 +28,14 @@ func (c *webController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post.Galleries = gallery.NewProvider().GetAllForResource(post)
+	post.Galleries = gallery.Provider().GetAllForResource(post)
 
 	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates, err := template.NewRepo().GetAllTemplates()
+	templates, err := template.NewRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

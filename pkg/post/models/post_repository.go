@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ type PostRepository interface {
 	Update(post *Post) error
 	Delete(id uint) error
 	GetAll() ([]Post, error)
-	GetPaginate(page, pageSize int) ([]PostResponse, int, error)
+	GetPaginate(paginator common.Paginator, filter *PostFilter) ([]*PostResponse, error)
 	GetByAlias(alias string) (*Post, error)
 	GetByAliasNotID(alias string, id uint) (*Post, error)
 }
@@ -84,13 +85,11 @@ func (r *postRepository) GetAll() ([]Post, error) {
 	return posts, nil
 }
 
-func (r *postRepository) GetPaginate(page, pageSize int) ([]PostResponse, int, error) {
-	var posts []PostResponse
+func (r *postRepository) GetPaginate(p common.Paginator, filter *PostFilter) ([]*PostResponse, error) {
+	var posts []*PostResponse
 	var total int64
 
-	r.db.Model(&Post{}).Count(&total)
-	err := r.db.Table("posts").
-		Scopes(r.SetPaginate(page, pageSize)).
+	query := r.db.Table("posts").
 		Select(
 			"posts.*",
 			"post_categories.title as category_title",
@@ -102,13 +101,28 @@ func (r *postRepository) GetPaginate(page, pageSize int) ([]PostResponse, int, e
 		).
 		Joins("left join post_categories on post_categories.id = posts.post_category_id").
 		Joins("left join users on users.id = posts.user_id").
-		Joins("left join templates on templates.id = posts.template_id").
+		Joins("left join templates on templates.id = posts.template_id")
+
+	// TODO WHERE IN; LIKE
+	for col, val := range filter.GetMap() {
+		if col == "title" {
+			query = query.Where(fmt.Sprintf("posts.%v ilike ?", col), fmt.Sprintf("%%%v%%", val))
+			continue
+		}
+		query = query.Where(fmt.Sprintf("posts.%v = ?", col), val)
+	}
+
+	query.Count(&total)
+
+	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
 		Order("posts.id ASC").
 		Scan(&posts).Error
+
+	p.SetTotal(int(total))
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return posts, int(total), nil
+	return posts, nil
 }
 
 func (r *postRepository) GetByAlias(alias string) (*Post, error) {

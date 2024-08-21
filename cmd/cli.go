@@ -10,7 +10,8 @@ import (
 	post "github.com/axlle-com/blog/pkg/post/db"
 	"github.com/axlle-com/blog/pkg/post/models"
 	rights "github.com/axlle-com/blog/pkg/rights/db"
-	template "github.com/axlle-com/blog/pkg/template/db"
+	templateDB "github.com/axlle-com/blog/pkg/template/db"
+	template "github.com/axlle-com/blog/pkg/template/models"
 	user "github.com/axlle-com/blog/pkg/user/db"
 	"gorm.io/gorm"
 	"log"
@@ -36,7 +37,7 @@ var Commands = map[string]func(){
 		fmt.Println("Hello!")
 	},
 	"seed": func() {
-		template.SeedTemplate(100)
+		templateDB.SeedTemplate(100)
 		rights.SeedPermissions()
 		rights.SeedRoles()
 		user.SeedUsers(100)
@@ -49,7 +50,7 @@ var Commands = map[string]func(){
 			&models.Post{},
 			&common.User{},
 			&models.PostCategory{},
-			&common.Template{},
+			&template.Template{},
 			&common.Role{},
 			&common.Permission{},
 			&gallery.Gallery{},
@@ -68,7 +69,7 @@ var Commands = map[string]func(){
 			&models.Post{},
 			&common.User{},
 			&models.PostCategory{},
-			&common.Template{},
+			&template.Template{},
 			&common.Role{},
 			&common.Permission{},
 			&gallery.Gallery{},
@@ -82,7 +83,7 @@ var Commands = map[string]func(){
 			&models.Post{},
 			&common.User{},
 			&models.PostCategory{},
-			&common.Template{},
+			&template.Template{},
 			&common.Role{},
 			&common.Permission{},
 			&gallery.Gallery{},
@@ -92,11 +93,11 @@ var Commands = map[string]func(){
 		if err != nil {
 			log.Fatalln(err)
 		}
-		template.SeedTemplate(100)
+		templateDB.SeedTemplate(5)
 		rights.SeedPermissions()
 		rights.SeedRoles()
-		user.SeedUsers(100)
-		post.SeedPostCategory(100)
+		user.SeedUsers(5)
+		post.SeedPostCategory(10)
 		post.SeedPosts(100)
 	},
 }

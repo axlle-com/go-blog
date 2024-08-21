@@ -106,12 +106,12 @@ const _glob = {
                     if (typeof object[key] === 'object') {
                         let cnt = 0;
                         for (let key2 in object[key]) {
-                            data.append(key + '[' + key2 + ']', object[key][key2]);
+                            formData.append(key + '[' + key2 + ']', object[key][key2]);
                             cnt++;
                         }
                     } else {
                         if (object[key]) {
-                            data.append(key, object[key]);
+                            formData.append(key, object[key]);
                         }
                     }
                 }
@@ -274,7 +274,6 @@ const _glob = {
                     this.form[0].reset();
                 } catch (e) {
                 }
-
             }
         }
 

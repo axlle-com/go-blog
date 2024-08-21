@@ -92,6 +92,10 @@ table td.td-col-3 {
 form.delete-button{
     margin-bottom: 0 !important;
 }
+.width-5 {
+    width: 5% !important;
+    max-width: 5% !important;
+}
 .width-7 {
     width: 7% !important;
 }
@@ -99,7 +103,10 @@ form.delete-button{
 .width-9 {
     width: 9% !important;
 }
-
+.width-30 {
+    width: 30% !important;
+    max-width: 30% !important;
+}
 .bg-primary {
     background-color: #3d8bfd !important;
 }
@@ -108,6 +115,14 @@ form.delete-button{
     text-align: end !important;
 }
 
+.width-60 {
+    width: 60px !important;
+    max-width: 60px !important;
+}
+.width-80 {
+    width: 80px !important;
+    max-width: 80px !important;
+}
 .width-200 {
     width: 200px !important;
     max-width: 200px !important;

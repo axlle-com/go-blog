@@ -33,6 +33,9 @@ func extractBaseRoute(route string) string {
 	parts := strings.Split(route, "/")
 	baseRoute := ""
 	for i, part := range parts {
+		if i == 3 {
+			break
+		}
 		if part == "" && i == 0 {
 			continue
 		}

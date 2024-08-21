@@ -7,8 +7,9 @@ import (
 
 type Controller interface {
 	UpdatePostHandler() gin.HandlerFunc
-	CreatePostHandler() gin.HandlerFunc
-	DeletePostHandler() gin.HandlerFunc
+	CreatePost(*gin.Context)
+	DeletePost(*gin.Context)
+	FilterPostHandler() gin.HandlerFunc
 	DeletePostImageHandler() gin.HandlerFunc
 }
 

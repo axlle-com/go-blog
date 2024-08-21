@@ -19,11 +19,13 @@ func InitTemplate(router *gin.Engine) {
 
 func loadTemplates(templatesDir string) *template.Template {
 	tmpl := template.New("").Funcs(template.FuncMap{
-		"add":   add,
-		"sub":   sub,
-		"mul":   mul,
-		"date":  date,
-		"query": query,
+		"add":     add,
+		"sub":     sub,
+		"mul":     mul,
+		"date":    date,
+		"query":   query,
+		"ptrStr":  ptrStr,
+		"ptrUint": ptrUint,
 	})
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -52,11 +54,23 @@ func date(timePtr *time.Time) string {
 	}
 	return timePtr.Format("02.01.2006 15:04:05")
 }
-func query(u url.Values, s string) string {
-	param, ok := u[s]
+func query(url url.Values, string string) string {
+	param, ok := url[string]
 	if ok {
 		// TODO
 		return param[0]
 	}
 	return ""
+}
+func ptrStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+func ptrUint(i *uint) uint {
+	if i == nil {
+		return 0
+	}
+	return *i
 }

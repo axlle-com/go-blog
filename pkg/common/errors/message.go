@@ -7,7 +7,7 @@ import (
 )
 
 func message(fieldErr validator.FieldError) (message string) {
-	fieldName := toSnakeCase(fieldErr.Field())
+	fieldName := ToSnakeCase(fieldErr.Field())
 	tag := fieldErr.Tag()
 	switch tag {
 	case "required":
@@ -24,7 +24,7 @@ func message(fieldErr validator.FieldError) (message string) {
 	return
 }
 
-func toSnakeCase(str string) string {
+func ToSnakeCase(str string) string {
 	var result []rune
 	for i, r := range str {
 		if unicode.IsUpper(r) {

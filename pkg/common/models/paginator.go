@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"math"
 	"net/url"
@@ -17,28 +16,39 @@ type Paginator interface {
 	GetTotal() int
 	PageNumbers() []interface{}
 	HasPages() bool
-	SetQuery()
+	AddQueryString(s string)
 	GetQuery() template.URL
 }
+
+const DefaultPageSize = 20
+
 type paginator struct {
-	*gin.Context `json:"-"`
-	Total        int `json:"total"`
-	Page         int `json:"page"`
-	PageSize     int `json:"pageSize"`
-	queryString  template.URL
-	Query        url.Values `json:"query"`
+	Total       int          `json:"total"`
+	Page        int          `json:"page"`
+	PageSize    int          `json:"pageSize"`
+	Query       url.Values   `json:"query"`
+	QueryString template.URL `json:"queryString"`
 }
 
-func NewPaginator(c *gin.Context) Paginator {
-	p := &paginator{Context: c}
-	p.SetQuery()
+func NewPaginator(q url.Values) Paginator {
+	p := &paginator{
+		Query: q,
+	}
 	p.SetPage()
 	p.SetPageSize()
 	return p
 }
 
+func (p *paginator) defaultQuery(key, defaultValue string) string {
+	values, ok := p.Query[key]
+	if ok {
+		return values[0]
+	}
+	return defaultValue
+}
+
 func (p *paginator) SetPage() {
-	pageStr := p.DefaultQuery("page", "1")
+	pageStr := p.defaultQuery("page", "1")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
 		page = 1
@@ -46,13 +56,15 @@ func (p *paginator) SetPage() {
 	p.Page = page
 }
 
-func (p *paginator) SetQuery() {
-	p.Query = p.Request.URL.Query()
-	p.queryString = template.URL(p.Query.Encode())
+func (p *paginator) AddQueryString(s string) {
+	if s == "" {
+		return
+	}
+	p.QueryString += template.URL("&" + s)
 }
 
 func (p *paginator) GetQuery() template.URL {
-	return p.queryString
+	return p.QueryString
 }
 
 func (p *paginator) SetTotal(total int) {
@@ -68,7 +80,7 @@ func (p *paginator) GetPage() int {
 }
 
 func (p *paginator) SetPageSize() {
-	pageSizeStr := p.DefaultQuery("pageSize", "20")
+	pageSizeStr := p.defaultQuery("pageSize", strconv.Itoa(DefaultPageSize))
 
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil || pageSize < 1 {
@@ -79,6 +91,15 @@ func (p *paginator) SetPageSize() {
 
 func (p *paginator) GetPageSize() int {
 	return p.PageSize
+}
+
+func (p *paginator) PrintFullQuery() template.URL {
+	size := ""
+	if p.PageSize != DefaultPageSize {
+		size = "&pageSize=" + strconv.Itoa(p.PageSize)
+	}
+	pageQuery := template.URL("page=" + strconv.Itoa(p.Page) + size)
+	return pageQuery + p.GetQuery()
 }
 
 func (p *paginator) HasPages() bool {

@@ -2,22 +2,23 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
 	"log"
 )
 
 type TemplateRepository interface {
-	CreateTemplate(template *models.Template) error
-	GetTemplateByID(id uint) (*models.Template, error)
-	UpdateTemplate(template *models.Template) error
-	DeleteTemplate(id uint) error
-	GetAllTemplates() ([]models.Template, error)
+	Create(template *models.Template) error
+	GetByID(id uint) (*models.Template, error)
+	Update(template *models.Template) error
+	Delete(id uint) error
+	GetAll() ([]*models.Template, error)
 	GetAllIds() ([]uint, error)
 }
 
 type repository struct {
-	*models.Paginate
+	*common.Paginate
 	db *gorm.DB
 }
 
@@ -25,11 +26,11 @@ func NewRepo() TemplateRepository {
 	return &repository{db: db.GetDB()}
 }
 
-func (r *repository) CreateTemplate(template *models.Template) error {
+func (r *repository) Create(template *models.Template) error {
 	return r.db.Create(template).Error
 }
 
-func (r *repository) GetTemplateByID(id uint) (*models.Template, error) {
+func (r *repository) GetByID(id uint) (*models.Template, error) {
 	var template models.Template
 	if err := r.db.First(&template, id).Error; err != nil {
 		return nil, err
@@ -37,16 +38,16 @@ func (r *repository) GetTemplateByID(id uint) (*models.Template, error) {
 	return &template, nil
 }
 
-func (r *repository) UpdateTemplate(template *models.Template) error {
+func (r *repository) Update(template *models.Template) error {
 	return r.db.Save(template).Error
 }
 
-func (r *repository) DeleteTemplate(id uint) error {
+func (r *repository) Delete(id uint) error {
 	return r.db.Delete(&models.Template{}, id).Error
 }
 
-func (r *repository) GetAllTemplates() ([]models.Template, error) {
-	var template []models.Template
+func (r *repository) GetAll() ([]*models.Template, error) {
+	var template []*models.Template
 	if err := r.db.Find(&template).Error; err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (r *repository) GetAllTemplates() ([]models.Template, error) {
 func (r *repository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.Template{}).Pluck("id", &ids).Error; err != nil {
-		log.Println("Failed to fetch IDs from the database: %v", err)
+		log.Printf("Failed to fetch IDs from the database: %v\n", err)
 	}
 	return ids, nil
 }

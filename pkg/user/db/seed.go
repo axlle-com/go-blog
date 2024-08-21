@@ -1,7 +1,7 @@
 package db
 
 import (
-	db "github.com/axlle-com/blog/pkg/common/db"
+	. "github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	rights "github.com/axlle-com/blog/pkg/rights/repository"
 	. "github.com/axlle-com/blog/pkg/user/repository"
@@ -25,12 +25,13 @@ func SeedUsers(n int) {
 		updatedAt := time.Now()
 
 		user := User{
+			Avatar:             StrPtr("/public/uploads/img/user.svg"),
 			FirstName:          firstName,
 			LastName:           lastName,
 			Phone:              &phone,
 			Email:              faker.Email(),
-			IsEmail:            db.IntToBoolPtr(),
-			IsPhone:            db.IntToBoolPtr(),
+			IsEmail:            IntToBoolPtr(),
+			IsPhone:            IntToBoolPtr(),
 			Status:             int8(rand.Intn(10)),
 			Password:           password,
 			RememberToken:      &rememberToken,
@@ -56,12 +57,13 @@ func SeedUsers(n int) {
 
 	role, _ := rights.NewRoleRepository().GetByName("admin")
 	user := User{
+		Avatar:             StrPtr("/public/uploads/img/user.svg"),
 		FirstName:          "Admin",
 		LastName:           "Admin",
 		Phone:              &phone,
 		Email:              "axlle@mail.ru",
-		IsEmail:            db.BoolToBoolPtr(true),
-		IsPhone:            db.BoolToBoolPtr(true),
+		IsEmail:            BoolToBoolPtr(true),
+		IsPhone:            BoolToBoolPtr(true),
 		Status:             10,
 		Password:           "123456",
 		RememberToken:      &rememberToken,

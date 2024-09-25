@@ -12,9 +12,9 @@ type CategoryRepository interface {
 	GetByID(id uint) (*PostCategory, error)
 	Update(postCategory *PostCategory) error
 	Delete(id uint) error
-	GetAll() ([]PostCategory, error)
+	GetAll() ([]*PostCategory, error)
 	GetAllIds() ([]uint, error)
-	GetPaginate(page, pageSize int) ([]PostCategory, error)
+	GetPaginate(page, pageSize int) ([]*PostCategory, error)
 }
 
 type categoryRepository struct {
@@ -46,8 +46,8 @@ func (r *categoryRepository) Delete(id uint) error {
 	return r.db.Delete(&PostCategory{}, id).Error
 }
 
-func (r *categoryRepository) GetAll() ([]PostCategory, error) {
-	var postCategories []PostCategory
+func (r *categoryRepository) GetAll() ([]*PostCategory, error) {
+	var postCategories []*PostCategory
 	if err := r.db.Find(&postCategories).Error; err != nil {
 		return nil, err
 	}
@@ -62,8 +62,8 @@ func (r *categoryRepository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *categoryRepository) GetPaginate(page, pageSize int) ([]PostCategory, error) {
-	var models []PostCategory
+func (r *categoryRepository) GetPaginate(page, pageSize int) ([]*PostCategory, error) {
+	var models []*PostCategory
 
 	err := r.db.Model(models).Scopes(r.SetPaginate(page, pageSize)).Find(&models).Error
 	if err != nil {

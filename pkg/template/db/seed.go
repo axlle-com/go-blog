@@ -2,7 +2,7 @@ package db
 
 import (
 	db "github.com/axlle-com/blog/pkg/common/db"
-	. "github.com/axlle-com/blog/pkg/common/models"
+	. "github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/bxcodec/faker/v3"
 	"log"

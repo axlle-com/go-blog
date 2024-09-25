@@ -6,11 +6,11 @@ import (
 )
 
 type Controller interface {
-	UpdatePostHandler() gin.HandlerFunc
+	UpdatePost(*gin.Context)
 	CreatePost(*gin.Context)
 	DeletePost(*gin.Context)
-	FilterPostHandler() gin.HandlerFunc
-	DeletePostImageHandler() gin.HandlerFunc
+	DeletePostImage(*gin.Context)
+	FilterPosts(*gin.Context)
 }
 
 func NewController(r *gin.Engine) Controller {

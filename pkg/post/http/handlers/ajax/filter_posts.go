@@ -2,26 +2,27 @@ package ajax
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
-	. "github.com/axlle-com/blog/pkg/post/service"
+	"github.com/axlle-com/blog/pkg/common/models"
+	. "github.com/axlle-com/blog/pkg/post/models"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func (c *controller) filterPosts(ctx *gin.Context, ctr Container) {
-	filter := ctr.Filter().ValidateForm(ctx)
+func (c *controller) FilterPosts(ctx *gin.Context) {
+	filter := NewPostFilter().ValidateForm(ctx)
 	if filter == nil {
 		return
 	}
 
-	paginator := ctr.Paginator(ctx)
+	paginator := models.Paginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
-	posts, err := ctr.Post().GetPaginate(paginator, filter)
+	posts, err := NewPostRepo().GetPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	categories, err := ctr.Category().GetAll()
+	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

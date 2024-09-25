@@ -1,11 +1,10 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/models"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -31,22 +30,15 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(authInput.Password), bcrypt.DefaultCost)
-	if err != nil {
+	newUser := user.User{
+		Email: authInput.Email,
+	}
+
+	if err := userRepo.Create(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user := User{
-		Email:        authInput.Email,
-		PasswordHash: string(passwordHash),
-	}
-
-	if err := userRepo.Create(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"data": user})
+	c.JSON(http.StatusCreated, gin.H{"data": newUser})
 
 }

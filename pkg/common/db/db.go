@@ -19,6 +19,7 @@ func Init(url string) {
 	}
 }
 
+// GetDB TODO переделать на динамическое
 func GetDB() *gorm.DB {
 	if instance == nil {
 		Init(config.GetConfig().DBUrl)

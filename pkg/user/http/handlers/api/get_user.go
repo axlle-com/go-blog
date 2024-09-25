@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -18,11 +17,8 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	uintValue := uint(value)
-	h := repository.NewRepo()
-	var result *models.User
-
-	if result, err = h.GetByID(uintValue); err != nil {
+	result, err := repository.NewRepo().GetByID(uint(value))
+	if err != nil {
 		c.AbortWithError(http.StatusNotFound, err)
 		return
 	}

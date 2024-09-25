@@ -25,15 +25,15 @@ func InitializeWebRoutes(r *gin.Engine) {
 	{
 		protected.GET("/", user.Index)
 		protected.GET("/logout", user.Logout)
-		protected.GET("/posts", postWebController.GetPostsHandler())
+		protected.GET("/posts", postWebController.GetPosts)
 		protected.GET("/posts/:id", postWebController.GetPost)
 		protected.GET("/posts/form", postWebController.CreatePost)
 
 		protected.POST("/posts", postController.CreatePost)
-		protected.POST("/posts/filter", postController.FilterPostHandler())
-		protected.PUT("/posts/:id", postController.UpdatePostHandler())
+		protected.POST("/posts/filter", postController.FilterPosts)
+		protected.PUT("/posts/:id", postController.UpdatePost)
 		protected.DELETE("/posts/:id", postController.DeletePost)
-		protected.DELETE("/posts/:id/image", postController.DeletePostImageHandler())
+		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
 	r.GET("/:alias", post.GetPostFront)

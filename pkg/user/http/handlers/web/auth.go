@@ -49,7 +49,7 @@ func Auth(c *gin.Context) {
 	session.Set("user_id", userFound.ID)
 	session.Set("user", userFound)
 	sessionID := session.ID()
-	cache := db.NewCache()
+	cache := db.Cache()
 	cache.AddUserSession(userFound.ID, sessionID)
 
 	if err := session.Save(); err != nil {

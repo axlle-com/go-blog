@@ -1,8 +1,8 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/models"
-	. "github.com/axlle-com/blog/pkg/rights/repository"
+	. "github.com/axlle-com/blog/pkg/user/models"
+	. "github.com/axlle-com/blog/pkg/user/repository"
 	"log"
 )
 

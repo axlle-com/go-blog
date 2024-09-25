@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
       target: app
-    container_name: app
     networks:
       - projects_network
     ports:
@@ -20,22 +19,25 @@ services:
       - filebeat
       - redis
 
-#  cli:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#      target: cli
-#    container_name: cli
-#    volumes:
-#      - ./docker/.env:/cli/.env
-#      - ./:/cli
-#    networks:
-#      - projects_network
+  cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: cli
+    networks:
+      - projects_network
+    volumes:
+      - ./docker/.env:/app/.env
+      - ./docker/.env:/.env
+      - ./:/app
+    depends_on:
+      - postgres
+      - filebeat
+      - redis
 
   postgres:
     image: postgres:16.4-alpine
     restart: always
-    container_name: postgres
     networks:
       - projects_network
     environment:
@@ -54,7 +56,6 @@ services:
 
   redis:
     image: redis:7.4.0-alpine
-    container_name: redis
     networks:
       - projects_network
     ports:
@@ -69,7 +70,6 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
-    container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
@@ -119,7 +119,6 @@ services:
 volumes:
   pg-data:
   es-data:
-    driver: local
   redis-data:
     driver: local
 

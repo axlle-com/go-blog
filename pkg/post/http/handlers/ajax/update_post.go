@@ -3,29 +3,40 @@ package ajax
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	. "github.com/axlle-com/blog/pkg/post/service"
+	. "github.com/axlle-com/blog/pkg/post/http/models"
+	. "github.com/axlle-com/blog/pkg/post/models"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func (c *controller) updatePost(ctx *gin.Context, ctr Container) {
+func (c *controller) UpdatePost(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 
-	post, err := ctr.Post().GetByID(id)
+	post, err := NewPostRepo().GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 
-	form := ctr.Request().ValidateForm(ctx)
+	form, formError := NewPostRequest().ValidateForm(ctx)
 	if form == nil {
+		if formError != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"errors":  formError.Errors,
+				"message": formError.Message,
+			})
+			ctx.Abort()
+		} else {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
 		return
 	}
+	// TODO использовать post, заполнить из form
 	form.ID = post.ID
 	form.Image = post.Image
 	form.UserID = post.UserID
@@ -35,7 +46,7 @@ func (c *controller) updatePost(ctx *gin.Context, ctr Container) {
 		return
 	}
 	form.SetOriginal(post)
-	err = ctr.Post().Update(form)
+	err = NewPostRepo().Update(form)
 	if err != nil {
 		logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -50,7 +61,7 @@ func (c *controller) updatePost(ctx *gin.Context, ctr Container) {
 		}
 	}
 
-	categories, err := ctr.Category().GetAll()
+	categories, err := NewCategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

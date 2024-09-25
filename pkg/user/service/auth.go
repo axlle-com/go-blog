@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 	"github.com/axlle-com/blog/pkg/common/config"
-	. "github.com/axlle-com/blog/pkg/common/models"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func Auth(authInput AuthInput) (userFound *User, err error) {
+func Auth(authInput AuthInput) (userFound *user.User, err error) {
 	userRepo := repository.NewRepo()
 	userFound, err = userRepo.GetByEmail(authInput.Email)
 

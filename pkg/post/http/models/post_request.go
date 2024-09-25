@@ -5,7 +5,6 @@ import (
 	common "github.com/axlle-com/blog/pkg/common/models"
 	post "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"time"
 )
 
@@ -37,28 +36,20 @@ type PostRequest struct {
 	Sort               int        `json:"sort" form:"sort" binding:"omitempty"`
 }
 
-func (p *PostRequest) ValidateForm(ctx *gin.Context) *post.Post {
+func (p *PostRequest) ValidateForm(ctx *gin.Context) (*post.Post, *errorsForm.Errors) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Форма не валидная"})
-		ctx.Abort()
-		return nil
+		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
 	}
 	if len(ctx.Request.PostForm) == 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Форма не валидная"})
-		ctx.Abort()
-		return nil
+		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
 	}
 	var form *post.Post
 	if err := ctx.ShouldBind(&form); err != nil {
 		errBind := errorsForm.ParseBindErrorToMap(err)
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors":  errBind,
-			"message": "Ошибки валидации",
-		})
-		ctx.Abort()
-		return nil
+		return nil, errBind
 	}
+	// TODO
 	common.SetEmptyStringPointersToNil(form)
-	return form
+	return form, nil
 }

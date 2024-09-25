@@ -18,7 +18,7 @@ func SeedPosts(n int) {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
-		randomCategoryID := ids[rand.Intn(len(idsCategory))]
+		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
 		post := Post{
 			TemplateID:         &randomID,
@@ -65,7 +65,7 @@ func SeedPostCategory(n int) {
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
 			TemplateID:         &randomID,
-			PostCategoryID:     UintPtr(100),
+			PostCategoryID:     UintPtr(rand.Intn(100)),
 			MetaTitle:          StrPtr(faker.Sentence()),
 			MetaDescription:    StrPtr(faker.Sentence()),
 			Alias:              faker.Username(),
@@ -79,7 +79,7 @@ func SeedPostCategory(n int) {
 			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
 			Image:              StrPtr("/public/uploads/img/404.svg"),
-			Sort:               UintPtr(100),
+			Sort:               UintPtr(rand.Intn(100)),
 			CreatedAt:          TimePtr(time.Now()),
 			UpdatedAt:          TimePtr(time.Now()),
 			DeletedAt:          nil,

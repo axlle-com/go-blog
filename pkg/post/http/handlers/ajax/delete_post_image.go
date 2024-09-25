@@ -2,18 +2,18 @@ package ajax
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
-	. "github.com/axlle-com/blog/pkg/post/service"
+	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func (c *controller) deletePostImage(ctx *gin.Context, ctr Container) {
+func (c *controller) DeletePostImage(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
-	postRepo := ctr.Post()
+	postRepo := NewPostRepo()
 	post, err := postRepo.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})

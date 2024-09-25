@@ -2,12 +2,12 @@ package provider
 
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/common/models"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
 )
 
 type User interface {
-	GetAll() []*models.User
+	GetAll() []*user.User
 	GetAllIds() []uint
 }
 
@@ -18,7 +18,7 @@ func Provider() User {
 type provider struct {
 }
 
-func (p *provider) GetAll() []*models.User {
+func (p *provider) GetAll() []*user.User {
 	all, err := repository.NewRepo().GetAll()
 	if err == nil {
 		return all

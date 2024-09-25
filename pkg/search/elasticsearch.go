@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"golang.org/x/net/context"

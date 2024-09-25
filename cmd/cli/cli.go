@@ -5,14 +5,13 @@ import (
 	"flag"
 	"fmt"
 	DB "github.com/axlle-com/blog/pkg/common/db"
-	common "github.com/axlle-com/blog/pkg/common/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/models"
 	post "github.com/axlle-com/blog/pkg/post/db"
 	"github.com/axlle-com/blog/pkg/post/models"
-	rights "github.com/axlle-com/blog/pkg/rights/db"
 	templateDB "github.com/axlle-com/blog/pkg/template/db"
 	template "github.com/axlle-com/blog/pkg/template/models"
-	user "github.com/axlle-com/blog/pkg/user/db"
+	userDB "github.com/axlle-com/blog/pkg/user/db"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 	"log"
 	"os"
@@ -38,9 +37,9 @@ var Commands = map[string]func(){
 	},
 	"seed": func() {
 		templateDB.SeedTemplate(100)
-		rights.SeedPermissions()
-		rights.SeedRoles()
-		user.SeedUsers(100)
+		userDB.SeedPermissions()
+		userDB.SeedRoles()
+		userDB.SeedUsers(100)
 		post.SeedPostCategory(100)
 		post.SeedPosts(100)
 	},
@@ -48,11 +47,11 @@ var Commands = map[string]func(){
 		db := DB.GetDB()
 		err := db.AutoMigrate(
 			&models.Post{},
-			&common.User{},
+			&user.User{},
 			&models.PostCategory{},
 			&template.Template{},
-			&common.Role{},
-			&common.Permission{},
+			&user.Role{},
+			&user.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -62,16 +61,16 @@ var Commands = map[string]func(){
 		}
 	},
 	"refill": func() {
-		DB.NewCache().ResetUsersSession()
+		DB.Cache().ResetUsersSession()
 		db := DB.GetDB()
 		dropIntermediateTables(db)
 		err := db.Migrator().DropTable(
 			&models.Post{},
-			&common.User{},
+			&user.User{},
 			&models.PostCategory{},
 			&template.Template{},
-			&common.Role{},
-			&common.Permission{},
+			&user.Role{},
+			&user.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -81,11 +80,11 @@ var Commands = map[string]func(){
 		}
 		err = db.AutoMigrate(
 			&models.Post{},
-			&common.User{},
+			&user.User{},
 			&models.PostCategory{},
 			&template.Template{},
-			&common.Role{},
-			&common.Permission{},
+			&user.Role{},
+			&user.Permission{},
 			&gallery.Gallery{},
 			&gallery.GalleryImage{},
 			&gallery.GalleryHasResource{},
@@ -94,9 +93,9 @@ var Commands = map[string]func(){
 			log.Fatalln(err)
 		}
 		templateDB.SeedTemplate(5)
-		rights.SeedPermissions()
-		rights.SeedRoles()
-		user.SeedUsers(5)
+		userDB.SeedPermissions()
+		userDB.SeedRoles()
+		userDB.SeedUsers(5)
 		post.SeedPostCategory(10)
 		post.SeedPosts(100)
 	},

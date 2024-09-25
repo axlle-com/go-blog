@@ -2,8 +2,7 @@ package db
 
 import (
 	. "github.com/axlle-com/blog/pkg/common/db"
-	. "github.com/axlle-com/blog/pkg/common/models"
-	rights "github.com/axlle-com/blog/pkg/rights/repository"
+	"github.com/axlle-com/blog/pkg/user/models"
 	. "github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/bxcodec/faker/v3"
 	"log"
@@ -24,7 +23,7 @@ func SeedUsers(n int) {
 		createdAt := time.Now()
 		updatedAt := time.Now()
 
-		user := User{
+		user := models.User{
 			Avatar:             StrPtr("/public/uploads/img/user.svg"),
 			FirstName:          firstName,
 			LastName:           lastName,
@@ -55,8 +54,8 @@ func SeedUsers(n int) {
 	createdAt := time.Now()
 	updatedAt := time.Now()
 
-	role, _ := rights.NewRoleRepository().GetByName("admin")
-	user := User{
+	role, _ := NewRoleRepository().GetByName("admin")
+	user := models.User{
 		Avatar:             StrPtr("/public/uploads/img/user.svg"),
 		FirstName:          "Admin",
 		LastName:           "Admin",
@@ -72,7 +71,7 @@ func SeedUsers(n int) {
 		PasswordResetToken: &passwordResetToken,
 		CreatedAt:          &createdAt,
 		UpdatedAt:          &updatedAt,
-		Roles:              []Role{*role},
+		Roles:              []models.Role{*role},
 	}
 
 	err := NewRepo().Create(&user)

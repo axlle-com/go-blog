@@ -2,7 +2,8 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +19,7 @@ type UserRepository interface {
 }
 
 type repository struct {
-	*models.Paginate
+	*common.Paginate
 	db *gorm.DB
 }
 

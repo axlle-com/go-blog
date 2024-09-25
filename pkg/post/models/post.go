@@ -80,6 +80,7 @@ func (p *Post) Creating() {
 	p.SetDirty()
 	p.setTitleShort()
 	p.setAlias()
+	p.setURL()
 	p.setDate()
 	p.SetDirty()
 }
@@ -88,6 +89,7 @@ func (p *Post) Updating() {
 	p.SetDirty()
 	p.setTitleShort()
 	p.setAlias()
+	p.setURL()
 	p.setDate()
 	p.SetDirty()
 }
@@ -123,36 +125,36 @@ func (p *Post) UploadImageFile(ctx *gin.Context) error {
 }
 
 func (p *Post) setAlias() {
-	if !p.isDirty("Alias") && !p.isDirty("Title") {
-		p.setURL()
+	if p.Title == "" {
 		return
 	}
-	if p.Title != "" {
-		if p.Alias == "" {
-			p.Alias = alias.Create(p.Title)
-		} else {
-			p.Alias = alias.Create(p.Alias)
-		}
-
-		aliasString := p.Alias
-		counter := 1
-		repo := NewPostRepo()
-
-		for {
-			_, err := repo.GetByAliasNotID(aliasString, p.ID)
-			if err == gorm.ErrRecordNotFound {
-				break
-			} else if err != nil {
-				logger.Fatal(err)
-				break
-			}
-			aliasString = fmt.Sprintf("%s-%d", p.Alias, counter)
-			counter++
-		}
-
-		p.Alias = aliasString
-		p.setURL()
+	if !p.isDirty("Alias") && !p.isDirty("Title") {
+		return
 	}
+
+	if p.Alias == "" {
+		p.Alias = alias.Create(p.Title)
+	} else {
+		p.Alias = alias.Create(p.Alias)
+	}
+
+	aliasString := p.Alias
+	counter := 1
+	repo := NewPostRepo()
+
+	for {
+		_, err := repo.GetByAliasNotID(aliasString, p.ID)
+		if err == gorm.ErrRecordNotFound {
+			break
+		} else if err != nil {
+			logger.Fatal(err)
+			break
+		}
+		aliasString = fmt.Sprintf("%s-%d", p.Alias, counter)
+		counter++
+	}
+
+	p.Alias = aliasString
 }
 
 func (p *Post) setURL() {

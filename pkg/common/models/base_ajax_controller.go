@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
@@ -23,20 +24,20 @@ func (c *BaseAjax) GetID(ctx *gin.Context) uint {
 	return uint(id)
 }
 
-func (c *BaseAjax) GetUser(ctx *gin.Context) *User {
+func (c *BaseAjax) GetUser(ctx *gin.Context) *user.User {
 	userData, exists := ctx.Get("user")
 	if !exists {
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
 		return nil
 	}
-	user, ok := userData.(User)
+	u, ok := userData.(user.User)
 	if !ok {
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
 		return nil
 	}
-	return &user
+	return &u
 }
 
 func (c *BaseAjax) RenderView(view string, data gin.H, ctx *gin.Context) string {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/post/http/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
@@ -17,7 +18,7 @@ type Container interface {
 	Template() Template
 	Request() *PostRequest
 	Gallery() provider.Gallery
-	Paginator(ctx *gin.Context) models.Paginator
+	Paginator(ctx *gin.Context) contracts.Paginator
 	Filter() *PostFilter
 }
 
@@ -28,7 +29,7 @@ type container struct {
 	template           Template
 	gallery            provider.Gallery
 	request            *PostRequest
-	paginator          models.Paginator
+	paginator          contracts.Paginator
 	filter             *PostFilter
 }
 
@@ -78,9 +79,9 @@ func (c *container) Gallery() provider.Gallery {
 	return c.gallery
 }
 
-func (c *container) Paginator(ctx *gin.Context) models.Paginator {
+func (c *container) Paginator(ctx *gin.Context) contracts.Paginator {
 	if c.paginator == nil {
-		c.paginator = models.NewPaginator(ctx.Request.URL.Query())
+		c.paginator = models.Paginator(ctx.Request.URL.Query())
 	}
 	return c.paginator
 }

@@ -2,7 +2,8 @@ NETWORK_NAME=projects_network
 
 # Имя файлов Docker Compose
 DOCKER_COMPOSE_PROJECT_BLOG=docker-compose.yml
-SERVICES=postgres elasticsearch redis
+SERVICES=postgres  redis
+# elasticsearch app cli
 
 # Цель по умолчанию
 .PHONY: all

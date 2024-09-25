@@ -102,3 +102,39 @@ func ValidateAndCleanPhone(phone string) (bool, string) {
 
 	return true, cleanedPhone
 }
+
+func (u *User) GetID() uint {
+	return u.ID
+}
+
+func (u *User) GetFirstName() string {
+	return u.FirstName
+}
+
+func (u *User) GetLastName() string {
+	return u.LastName
+}
+
+func (u *User) GetPatronymic() string {
+	return *u.Patronymic
+}
+
+func (u *User) GetPhone() string {
+	return *u.Phone
+}
+
+func (u *User) GetEmail() string {
+	return u.Email
+}
+
+func (u *User) GetStatus() int8 {
+	return u.Status
+}
+
+func (u *User) GetRoles() int8 {
+	return u.Status
+}
+
+func (u *User) GetPermissions() int8 {
+	return u.Status
+}

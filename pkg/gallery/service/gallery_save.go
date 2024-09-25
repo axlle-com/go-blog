@@ -63,9 +63,7 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 				defer group.Done()
 				err := SaveImage(image, c)
 				if err != nil {
-					mutex.Lock()
 					logger.Error(err)
-					mutex.Unlock()
 				} else {
 					mutex.Lock()
 					gallery.GalleryImage = append(gallery.GalleryImage, image)

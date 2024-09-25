@@ -1,6 +1,6 @@
 package models
 
-type PostResponse struct {
+type PostFull struct {
 	Post
 	UserFirstName      string  `json:"user_first_name"`
 	UserLastName       string  `json:"user_last_name"`
@@ -10,21 +10,21 @@ type PostResponse struct {
 	TemplateName       *string `json:"template_name"`
 }
 
-func (p *PostResponse) Date() string {
+func (p *PostFull) Date() string {
 	if p.CreatedAt == nil {
 		return ""
 	}
 	return p.CreatedAt.Format("02.01.2006 15:04:05")
 }
 
-func (p *PostResponse) GetTemplateTitle() string {
+func (p *PostFull) GetTemplateTitle() string {
 	if p.TemplateTitle == nil {
 		return ""
 	}
 	return *p.TemplateTitle
 }
 
-func (p *PostResponse) GetCategoryTitleShort() string {
+func (p *PostFull) GetCategoryTitleShort() string {
 	if p.CategoryTitleShort == nil {
 		if p.CategoryTitle == nil {
 			return ""

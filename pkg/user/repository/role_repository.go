@@ -2,7 +2,8 @@ package repository
 
 import (
 	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models"
+	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +18,7 @@ type RoleRepository interface {
 }
 
 type roleRepository struct {
-	*models.Paginate
+	*common.Paginate
 	db *gorm.DB
 }
 
@@ -54,19 +55,19 @@ func (r *roleRepository) Delete(id uint) error {
 }
 
 func (r *roleRepository) GetAll() ([]models.Role, error) {
-	var models []models.Role
-	if err := r.db.Find(&models).Error; err != nil {
+	var m []models.Role
+	if err := r.db.Find(&m).Error; err != nil {
 		return nil, err
 	}
-	return models, nil
+	return m, nil
 }
 
 func (r *roleRepository) GetPaginate(page, pageSize int) ([]models.Role, error) {
-	var models []models.Role
+	var m []models.Role
 
-	err := r.db.Scopes(r.SetPaginate(page, pageSize)).Find(&models).Error
+	err := r.db.Scopes(r.SetPaginate(page, pageSize)).Find(&m).Error
 	if err != nil {
 		return nil, err
 	}
-	return models, nil
+	return m, nil
 }

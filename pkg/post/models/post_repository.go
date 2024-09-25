@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"gorm.io/gorm"
 )
 
@@ -12,8 +13,8 @@ type PostRepository interface {
 	GetByID(id uint) (*Post, error)
 	Update(post *Post) error
 	Delete(id uint) error
-	GetAll() ([]Post, error)
-	GetPaginate(paginator common.Paginator, filter *PostFilter) ([]*PostResponse, error)
+	GetAll() ([]*Post, error)
+	GetPaginate(paginator contracts.Paginator, filter *PostFilter) ([]*PostFull, error)
 	GetByAlias(alias string) (*Post, error)
 	GetByAliasNotID(alias string, id uint) (*Post, error)
 }
@@ -77,16 +78,16 @@ func (r *postRepository) Delete(id uint) error {
 	return r.db.Delete(&Post{}, id).Error
 }
 
-func (r *postRepository) GetAll() ([]Post, error) {
-	var posts []Post
+func (r *postRepository) GetAll() ([]*Post, error) {
+	var posts []*Post
 	if err := r.db.Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
 }
 
-func (r *postRepository) GetPaginate(p common.Paginator, filter *PostFilter) ([]*PostResponse, error) {
-	var posts []*PostResponse
+func (r *postRepository) GetPaginate(p contracts.Paginator, filter *PostFilter) ([]*PostFull, error) {
+	var posts []*PostFull
 	var total int64
 
 	query := r.db.Table("posts").
@@ -133,6 +134,7 @@ func (r *postRepository) GetByAlias(alias string) (*Post, error) {
 	return &post, nil
 }
 
+// GetByAliasNotID TODO AND id <> 0 ORDER BY "posts"."id" LIMIT 1
 func (r *postRepository) GetByAliasNotID(alias string, id uint) (*Post, error) {
 	var post Post
 	if err := r.db.Where("alias = ?", alias).Where("id <> ?", id).First(&post).Error; err != nil {

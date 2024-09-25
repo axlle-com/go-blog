@@ -1,24 +1,12 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"html/template"
 	"math"
 	"net/url"
 	"strconv"
 )
-
-type Paginator interface {
-	SetPage()
-	GetPage() int
-	SetPageSize()
-	GetPageSize() int
-	SetTotal(int)
-	GetTotal() int
-	PageNumbers() []interface{}
-	HasPages() bool
-	AddQueryString(s string)
-	GetQuery() template.URL
-}
 
 const DefaultPageSize = 20
 
@@ -30,7 +18,7 @@ type paginator struct {
 	QueryString template.URL `json:"queryString"`
 }
 
-func NewPaginator(q url.Values) Paginator {
+func Paginator(q url.Values) contracts.Paginator {
 	p := &paginator{
 		Query: q,
 	}

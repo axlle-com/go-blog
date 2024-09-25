@@ -4,22 +4,14 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	client "github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"
 )
 
 const UserSessionKey = "user_session_"
 
-type Cache interface {
-	AddCache(key, value string)
-	DeleteCache(key string)
-	GetUserKey(id uint) string
-	AddUserSession(id uint, sessionID string)
-	ResetUserSession(userID uint) error
-	ResetUsersSession()
-}
-
-func NewRedisClient() Cache {
+func Redis() contracts.Cache {
 	cfg := config.GetConfig()
 	c := &redisClient{}
 	c.client = client.NewClient(&client.Options{

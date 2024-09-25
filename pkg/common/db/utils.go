@@ -46,29 +46,8 @@ func TimePtr(t time.Time) *time.Time {
 }
 
 func UintPtr(u int) *uint {
-	v := uint(rand.Intn(u))
+	v := uint(u)
 	return &v
-}
-
-func IDStrPtr(id string) *uint {
-	v, err := strconv.Atoi(id)
-	if err != nil {
-		return nil
-	}
-	newID := uint(v)
-	return &newID
-}
-
-func CheckStr(num string) bool {
-	return num == "1"
-}
-
-func SortStr(num string) int {
-	v, err := strconv.Atoi(num)
-	if err != nil {
-		return 0
-	}
-	return v
 }
 
 func IntStr(num string) int {

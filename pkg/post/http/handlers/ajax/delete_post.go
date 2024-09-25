@@ -23,7 +23,7 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 	}
 
 	filter := NewPostFilter().ValidateQuery(ctx)
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
+	paginator := models.Paginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
 	users := user.Provider().GetAll()
 	templates := template.Provider().GetAll()

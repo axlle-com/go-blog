@@ -12,12 +12,20 @@ import (
 )
 
 func (c *controller) CreatePost(ctx *gin.Context) {
-	form := NewPostRequest().ValidateForm(ctx)
+	form, formError := NewPostRequest().ValidateForm(ctx)
 	if form == nil {
+		if formError != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"errors":  formError.Errors,
+				"message": formError.Message,
+			})
+			ctx.Abort()
+		} else {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
 		return
 	}
 	form.UserID = &c.GetUser(ctx).ID
-	err := form.UploadImageFile(ctx)
 	if err := form.UploadImageFile(ctx); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		ctx.Abort()

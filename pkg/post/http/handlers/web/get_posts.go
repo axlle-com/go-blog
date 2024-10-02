@@ -19,7 +19,19 @@ func (c *webController) GetPosts(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	filter := NewPostFilter().ValidateQuery(ctx)
+	filter, validError := NewPostFilter().ValidateQuery(ctx)
+	if validError != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errors":  validError.Errors,
+			"message": validError.Message,
+		})
+		ctx.Abort()
+		return
+	}
+	if filter == nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
+		return
+	}
 	paginator := models.Paginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
 	templates := template.Provider().GetAll()

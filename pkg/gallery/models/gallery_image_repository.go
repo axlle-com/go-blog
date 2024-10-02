@@ -42,6 +42,7 @@ func (r *galleryImageRepository) Update(image *GalleryImage) error {
 	return r.db.Select("GalleryID", "Title", "Description", "Sort").Save(image).Error
 }
 
+// Delete TODO транзакции
 func (r *galleryImageRepository) Delete(id uint) error {
 	g, err := r.GetByID(id)
 	if err == nil {

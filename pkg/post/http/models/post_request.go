@@ -13,11 +13,13 @@ func NewPostRequest() *PostRequest {
 }
 
 type PostRequest struct {
+	UserID             *uint      `json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint      `json:"template_id" form:"template_id" binding:"omitempty"`
 	PostCategoryID     *uint      `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	MetaTitle          *string    `json:"meta_title" form:"meta_title" binding:"omitempty,max=100"`
 	MetaDescription    *string    `json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
-	Alias              *string    `json:"alias" form:"alias" binding:"omitempty,max=255"`
+	Alias              string     `json:"alias" form:"alias" binding:"omitempty,max=255"`
+	URL                string     `json:"url" form:"url" binding:"omitempty,max=1000"`
 	IsPublished        bool       `json:"is_published" form:"is_published" binding:"omitempty"`
 	IsFavourites       bool       `json:"is_favourites" form:"is_favourites" binding:"omitempty"`
 	HasComments        bool       `json:"has_comments" form:"has_comments" binding:"omitempty"`
@@ -33,7 +35,9 @@ type PostRequest struct {
 	ShowDate           bool       `json:"show_date" form:"show_date" binding:"omitempty"`
 	DatePub            *time.Time `json:"date_pub,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
 	DateEnd            *time.Time `json:"date_end,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
+	Image              *string    `json:"image" form:"image" binding:"omitempty,max=255"`
 	Sort               int        `json:"sort" form:"sort" binding:"omitempty"`
+	*common.Field
 }
 
 func (p *PostRequest) ValidateForm(ctx *gin.Context) (*post.Post, *errorsForm.Errors) {
@@ -49,7 +53,6 @@ func (p *PostRequest) ValidateForm(ctx *gin.Context) (*post.Post, *errorsForm.Er
 		errBind := errorsForm.ParseBindErrorToMap(err)
 		return nil, errBind
 	}
-	// TODO
-	common.SetEmptyStringPointersToNil(form)
+	p.SetEmptyPointersToNil(form)
 	return form, nil
 }

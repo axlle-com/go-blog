@@ -26,7 +26,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 	form.UserID = &c.GetUser(ctx).ID
-	if err := form.UploadImageFile(ctx); err != nil {
+	if err := form.UploadImageFile(ctx.Request); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		ctx.Abort()
 		return

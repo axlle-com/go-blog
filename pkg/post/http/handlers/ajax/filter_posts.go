@@ -11,8 +11,17 @@ import (
 )
 
 func (c *controller) FilterPosts(ctx *gin.Context) {
-	filter := NewPostFilter().ValidateForm(ctx)
+	filter, validError := NewPostFilter().ValidateForm(ctx)
+	if validError != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"errors":  validError.Errors,
+			"message": validError.Message,
+		})
+		ctx.Abort()
+		return
+	}
 	if filter == nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
 

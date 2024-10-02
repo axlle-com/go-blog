@@ -1,9 +1,42 @@
 package alias
 
 import (
+	"fmt"
+	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"gorm.io/gorm"
 	"regexp"
 	"strings"
 )
+
+func Generate(r contracts.Resource, s string) string {
+	alias := Create(s)
+	aliasNew := alias
+	counter := 1
+	repo := Repo()
+
+	for {
+		err := repo.GetByAlias(r.GetResource(), aliasNew, r.GetID())
+		if err == gorm.ErrRecordNotFound {
+			break
+		} else if err != nil {
+			logger.Fatal(err)
+			break
+		}
+		aliasNew = fmt.Sprintf("%s-%d", alias, counter)
+		counter++
+	}
+
+	return aliasNew
+}
+
+func Create(title string) string {
+	title = strings.ToLower(title)
+	alias := transliterate(title)
+	alias = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(alias, "-")
+	alias = strings.Trim(alias, "-")
+	return alias
+}
 
 func transliterate(input string) string {
 	translitMap := map[rune]string{
@@ -24,12 +57,4 @@ func transliterate(input string) string {
 	}
 
 	return result.String()
-}
-
-func Create(title string) string {
-	title = strings.ToLower(title)
-	alias := transliterate(title)
-	alias = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(alias, "-")
-	alias = strings.Trim(alias, "-")
-	return alias
 }

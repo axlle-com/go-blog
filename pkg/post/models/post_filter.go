@@ -1,9 +1,9 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/pkg/common/errors"
 	. "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func NewPostFilter() *PostFilter {
@@ -20,30 +20,14 @@ type PostFilter struct {
 	Filter
 }
 
-func (p *PostFilter) ValidateForm(ctx *gin.Context) *PostFilter {
+func (p *PostFilter) ValidateForm(ctx *gin.Context) (*PostFilter, *errors.Errors) {
 	err := p.Filter.ValidateForm(ctx, p)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors":  err.Errors,
-			"message": err.Message,
-		})
-		ctx.Abort()
-		return nil
-	}
-	return p
+	return p, err
 }
 
-func (p *PostFilter) ValidateQuery(ctx *gin.Context) *PostFilter {
+func (p *PostFilter) ValidateQuery(ctx *gin.Context) (*PostFilter, *errors.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors":  err.Errors,
-			"message": err.Message,
-		})
-		ctx.Abort()
-		return nil
-	}
-	return p
+	return p, err
 }
 
 func (p *PostFilter) PrintTemplateID() uint {

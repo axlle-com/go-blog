@@ -2,19 +2,20 @@ package service
 
 import (
 	"fmt"
+	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/file"
 	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"path/filepath"
 )
 
-func SaveImage(image *models.GalleryImage, c *gin.Context) error {
+func SaveImage(image *models.GalleryImage) error {
 	if image.FileHeader != nil {
-		newFileName := fmt.Sprintf("/public/uploads/%d/%s%s", image.GalleryID, uuid.New().String(), filepath.Ext(image.FileHeader.Filename))
-		if err := c.SaveUploadedFile(image.FileHeader, "src"+newFileName); err != nil {
+		newFileName := fmt.Sprintf("%d", image.GalleryID)
+		path, err := file.SaveUploadedFile(image.FileHeader, newFileName)
+		if err != nil {
+			logger.Error(err)
 			return err
 		} else {
-			image.File = newFileName
+			image.File = path
 			image.OriginalName = image.FileHeader.Filename
 		}
 	}

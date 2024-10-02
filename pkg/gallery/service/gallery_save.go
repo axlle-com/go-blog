@@ -61,7 +61,7 @@ func SaveFromForm(c *gin.Context) []*models.Gallery {
 			image := image
 			go func() {
 				defer group.Done()
-				err := SaveImage(image, c)
+				err := SaveImage(image)
 				if err != nil {
 					logger.Error(err)
 				} else {

@@ -24,5 +24,5 @@ func GetDB() *gorm.DB {
 	if instance == nil {
 		Init(config.GetConfig().DBUrl)
 	}
-	return instance.Debug()
+	return instance //.Debug()
 }

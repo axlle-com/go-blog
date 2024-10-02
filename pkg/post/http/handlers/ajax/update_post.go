@@ -40,7 +40,7 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 	form.ID = post.ID
 	form.Image = post.Image
 	form.UserID = post.UserID
-	if err = form.UploadImageFile(ctx); err != nil {
+	if err = form.UploadImageFile(ctx.Request); err != nil {
 		logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

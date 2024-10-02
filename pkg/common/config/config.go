@@ -10,16 +10,18 @@ import (
 const SessionsName = "web_session"
 
 type Config struct {
-	RedisHost  string
-	RedisPort  string
-	Port       string
-	DBUrl      string
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	KeyJWT     string
-	KeyCookie  string
+	RedisHost     string
+	RedisPort     string
+	Port          string
+	DBUrl         string
+	DBHost        string
+	DBPort        string
+	DBUser        string
+	DBPassword    string
+	KeyJWT        string
+	KeyCookie     string
+	UploadsPath   string
+	UploadsFolder string
 }
 
 var (
@@ -45,6 +47,15 @@ func LoadConfig() (err error) {
 		instance.DBUser = os.Getenv("POSTGRES_USER")
 		instance.DBPassword = os.Getenv("POSTGRES_PASSWORD")
 		instance.DBUrl = "postgres://" + instance.DBUser + ":" + instance.DBPassword + "@" + instance.DBHost + ":" + instance.DBPort + "/postgres"
+
+		instance.UploadsPath = os.Getenv("FILE_UPLOADS_PATH")
+		if instance.UploadsPath == "" {
+			instance.UploadsPath = "/public/uploads/"
+		}
+		instance.UploadsFolder = os.Getenv("FILE_UPLOADS_FOLDER")
+		if instance.UploadsFolder == "" {
+			instance.UploadsFolder = "src"
+		}
 	})
 	return
 }

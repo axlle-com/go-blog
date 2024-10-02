@@ -7,12 +7,9 @@ import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	common "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-	"os"
-	"path/filepath"
-	"strings"
+	"github.com/axlle-com/blog/pkg/file"
+	"log"
+	"net/http"
 	"time"
 )
 
@@ -50,6 +47,7 @@ type Post struct {
 	Galleries          []contracts.Gallery    `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	dirty              map[string]interface{} `ignore:"true"`
 	original           *Post                  `ignore:"true"`
+	*common.Field      `ignore:"true"`
 }
 
 func (p *Post) GetCategoryID() uint {
@@ -77,49 +75,52 @@ func (p *Post) GetResource() string {
 }
 
 func (p *Post) Creating() {
-	p.SetDirty()
-	p.setTitleShort()
-	p.setAlias()
-	p.setURL()
-	p.setDate()
-	p.SetDirty()
+	p.Saving()
 }
 
 func (p *Post) Updating() {
+	p.Saving()
+}
+
+func (p *Post) Saving() {
+	log.Println("=============================")
+	log.Println(p.GetDirty())
+	log.Println("=============================")
 	p.SetDirty()
 	p.setTitleShort()
 	p.setAlias()
 	p.setURL()
 	p.setDate()
 	p.SetDirty()
+	log.Println("=============================")
+	log.Println(p.GetDirty())
+	log.Println("=============================")
 }
 
 func (p *Post) DeleteImageFile() {
 	if p.Image == nil {
 		return
 	}
-	if strings.HasPrefix(*p.Image, "/public/uploads/img/") {
-		return
-	}
-	err := os.Remove("src/" + *p.Image)
+	err := file.DeleteFile(*p.Image)
 	if err != nil {
 		logger.Error(err)
 	}
 	p.Image = nil
 }
 
-func (p *Post) UploadImageFile(ctx *gin.Context) error {
-	_, file, _ := ctx.Request.FormFile("file")
-	if file != nil {
-		newFileName := fmt.Sprintf("/public/uploads/%s/%d/%s%s", p.GetResource(), p.ID, uuid.New().String(), filepath.Ext(file.Filename))
-		if err := ctx.SaveUploadedFile(file, "src"+newFileName); err != nil {
+func (p *Post) UploadImageFile(r *http.Request) error {
+	_, img, _ := r.FormFile("file")
+	if img != nil {
+		newFileName := fmt.Sprintf("%s/%d", p.GetResource(), p.ID)
+		path, err := file.SaveUploadedFile(img, newFileName)
+		if err != nil {
 			logger.Error(err)
 			return err
 		}
 		if p.Image != nil {
 			p.DeleteImageFile()
 		}
-		p.Image = &newFileName
+		p.Image = &path
 	}
 	return nil
 }
@@ -128,33 +129,15 @@ func (p *Post) setAlias() {
 	if p.Title == "" {
 		return
 	}
-	if !p.isDirty("Alias") && !p.isDirty("Title") {
+	if !p.isDirty("Alias") && p.Alias != "" {
 		return
 	}
 
 	if p.Alias == "" {
-		p.Alias = alias.Create(p.Title)
+		p.Alias = alias.Generate(p, p.Title)
 	} else {
-		p.Alias = alias.Create(p.Alias)
+		p.Alias = alias.Generate(p, p.Alias)
 	}
-
-	aliasString := p.Alias
-	counter := 1
-	repo := NewPostRepo()
-
-	for {
-		_, err := repo.GetByAliasNotID(aliasString, p.ID)
-		if err == gorm.ErrRecordNotFound {
-			break
-		} else if err != nil {
-			logger.Fatal(err)
-			break
-		}
-		aliasString = fmt.Sprintf("%s-%d", p.Alias, counter)
-		counter++
-	}
-
-	p.Alias = aliasString
 }
 
 func (p *Post) setURL() {
@@ -186,7 +169,7 @@ func (p *Post) SetOriginal(o *Post) {
 }
 
 func (p *Post) SetDirty() {
-	p.dirty = common.GetChangedFields(p.original, p)
+	p.dirty = p.GetChangedFields(p.original, p)
 }
 
 func (p *Post) GetDirty() string {

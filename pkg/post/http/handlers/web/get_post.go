@@ -22,7 +22,7 @@ func (c *webController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := NewPostRepo().GetByID(id)
+	post, err := PostRepo().GetByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
@@ -30,7 +30,7 @@ func (c *webController) GetPost(ctx *gin.Context) {
 
 	post.Galleries = gallery.Provider().GetAllForResource(post)
 
-	categories, err := NewCategoryRepo().GetAll()
+	categories, err := CategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

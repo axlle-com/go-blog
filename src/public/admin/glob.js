@@ -135,6 +135,8 @@ const _glob = {
                     this.form = object;
                     this.action = this.form.attr('action');
                     this.payload = new FormData(this.form[0]);
+                } else if (object instanceof FormData) {
+                    this.payload = object;
                 } else {
                     _glob.console.error('Не известные данные');
                 }
@@ -195,6 +197,30 @@ const _glob = {
             }
         }
 
+        deepSet(obj, path, value) {
+            let keys = path.split('[').map(function (key) {
+                return key.replace(']', '');
+            });
+            keys.reduce(function (acc, key, i) {
+                if (i === keys.length - 1) {
+                    if (
+                        value !== ''
+                        && value !== null
+                        && value !== undefined
+                        && !(Array.isArray(value) && value.length === 0)
+                        && (typeof value !== 'object' || Object.keys(value).length > 0)
+                    ) {
+                        acc[key] = value;
+                    }
+                } else {
+                    if (!acc[key]) {
+                        acc[key] = isNaN(keys[i + 1]) ? {} : [];
+                    }
+                }
+                return acc[key];
+            }, obj);
+        }
+
         send(callback = null) {
             const _this = this;
             this.validateForm();
@@ -210,7 +236,54 @@ const _glob = {
                 this.preloader.show();
             }
             this.hasSend = true;
-            this.appendImages();
+            let formObject = {};
+            const csrf = $('meta[name="csrf-token"]').attr('content');
+            _this.payload.forEach(function (value, key) {
+                _this.deepSet(formObject, key, value);
+            });
+            $.ajax({
+                url: _this.action,
+                headers: {'X-CSRF-TOKEN': csrf},
+                type: _this.method,
+                data: JSON.stringify(formObject),
+                dataType: 'json',
+                contentType: 'application/json',
+                beforeSend: function () {
+                },
+                success: function (response) {
+                    _this.setData(response).defaultBehavior();
+                    if (!!callback) {
+                        callback(response);
+                    }
+                },
+                error: function (response) {
+                    _this.errorResponse(response);
+                },
+                complete: function () {
+                    _this.hasSend = false;
+                    if (_this.preloader) {
+                        _this.preloader.hide();
+                    }
+                }
+            });
+        }
+
+        sendForm(callback = null) {
+            const _this = this;
+            this.validateForm();
+            if (this.hasErrors) {
+                _glob.noty.error('Заполнены не все обязательные поля');
+                return;
+            }
+            if (this.hasSend) {
+                _glob.console.error('Форма еще отправляется');
+                return;
+            }
+            if (this.preloader) {
+                this.preloader.show();
+            }
+            this.hasSend = true;
+            // this.appendImages();
             const csrf = $('meta[name="csrf-token"]').attr('content');
             $.ajax({
                 url: _this.action,
@@ -497,6 +570,17 @@ const _glob = {
                 }
             }
         },
+    },
+    isEmpty: function (value) {
+        return (
+            value === null
+            || value === undefined
+            || value === '0'
+            || value === 'false'
+            || value === false
+            || (typeof value === 'string' && value.trim() === '')
+            || (Array.isArray(value) && value.length === 0)
+        );
     },
     run: function () {
         try {

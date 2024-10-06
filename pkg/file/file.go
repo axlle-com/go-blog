@@ -1,33 +1,64 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
-const staticPath = "/public/uploads/img/"
+const staticPath = "/public/img/"
 
-func SaveUploadedFile(file *multipart.FileHeader, dst string) (path string, err error) {
-	cnf := config.GetConfig()
-	path = fmt.Sprintf(cnf.UploadsPath+"%s/%s%s", dst, uuid.New().String(), filepath.Ext(file.Filename))
-	if err := save(file, cnf.UploadsFolder+path); err != nil {
-		return "", err
+func SaveUploadedFile(file *multipart.FileHeader, dist string) (path string, err error) {
+	if !isImageFile(file) {
+		return "", errors.New(fmt.Sprintf("Файл:%s не является изображением", file.Filename))
 	}
-	return path, nil
+	cnf := config.GetConfig()
+	path = fmt.Sprintf(cnf.UploadsPath+"%s/%s%s", dist, uuid.New().String(), filepath.Ext(file.Filename))
+	if err = save(file, realPath(path)); err != nil {
+		return
+	}
+	return
+}
+
+func SaveUploadedFiles(files []*multipart.FileHeader, dist string) (uploadedFiles []string) {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	for _, file := range files {
+		wg.Add(1)
+
+		go func(file *multipart.FileHeader, dist string) {
+			defer wg.Done()
+			path, e := SaveUploadedFile(file, dist)
+			if e != nil {
+				logger.Error(e)
+				return
+			}
+
+			mu.Lock()
+			uploadedFiles = append(uploadedFiles, path)
+			mu.Unlock()
+		}(file, dist)
+	}
+
+	wg.Wait()
+	return
 }
 
 func DeleteFile(file string) error {
-	cnf := config.GetConfig()
 	if strings.HasPrefix(file, staticPath) {
 		return nil
 	}
-	absPath, err := filepath.Abs(cnf.UploadsFolder + file)
+	absPath, err := filepath.Abs(realPath(file))
 	if err != nil {
 		return err
 	}
@@ -66,4 +97,38 @@ func save(file *multipart.FileHeader, dst string) error {
 
 	_, err = io.Copy(out, src)
 	return err
+}
+
+func realPath(path string) string {
+	return config.GetConfig().UploadsFolder + path
+}
+
+func isImageFile(fileHeader *multipart.FileHeader) bool {
+	file, err := fileHeader.Open()
+	if err != nil {
+		return false
+	}
+	defer func(file multipart.File) {
+		err := file.Close()
+		if err != nil {
+			logger.Error(err)
+		}
+	}(file)
+
+	// Чтение первых 512 байт файла для определения MIME-типа
+	buffer := make([]byte, 512)
+	if _, err := file.Read(buffer); err != nil {
+		return false
+	}
+
+	// Получение MIME-типа файла
+	contentType := http.DetectContentType(buffer)
+
+	// Проверка MIME-типа на соответствие изображениям
+	switch contentType {
+	case "image/jpeg", "image/png", "image/gif", "image/bmp":
+		return true
+	default:
+		return false
+	}
 }

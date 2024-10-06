@@ -16,7 +16,7 @@ func (c *webController) CreatePost(ctx *gin.Context) {
 	}
 
 	post := &Post{}
-	categories, err := NewCategoryRepo().GetAll()
+	categories, err := CategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

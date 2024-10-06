@@ -17,7 +17,7 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	if err := NewPostRepo().Delete(id); err != nil {
+	if err := PostRepo().Delete(id); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return
 	}
@@ -39,11 +39,11 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 	paginator.AddQueryString(string(filter.GetQueryString()))
 	users := user.Provider().GetAll()
 	templates := template.Provider().GetAll()
-	categories, err := NewCategoryRepo().GetAll()
+	categories, err := CategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
-	posts, err := NewPostRepo().GetPaginate(paginator, filter)
+	posts, err := PostRepo().GetPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}

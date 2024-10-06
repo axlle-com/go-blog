@@ -13,7 +13,7 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
-	postRepo := NewPostRepo()
+	postRepo := PostRepo()
 	post, err := postRepo.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})

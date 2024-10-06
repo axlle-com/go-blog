@@ -3,6 +3,7 @@ package logger
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	l "log"
 	"os"
 	"runtime"
 )
@@ -89,4 +90,12 @@ func Fatal(err error) {
 
 func Info(message string) {
 	New().Info(message)
+}
+
+func Print(message any) {
+	_, file, line, _ := runtime.Caller(1)
+	l.Println("=================================")
+	l.Println(file, line)
+	l.Println(message)
+	l.Println("=================================")
 }

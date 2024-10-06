@@ -22,7 +22,7 @@ type categoryRepository struct {
 	db *gorm.DB
 }
 
-func NewCategoryRepo() CategoryRepository {
+func CategoryRepo() CategoryRepository {
 	return &categoryRepository{db: db.GetDB()}
 }
 

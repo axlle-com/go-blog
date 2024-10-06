@@ -27,11 +27,11 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 
 	paginator := models.Paginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
-	posts, err := NewPostRepo().GetPaginate(paginator, filter)
+	posts, err := PostRepo().GetPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	categories, err := NewCategoryRepo().GetAll()
+	categories, err := CategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

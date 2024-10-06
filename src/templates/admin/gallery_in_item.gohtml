@@ -1,11 +1,12 @@
 {{ define "admin.gallery_in_item" }}
     <div class="catalog-tabs">
         {{ if .post.Galleries }}
+            {{ $index := 0 }}
             {{ range .post.Galleries }}
                 <div class="js-galleries-general-block">
                     <input
                             type="hidden"
-                            name="galleries[{{ .GetID }}][gallery_id]"
+                            name="galleries[{{ $index }}][id]"
                             value="{{ .GetID }}">
                     <div class="row">
                         <div class="col-md-12">
@@ -17,7 +18,7 @@
                             <input
                                     type="file"
                                     id="js-gallery-input-{{ .GetID }}"
-                                    data-js-gallery-id="{{ .GetID }}"
+                                    data-gallery-id="{{ $index }}"
                                     class="custom-input-file js-gallery-input"
                                     name=""
                                     multiple
@@ -27,13 +28,18 @@
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="parts-gallery js-gallery-block-saved sortable swap">
+                                {{ $indexImages := 0 }}
                                 {{ range .GetImages }}
-                                <div class="md-block-5 js-gallery-item sort-handle">
+                                    <div class="md-block-5 js-gallery-item sort-handle">
                                     <div class="img rounded">
                                         <input
                                                 type="hidden"
-                                                name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][id]"
+                                                name="galleries[{{ $index }}][images][{{ $indexImages }}][id]"
                                                 value="{{ .GetID }}">
+                                        <input
+                                                type="hidden"
+                                                name="galleries[{{ $index }}][images][{{ $indexImages }}][gallery_id]"
+                                                value="{{ .GetGalleryID }}">
                                         {{ template "admin.gallery_image" . }}
                                     </div>
                                     <div>
@@ -41,7 +47,7 @@
                                             <input
                                                     class="form-control form-shadow"
                                                     placeholder="Заголовок"
-                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][title]"
+                                                    name="galleries[{{ $index }}][images][{{ $indexImages }}][title]"
                                                     value="{{ .GetTitle }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -49,7 +55,7 @@
                                             <input
                                                     class="form-control form-shadow"
                                                     placeholder="Описание"
-                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][description]"
+                                                    name="galleries[{{ $index }}][images][{{ $indexImages }}][description]"
                                                     value="{{ .GetDescription }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -58,17 +64,19 @@
                                                     class="form-control form-shadow"
                                                     placeholder="Сортировка"
                                                     type="number"
-                                                    name="galleries[{{ .GetGalleryID }}][images][{{ .GetID }}][sort]"
+                                                    name="galleries[{{ $index }}][images][{{ $indexImages }}][sort]"
                                                     value="{{ .GetSort }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
+                                    {{ $indexImages = add $indexImages 1 }}
                                 {{ end }}
                             </div>
                         </div>
                     </div>
                 </div>
+                {{ $index = add $index 1 }}
             {{ end }}
         {{ else }}
             <div class="js-galleries-general-block">
@@ -82,9 +90,10 @@
                         <input
                                 type="file"
                                 id="js-gallery-input-0"
-                                data-js-gallery-id=""
+                                data-gallery-id="0"
+                                data-action="/admin/file/images"
                                 class="custom-input-file js-gallery-input"
-                                name=""
+                                name="files"
                                 multiple
                                 accept="image/*">
                     </div>

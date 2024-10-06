@@ -9,7 +9,7 @@ import (
 
 func SaveImage(image *models.GalleryImage) error {
 	if image.FileHeader != nil {
-		newFileName := fmt.Sprintf("%d", image.GalleryID)
+		newFileName := fmt.Sprintf("gallery/%d", image.GalleryID)
 		path, err := file.SaveUploadedFile(image.FileHeader, newFileName)
 		if err != nil {
 			logger.Error(err)

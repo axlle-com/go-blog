@@ -120,43 +120,155 @@ const _image = {
         const _this = this;
         $('body').on('change', '.js-image-upload', function () {
             let input = $(this);
-            let div = $(this).closest('fieldset');
-            let image = div.find('.js-image-block');
-            let file = window.URL.createObjectURL(input[0].files[0]);
-            $('.js-image-block-remove').slideDown();
-            if (image.length) {
-                const imageBlock = `
-                    <div class="image-box" style="background-image: url(${file}); background-size: cover;background-position: center;"></div>
+            let action = input.attr('data-action');
+            let div = input.closest('fieldset').find('.js-image-block');
+            let file = input[0].files[0];
+            if (!file) {
+                return
+            }
+            let formData = new FormData();
+            formData.append('file', file);
+            const request = new _glob.request(formData)
+                .setPreloader('.js-product')
+                .setAction(action);
+            request.sendForm((response) => {
+                if (response.data.image) {
+                    _this.draw(div, response.data.image)
+                }
+                if (response.message) {
+                    _glob.noty.success(response.message);
+                } else {
+                    _glob.noty.success('Изображение загружено');
+                }
+            });
+        });
+    },
+    draw: function (div, image) {
+        const _this = this;
+        if (div.length && image) {
+            const imageBlock = `
+                    <div class="image-box" style="background-image: url(${image}); background-size: cover;background-position: center;"></div>
                     <div class="overlay-content text-center justify-content-end">
                         <div class="btn-group mb-1" role="group">
-                            <a data-fancybox="gallery" href="${file}">
+                            <a data-fancybox="gallery" href="${image}">
                                 <button type="button" class="btn btn-link btn-icon text-danger">
                                     <i class="material-icons">zoom_in</i>
                                 </button>
                             </a>
-                            <button type="button" class="btn btn-link btn-icon text-danger" data-js-image-delete>
+                            <button 
+                            type="button" 
+                            class="btn btn-link btn-icon text-danger" 
+                            data-action="/admin/file/image${image}"
+                            data-js-image-delete>
                                 <i class="material-icons">delete</i>
                             </button>
                         </div>
+                        <input type="hidden" name="image" value="${image}">
                     </div>
                 `;
-                $(image).html(imageBlock);
-                _config.fancybox();
-            }
-            _glob.noty.success('Нажните сохранить, что бы загрузить изображение');
-        });
+            $(div).html(imageBlock);
+            $('.js-image-block-empty').remove();
+            _config.fancybox();
+        }
     },
     delete: function () {
         const _this = this;
         $('body').on('click', '[data-js-image-delete]', function (evt) {
-            let image = $(this).closest('fieldset').find('.image-box');
-            let input = $(this).closest('fieldset').find('input[type="file"]');
+            let image = $(this).closest('.js-image-block').find('.image-box');
+            let input = $(this).closest('.js-image-block').find('input[name="temp_image"]');
             if (!image.length || !input.length) {
                 return;
             }
+            const request = new _glob.request({action: $(this).data('action')}).setMethod('delete')
+                .setPreloader('.js-product');
+            request.sendForm((response) => {
+                if (response.message) {
+                    _glob.noty.success(response.message);
+                } else {
+                    _glob.noty.success('Изображение удалено');
+                }
+            });
             input.val('');
             image.remove();
         });
+    },
+    addArray: function () {
+        const _this = this;
+        $('body').on('change', '.js-gallery-input', function (evt) {
+            let input = $(this);
+            let action = input.attr('data-action');
+            let files = input[0].files;
+            if (!files) {
+                return
+            }
+            let formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+            new _glob.request(formData).setAction(action).sendForm((response) => {
+                if (response.data.images) {
+                    let idGallery = input.attr('data-gallery-id');
+                    if (!idGallery) {
+                        idGallery = _glob.uuid();
+                        input.attr('data-gallery-id', idGallery);
+                    }
+                    _this.drawArray(response.data.images, idGallery)
+                }
+                if (response.message) {
+                    _glob.noty.success(response.message);
+                } else {
+                    _glob.noty.success('Изображение загружено');
+                }
+            });
+        });
+    },
+    drawArray: function (images, idGallery) {
+        if (Object.keys(images).length <= 0) {
+            return
+        }
+        const _this = this;
+        const selector = `[data-gallery-id="${idGallery}"]`;
+        const block = $(selector).closest('.js-galleries-general-block').find('.js-gallery-block-saved');
+        for (let i = 0; i < images.length; i++) {
+            let url = images[i];
+            let image = `<div class="md-block-5 js-gallery-item sort-handle">
+                                <div class="img rounded">
+                                    <div class="image-box" style="background-image: url(${url}); background-size: cover;background-position: center;"></div>
+                                    <div class="overlay-content text-center justify-content-end">
+                                        <div class="btn-group mb-1" role="group">
+                                            <a data-fancybox="gallery" href="${url}">
+                                                <button type="button" class="btn btn-link btn-icon text-danger">
+                                                    <i class="material-icons">zoom_in</i>
+                                                </button>
+                                            </a>
+                                            <button type="button" class="btn btn-link btn-icon text-danger" data-js-image-array-id="${idGallery}.${i}">
+                                                <i class="material-icons">delete</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][id]" value="">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][gallery_id]" value="${_glob.isEmpty(idGallery) ? '' : idGallery}">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][image]" value="${url}">
+                                    <div class="form-group small">
+                                        <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${i}][title]" value="">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="form-group small">
+                                        <input class="form-control form-shadow" placeholder="Описание" name="galleries[${idGallery}][images][${i}][description]" value="">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="form-group small">
+                                        <input class="form-control form-shadow" type="number" placeholder="Сортировка" name="galleries[${idGallery}][images][${i}][sort]" value="">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>`;
+            block.append(image);
+        }
+        _config.fancybox();
+        _config.sort();
     },
     deleteArray: function () {
         const _this = this;
@@ -184,78 +296,27 @@ const _image = {
             }
         });
     },
-    addArray: function () {
-        const _this = this;
-        $('body').on('change', '.js-gallery-input', function (evt) {
-            let idGallery = $(this).attr('data-js-gallery-id');
-            if (!idGallery) {
-                idGallery = _glob.uuid();
-                $(this).attr('data-js-gallery-id', idGallery);
-            }
-            let array = {};
-            let files = evt.target.files;
-            let fileArray = Array.from(files);
-            $(this).val(null);
-            for (let i = 0, l = fileArray.length; i < l; i++) {
-                let id = _glob.uuid();
-                if (!_glob.images[idGallery]) {
-                    _glob.images[idGallery] = {};
-                    _glob.images[idGallery]['images'] = {};
-                }
-                _glob.images[idGallery]['images'][id] = {};
-                _glob.images[idGallery]['images'][id]['file'] = fileArray[i];
-                array[id] = fileArray[i];
-            }
-            _this.drawArray(array, idGallery);
-        });
-    },
-    drawArray: function (array, idGallery) {
-        const self = this;
-        if (Object.keys(array).length) {
-            let selector = `[data-js-gallery-id="${idGallery}"]`;
-            let block = $(selector).closest('.js-galleries-general-block').find('.js-gallery-block-saved');
-            for (let key in array) {
-                let imageUrl = URL.createObjectURL(array[key]);
-                let image = `<div class="md-block-5 js-gallery-item sort-handle">
-                                <div class="img rounded">
-                                    <div class="image-box" style="background-image: url(${imageUrl}); background-size: cover;background-position: center;"></div>
-                                    <div class="overlay-content text-center justify-content-end">
-                                        <div class="btn-group mb-1" role="group">
-                                            <a data-fancybox="gallery" href="${imageUrl}">
-                                                <button type="button" class="btn btn-link btn-icon text-danger">
-                                                    <i class="material-icons">zoom_in</i>
-                                                </button>
-                                            </a>
-                                            <button type="button" class="btn btn-link btn-icon text-danger" data-js-image-array-id="${idGallery}.${key}">
-                                                <i class="material-icons">delete</i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${key}][title]" value="">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                    <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Описание" name="galleries[${idGallery}][images][${key}][description]" value="">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                    <div class="form-group small">
-                                        <input class="form-control form-shadow" type="number" placeholder="Сортировка" name="galleries[${idGallery}][images][${key}][sort]" value="">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                </div>
-                            </div>`;
-                block.append(image);
-            }
-            _glob.noty.info('Нажмите "Сохранить", что бы загрузить изображение');
-            _config.fancybox();
-            _config.sort();
-        }
-    },
     gallerySort: function () {
 
+    },
+    imageBlockEmpty: function () {
+        return `
+            <div class="form-group js-image-block-empty">
+                <label class="control-label button-100" for="js-image-upload">
+                    <a type="button" class="btn btn-primary button-image">
+                        Загрузить фото
+                    </a>
+                </label>
+                <input
+                        type="file"
+                        data-action="/admin/file/image"
+                        id="js-image-upload"
+                        class="custom-input-file js-image-upload"
+                        name="file"
+                        accept="image/*">
+                <div class="invalid-feedback"></div>
+            </div>
+        `;
     },
     run: function () {
         this.add();

@@ -25,7 +25,7 @@ type postRepository struct {
 	c  int
 }
 
-func NewPostRepo() PostRepository {
+func PostRepo() PostRepository {
 	return &postRepository{db: db.GetDB()}
 }
 

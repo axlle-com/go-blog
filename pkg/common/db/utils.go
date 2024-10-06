@@ -50,6 +50,34 @@ func UintPtr(u int) *uint {
 	return &v
 }
 
+func IntPtr(i int) *int {
+	return &i
+}
+
+func Int8Ptr(i int8) *int8 {
+	return &i
+}
+
+func Int16Ptr(i int16) *int16 {
+	return &i
+}
+
+func Int32Ptr(i int32) *int32 {
+	return &i
+}
+
+func Int64Ptr(i int64) *int64 {
+	return &i
+}
+
+func Float32Ptr(i float32) *float32 {
+	return &i
+}
+
+func Float64Ptr(i float64) *float64 {
+	return &i
+}
+
 func IntStr(num string) int {
 	v, err := strconv.ParseInt(num, 10, 0)
 	if err != nil {

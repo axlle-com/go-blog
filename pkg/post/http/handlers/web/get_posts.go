@@ -36,12 +36,12 @@ func (c *webController) GetPosts(ctx *gin.Context) {
 	paginator.AddQueryString(string(filter.GetQueryString()))
 	templates := template.Provider().GetAll()
 	users := userProvider.Provider().GetAll()
-	categories, err := NewCategoryRepo().GetAll()
+	categories, err := CategoryRepo().GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	posts, err := NewPostRepo().GetPaginate(paginator, filter)
+	posts, err := PostRepo().GetPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}

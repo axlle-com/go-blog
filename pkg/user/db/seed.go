@@ -24,7 +24,7 @@ func SeedUsers(n int) {
 		updatedAt := time.Now()
 
 		user := models.User{
-			Avatar:             StrPtr("/public/uploads/img/user.svg"),
+			Avatar:             StrPtr("/public/img/user.svg"),
 			FirstName:          firstName,
 			LastName:           lastName,
 			Phone:              &phone,
@@ -56,7 +56,7 @@ func SeedUsers(n int) {
 
 	role, _ := NewRoleRepository().GetByName("admin")
 	user := models.User{
-		Avatar:             StrPtr("/public/uploads/img/user.svg"),
+		Avatar:             StrPtr("/public/img/user.svg"),
 		FirstName:          "Admin",
 		LastName:           "Admin",
 		Phone:              &phone,

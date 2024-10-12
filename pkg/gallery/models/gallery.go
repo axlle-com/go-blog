@@ -6,16 +6,16 @@ import (
 )
 
 type Gallery struct {
-	ID           uint            `gorm:"primary_key" json:"id"`
-	Title        *string         `gorm:"size:255" json:"title"`
-	Description  *string         `gorm:"type:text" json:"description"`
-	Sort         int             `gorm:"default:0" json:"sort"`
-	Image        *string         `gorm:"size:255;" json:"image"`
-	URL          *string         `gorm:"size:255" json:"url"`
-	CreatedAt    *time.Time      `json:"created_at,omitempty"`
-	UpdatedAt    *time.Time      `json:"updated_at,omitempty"`
-	DeletedAt    *time.Time      `gorm:"index" json:"deleted_at,omitempty"`
-	GalleryImage []*GalleryImage `json:"images,omitempty"`
+	ID          uint       `gorm:"primary_key" json:"id"`
+	Title       *string    `gorm:"size:255" json:"title"`
+	Description *string    `gorm:"type:text" json:"description"`
+	Sort        int        `gorm:"default:0" json:"sort"`
+	Image       *string    `gorm:"size:255;" json:"image"`
+	URL         *string    `gorm:"size:255" json:"url"`
+	CreatedAt   *time.Time `json:"created_at,omitempty"`
+	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
+	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+	Images      []*Image   `json:"images,omitempty"`
 }
 
 func (g *Gallery) GetID() uint {
@@ -46,9 +46,9 @@ func (g *Gallery) GetDate() *time.Time {
 	return g.CreatedAt
 }
 
-func (g *Gallery) GetImages() []contracts.GalleryImage {
-	images := make([]contracts.GalleryImage, len(g.GalleryImage))
-	for i, image := range g.GalleryImage {
+func (g *Gallery) GetImages() []contracts.Image {
+	images := make([]contracts.Image, len(g.Images))
+	for i, image := range g.Images {
 		images[i] = image
 	}
 	return images

@@ -25,12 +25,13 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		}
 		return
 	}
-	logger.Print(form)
 	post, err := service.PostCreate(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+	ctx.JSON(http.StatusMultipleChoices, gin.H{"message": "err.Error()"})
+	return
 
 	//ctx.Set("title", form.Title)
 	//galleries := gallery.Provider().SaveFromForm(ctx)

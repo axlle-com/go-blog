@@ -40,6 +40,10 @@
                                                 type="hidden"
                                                 name="galleries[{{ $index }}][images][{{ $indexImages }}][gallery_id]"
                                                 value="{{ .GetGalleryID }}">
+                                        <input
+                                                type="hidden"
+                                                name="galleries[{{ $index }}][images][{{ $indexImages }}][file]"
+                                                value="{{ .GetFile }}">
                                         {{ template "admin.gallery_image" . }}
                                     </div>
                                     <div>

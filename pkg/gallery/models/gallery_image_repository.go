@@ -8,11 +8,11 @@ import (
 )
 
 type GalleryImageRepository interface {
-	Create(image *GalleryImage) error
-	GetByID(id uint) (*GalleryImage, error)
-	Update(image *GalleryImage) error
+	Create(image *Image) error
+	GetByID(id uint) (*Image, error)
+	Update(image *Image) error
 	Delete(id uint) error
-	GetAll() ([]GalleryImage, error)
+	GetAll() ([]Image, error)
 	GetAllIds() ([]uint, error)
 	CountForGallery(id uint) int64
 }
@@ -22,23 +22,23 @@ type galleryImageRepository struct {
 	db *gorm.DB
 }
 
-func NewGalleryImageRepository() GalleryImageRepository {
+func ImageRepo() GalleryImageRepository {
 	return &galleryImageRepository{db: db.GetDB()}
 }
 
-func (r *galleryImageRepository) Create(image *GalleryImage) error {
+func (r *galleryImageRepository) Create(image *Image) error {
 	return r.db.Create(image).Error
 }
 
-func (r *galleryImageRepository) GetByID(id uint) (*GalleryImage, error) {
-	var image GalleryImage
+func (r *galleryImageRepository) GetByID(id uint) (*Image, error) {
+	var image Image
 	if err := r.db.First(&image, id).Error; err != nil {
 		return nil, err
 	}
 	return &image, nil
 }
 
-func (r *galleryImageRepository) Update(image *GalleryImage) error {
+func (r *galleryImageRepository) Update(image *Image) error {
 	return r.db.Select("GalleryID", "Title", "Description", "Sort").Save(image).Error
 }
 
@@ -46,15 +46,15 @@ func (r *galleryImageRepository) Update(image *GalleryImage) error {
 func (r *galleryImageRepository) Delete(id uint) error {
 	g, err := r.GetByID(id)
 	if err == nil {
-		if err = r.db.Delete(&GalleryImage{}, id).Error; err == nil {
+		if err = r.db.Delete(&Image{}, id).Error; err == nil {
 			return g.Deleted()
 		}
 	}
 	return err
 }
 
-func (r *galleryImageRepository) GetAll() ([]GalleryImage, error) {
-	var images []GalleryImage
+func (r *galleryImageRepository) GetAll() ([]Image, error) {
+	var images []Image
 	if err := r.db.Find(&images).Error; err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (r *galleryImageRepository) GetAll() ([]GalleryImage, error) {
 
 func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
-	if err := r.db.Model(&GalleryImage{}).Pluck("id", &ids).Error; err != nil {
+	if err := r.db.Model(&Image{}).Pluck("id", &ids).Error; err != nil {
 		logger.Error(err)
 	}
 	return ids, nil
@@ -71,7 +71,7 @@ func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 
 func (r *galleryImageRepository) CountForGallery(id uint) int64 {
 	var count int64
-	result := r.db.Model(&GalleryImage{}).Where("gallery_id = ?", id).Count(&count)
+	result := r.db.Model(&Image{}).Where("gallery_id = ?", id).Count(&count)
 	if result.Error != nil {
 		logger.Error(result.Error)
 	}

@@ -18,7 +18,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		return
 	}
 
-	galleryRepo := models.NewGalleryRepository()
+	galleryRepo := models.GalleryRepo()
 	_, err := galleryRepo.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
@@ -26,7 +26,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		return
 	}
 
-	imageRepo := models.NewGalleryImageRepository()
+	imageRepo := models.ImageRepo()
 	image, err := imageRepo.GetByID(imageId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})

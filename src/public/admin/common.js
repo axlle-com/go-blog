@@ -250,7 +250,7 @@ const _image = {
                                 <div>
                                     <input type="hidden" name="galleries[${idGallery}][images][${i}][id]" value="">
                                     <input type="hidden" name="galleries[${idGallery}][images][${i}][gallery_id]" value="${_glob.isEmpty(idGallery) ? '' : idGallery}">
-                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][image]" value="${url}">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][file]" value="${url}">
                                     <div class="form-group small">
                                         <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${i}][title]" value="">
                                         <div class="invalid-feedback"></div>

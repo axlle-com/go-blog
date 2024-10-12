@@ -4,7 +4,6 @@ import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +22,7 @@ type provider struct {
 func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
 	var collection []contracts.Gallery
 	galleries, err := models.
-		NewGalleryRepository().
+		GalleryRepo().
 		GetAllForResource(c)
 	if err == nil {
 		for _, gallery := range galleries {
@@ -37,9 +36,9 @@ func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
 
 func (p *provider) SaveFromForm(c *gin.Context) []contracts.Gallery {
 	var collection []contracts.Gallery
-	galleries := service.SaveFromForm(c)
-	for _, gallery := range galleries {
-		collection = append(collection, gallery)
-	}
+	//galleries := service.SaveFromForm(c)
+	//for _, gallery := range galleries {
+	//	collection = append(collection, gallery)
+	//}
 	return collection
 }

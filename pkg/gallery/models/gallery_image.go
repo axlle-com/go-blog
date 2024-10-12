@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type GalleryImage struct {
+type Image struct {
 	ID           uint                  `gorm:"primary_key" json:"id"`
 	GalleryID    uint                  `gorm:"not null;index" json:"gallery_id"`
 	OriginalName string                `gorm:"size:255;not null" json:"original_name"`
@@ -22,46 +22,50 @@ type GalleryImage struct {
 	Gallery      *Gallery
 }
 
-func (gi *GalleryImage) GetID() uint {
+func (*Image) TableName() string {
+	return "gallery_images"
+}
+
+func (gi *Image) GetID() uint {
 	return gi.ID
 }
 
-func (gi *GalleryImage) GetGalleryID() uint {
+func (gi *Image) GetGalleryID() uint {
 	return gi.GalleryID
 }
 
-func (gi *GalleryImage) GetTitle() *string {
+func (gi *Image) GetTitle() *string {
 	return gi.Title
 }
 
-func (gi *GalleryImage) GetDescription() *string {
+func (gi *Image) GetDescription() *string {
 	return gi.Description
 }
 
-func (gi *GalleryImage) GetSort() int {
+func (gi *Image) GetSort() int {
 	return gi.Sort
 }
 
-func (gi *GalleryImage) GetFile() string {
+func (gi *Image) GetFile() string {
 	return gi.File
 }
 
-func (gi *GalleryImage) GetDate() *time.Time {
+func (gi *Image) GetDate() *time.Time {
 	return gi.CreatedAt
 }
 
-func (gi *GalleryImage) GetGallery() contracts.Gallery {
+func (gi *Image) GetGallery() contracts.Gallery {
 	return gi.Gallery
 }
 
-func (gi *GalleryImage) Deleted() error {
+func (gi *Image) Deleted() error {
 	err := file.DeleteFile(gi.File)
 	if err != nil {
 		return err
 	}
-	count := NewGalleryImageRepository().CountForGallery(gi.GalleryID)
+	count := ImageRepo().CountForGallery(gi.GalleryID)
 	if count == 0 {
-		err = NewGalleryRepository().Delete(gi.GalleryID)
+		err = GalleryRepo().Delete(gi.GalleryID)
 		if err != nil {
 			return err
 		}

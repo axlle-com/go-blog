@@ -82,8 +82,8 @@ func (p *Post) Updating() {
 }
 
 func (p *Post) Saving() {
-	logger.Print(p.GetDirty())
 	p.SetDirty()
+	logger.Print(p.GetDirty())
 	p.setTitleShort()
 	p.setAlias()
 	p.setURL()

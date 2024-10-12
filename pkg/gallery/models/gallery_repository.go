@@ -23,12 +23,12 @@ type galleryRepository struct {
 	db *gorm.DB
 }
 
-func NewGalleryRepository() GalleryRepository {
+func GalleryRepo() GalleryRepository {
 	return &galleryRepository{db: db.GetDB()}
 }
 
 func (r *galleryRepository) Create(gallery *Gallery) error {
-	return r.db.Create(gallery).Error
+	return r.db.Omit("Images").Create(gallery).Error
 }
 
 func (r *galleryRepository) GetByID(id uint) (*Gallery, error) {
@@ -68,7 +68,7 @@ func (r *galleryRepository) GetAllForResource(c contracts.Resource) ([]*Gallery,
 		Where("r.resource_id = ?", c.GetID()).
 		Where("r.resource = ?", c.GetResource()).
 		Model(&Gallery{}).
-		Preload("GalleryImage", func(db *gorm.DB) *gorm.DB {
+		Preload("Images", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sort ASC")
 		}).
 		Find(&galleries).Error

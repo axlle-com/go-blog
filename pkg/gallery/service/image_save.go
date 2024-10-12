@@ -1,42 +1,23 @@
 package service
 
 import (
-	"fmt"
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/file"
+	"github.com/axlle-com/blog/pkg/common/service"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 )
 
-func SaveImage(image *models.GalleryImage) error {
-	if image.FileHeader != nil {
-		newFileName := fmt.Sprintf("gallery/%d", image.GalleryID)
-		path, err := file.SaveUploadedFile(image.FileHeader, newFileName)
-		if err != nil {
-			logger.Error(err)
-			return err
-		} else {
-			image.File = path
-			image.OriginalName = image.FileHeader.Filename
-		}
-	}
+func SaveImage(i any) (*models.Image, error) {
+	image := service.LoadStruct(&models.Image{}, i).(*models.Image)
+	repo := models.ImageRepo()
 
-	var imageOld *models.GalleryImage
-	imageRepo := models.NewGalleryImageRepository()
-	if image.ID != 0 {
-		imageOld, _ = imageRepo.GetByID(image.ID)
-	}
-
-	if imageOld == nil || imageOld.ID == 0 {
-		err := imageRepo.Create(image)
-		if err != nil {
-			return err
+	if image.ID == 0 {
+		if err := repo.Create(image); err != nil {
+			return nil, err
 		}
 	} else {
-		err := imageRepo.Update(image)
-		if err != nil {
-			return err
+		if err := repo.Update(image); err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	return image, nil
 }

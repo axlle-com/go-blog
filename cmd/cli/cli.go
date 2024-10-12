@@ -53,7 +53,7 @@ var Commands = map[string]func(){
 			&user.Role{},
 			&user.Permission{},
 			&gallery.Gallery{},
-			&gallery.GalleryImage{},
+			&gallery.Image{},
 			&gallery.GalleryHasResource{},
 		)
 		if err != nil {
@@ -72,7 +72,7 @@ var Commands = map[string]func(){
 			&user.Role{},
 			&user.Permission{},
 			&gallery.Gallery{},
-			&gallery.GalleryImage{},
+			&gallery.Image{},
 			&gallery.GalleryHasResource{},
 		)
 		if err != nil {
@@ -86,7 +86,7 @@ var Commands = map[string]func(){
 			&user.Role{},
 			&user.Permission{},
 			&gallery.Gallery{},
-			&gallery.GalleryImage{},
+			&gallery.Image{},
 			&gallery.GalleryHasResource{},
 		)
 		if err != nil {

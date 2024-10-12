@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	l "log"
@@ -96,6 +97,6 @@ func Print(message any) {
 	_, file, line, _ := runtime.Caller(1)
 	l.Println("=================================")
 	l.Println(file, line)
-	l.Println(message)
+	fmt.Printf("%+v\n", message)
 	l.Println("=================================")
 }

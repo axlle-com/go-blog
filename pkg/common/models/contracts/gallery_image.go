@@ -2,7 +2,7 @@ package contracts
 
 import "time"
 
-type GalleryImage interface {
+type Image interface {
 	GetID() uint
 	GetGalleryID() uint
 	GetTitle() *string

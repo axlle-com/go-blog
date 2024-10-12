@@ -12,6 +12,6 @@ type Gallery interface {
 	GetImage() *string
 	GetURL() *string
 	GetDate() *time.Time
-	GetImages() []GalleryImage
+	GetImages() []Image
 	Attach(Resource) error
 }

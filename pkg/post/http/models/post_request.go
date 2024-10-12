@@ -10,13 +10,13 @@ func NewPostRequest() *PostRequest {
 }
 
 type GalleryRequest struct {
-	ID          string `json:"id" form:"id" binding:"omitempty"`
-	Title       string `json:"title" form:"title" binding:"omitempty"`
-	Description string `json:"description" form:"description" binding:"omitempty"`
-	Sort        string `json:"sort" form:"sort" binding:"omitempty"`
-	Image       string `json:"image" form:"image" binding:"omitempty"`
-	URL         string `json:"url" form:"url" binding:"omitempty"`
-	Images      []*ImageRequest
+	ID          string          `json:"id" form:"id" binding:"omitempty"`
+	Title       string          `json:"title" form:"title" binding:"omitempty"`
+	Description string          `json:"description" form:"description" binding:"omitempty"`
+	Sort        string          `json:"sort" form:"sort" binding:"omitempty"`
+	Image       string          `json:"image" form:"image" binding:"omitempty"`
+	URL         string          `json:"url" form:"url" binding:"omitempty"`
+	Images      []*ImageRequest // TODO rename to GalleryImages in all of them
 }
 
 type ImageRequest struct {

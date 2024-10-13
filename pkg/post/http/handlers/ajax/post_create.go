@@ -25,24 +25,11 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		}
 		return
 	}
-	post, err := service.PostCreate(form, c.GetUser(ctx))
+	post, err := service.PostSave(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusMultipleChoices, gin.H{"message": "err.Error()"})
-	return
-
-	//ctx.Set("title", form.Title)
-	//galleries := gallery.Provider().SaveFromForm(ctx)
-	//for _, g := range galleries {
-	//	err := g.Attach(form)
-	//	if err != nil {
-	//		logger.Error(err)
-	//	} else {
-	//		form.Galleries = append(form.Galleries, g)
-	//	}
-	//}
 
 	categories, err := CategoryRepo().GetAll()
 	if err != nil {

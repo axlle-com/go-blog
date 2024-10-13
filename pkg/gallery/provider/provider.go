@@ -3,13 +3,14 @@ package provider
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	common "github.com/axlle-com/blog/pkg/common/service"
 	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/gin-gonic/gin"
+	"github.com/axlle-com/blog/pkg/gallery/service"
 )
 
 type Gallery interface {
 	GetAllForResource(contracts.Resource) []contracts.Gallery
-	SaveFromForm(*gin.Context) []contracts.Gallery
+	SaveFromForm(g any) (contracts.Gallery, error)
 }
 
 func Provider() Gallery {
@@ -34,11 +35,11 @@ func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
 	return nil
 }
 
-func (p *provider) SaveFromForm(c *gin.Context) []contracts.Gallery {
-	var collection []contracts.Gallery
-	//galleries := service.SaveFromForm(c)
-	//for _, gallery := range galleries {
-	//	collection = append(collection, gallery)
-	//}
-	return collection
+func (p *provider) SaveFromForm(g any) (contracts.Gallery, error) {
+	gal := common.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
+	save, err := service.GallerySave(gal)
+	if err != nil {
+		return nil, err
+	}
+	return save, nil
 }

@@ -18,7 +18,7 @@ type galleryResourceRepository struct {
 	db *gorm.DB
 }
 
-func NewGalleryResourceRepository() GalleryResourceRepository {
+func ResourceRepo() GalleryResourceRepository {
 	return &galleryResourceRepository{db: db.GetDB()}
 }
 

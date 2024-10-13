@@ -19,53 +19,53 @@ type Image struct {
 	UpdatedAt    *time.Time            `json:"updated_at,omitempty"`
 	DeletedAt    *time.Time            `gorm:"index" json:"deleted_at,omitempty"`
 	FileHeader   *multipart.FileHeader `gorm:"-"`
-	Gallery      *Gallery
+	Gallery      *Gallery              `gorm:"-"`
 }
 
 func (*Image) TableName() string {
 	return "gallery_images"
 }
 
-func (gi *Image) GetID() uint {
-	return gi.ID
+func (i *Image) GetID() uint {
+	return i.ID
 }
 
-func (gi *Image) GetGalleryID() uint {
-	return gi.GalleryID
+func (i *Image) GetGalleryID() uint {
+	return i.GalleryID
 }
 
-func (gi *Image) GetTitle() *string {
-	return gi.Title
+func (i *Image) GetTitle() *string {
+	return i.Title
 }
 
-func (gi *Image) GetDescription() *string {
-	return gi.Description
+func (i *Image) GetDescription() *string {
+	return i.Description
 }
 
-func (gi *Image) GetSort() int {
-	return gi.Sort
+func (i *Image) GetSort() int {
+	return i.Sort
 }
 
-func (gi *Image) GetFile() string {
-	return gi.File
+func (i *Image) GetFile() string {
+	return i.File
 }
 
-func (gi *Image) GetDate() *time.Time {
-	return gi.CreatedAt
+func (i *Image) GetDate() *time.Time {
+	return i.CreatedAt
 }
 
-func (gi *Image) GetGallery() contracts.Gallery {
-	return gi.Gallery
+func (i *Image) GetGallery() contracts.Gallery {
+	return i.Gallery
 }
 
-func (gi *Image) Deleted() error {
-	err := file.DeleteFile(gi.File)
+func (i *Image) Deleted() error {
+	err := file.DeleteFile(i.File)
 	if err != nil {
 		return err
 	}
-	count := ImageRepo().CountForGallery(gi.GalleryID)
+	count := ImageRepo().CountForGallery(i.GalleryID)
 	if count == 0 {
-		err = GalleryRepo().Delete(gi.GalleryID)
+		err = GalleryRepo().Delete(i.GalleryID)
 		if err != nil {
 			return err
 		}

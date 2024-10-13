@@ -16,7 +16,7 @@ type GalleryRequest struct {
 	Sort        string          `json:"sort" form:"sort" binding:"omitempty"`
 	Image       string          `json:"image" form:"image" binding:"omitempty"`
 	URL         string          `json:"url" form:"url" binding:"omitempty"`
-	Images      []*ImageRequest // TODO rename to GalleryImages in all of them
+	Images      []*ImageRequest `json:"images" form:"images" binding:"omitempty"`
 }
 
 type ImageRequest struct {
@@ -30,6 +30,7 @@ type ImageRequest struct {
 }
 
 type PostRequest struct {
+	ID                 uint              `json:"id" form:"id" binding:"omitempty"`
 	UserID             string            `json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         string            `json:"template_id" form:"template_id" binding:"omitempty"`
 	PostCategoryID     string            `json:"post_category_id" form:"post_category_id" binding:"omitempty"`

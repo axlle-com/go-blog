@@ -52,7 +52,7 @@
                                                     class="form-control form-shadow"
                                                     placeholder="Заголовок"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][title]"
-                                                    value="{{ .GetTitle }}">
+                                                    value="{{ ptrStr .GetTitle }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -60,7 +60,7 @@
                                                     class="form-control form-shadow"
                                                     placeholder="Описание"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][description]"
-                                                    value="{{ .GetDescription }}">
+                                                    value="{{ ptrStr .GetDescription }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">

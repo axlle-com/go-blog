@@ -1,12 +1,10 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/pkg/common/service"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 )
 
-func SaveImage(i any) (*models.Image, error) {
-	image := service.LoadStruct(&models.Image{}, i).(*models.Image)
+func ImageSave(image *models.Image) (*models.Image, error) {
 	repo := models.ImageRepo()
 
 	if image.ID == 0 {

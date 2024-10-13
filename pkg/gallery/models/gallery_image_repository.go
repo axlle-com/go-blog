@@ -64,7 +64,7 @@ func (r *galleryImageRepository) GetAll() ([]Image, error) {
 func (r *galleryImageRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&Image{}).Pluck("id", &ids).Error; err != nil {
-		logger.Error(err)
+		return nil, err
 	}
 	return ids, nil
 }

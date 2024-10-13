@@ -21,9 +21,19 @@ func LoadStruct(dest, request any) any {
 	if reflect.TypeOf(requestVal).Kind() == reflect.Interface || reflect.TypeOf(destVal).Kind() == reflect.Interface {
 		return dest
 	}
+
+	requestType := requestVal.Type()
+	destType := destVal.Type()
+
 	for i := 0; i < requestVal.NumField(); i++ {
 		srcField := requestVal.Field(i)                                   // Поле в исходной структуре
 		destField := destVal.FieldByName(requestVal.Type().Field(i).Name) // Поле в целевой структуре
+		srcStructField := requestType.Field(i)
+		destStructField, ok := destType.FieldByName(srcStructField.Name)
+		var destTag reflect.StructTag
+		if ok {
+			destTag = destStructField.Tag
+		}
 
 		if destField.Kind() == reflect.Interface || srcField.Kind() == reflect.Interface {
 			continue
@@ -46,7 +56,7 @@ func LoadStruct(dest, request any) any {
 
 		// Если поля строки
 		if srcField.Kind() == reflect.String {
-			strToType(&srcField, &destField)
+			strToType(&srcField, &destField, destTag)
 			continue
 		}
 
@@ -165,7 +175,7 @@ func LoadStruct(dest, request any) any {
 				for i := 0; i < srcField.Len(); i++ {
 					srcFieldSliceTypeElem := srcField.Index(i)
 					destFieldSliceTypeElem := newDst.Index(i)
-					strToType(&srcFieldSliceTypeElem, &destFieldSliceTypeElem)
+					strToType(&srcFieldSliceTypeElem, &destFieldSliceTypeElem, destTag)
 				}
 				destField.Set(newDst)
 				continue
@@ -185,14 +195,14 @@ func LoadStruct(dest, request any) any {
 	return dest
 }
 
-func strToType(src *reflect.Value, dest *reflect.Value) {
+func strToType(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTag) {
 	if src.Kind() != reflect.String {
 		return
 	}
 	srcStr := src.String() // Значение строки из request
 	switch dest.Kind() {
 	case reflect.Ptr:
-		strToPtr(src, dest)
+		strToPtr(src, dest, destTag)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		if val, err := strconv.ParseInt(srcStr, 10, dest.Type().Bits()); err == nil {
 			dest.SetInt(val)
@@ -211,14 +221,18 @@ func strToType(src *reflect.Value, dest *reflect.Value) {
 		}
 	case reflect.Struct:
 		if dest.Type() == reflect.TypeOf(time.Time{}) {
-			if val, err := time.Parse("2006-01-02 15:04:05", srcStr); err == nil {
+			timeFormat := destTag.Get("time_format")
+			if timeFormat == "" {
+				timeFormat = "2006-01-02 15:04:05"
+			}
+			if val, err := time.Parse(timeFormat, srcStr); err == nil {
 				dest.Set(reflect.ValueOf(val))
 			}
 		}
 	}
 }
 
-func strToPtr(src *reflect.Value, dest *reflect.Value) {
+func strToPtr(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTag) {
 	if src.Kind() != reflect.String || dest.Kind() != reflect.Ptr {
 		return
 	}
@@ -255,7 +269,11 @@ func strToPtr(src *reflect.Value, dest *reflect.Value) {
 		}
 	case reflect.Struct:
 		if destElemType == reflect.TypeOf(time.Time{}) {
-			if val, err := time.Parse("2006-01-02 15:04:05", srcStr); err == nil {
+			timeFormat := destTag.Get("time_format")
+			if timeFormat == "" {
+				timeFormat = "2006-01-02 15:04:05"
+			}
+			if val, err := time.Parse(timeFormat, srcStr); err == nil {
 				newVal := reflect.New(destElemType).Elem()
 				newVal.Set(reflect.ValueOf(val))
 				dest.Set(newVal.Addr())

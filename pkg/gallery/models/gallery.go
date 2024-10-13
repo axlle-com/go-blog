@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -46,7 +47,7 @@ func (g *Gallery) GetDate() *time.Time {
 	return g.CreatedAt
 }
 
-func (g *Gallery) GetImages() []contracts.Image {
+func (g *Gallery) GetImages() []contracts.Image { // TODO *ptr
 	images := make([]contracts.Image, len(g.Images))
 	for i, image := range g.Images {
 		images[i] = image
@@ -55,9 +56,12 @@ func (g *Gallery) GetImages() []contracts.Image {
 }
 
 func (g *Gallery) Attach(r contracts.Resource) error {
-	repo := NewGalleryResourceRepository()
+	repo := ResourceRepo()
 	hasRepo, err := repo.GetByResourceAndID(r.GetID(), r.GetResource(), g.ID)
-	if err != nil || hasRepo == nil {
+	if err != gorm.ErrRecordNotFound {
+		return err
+	}
+	if hasRepo == nil {
 		err = repo.Create(
 			&GalleryHasResource{
 				ResourceID: r.GetID(),
@@ -66,11 +70,11 @@ func (g *Gallery) Attach(r contracts.Resource) error {
 			},
 		)
 	}
-	return err
+	return nil
 }
 
 func (g *Gallery) Deleted() error {
-	repo := NewGalleryResourceRepository()
+	repo := ResourceRepo()
 	has, err := repo.GetByID(g.ID)
 	if err == nil || has != nil {
 		return repo.Delete(g.ID)

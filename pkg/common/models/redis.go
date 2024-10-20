@@ -9,13 +9,10 @@ import (
 	"golang.org/x/net/context"
 )
 
-const UserSessionKey = "user_session_"
-
 func Redis() contracts.Cache {
-	cfg := config.GetConfig()
 	c := &redisClient{}
 	c.client = client.NewClient(&client.Options{
-		Addr: cfg.RedisHost + ":" + cfg.RedisPort,
+		Addr: config.Config().RedisHost(),
 	})
 
 	return c
@@ -40,7 +37,7 @@ func (r *redisClient) DeleteCache(key string) {
 }
 
 func (r *redisClient) GetUserKey(id uint) string {
-	return fmt.Sprintf(UserSessionKey+"%d", id)
+	return fmt.Sprintf(config.Config().UserSessionKey("%d"), id)
 }
 
 func (r *redisClient) AddUserSession(id uint, sessionID string) {
@@ -70,7 +67,7 @@ func (r *redisClient) ResetUsersSession() {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, UserSessionKey+"*", 1000).Result()
+		keys, cursor, err = r.client.Scan(context.Background(), cursor, config.Config().UserSessionKey("*"), 1000).Result()
 		if err != nil {
 			logger.Fatal(err)
 		}
@@ -86,7 +83,7 @@ func (r *redisClient) ResetUsersSession() {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, "session_*", 1000).Result()
+		keys, cursor, err = r.client.Scan(context.Background(), cursor, config.Config().SessionKey("*"), 1000).Result()
 		if err != nil {
 			logger.Fatal(err)
 		}

@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
+	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
@@ -17,8 +18,15 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	if err := PostRepo().Delete(id); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+	post, err := PostRepo().GetByID(id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		return
+	}
+
+	if err := service.PostDelete(post); err != nil {
+		logger.Error(err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 

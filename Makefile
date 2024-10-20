@@ -18,6 +18,8 @@ up: network
 # Цель для пересборки Docker-образов и перезапуска контейнеров
 .PHONY: rebuild
 rebuild: network
+	@echo "Stopping Docker Compose projects..."
+	@docker compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) down -v
 	@echo "Rebuilding Docker Compose images..."
 	@docker compose -f $(DOCKER_COMPOSE_PROJECT_BLOG) build --no-cache $(SERVICES)
 	@echo "Restarting Docker Compose projects..."

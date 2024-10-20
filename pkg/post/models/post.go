@@ -21,19 +21,18 @@ type Post struct {
 	MetaDescription    *string                `gorm:"size:200" json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
 	Alias              string                 `gorm:"size:255;unique" json:"alias" form:"alias" binding:"omitempty,max=255"`
 	URL                string                 `gorm:"size:1000;unique" json:"url" form:"url" binding:"omitempty,max=1000"`
-	IsPublished        bool                   `gorm:"not null;default:true" json:"is_published" form:"is_published" binding:"omitempty"`
+	IsPublished        bool                   `gorm:"not null;default:false" json:"is_published" form:"is_published" binding:"omitempty"`
 	IsFavourites       bool                   `gorm:"not null;default:false" json:"is_favourites" form:"is_favourites" binding:"omitempty"`
 	HasComments        bool                   `gorm:"not null;default:false" json:"has_comments" form:"has_comments" binding:"omitempty"`
-	ShowImagePost      bool                   `gorm:"not null;default:true" json:"show_image_post" form:"show_image_post" binding:"omitempty"`
-	ShowImageCategory  bool                   `gorm:"not null;default:true" json:"show_image_category" form:"show_image_category" binding:"omitempty"`
-	MakeWatermark      bool                   `gorm:"not null;default:false" json:"make_watermark" form:"make_watermark" binding:"omitempty"`
-	InSitemap          bool                   `gorm:"not null;default:true" json:"in_sitemap" form:"in_sitemap" binding:"omitempty"`
+	ShowImagePost      bool                   `gorm:"not null;default:false" json:"show_image_post" form:"show_image_post"`
+	ShowImageCategory  bool                   `gorm:"not null;default:false" json:"show_image_category" form:"show_image_category" binding:"omitempty"`
+	InSitemap          bool                   `gorm:"not null;default:false" json:"in_sitemap" form:"in_sitemap" binding:"omitempty"`
 	Media              *string                `gorm:"size:255" json:"media" form:"media" binding:"omitempty,max=255"`
 	Title              string                 `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
 	TitleShort         *string                `gorm:"size:155;default:null" json:"title_short" form:"title_short" binding:"omitempty,max=155"`
 	DescriptionPreview *string                `gorm:"type:text" json:"description_preview" form:"description_preview" binding:"omitempty"`
 	Description        *string                `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
-	ShowDate           bool                   `gorm:"not null;default:true" json:"show_date" form:"show_date" binding:"omitempty"`
+	ShowDate           bool                   `gorm:"not null;default:false" json:"show_date" form:"show_date" binding:"omitempty"`
 	DatePub            *time.Time             `json:"date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
 	DateEnd            *time.Time             `json:"date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
 	Image              *string                `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
@@ -81,26 +80,35 @@ func (p *Post) Updating() {
 	p.Saving()
 }
 
+func (p *Post) Deleting() bool {
+	err := p.DeleteImageFile()
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func (p *Post) Saving() {
 	p.SetDirty()
-	logger.Print(p.GetDirty())
+	//logger.Print(p.GetDirty())
 	p.setTitleShort()
 	p.setAlias()
 	p.setURL()
 	p.setDate()
 	p.SetDirty()
-	logger.Print(p.GetDirty())
+	//logger.Print(p.GetDirty())
 }
 
-func (p *Post) DeleteImageFile() {
+func (p *Post) DeleteImageFile() error {
 	if p.Image == nil {
-		return
+		return nil
 	}
 	err := file.DeleteFile(*p.Image)
 	if err != nil {
-		logger.Error(err)
+		return err
 	}
 	p.Image = nil
+	return nil
 }
 
 func (p *Post) UploadImageFile(r *http.Request) error {
@@ -113,7 +121,10 @@ func (p *Post) UploadImageFile(r *http.Request) error {
 			return err
 		}
 		if p.Image != nil {
-			p.DeleteImageFile()
+			err := p.DeleteImageFile()
+			if err != nil {
+				return err
+			}
 		}
 		p.Image = &path
 	}

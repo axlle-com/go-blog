@@ -22,7 +22,7 @@ type roleRepository struct {
 	db *gorm.DB
 }
 
-func NewRoleRepository() RoleRepository {
+func NewRoleRepo() RoleRepository {
 	return &roleRepository{db: db.GetDB()}
 }
 

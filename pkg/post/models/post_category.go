@@ -14,7 +14,6 @@ type PostCategory struct {
 	URL                string     `gorm:"size:1000;unique" json:"url"`
 	IsPublished        *bool      `gorm:"default:true" json:"is_published,omitempty"`
 	IsFavourites       *bool      `gorm:"default:false" json:"is_favourites,omitempty"`
-	MakeWatermark      *bool      `gorm:"default:true" json:"make_watermark,omitempty"`
 	InSitemap          *bool      `gorm:"default:true" json:"in_sitemap,omitempty"`
 	Image              *string    `gorm:"size:255" json:"image,omitempty"`
 	ShowImage          *bool      `gorm:"default:true" json:"show_image,omitempty"`

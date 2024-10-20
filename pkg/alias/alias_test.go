@@ -66,7 +66,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func Test_transliterate(t *testing.T) {
+func TestTransliterate(t *testing.T) {
 	type args struct {
 		input string
 	}

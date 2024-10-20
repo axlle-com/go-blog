@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -34,7 +35,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		return
 	}
 
-	err = imageRepo.Delete(image.ID)
+	err = service.DeleteImage(image)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
@@ -12,7 +13,7 @@ type PostRepository interface {
 	Create(post *Post) error
 	GetByID(id uint) (*Post, error)
 	Update(post *Post) error
-	Delete(id uint) error
+	Delete(post *Post) error
 	GetAll() ([]*Post, error)
 	GetPaginate(paginator contracts.Paginator, filter *PostFilter) ([]*PostFull, error)
 	GetByAlias(alias string) (*Post, error)
@@ -57,7 +58,6 @@ func (r *postRepository) Update(post *Post) error {
 		"HasComments",
 		"ShowImagePost",
 		"ShowImageCategory",
-		"MakeWatermark",
 		"InSitemap",
 		"Media",
 		"Title",
@@ -74,8 +74,11 @@ func (r *postRepository) Update(post *Post) error {
 	).Save(post).Error
 }
 
-func (r *postRepository) Delete(id uint) error {
-	return r.db.Delete(&Post{}, id).Error
+func (r *postRepository) Delete(post *Post) error {
+	if post.Deleting() {
+		return r.db.Delete(&Post{}, post.ID).Error
+	}
+	return errors.New("При удалении произошли ошибки")
 }
 
 func (r *postRepository) GetAll() ([]*Post, error) {

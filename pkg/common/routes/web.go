@@ -25,7 +25,7 @@ func InitializeWebRoutes(r *gin.Engine) {
 	protected := r.Group("/admin")
 	protected.Use(middleware.AuthRequired())
 	{
-		protected.GET("/", user.Index)
+		protected.GET("", user.Index)
 		protected.GET("/logout", user.Logout)
 
 		protected.POST("/file/image", fileController.UploadImage)

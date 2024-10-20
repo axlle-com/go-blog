@@ -28,7 +28,7 @@ func (c *webController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post.Galleries = gallery.Provider().GetAllForResource(post)
+	post.Galleries = gallery.Provider().GetForResource(post)
 
 	categories, err := CategoryRepo().GetAll()
 	if err != nil {

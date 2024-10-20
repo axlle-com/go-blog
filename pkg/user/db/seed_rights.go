@@ -27,7 +27,7 @@ func SeedRoles() {
 		role := Role{
 			Name: name,
 		}
-		err := NewRoleRepository().Create(&role)
+		err := NewRoleRepo().Create(&role)
 		if err != nil {
 			log.Printf("Failed to create role %v", err.Error())
 		}

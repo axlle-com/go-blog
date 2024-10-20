@@ -9,6 +9,7 @@ import (
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func (c *controller) UpdatePost(ctx *gin.Context) {
@@ -38,7 +39,7 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	form.ID = id
+	form.ID = strconv.Itoa(int(id))
 	post, err := service.PostSave(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

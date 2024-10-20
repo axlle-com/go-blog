@@ -1,25 +1,23 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	DB "github.com/axlle-com/blog/pkg/common/db"
-	gallery "github.com/axlle-com/blog/pkg/gallery/models"
-	post "github.com/axlle-com/blog/pkg/post/db"
-	"github.com/axlle-com/blog/pkg/post/models"
-	templateDB "github.com/axlle-com/blog/pkg/template/db"
-	template "github.com/axlle-com/blog/pkg/template/models"
-	userDB "github.com/axlle-com/blog/pkg/user/db"
-	user "github.com/axlle-com/blog/pkg/user/models"
-	"gorm.io/gorm"
-	"log"
+	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/db"
+	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
+	dbPost "github.com/axlle-com/blog/pkg/post/db"
+	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
+	dbTemplate "github.com/axlle-com/blog/pkg/template/db"
+	mTemplate "github.com/axlle-com/blog/pkg/template/db/migrate"
+	dbUser "github.com/axlle-com/blog/pkg/user/db"
+	mUser "github.com/axlle-com/blog/pkg/user/db/migrate"
 	"os"
-	"strings"
 )
 
 func main() {
 	var command string
+	db.Init(config.Config().DBUrl())
 	flag.StringVar(&command, "command", "", "Command to execute")
 	flag.Parse()
 
@@ -27,77 +25,25 @@ func main() {
 		handleCommand(command)
 	} else {
 		fmt.Println("No task provided. Use -command=name to specify a task.")
-		os.Exit(1)
 	}
+	os.Exit(1)
 }
 
 var Commands = map[string]func(){
 	"hello": func() {
 		fmt.Println("Hello!")
 	},
-	"seed": func() {
-		templateDB.SeedTemplate(100)
-		userDB.SeedPermissions()
-		userDB.SeedRoles()
-		userDB.SeedUsers(100)
-		post.SeedPostCategory(100)
-		post.SeedPosts(100)
+	"seed-teat": func() {
+		seedTest()
 	},
 	"migrate": func() {
-		db := DB.GetDB()
-		err := db.AutoMigrate(
-			&models.Post{},
-			&user.User{},
-			&models.PostCategory{},
-			&template.Template{},
-			&user.Role{},
-			&user.Permission{},
-			&gallery.Gallery{},
-			&gallery.Image{},
-			&gallery.GalleryHasResource{},
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		migrate()
 	},
 	"refill": func() {
-		DB.Cache().ResetUsersSession()
-		db := DB.GetDB()
-		dropIntermediateTables(db)
-		err := db.Migrator().DropTable(
-			&models.Post{},
-			&user.User{},
-			&models.PostCategory{},
-			&template.Template{},
-			&user.Role{},
-			&user.Permission{},
-			&gallery.Gallery{},
-			&gallery.Image{},
-			&gallery.GalleryHasResource{},
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		err = db.AutoMigrate(
-			&models.Post{},
-			&user.User{},
-			&models.PostCategory{},
-			&template.Template{},
-			&user.Role{},
-			&user.Permission{},
-			&gallery.Gallery{},
-			&gallery.Image{},
-			&gallery.GalleryHasResource{},
-		)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		templateDB.SeedTemplate(5)
-		userDB.SeedPermissions()
-		userDB.SeedRoles()
-		userDB.SeedUsers(5)
-		post.SeedPostCategory(10)
-		post.SeedPosts(100)
+		db.Cache().ResetUsersSession()
+		rollback()
+		migrate()
+		seedTest()
 	},
 }
 
@@ -109,32 +55,27 @@ func handleCommand(command string) {
 	}
 }
 
-func handleCommands() {
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print("Enter command: ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Error reading command:", err)
-			continue
-		}
-		input = strings.TrimSpace(input)
-		handleCommand(input)
-	}
+func migrate() {
+	mUser.Migrate()
+	mPost.Migrate()
+	mTemplate.Migrate()
+	mGallery.Migrate()
 }
 
-func dropIntermediateTables(db *gorm.DB) {
-	migrator := db.Migrator()
-	intermediateTables := []string{
-		"user_has_role",
-		"user_has_permission",
-		"role_has_permission",
-	}
-	for _, table := range intermediateTables {
-		if err := migrator.DropTable(table); err != nil {
-			fmt.Println("Error dropping table:", table, err)
-			return
-		}
-		fmt.Println("Dropped intermediate table:", table)
-	}
+func rollback() {
+	mUser.Rollback()
+	mPost.Rollback()
+	mTemplate.Rollback()
+	mGallery.Rollback()
+}
+
+func seedTest() {
+	dbUser.SeedPermissions()
+	dbUser.SeedRoles()
+	dbUser.SeedUsers(5)
+	dbUser.SeedUsersDefault()
+
+	dbTemplate.SeedTemplate(5)
+	dbPost.SeedPostCategory(10)
+	dbPost.SeedPosts(100)
 }

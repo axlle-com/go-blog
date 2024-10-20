@@ -12,8 +12,7 @@ func AuthRequired() gin.HandlerFunc {
 		userID := session.Get("user_id")
 		user := session.Get("user")
 		if userID == nil {
-			c.Redirect(http.StatusFound, "/login")
-			c.Abort()
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 		c.Set("user", user)

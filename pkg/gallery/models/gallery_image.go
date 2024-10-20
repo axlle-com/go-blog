@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
-	"github.com/axlle-com/blog/pkg/file"
 	"mime/multipart"
 	"time"
 )
@@ -56,19 +55,4 @@ func (i *Image) GetDate() *time.Time {
 
 func (i *Image) GetGallery() contracts.Gallery {
 	return i.Gallery
-}
-
-func (i *Image) Deleted() error {
-	err := file.DeleteFile(i.File)
-	if err != nil {
-		return err
-	}
-	count := ImageRepo().CountForGallery(i.GalleryID)
-	if count == 0 {
-		err = GalleryRepo().Delete(i.GalleryID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }

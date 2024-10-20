@@ -47,7 +47,7 @@ func (g *Gallery) GetDate() *time.Time {
 	return g.CreatedAt
 }
 
-func (g *Gallery) GetImages() []contracts.Image { // TODO *ptr
+func (g *Gallery) GetImages() []contracts.Image {
 	images := make([]contracts.Image, len(g.Images))
 	for i, image := range g.Images {
 		images[i] = image
@@ -71,13 +71,4 @@ func (g *Gallery) Attach(r contracts.Resource) error {
 		)
 	}
 	return nil
-}
-
-func (g *Gallery) Deleted() error {
-	repo := ResourceRepo()
-	has, err := repo.GetByID(g.ID)
-	if err == nil || has != nil {
-		return repo.Delete(g.ID)
-	}
-	return err
 }

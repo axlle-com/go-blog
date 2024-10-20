@@ -22,7 +22,7 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 	}
 
 	post.SetOriginal(post)
-	post.DeleteImageFile()
+	post.DeleteImageFile() // TODO
 	err = postRepo.Update(post)
 	if err != nil {
 		logger.Error(err)

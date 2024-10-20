@@ -5,24 +5,37 @@ import (
 	"github.com/axlle-com/blog/pkg/gallery/models"
 )
 
-func GallerySave(g *models.Gallery) (*models.Gallery, error) {
+func GalleryCreate(g *models.Gallery) (*models.Gallery, error) {
 	repo := models.GalleryRepo()
 
-	if g.ID == 0 {
-		if err := repo.Create(g); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := repo.Update(g); err != nil {
-			return nil, err
-		}
+	if err := repo.Create(g); err != nil {
+		return nil, err
 	}
 
+	err := galleryImageUpdate(g)
+	return g, err
+}
+
+func GalleryUpdate(g *models.Gallery) (*models.Gallery, error) {
+	repo := models.GalleryRepo()
+
+	if err := repo.Update(g); err != nil {
+		return nil, err
+	}
+
+	err := galleryImageUpdate(g)
+	return g, err
+}
+
+func galleryImageUpdate(g *models.Gallery) error {
 	var err error
 	if len(g.Images) > 0 {
 		slice := make([]*models.Image, len(g.Images), len(g.Images))
 		var eSlice []error
 		for idx, item := range g.Images {
+			if item == nil {
+				continue
+			}
 			item.GalleryID = g.ID
 			image, e := ImageSave(item)
 			if e != nil {
@@ -37,5 +50,5 @@ func GallerySave(g *models.Gallery) (*models.Gallery, error) {
 		g.Images = slice
 	}
 
-	return g, err
+	return err
 }

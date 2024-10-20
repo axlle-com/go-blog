@@ -26,8 +26,11 @@ func PostSave(form *http.PostRequest, u *user.User) (*models.Post, error) {
 
 	if len(form.Galleries) > 0 {
 		slice := make([]contracts.Gallery, len(form.Galleries), len(form.Galleries))
-		for idx, i := range form.Galleries {
-			g, err := gallery.Provider().SaveFromForm(i)
+		for idx, gRequest := range form.Galleries {
+			if gRequest == nil {
+				continue
+			}
+			g, err := gallery.Provider().SaveFromForm(gRequest)
 			if err != nil {
 				continue
 			}

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/url"
@@ -10,14 +11,15 @@ import (
 )
 
 func InitTemplate(router *gin.Engine) {
-	router.Static("/favicon.ico", "./src/public/favicon.ico")
-	router.Static("/public", "./src/public")
-	templates := loadTemplates("src/templates")
+	cfg := config.Config()
+	router.Static("/favicon.ico", "./"+cfg.SrcFolderBuilder("public/favicon.ico"))
+	router.Static("/public", "./"+cfg.SrcFolderBuilder("public"))
+	templates := LoadTemplates(cfg.SrcFolderBuilder("templates"))
 	router.SetHTMLTemplate(templates)
 	//router.LoadHTMLGlob("templates/**/**/*")
 }
 
-func loadTemplates(templatesDir string) *template.Template {
+func LoadTemplates(templatesDir string) *template.Template {
 	tmpl := template.New("").Funcs(template.FuncMap{
 		"add":     add,
 		"sub":     sub,

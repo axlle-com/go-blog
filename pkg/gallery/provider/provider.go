@@ -9,7 +9,8 @@ import (
 )
 
 type Gallery interface {
-	GetAllForResource(contracts.Resource) []contracts.Gallery
+	GetForResource(contracts.Resource) []contracts.Gallery
+	GetAll() []contracts.Gallery
 	SaveFromForm(g any) (contracts.Gallery, error)
 }
 
@@ -20,11 +21,11 @@ func Provider() Gallery {
 type provider struct {
 }
 
-func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
+func (p *provider) GetForResource(c contracts.Resource) []contracts.Gallery {
 	var collection []contracts.Gallery
 	galleries, err := models.
 		GalleryRepo().
-		GetAllForResource(c)
+		GetForResource(c)
 	if err == nil {
 		for _, gallery := range galleries {
 			collection = append(collection, gallery)
@@ -35,11 +36,31 @@ func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
 	return nil
 }
 
-func (p *provider) SaveFromForm(g any) (contracts.Gallery, error) {
+func (p *provider) GetAll() []contracts.Gallery {
+	var collection []contracts.Gallery
+	galleries, err := models.
+		GalleryRepo().
+		GetAll()
+	if err == nil {
+		for _, gallery := range galleries {
+			collection = append(collection, gallery)
+		}
+		return collection
+	}
+	logger.Error(err)
+	return nil
+}
+
+func (p *provider) SaveFromForm(g any) (gallery contracts.Gallery, err error) {
 	gal := common.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
-	save, err := service.GallerySave(gal)
+	if gal.ID == 0 {
+		gallery, err = service.GalleryCreate(gal)
+	} else {
+		gallery, err = service.GalleryUpdate(gal)
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	return save, nil
+	return gallery, nil
 }

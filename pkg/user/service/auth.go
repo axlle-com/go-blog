@@ -33,7 +33,7 @@ func Auth(authInput AuthInput) (userFound *user.User, err error) {
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err := generateToken.SignedString([]byte(config.GetConfig().KeyJWT))
+	token, err := generateToken.SignedString(config.Config().KeyJWT())
 	if err != nil {
 		return
 	}

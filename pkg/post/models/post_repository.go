@@ -57,7 +57,6 @@ func (r *postRepository) Update(post *Post) error {
 		"HasComments",
 		"ShowImagePost",
 		"ShowImageCategory",
-		"MakeWatermark",
 		"InSitemap",
 		"Media",
 		"Title",

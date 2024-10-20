@@ -13,9 +13,9 @@ type GalleryRepository interface {
 	GetByID(id uint) (*Gallery, error)
 	Update(gallery *Gallery) error
 	Delete(id uint) error
-	GetAll() ([]Gallery, error)
+	GetAll() ([]*Gallery, error)
 	GetAllIds() ([]uint, error)
-	GetAllForResource(contracts.Resource) ([]*Gallery, error)
+	GetForResource(contracts.Resource) ([]*Gallery, error)
 }
 
 type galleryRepository struct {
@@ -53,15 +53,15 @@ func (r *galleryRepository) Delete(id uint) error {
 	return err
 }
 
-func (r *galleryRepository) GetAll() ([]Gallery, error) {
-	var galleries []Gallery
+func (r *galleryRepository) GetAll() ([]*Gallery, error) {
+	var galleries []*Gallery
 	if err := r.db.Find(&galleries).Error; err != nil {
 		return nil, err
 	}
 	return galleries, nil
 }
 
-func (r *galleryRepository) GetAllForResource(c contracts.Resource) ([]*Gallery, error) {
+func (r *galleryRepository) GetForResource(c contracts.Resource) ([]*Gallery, error) {
 	var galleries []*Gallery
 	err := r.db.
 		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").

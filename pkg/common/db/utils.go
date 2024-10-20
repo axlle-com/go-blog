@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"math/rand"
 	"strconv"
@@ -78,7 +79,11 @@ func Float64Ptr(i float64) *float64 {
 	return &i
 }
 
-func IntStr(num string) int {
+func IntStr(num int) string {
+	return fmt.Sprintf("%d", num)
+}
+
+func StrInt(num string) int {
 	v, err := strconv.ParseInt(num, 10, 0)
 	if err != nil {
 		return 0
@@ -94,4 +99,16 @@ func IntStrPtr(num string) *int {
 	}
 	newNum := int(v)
 	return &newNum
+}
+
+func FormatDate(date time.Time) string {
+	return fmt.Sprintf("%02d.%02d.%d", date.Day(), date.Month(), date.Year())
+}
+
+func RandomDate() time.Time {
+	startDate := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC) // Начальная дата
+	endDate := time.Now()
+	delta := endDate.Sub(startDate)
+	randomDuration := time.Duration(rand.Int63n(int64(delta)))
+	return startDate.Add(randomDuration)
 }

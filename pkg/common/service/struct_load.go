@@ -15,6 +15,16 @@ func LoadStruct(dest, request any) any {
 		return dest
 	}
 
+	// Если request nil, нужно установить dest тоже в nil
+	if reflect.ValueOf(request).IsNil() {
+		destVal := reflect.ValueOf(dest).Elem()
+		// Проверяем, что dest — указатель и он может быть нулевым
+		if destVal.CanSet() {
+			destVal.Set(reflect.Zero(destVal.Type()))
+		}
+		return dest
+	}
+
 	requestVal := reflect.ValueOf(request).Elem() // Исходная структура (строки/базовые типы/указателя)
 	destVal := reflect.ValueOf(dest).Elem()       // Целевая структура (с указателями и без)
 

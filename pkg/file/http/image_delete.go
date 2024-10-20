@@ -16,7 +16,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
+	// TODO
 	ctx.JSON(200, gin.H{
 		"message": "Файл успешно удален",
 	})

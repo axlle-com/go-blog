@@ -12,9 +12,10 @@ type GalleryImageRepository interface {
 	GetByID(id uint) (*Image, error)
 	Update(image *Image) error
 	Delete(id uint) error
-	GetAll() ([]Image, error)
+	GetAll() ([]*Image, error)
 	GetAllIds() ([]uint, error)
 	CountForGallery(id uint) int64
+	GetForGallery(id uint) ([]*Image, error)
 }
 
 type galleryImageRepository struct {
@@ -53,8 +54,8 @@ func (r *galleryImageRepository) Delete(id uint) error {
 	return err
 }
 
-func (r *galleryImageRepository) GetAll() ([]Image, error) {
-	var images []Image
+func (r *galleryImageRepository) GetAll() ([]*Image, error) {
+	var images []*Image
 	if err := r.db.Find(&images).Error; err != nil {
 		return nil, err
 	}
@@ -76,4 +77,12 @@ func (r *galleryImageRepository) CountForGallery(id uint) int64 {
 		logger.Error(result.Error)
 	}
 	return count
+}
+
+func (r *galleryImageRepository) GetForGallery(id uint) ([]*Image, error) {
+	var images []*Image
+	if err := r.db.Model(&Image{}).Where("gallery_id = ?", id).Find(&images).Error; err != nil {
+		return nil, err
+	}
+	return images, nil
 }

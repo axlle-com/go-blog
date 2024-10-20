@@ -1,7 +1,7 @@
 package web
 
 import (
-	db "github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/db"
 	. "github.com/axlle-com/blog/pkg/common/errors"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"

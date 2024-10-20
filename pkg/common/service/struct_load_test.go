@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// TODO протестировать формат времени
 type FormStruct struct {
 	Uint                   string
 	UintPtr                string

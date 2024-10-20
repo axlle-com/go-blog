@@ -25,6 +25,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		}
 		return
 	}
+
 	post, err := service.PostSave(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

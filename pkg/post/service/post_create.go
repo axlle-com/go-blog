@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	common "github.com/axlle-com/blog/pkg/common/service"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
@@ -13,7 +14,7 @@ func PostSave(form *http.PostRequest, u *user.User) (*models.Post, error) {
 	post := common.LoadStruct(&models.Post{}, form).(*models.Post)
 	repo := models.PostRepo()
 	post.UserID = &u.ID
-
+	logger.Print(post.ShowImagePost)
 	if post.ID == 0 {
 		if err := repo.Create(post); err != nil {
 			return nil, err
@@ -26,8 +27,11 @@ func PostSave(form *http.PostRequest, u *user.User) (*models.Post, error) {
 
 	if len(form.Galleries) > 0 {
 		slice := make([]contracts.Gallery, len(form.Galleries), len(form.Galleries))
-		for idx, i := range form.Galleries {
-			g, err := gallery.Provider().SaveFromForm(i)
+		for idx, gRequest := range form.Galleries {
+			if gRequest == nil {
+				continue
+			}
+			g, err := gallery.Provider().SaveFromForm(gRequest)
 			if err != nil {
 				continue
 			}

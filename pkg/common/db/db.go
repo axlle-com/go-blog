@@ -2,13 +2,15 @@ package db
 
 import (
 	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/common/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 )
 
 var (
-	instance *gorm.DB
+	instance     *gorm.DB
+	instanceTest *gorm.DB
 )
 
 func Init(url string) {
@@ -19,10 +21,28 @@ func Init(url string) {
 	}
 }
 
-// GetDB TODO переделать на динамическое
 func GetDB() *gorm.DB {
-	if instance == nil {
-		Init(config.GetConfig().DBUrl)
+	if config.Config().IsTest() {
+		return GetDBTest()
 	}
-	return instance //.Debug()
+
+	var err error
+	if instance == nil {
+		instance, err = gorm.Open(postgres.Open(config.Config().DBUrl()), &gorm.Config{})
+		if err != nil {
+			logger.Fatal(err)
+		}
+	}
+	return instance
+}
+
+func GetDBTest() *gorm.DB {
+	var err error
+	if instanceTest == nil {
+		instanceTest, err = gorm.Open(postgres.Open(config.Config().DBUrlTest()), &gorm.Config{})
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return instanceTest //.Debug()
 }

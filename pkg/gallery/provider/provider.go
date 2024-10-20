@@ -35,11 +35,16 @@ func (p *provider) GetAllForResource(c contracts.Resource) []contracts.Gallery {
 	return nil
 }
 
-func (p *provider) SaveFromForm(g any) (contracts.Gallery, error) {
+func (p *provider) SaveFromForm(g any) (gallery contracts.Gallery, err error) {
 	gal := common.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
-	save, err := service.GallerySave(gal)
+	if gal.ID == 0 {
+		gallery, err = service.GalleryCreate(gal)
+	} else {
+		gallery, err = service.GalleryUpdate(gal)
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	return save, nil
+	return gallery, nil
 }

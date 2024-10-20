@@ -13,24 +13,24 @@ import (
 
 func main() {
 	gob.Register(user.User{})
-	cfg := config.GetConfig()
+	cfg := config.Config()
 	router := gin.Default()
 	err := router.SetTrustedProxies(nil)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	store := db.InitRedis(cfg)
-	router.Use(sessions.Sessions(config.SessionsName, store))
+	store := db.RedisStore(cfg.RedisHost(), "", cfg.KeyCookie())
+	router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
-	db.Init(cfg.DBUrl)
+	db.Init(cfg.DBUrl())
 
 	//web.InitMinify()
 	web.InitTemplate(router)
 	routes.InitializeApiRoutes(router)
 	routes.InitializeWebRoutes(router)
 
-	err = router.Run(cfg.Port)
+	err = router.Run(cfg.Port())
 	if err != nil {
 		panic("Error run")
 	}

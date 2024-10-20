@@ -22,9 +22,9 @@ type User struct {
 	Avatar             *string      `gorm:"size:255" json:"avatar,omitempty"`
 	Password           string       `gorm:"-" json:"password"`
 	PasswordHash       string       `gorm:"size:255;not null" json:"password_hash"`
-	RememberToken      *string      `gorm:"size:500" json:"remember_token,omitempty"`
+	RememberToken      *string      `gorm:"size:500;default:null;index" json:"remember_token,omitempty"`
 	AuthToken          *string      `gorm:"size:500;default:null;index" json:"auth_token"`
-	AuthKey            *string      `gorm:"size:32" json:"auth_key,omitempty"`
+	AuthKey            *string      `gorm:"size:32;default:null;" json:"auth_key,omitempty"`
 	PasswordResetToken *string      `gorm:"size:255;unique" json:"password_reset_token,omitempty"`
 	CreatedAt          *time.Time   `json:"created_at,omitempty"`
 	UpdatedAt          *time.Time   `json:"updated_at,omitempty"`
@@ -60,7 +60,7 @@ func (u *User) SetAuthToken() (token string, err error) {
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	token, err = generateToken.SignedString([]byte(config.GetConfig().KeyJWT))
+	token, err = generateToken.SignedString(config.Config().KeyJWT())
 
 	if err != nil {
 		logger.Error(err)

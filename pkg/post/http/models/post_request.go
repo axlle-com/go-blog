@@ -43,7 +43,6 @@ type PostRequest struct {
 	HasComments        string            `json:"has_comments" form:"has_comments" binding:"omitempty"`
 	ShowImagePost      string            `json:"show_image_post" form:"show_image_post" binding:"omitempty"`
 	ShowImageCategory  string            `json:"show_image_category" form:"show_image_category" binding:"omitempty"`
-	MakeWatermark      string            `json:"make_watermark" form:"make_watermark" binding:"omitempty"`
 	InSitemap          string            `json:"in_sitemap" form:"in_sitemap" binding:"omitempty"`
 	Media              string            `json:"media" form:"media" binding:"omitempty,max=255"`
 	Title              string            `json:"title" form:"title" binding:"required,max=255"`

@@ -21,8 +21,7 @@ func SaveUploadedFile(file *multipart.FileHeader, dist string) (path string, err
 	if !isImageFile(file) {
 		return "", errors.New(fmt.Sprintf("Файл:%s не является изображением", file.Filename))
 	}
-	cnf := config.GetConfig()
-	path = fmt.Sprintf(cnf.UploadsPath+"%s/%s%s", dist, uuid.New().String(), filepath.Ext(file.Filename))
+	path = fmt.Sprintf(config.Config().UploadPath()+"%s/%s%s", dist, uuid.New().String(), filepath.Ext(file.Filename))
 	if err = save(file, realPath(path)); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func save(file *multipart.FileHeader, dst string) error {
 }
 
 func realPath(path string) string {
-	return config.GetConfig().UploadsFolder + path
+	return config.Config().SrcFolderBuilder(path)
 }
 
 func isImageFile(fileHeader *multipart.FileHeader) bool {

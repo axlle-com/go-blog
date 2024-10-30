@@ -114,7 +114,7 @@ type PostResponse struct {
 }
 
 func TestFailedCreatePost(t *testing.T) {
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 	requestBody := `{"email":"axlle@mail","password":"123456"}`
 
 	t.Run("Failed login", func(t *testing.T) {
@@ -128,8 +128,6 @@ func TestFailedCreatePost(t *testing.T) {
 	})
 
 	t.Run("Failed create post", func(t *testing.T) {
-		cookies, _ := PerformLogin(router)
-
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodPost, "/admin/posts", bytes.NewBufferString(requestBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -145,8 +143,7 @@ func TestFailedCreatePost(t *testing.T) {
 	})
 
 	t.Run("Failed create post", func(t *testing.T) {
-		cookies, _ := PerformLogin(router)
-		requestBody := `{"title":""}`
+		requestBody = `{"title":""}`
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodPost, "/admin/posts", bytes.NewBufferString(requestBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -163,7 +160,8 @@ func TestFailedCreatePost(t *testing.T) {
 }
 
 func TestSuccessfulCreatePost(t *testing.T) {
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
+
 	mGallery.Rollback()
 	mGallery.Migrate()
 	mPost.Rollback()
@@ -174,8 +172,6 @@ func TestSuccessfulCreatePost(t *testing.T) {
 		addNewGallery(post)
 
 		t.Run("Successful create post", func(t *testing.T) {
-			cookies, _ := PerformLogin(router)
-
 			requestBody, err := json.Marshal(post)
 			if err != nil {
 				t.Fatalf("Failed to marshal JSON: %v", err)

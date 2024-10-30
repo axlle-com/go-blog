@@ -38,6 +38,24 @@ func PerformLogin(router *gin.Engine) ([]*http.Cookie, error) {
 	return cookie, nil
 }
 
+func StartWithLogin() (router *gin.Engine, cookie []*http.Cookie, err error) {
+	router = SetupTestRouter()
+	requestBody := `{"email":"admin@admin.ru","password":"123456"}`
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth", bytes.NewBufferString(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	if w.Code >= 400 {
+		return nil, nil, http.ErrNoCookie
+	}
+
+	cookie = w.Result().Cookies()
+	return router, cookie, nil
+}
+
 func SetupTestRouter() *gin.Engine {
 	if router == nil {
 		mUser.Migrate()

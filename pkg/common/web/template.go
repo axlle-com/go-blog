@@ -12,7 +12,7 @@ import (
 
 func InitTemplate(router *gin.Engine) {
 	cfg := config.Config()
-	router.Static("/favicon.ico", "./"+cfg.SrcFolderBuilder("public/favicon.ico"))
+	router.StaticFile("/favicon.ico", "./"+cfg.SrcFolderBuilder("public/favicon.ico"))
 	router.Static("/public", "./"+cfg.SrcFolderBuilder("public"))
 	templates := LoadTemplates(cfg.SrcFolderBuilder("templates"))
 	router.SetHTMLTemplate(templates)

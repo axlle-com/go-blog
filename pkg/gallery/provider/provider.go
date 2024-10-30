@@ -38,35 +38,56 @@ func (p *provider) GetForResource(c contracts.Resource) []contracts.Gallery {
 	return nil
 }
 
-func (p *provider) DeleteForResource(c contracts.Resource) error {
+func (p *provider) DeleteForResource(c contracts.Resource) (err error) {
 	rRepo := models.ResourceRepo()
-	resource, err := rRepo.GetForResource(c)
+	resource, err := rRepo.GetGalleriesByResource(c)
 	if err != nil {
 		return err
 	}
 
-	if resource != nil {
-		if err := rRepo.DetachResource(c); err != nil {
-			return err
+	all := make(map[uint]*models.GalleryHasResource)
+	only := make(map[uint]*models.GalleryHasResource)
+	detach := make(map[uint]*models.GalleryHasResource)
+	var galleryIDs []uint
+	if resource == nil {
+		return nil
+	}
+
+	for _, r := range resource {
+		if r.ResourceID != c.GetID() && r.Resource != c.GetResource() {
+			all[r.GalleryID] = r
+		} else {
+			only[r.GalleryID] = r
 		}
 	}
 
-	var galleryIDs []uint
-	for _, g := range resource {
-		rsc, err := rRepo.GetByGalleryID(g.GalleryID) // TODO
-		if err != nil || rsc != nil {
-			continue
+	for id, _ := range only {
+		if _, ok := all[id]; ok {
+			detach[id] = all[id]
+		} else {
+			galleryIDs = append(galleryIDs, id)
 		}
-		galleryIDs = append(galleryIDs, g.GalleryID)
+	}
+
+	if len(detach) > 0 { // TODO need test
+		rRepo.Transaction()
+		for _, r := range detach {
+			err = rRepo.DeleteByResourceAndID(r.ResourceID, r.Resource, r.GalleryID)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if len(galleryIDs) > 0 {
 		galleries, err := models.GalleryRepo().WithImages().GetByIDs(galleryIDs)
 		if err != nil {
+			rRepo.Rollback()
 			return err
 		}
 		err = service.DeleteGalleries(galleries)
 		if err != nil {
+			rRepo.Rollback()
 			return err
 		}
 	}

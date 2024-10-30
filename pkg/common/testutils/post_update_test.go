@@ -19,9 +19,8 @@ import (
 )
 
 func TestFailedUpdatePost(t *testing.T) {
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 	requestBody := `{"title":"title"}`
-	cookies, _ := PerformLogin(router)
 	var oPost *PostResponse
 
 	t.Run("Failed update post", func(t *testing.T) {
@@ -101,8 +100,7 @@ func TestFailedUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePost(t *testing.T) {
-	cookies, _ := PerformLogin(router)
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 	mGallery.Rollback()
 	mGallery.Migrate()
 	mPost.Rollback()
@@ -310,8 +308,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePostAlias(t *testing.T) {
-	cookies, _ := PerformLogin(router)
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 	mPost.Rollback()
 	mPost.Migrate()
 

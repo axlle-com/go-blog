@@ -15,8 +15,7 @@ import (
 )
 
 func TestFailedDeletePost(t *testing.T) {
-	router := SetupTestRouter()
-	cookies, _ := PerformLogin(router)
+	router, cookies, _ := StartWithLogin()
 
 	t.Run("Failed delete post", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -44,8 +43,7 @@ func TestFailedDeletePost(t *testing.T) {
 }
 
 func TestSuccessfulDeletePost(t *testing.T) {
-	cookies, _ := PerformLogin(router)
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 	mGallery.Rollback()
 	mGallery.Migrate()
 	mPost.Rollback()

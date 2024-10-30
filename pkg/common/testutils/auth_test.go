@@ -9,7 +9,7 @@ import (
 )
 
 func TestLogin(t *testing.T) {
-	router := SetupTestRouter()
+	router, cookies, _ := StartWithLogin()
 
 	testsOK := map[string]map[string]int{
 		"/admin/posts": {
@@ -26,8 +26,6 @@ func TestLogin(t *testing.T) {
 	for route, body := range testsOK {
 		for method, status := range body {
 			t.Run("Successful login", func(t *testing.T) {
-				cookies, _ := PerformLogin(router)
-
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest(method, route, nil)
 

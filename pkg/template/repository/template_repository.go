@@ -4,7 +4,6 @@ import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/template/models"
-	"gorm.io/gorm"
 	"log"
 )
 
@@ -15,40 +14,45 @@ type TemplateRepository interface {
 	Delete(id uint) error
 	GetAll() ([]*models.Template, error)
 	GetAllIds() ([]uint, error)
+	Transaction()
+	Rollback()
+	Commit()
 }
 
 type repository struct {
+	*common.Repo
 	*common.Paginate
-	db *gorm.DB
 }
 
 func NewRepo() TemplateRepository {
-	return &repository{db: db.GetDB()}
+	r := &repository{Repo: &common.Repo{}}
+	r.SetConnection(db.GetDB())
+	return r
 }
 
 func (r *repository) Create(template *models.Template) error {
-	return r.db.Create(template).Error
+	return r.Connection().Create(template).Error
 }
 
 func (r *repository) GetByID(id uint) (*models.Template, error) {
 	var template models.Template
-	if err := r.db.First(&template, id).Error; err != nil {
+	if err := r.Connection().First(&template, id).Error; err != nil {
 		return nil, err
 	}
 	return &template, nil
 }
 
 func (r *repository) Update(template *models.Template) error {
-	return r.db.Save(template).Error
+	return r.Connection().Save(template).Error
 }
 
 func (r *repository) Delete(id uint) error {
-	return r.db.Delete(&models.Template{}, id).Error
+	return r.Connection().Delete(&models.Template{}, id).Error
 }
 
 func (r *repository) GetAll() ([]*models.Template, error) {
 	var template []*models.Template
-	if err := r.db.Find(&template).Error; err != nil {
+	if err := r.Connection().Find(&template).Error; err != nil {
 		return nil, err
 	}
 	return template, nil
@@ -56,7 +60,7 @@ func (r *repository) GetAll() ([]*models.Template, error) {
 
 func (r *repository) GetAllIds() ([]uint, error) {
 	var ids []uint
-	if err := r.db.Model(&models.Template{}).Pluck("id", &ids).Error; err != nil {
+	if err := r.Connection().Model(&models.Template{}).Pluck("id", &ids).Error; err != nil {
 		log.Printf("Failed to fetch IDs from the database: %v\n", err)
 	}
 	return ids, nil

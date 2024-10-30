@@ -1,10 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
@@ -177,7 +179,11 @@ func (c *config) UploadPath() string {
 
 func (c *config) SrcFolder() string {
 	if c.IsTest() {
-		return "../../../" + c.uploadsFolder
+		root, err := c.root()
+		if err != nil {
+			return ""
+		}
+		return root + "/" + c.uploadsFolder
 	}
 	return c.uploadsFolder
 }
@@ -195,9 +201,24 @@ func (c *config) UserSessionKey(s string) string {
 }
 
 func (c *config) SessionKey(s string) string {
-	key := "session_"
-	//if c.IsTest() {
-	//	return key + "test_" + s
-	//}
-	return key + s
+	return "session_" + s
+}
+
+func (c *config) root() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("не удалось найти корневую директорию модуля")
+		}
+
+		dir = parent
+	}
 }

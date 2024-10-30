@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 )
 
@@ -28,39 +27,26 @@ func UpdateGallery(g *models.Gallery) (*models.Gallery, error) {
 	return g, err
 }
 
-func DeleteGalleries(g []*models.Gallery) (err error) {
+func DeleteGalleries(galleries []*models.Gallery) (err error) {
 	var ids []uint
-	var resGalleries []*models.Gallery
-	isErr := false
-	for _, gallery := range g {
-		if err = DeletingGallery(gallery); err == nil {
-			ids = append(ids, gallery.ID)
-			resGalleries = append(resGalleries, gallery)
-		} else {
-			isErr = true
-			logger.Error(err)
+	for _, gallery := range galleries {
+		if err = DeletingGallery(gallery); err != nil {
+			return err
 		}
-	}
-
-	if isErr {
-		return errors.New("Ошибки при удалении галлерей")
+		ids = append(ids, gallery.ID)
 	}
 
 	if len(ids) > 0 {
 		if err = models.GalleryRepo().DeleteByIDs(ids); err == nil {
-			for _, gallery := range resGalleries {
+			for _, gallery := range galleries {
 				if err = DeletedGallery(gallery); err != nil {
-					isErr = true
-					logger.Error(err)
+					return err
 				}
 			}
-
-			if isErr {
-				return errors.New("Ошибки в удалении галлерей")
-			}
+			return nil
 		}
 	}
-	return
+	return err
 }
 
 func galleryImageUpdate(g *models.Gallery) error {

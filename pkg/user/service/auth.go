@@ -16,7 +16,7 @@ func Auth(authInput AuthInput) (userFound *user.User, err error) {
 	userRepo := repository.NewRepo()
 	userFound, err = userRepo.GetByEmail(authInput.Email)
 
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return
 	}
 

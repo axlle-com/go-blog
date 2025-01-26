@@ -90,13 +90,11 @@ func (p *Post) Deleting() bool {
 
 func (p *Post) Saving() {
 	p.SetDirty()
-	//logger.Print(p.GetDirty())
 	p.setTitleShort()
 	p.setAlias()
 	p.setURL()
 	p.setDate()
 	p.SetDirty()
-	//logger.Print(p.GetDirty())
 }
 
 func (p *Post) DeleteImageFile() error {

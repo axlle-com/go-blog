@@ -1,11 +1,11 @@
-package testutils
+package routes
 
 import (
 	"bytes"
 	"encoding/gob"
 	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/routes"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/common/web"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
@@ -58,6 +58,11 @@ func StartWithLogin() (router *gin.Engine, cookie []*http.Cookie, err error) {
 
 func SetupTestRouter() *gin.Engine {
 	if router == nil {
+		cfg := config.Config()
+		cfg.SetTestENV()
+
+		db.Init(cfg.DBUrlTest())
+
 		mUser.Migrate()
 		mTemplate.Migrate()
 		mPost.Migrate()
@@ -67,18 +72,15 @@ func SetupTestRouter() *gin.Engine {
 		dbUser.SeedRoles()
 		dbUser.SeedUsersDefault()
 		gob.Register(user.User{})
+
 		router = gin.New()
 
-		cfg := config.Config()
-		cfg.SetTestENV()
-		store := db.RedisStore(cfg.RedisHost(), "", cfg.KeyCookie())
+		store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
-		db.Init(cfg.DBUrlTest())
-
 		web.InitTemplate(router)
-		routes.InitializeApiRoutes(router)
-		routes.InitializeWebRoutes(router)
+		InitializeApiRoutes(router)
+		InitializeWebRoutes(router)
 		db.Cache().ResetUsersSession()
 	}
 	return router

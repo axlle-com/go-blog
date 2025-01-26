@@ -1,6 +1,7 @@
 package alias
 
 import (
+	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
@@ -17,7 +18,7 @@ func Generate(r contracts.Resource, s string) string {
 
 	for {
 		err := repo.GetByAlias(r.GetResource(), aliasNew, r.GetID())
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			break
 		} else if err != nil {
 			logger.Fatal(err)

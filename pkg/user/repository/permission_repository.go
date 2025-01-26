@@ -8,6 +8,7 @@ import (
 )
 
 type PermissionRepository interface {
+	WithTx(tx *gorm.DB) PermissionRepository
 	Create(post *models.Permission) error
 	GetByID(id uint) (*models.Permission, error)
 	Update(post *models.Permission) error
@@ -17,12 +18,17 @@ type PermissionRepository interface {
 }
 
 type permissionRepository struct {
-	*common.Paginate
 	db *gorm.DB
+	*common.Paginate
 }
 
 func NewPermissionRepository() PermissionRepository {
 	return &permissionRepository{db: db.GetDB()}
+}
+
+func (r *permissionRepository) WithTx(tx *gorm.DB) PermissionRepository {
+	newR := &permissionRepository{db: tx}
+	return newR
 }
 
 func (r *permissionRepository) Create(post *models.Permission) error {

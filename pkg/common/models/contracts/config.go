@@ -1,6 +1,8 @@
 package contracts
 
 type Config interface {
+	Port() string
+	LogLevel() int
 	SetTestENV()
 	IsTest() bool
 	DBUrl() string
@@ -9,10 +11,9 @@ type Config interface {
 	KeyCookie() []byte
 	KeyJWT() []byte
 	SessionsName() string
-	Port() string
+	SessionKey(string) string
+	UserSessionKey(string) string
 	UploadPath() string
 	SrcFolder() string
 	SrcFolderBuilder(string) string
-	UserSessionKey(string) string
-	SessionKey(string) string
 }

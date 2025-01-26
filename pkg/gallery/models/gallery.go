@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"gorm.io/gorm"
 	"time"
@@ -57,8 +58,8 @@ func (g *Gallery) GetImages() []contracts.Image {
 
 func (g *Gallery) Attach(r contracts.Resource) error {
 	repo := ResourceRepo()
-	hasRepo, err := repo.GetByResourceAndID(r.GetID(), r.GetResource(), g.ID)
-	if err != gorm.ErrRecordNotFound {
+	hasRepo, err := repo.GetByParams(r.GetID(), r.GetResource(), g.ID)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if hasRepo == nil {

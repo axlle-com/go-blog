@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/gob"
+	"errors"
 	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/axlle-com/blog/pkg/common/routes"
 	"github.com/axlle-com/blog/pkg/common/web"
@@ -30,7 +33,7 @@ func Init(cfg contracts.Config) *gin.Engine {
 		panic(err.Error())
 	}
 
-	store := db.RedisStore(cfg.RedisHost(), "", cfg.KeyCookie())
+	store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
 	router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
 	db.Init(cfg.DBUrl())
@@ -39,5 +42,10 @@ func Init(cfg contracts.Config) *gin.Engine {
 	web.InitTemplate(router)
 	routes.InitializeApiRoutes(router)
 	routes.InitializeWebRoutes(router)
+	logger.Debug(555)
+	logger.Error(errors.New("55"))
+	logger.Info(errors.New("55"))
+	logger.Info(55)
+	logger.Debug(55)
 	return router
 }

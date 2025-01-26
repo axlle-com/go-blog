@@ -11,7 +11,7 @@ import (
 )
 
 func (c *controller) FilterPosts(ctx *gin.Context) {
-	filter, validError := NewPostFilter().ValidateForm(ctx)
+	filter, validError := NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,

@@ -4,19 +4,23 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
 	"github.com/joho/godotenv"
-	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 )
 
 type config struct {
 	*sync.Mutex
-	env            string
-	redisHost      string
-	redisPort      string
-	port           string
+	rootDir  string
+	env      string
+	port     string
+	logLevel int
+
+	redisHost string
+	redisPort string
+
 	dialector      string
 	dbHost         string
 	dbPort         string
@@ -26,10 +30,12 @@ type config struct {
 	dbNameTest     string
 	dbUserTest     string
 	dbPasswordTest string
-	keyJWT         string
-	keyCookie      string
-	uploadsPath    string
-	uploadsFolder  string
+
+	keyJWT    string
+	keyCookie string
+
+	uploadsPath string
+	srcFolder   string
 }
 
 var (
@@ -39,45 +45,49 @@ var (
 
 func LoadConfig() (err error) {
 	once.Do(func() {
-		err := godotenv.Load(".env")
-		if err != nil {
-			log.Fatalf("Ошибка при загрузке .env файла: %v", err)
-		}
-
 		instance = &config{Mutex: &sync.Mutex{}}
-		instance.env = os.Getenv("ENV")
 
-		instance.port = os.Getenv("PORT")
-
-		instance.keyJWT = os.Getenv("KEY_JWT")
-		instance.keyCookie = os.Getenv("KEY_COOKIE")
-
-		instance.redisHost = os.Getenv("REDIS_HOST")
-		instance.redisPort = os.Getenv("REDIS_PORT")
-
-		instance.dialector = os.Getenv("DIALECTOR")
-		if instance.dialector == "" {
-			instance.dialector = "postgres"
+		rootDir, err := instance.root()
+		if err != nil {
+			err = fmt.Errorf("Ошибка определения корневой директории: %w", err)
+			return
 		}
 
-		instance.dbHost = os.Getenv("POSTGRES_HOST")
-		instance.dbPort = os.Getenv("POSTGRES_PORT")
-		instance.dbUser = os.Getenv("POSTGRES_USER")
-		instance.dbName = os.Getenv("POSTGRES_DB")
-		instance.dbPassword = os.Getenv("POSTGRES_PASSWORD")
-
-		instance.dbUserTest = os.Getenv("POSTGRES_USER_TEST")
-		instance.dbNameTest = os.Getenv("POSTGRES_DB_TEST")
-		instance.dbPasswordTest = os.Getenv("POSTGRES_PASSWORD_TEST")
-
-		instance.uploadsPath = os.Getenv("FILE_UPLOADS_PATH")
-		if instance.uploadsPath == "" {
-			instance.uploadsPath = "/public/uploads/"
+		err = godotenv.Load(filepath.Join(rootDir, ".env"))
+		if err != nil {
+			err = fmt.Errorf("Ошибка при загрузке .env файла: %v", err)
+			return
 		}
-		instance.uploadsFolder = os.Getenv("FILE_UPLOADS_FOLDER")
-		if instance.uploadsFolder == "" {
-			instance.uploadsFolder = "src"
+
+		instance.env = getEnv("ENV", "dev")
+		instance.port = getEnv("PORT", "3000")
+
+		logLevel := getEnv("LOG_LEVEL", "6")
+		instance.logLevel, err = strconv.Atoi(logLevel)
+		if err != nil {
+			instance.logLevel = 6
 		}
+
+		instance.keyJWT = getEnv("KEY_JWT", "")
+		instance.keyCookie = getEnv("KEY_COOKIE", "")
+
+		instance.redisHost = getEnv("REDIS_HOST", "127.0.0.1")
+		instance.redisPort = getEnv("REDIS_PORT", "6380")
+
+		instance.dialector = getEnv("DIALECTOR", "postgres")
+
+		instance.dbHost = getEnv("DB_HOST", "127.0.0.1")
+		instance.dbPort = getEnv("DB_PORT", "5432")
+		instance.dbName = getEnv("DB_NAME", "cms_main")
+		instance.dbUser = getEnv("DB_USER", "postgres")
+		instance.dbPassword = getEnv("DB_PASSWORD", "secret")
+
+		instance.dbNameTest = getEnv("DB_NAME_TEST", "cms_test")
+		instance.dbUserTest = getEnv("DB_USER_TEST", "postgres")
+		instance.dbPasswordTest = getEnv("DB_PASSWORD_TEST", "secret")
+
+		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/public/uploads/")
+		instance.srcFolder = getEnv("FILE_SRC_FOLDER", "src")
 	})
 	return
 }
@@ -93,8 +103,9 @@ func Config() contracts.Config {
 
 func (c *config) SetTestENV() {
 	c.Lock()
+	defer c.Unlock()
+
 	c.env = "test"
-	c.Unlock()
 }
 
 func (c *config) IsTest() bool {
@@ -183,9 +194,9 @@ func (c *config) SrcFolder() string {
 		if err != nil {
 			return ""
 		}
-		return root + "/" + c.uploadsFolder
+		return root + "/" + c.srcFolder
 	}
-	return c.uploadsFolder
+	return c.srcFolder
 }
 
 func (c *config) SrcFolderBuilder(s string) string {
@@ -204,7 +215,26 @@ func (c *config) SessionKey(s string) string {
 	return "session_" + s
 }
 
+func (c *config) LogLevel() int {
+	return c.logLevel
+}
+
+func getEnv(key string, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
 func (c *config) root() (string, error) {
+	c.Lock()
+	defer c.Unlock()
+
+	if c.rootDir != "" {
+		return c.rootDir, nil
+	}
+
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -212,13 +242,13 @@ func (c *config) root() (string, error) {
 
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			c.rootDir = dir
 			return dir, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			return "", fmt.Errorf("не удалось найти корневую директорию модуля")
 		}
-
 		dir = parent
 	}
 }

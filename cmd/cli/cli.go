@@ -33,7 +33,7 @@ var Commands = map[string]func(){
 	"hello": func() {
 		fmt.Println("Hello!")
 	},
-	"seed-teat": func() {
+	"seed-test": func() {
 		seedTest()
 	},
 	"migrate": func() {

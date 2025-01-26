@@ -6,9 +6,11 @@ import (
 	"github.com/axlle-com/blog/pkg/common/db"
 	common "github.com/axlle-com/blog/pkg/common/models"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"gorm.io/gorm"
 )
 
 type PostRepository interface {
+	WithTx(tx *gorm.DB) PostRepository
 	Create(post *Post) error
 	GetByID(id uint) (*Post, error)
 	Update(post *Post) error
@@ -17,30 +19,31 @@ type PostRepository interface {
 	GetPaginate(paginator contracts.Paginator, filter *PostFilter) ([]*PostFull, error)
 	GetByAlias(alias string) (*Post, error)
 	GetByAliasNotID(alias string, id uint) (*Post, error)
-	Transaction()
-	Rollback()
-	Commit()
 }
 
 type postRepository struct {
-	*common.Repo
+	db *gorm.DB
 	*common.Paginate
 }
 
 func PostRepo() PostRepository {
-	r := &postRepository{Repo: &common.Repo{}}
-	r.SetConnection(db.GetDB())
+	r := &postRepository{db: db.GetDB()}
 	return r
+}
+
+func (r *postRepository) WithTx(tx *gorm.DB) PostRepository {
+	newR := &postRepository{db: tx}
+	return newR
 }
 
 func (r *postRepository) Create(post *Post) error {
 	post.Creating()
-	return r.Connection().Create(post).Error
+	return r.db.Create(post).Error
 }
 
 func (r *postRepository) GetByID(id uint) (*Post, error) {
 	var model Post
-	if err := r.Connection().First(&model, id).Error; err != nil {
+	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
 	}
 	return &model, nil
@@ -48,7 +51,7 @@ func (r *postRepository) GetByID(id uint) (*Post, error) {
 
 func (r *postRepository) Update(post *Post) error {
 	post.Updating()
-	return r.Connection().Select(
+	return r.db.Select(
 		"UserID",
 		"TemplateID",
 		"PostCategoryID",
@@ -79,14 +82,14 @@ func (r *postRepository) Update(post *Post) error {
 
 func (r *postRepository) Delete(post *Post) error {
 	if post.Deleting() {
-		return r.Connection().Delete(&Post{}, post.ID).Error
+		return r.db.Delete(&Post{}, post.ID).Error
 	}
 	return errors.New("При удалении произошли ошибки")
 }
 
 func (r *postRepository) GetAll() ([]*Post, error) {
 	var posts []*Post
-	if err := r.Connection().Find(&posts).Error; err != nil {
+	if err := r.db.Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
@@ -96,7 +99,7 @@ func (r *postRepository) GetPaginate(p contracts.Paginator, filter *PostFilter) 
 	var posts []*PostFull
 	var total int64
 
-	query := r.Connection().Table("posts").
+	query := r.db.Table("posts").
 		Select(
 			"posts.*",
 			"post_categories.title as category_title",
@@ -134,7 +137,7 @@ func (r *postRepository) GetPaginate(p contracts.Paginator, filter *PostFilter) 
 
 func (r *postRepository) GetByAlias(alias string) (*Post, error) {
 	var post Post
-	if err := r.Connection().Where("alias = ?", alias).First(&post).Error; err != nil {
+	if err := r.db.Where("alias = ?", alias).First(&post).Error; err != nil {
 		return nil, err
 	}
 	return &post, nil
@@ -143,7 +146,7 @@ func (r *postRepository) GetByAlias(alias string) (*Post, error) {
 // GetByAliasNotID TODO AND id <> 0 ORDER BY "posts"."id" LIMIT 1
 func (r *postRepository) GetByAliasNotID(alias string, id uint) (*Post, error) {
 	var post Post
-	if err := r.Connection().Where("alias = ?", alias).Where("id <> ?", id).First(&post).Error; err != nil {
+	if err := r.db.Where("alias = ?", alias).Where("id <> ?", id).First(&post).Error; err != nil {
 		return nil, err
 	}
 	return &post, nil

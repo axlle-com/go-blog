@@ -1,102 +1,89 @@
 package logger
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"errors"
+	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/sirupsen/logrus"
-	l "log"
 	"os"
 	"runtime"
+	"strconv"
+	"sync"
 )
 
-type Logger interface {
-	Request(*gin.Context)
-	Error(error)
-	Fatal(error)
-	Info(string)
+var (
+	once         sync.Once
+	globalLogger *logrus.Logger
+	conf         = config.Config()
+)
+
+func getLogger() *logrus.Logger {
+	once.Do(func() {
+		logger := logrus.New()
+		logger.SetOutput(os.Stdout)
+		logger.SetLevel(logrus.DebugLevel)
+		logger.SetFormatter(&logrus.TextFormatter{
+			FullTimestamp:   true,
+			TimestampFormat: "2006-01-02 15:04:05.000",
+		})
+
+		globalLogger = logger
+	})
+
+	return globalLogger
 }
 
-type log struct {
-	logger *logrus.Logger
-	error
-	file     string
-	line     string
-	function string
-	message  string
-}
+func logWithCaller(level logrus.Level, args ...any) {
+	if conf.LogLevel() < int(level) {
+		return
+	}
 
-func New() Logger {
-	logger := logrus.New()
-	//logger.SetFormatter(&logrus.JSONFormatter{})
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(logrus.InfoLevel)
-
-	_, file, line, ok := runtime.Caller(1)
+	// runtime.Caller(3) - почему 3?
+	//   1) сам logWithCaller
+	//   2) функция-обёртка (например, Error() или Fatal() ниже)
+	//   3) конечная точка вызова в прикладном коде
+	pc, file, line, ok := runtime.Caller(3)
 	if !ok {
 		file = "unknown"
 		line = 0
 	}
 
-	function := "unknown"
-	if pc, _, _, ok := runtime.Caller(1); ok {
-		function = runtime.FuncForPC(pc).Name()
+	fnName := "unknown"
+	fn := runtime.FuncForPC(pc)
+	if fn != nil {
+		fnName = fn.Name()
 	}
-	return &log{
-		logger:   logger,
-		file:     file,
-		line:     string(rune(line)),
-		function: function,
+
+	getLogger().WithFields(logrus.Fields{
+		"file":     file,
+		"line":     strconv.Itoa(line),
+		"function": fnName,
+	}).Log(level, args...)
+}
+
+func log(level logrus.Level, args ...any) {
+	if conf.LogLevel() < int(level) {
+		return
 	}
-}
 
-func (f *log) Request(c *gin.Context) {
-	f.logger.WithFields(logrus.Fields{
-		"method": c.Request.Method,
-		"path":   c.Request.URL.Path,
-	}).Info("Request received")
-}
-
-func (f *log) Error(err error) {
-	f.logger.SetLevel(logrus.ErrorLevel)
-	f.logger.WithFields(logrus.Fields{
-		"error":    err,
-		"file":     f.file,
-		"line":     f.line,
-		"function": f.function,
-	}).Error("An error occurred")
-}
-
-func (f *log) Fatal(err error) {
-	f.logger.SetLevel(logrus.FatalLevel)
-	f.logger.WithFields(logrus.Fields{
-		"error":    err,
-		"file":     f.file,
-		"line":     f.line,
-		"function": f.function,
-	}).Error("An error occurred")
-	panic(err.Error())
-}
-
-func (f *log) Info(message string) {
-	f.logger.Info(message)
+	getLogger().Log(level, args...)
 }
 
 func Error(err error) {
-	New().Error(err)
+	logWithCaller(logrus.ErrorLevel, err)
+}
+
+func Errorf(msg string) {
+	logWithCaller(logrus.ErrorLevel, errors.New(msg))
 }
 
 func Fatal(err error) {
-	New().Fatal(err)
+	logWithCaller(logrus.FatalLevel, err)
 }
 
-func Info(message string) {
-	New().Info(message)
+func Info(args ...any) {
+	log(logrus.InfoLevel, args...)
 }
 
-func Print(message any) {
-	_, file, line, _ := runtime.Caller(1)
-	l.Println("=================================")
-	l.Println(file, line)
-	fmt.Printf("%+v\n", message)
-	l.Println("=================================")
+func Debug(args ...any) {
+	log(logrus.DebugLevel, args...)
 }

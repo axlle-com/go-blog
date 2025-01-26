@@ -8,6 +8,7 @@ import (
 )
 
 type RoleRepository interface {
+	WithTx(tx *gorm.DB) RoleRepository
 	Create(post *models.Role) error
 	GetByID(id uint) (*models.Role, error)
 	GetByName(name string) (*models.Role, error)
@@ -18,12 +19,17 @@ type RoleRepository interface {
 }
 
 type roleRepository struct {
-	*common.Paginate
 	db *gorm.DB
+	*common.Paginate
 }
 
 func NewRoleRepo() RoleRepository {
 	return &roleRepository{db: db.GetDB()}
+}
+
+func (r *roleRepository) WithTx(tx *gorm.DB) RoleRepository {
+	newR := &roleRepository{db: tx}
+	return newR
 }
 
 func (r *roleRepository) Create(post *models.Role) error {

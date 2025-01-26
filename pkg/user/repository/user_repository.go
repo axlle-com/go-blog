@@ -8,6 +8,7 @@ import (
 )
 
 type UserRepository interface {
+	WithTx(tx *gorm.DB) UserRepository
 	Create(user *models.User) error
 	GetByID(id uint) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
@@ -19,12 +20,17 @@ type UserRepository interface {
 }
 
 type repository struct {
-	*common.Paginate
 	db *gorm.DB
+	*common.Paginate
 }
 
 func NewRepo() UserRepository {
 	return &repository{db: db.GetDB()}
+}
+
+func (r *repository) WithTx(tx *gorm.DB) UserRepository {
+	newR := &repository{db: tx}
+	return newR
 }
 
 func (r *repository) Create(user *models.User) error {

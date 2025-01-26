@@ -20,21 +20,23 @@ type GalleryRepository interface {
 	GetAllIds() ([]uint, error)
 	GetForResource(contracts.Resource) ([]*Gallery, error)
 	WithImages() GalleryRepository
-	Transaction()
-	Rollback()
-	Commit()
+	WithTx(tx *gorm.DB) GalleryRepository
 }
 
 type galleryRepository struct {
-	*common.Repo
+	db *gorm.DB
 	*common.Paginate
 	withImages bool
 }
 
 func GalleryRepo() GalleryRepository {
-	r := &galleryRepository{Repo: &common.Repo{}}
-	r.SetConnection(db.GetDB())
+	r := &galleryRepository{db: db.GetDB()}
 	return r
+}
+
+func (r *galleryRepository) WithTx(tx *gorm.DB) GalleryRepository {
+	newR := &galleryRepository{db: tx}
+	return newR
 }
 
 func (r *galleryRepository) WithImages() GalleryRepository {
@@ -43,12 +45,12 @@ func (r *galleryRepository) WithImages() GalleryRepository {
 }
 
 func (r *galleryRepository) Create(gallery *Gallery) error {
-	return r.Connection().Omit("Images").Create(gallery).Error
+	return r.db.Omit("Images").Create(gallery).Error
 }
 
 func (r *galleryRepository) GetByID(id uint) (*Gallery, error) {
 	var gallery Gallery
-	if err := r.Connection().First(&gallery, id).Error; err != nil {
+	if err := r.db.First(&gallery, id).Error; err != nil {
 		return nil, err
 	}
 	return &gallery, nil
@@ -56,7 +58,7 @@ func (r *galleryRepository) GetByID(id uint) (*Gallery, error) {
 
 func (r *galleryRepository) GetByIDs(ids []uint) ([]*Gallery, error) {
 	var galleries []*Gallery
-	query := r.Connection().Where("id IN ?", ids)
+	query := r.db.Where("id IN ?", ids)
 
 	if r.withImages {
 		query.Preload("Images", func(db *gorm.DB) *gorm.DB {
@@ -71,24 +73,24 @@ func (r *galleryRepository) GetByIDs(ids []uint) ([]*Gallery, error) {
 }
 
 func (r *galleryRepository) Update(gallery *Gallery) error {
-	return r.Connection().Select("Title", "Description", "Sort", "Image", "URL").Save(gallery).Error
+	return r.db.Select("Title", "Description", "Sort", "Image", "URL").Save(gallery).Error
 }
 
 func (r *galleryRepository) DeleteByID(id uint) error {
-	return r.Connection().Delete(Gallery{}, id).Error
+	return r.db.Delete(Gallery{}, id).Error
 }
 
 func (r *galleryRepository) Delete(g *Gallery) (err error) {
-	return r.Connection().Delete(g, g.ID).Error
+	return r.db.Delete(g, g.ID).Error
 }
 
 func (r *galleryRepository) DeleteByIDs(ids []uint) (err error) {
-	return r.Connection().Where("id IN ?", ids).Delete(&Gallery{}).Error
+	return r.db.Where("id IN ?", ids).Delete(&Gallery{}).Error
 }
 
 func (r *galleryRepository) GetAll() ([]*Gallery, error) {
 	var galleries []*Gallery
-	if err := r.Connection().Find(&galleries).Error; err != nil {
+	if err := r.db.Find(&galleries).Error; err != nil {
 		return nil, err
 	}
 	return galleries, nil
@@ -96,7 +98,7 @@ func (r *galleryRepository) GetAll() ([]*Gallery, error) {
 
 func (r *galleryRepository) GetForResource(c contracts.Resource) ([]*Gallery, error) {
 	var galleries []*Gallery
-	query := r.Connection().
+	query := r.db.
 		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").
 		Where("r.resource_id = ?", c.GetID()).
 		Where("r.resource = ?", c.GetResource()).
@@ -114,7 +116,7 @@ func (r *galleryRepository) GetForResource(c contracts.Resource) ([]*Gallery, er
 
 func (r *galleryRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
-	if err := r.Connection().Model(&Gallery{}).Pluck("id", &ids).Error; err != nil {
+	if err := r.db.Model(&Gallery{}).Pluck("id", &ids).Error; err != nil {
 		logger.Error(err)
 	}
 	return ids, nil

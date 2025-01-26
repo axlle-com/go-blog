@@ -1,13 +1,28 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/common/config"
 	"github.com/axlle-com/blog/pkg/common/logger"
 	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
 	client "github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"
 )
+
+func Store(address string, password string, keyPairs []byte) redis.Store {
+	store, err := redis.NewStore(10, "tcp", address, password, keyPairs)
+	if err != nil {
+		panic(err)
+	}
+	store.Options(sessions.Options{
+		MaxAge: 86400 * 7,
+		Path:   "/",
+	})
+	return store
+}
 
 func Redis() contracts.Cache {
 	c := &redisClient{}
@@ -46,7 +61,7 @@ func (r *redisClient) AddUserSession(id uint, sessionID string) {
 
 func (r *redisClient) ResetUserSession(userID uint) error {
 	sessionID, err := r.client.Get(context.Background(), r.GetUserKey(userID)).Result()
-	if err == client.Nil {
+	if errors.Is(err, client.Nil) {
 		return nil
 	}
 	if err != nil {

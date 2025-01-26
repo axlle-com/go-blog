@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	GetByAlias(table, alias string, id uint) error
+	WithTx(tx *gorm.DB) Repository
 }
 
 type repository struct {
@@ -15,6 +16,11 @@ type repository struct {
 
 func Repo() Repository {
 	return &repository{db: db.GetDB()}
+}
+
+func (r *repository) WithTx(tx *gorm.DB) Repository {
+	newR := &repository{db: tx}
+	return newR
 }
 
 func (r *repository) GetByAlias(table, alias string, id uint) error {

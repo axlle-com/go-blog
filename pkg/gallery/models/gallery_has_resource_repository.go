@@ -9,38 +9,40 @@ import (
 )
 
 type GalleryResourceRepository interface {
-	GetByResourceAndID(id uint, resource string, galleryID uint) (*GalleryHasResource, error)
-	DeleteByResourceAndID(id uint, resource string, galleryID uint) error
+	WithTx(tx *gorm.DB) GalleryResourceRepository
+	GetByParams(resourceID uint, resource string, galleryID uint) (*GalleryHasResource, error)
+	DeleteByParams(resourceID uint, resource string, galleryID uint) error
 	GetForResource(contracts.Resource) ([]*GalleryHasResource, error)
 	GetByGalleryID(uint) (*GalleryHasResource, error)
-	GetGalleriesByResource(c contracts.Resource) ([]*GalleryHasResource, error)
+	GetByResource(c contracts.Resource) ([]*GalleryHasResource, error)
 	Create(*GalleryHasResource) error
 	Delete(uint) error
 	DetachResource(contracts.Resource) error
-	Transaction()
-	Rollback()
-	Commit()
 }
 
 type galleryResourceRepository struct {
-	*common.Repo
+	db *gorm.DB
 	*common.Paginate
 }
 
 func ResourceRepo() GalleryResourceRepository {
-	r := &galleryResourceRepository{Repo: &common.Repo{}}
-	r.SetConnection(db.GetDB())
+	r := &galleryResourceRepository{db: db.GetDB()}
 	return r
 }
 
-func (r *galleryResourceRepository) Create(galleryHasResource *GalleryHasResource) error {
-	return r.Connection().Create(galleryHasResource).Error
+func (r *galleryResourceRepository) WithTx(tx *gorm.DB) GalleryResourceRepository {
+	newR := &galleryResourceRepository{db: tx}
+	return newR
 }
 
-func (r *galleryResourceRepository) GetByResourceAndID(id uint, resource string, galleryID uint) (*GalleryHasResource, error) {
+func (r *galleryResourceRepository) Create(galleryHasResource *GalleryHasResource) error {
+	return r.db.Create(galleryHasResource).Error
+}
+
+func (r *galleryResourceRepository) GetByParams(resourceID uint, resource string, galleryID uint) (*GalleryHasResource, error) {
 	var galleryHasResource GalleryHasResource
-	if err := r.Connection().
-		Where("resource_id = ?", id).
+	if err := r.db.
+		Where("resource_id = ?", resourceID).
 		Where("resource = ?", resource).
 		Where("gallery_id = ?", galleryID).
 		First(&galleryHasResource).Error; err != nil {
@@ -49,9 +51,9 @@ func (r *galleryResourceRepository) GetByResourceAndID(id uint, resource string,
 	return &galleryHasResource, nil
 }
 
-func (r *galleryResourceRepository) DeleteByResourceAndID(id uint, resource string, galleryID uint) error {
-	err := r.Connection().
-		Where("resource_id = ?", id).
+func (r *galleryResourceRepository) DeleteByParams(resourceID uint, resource string, galleryID uint) error {
+	err := r.db.
+		Where("resource_id = ?", resourceID).
 		Where("resource = ?", resource).
 		Where("gallery_id = ?", galleryID).
 		Delete(&GalleryHasResource{}).Error
@@ -60,16 +62,12 @@ func (r *galleryResourceRepository) DeleteByResourceAndID(id uint, resource stri
 		return nil
 	}
 
-	if err != nil {
-		r.Rollback()
-	}
-
 	return err
 }
 
 func (r *galleryResourceRepository) GetForResource(c contracts.Resource) ([]*GalleryHasResource, error) {
 	var galleryHasResource []*GalleryHasResource
-	err := r.Connection().
+	err := r.db.
 		Where("resource = ?", c.GetResource()).
 		Where("resource_id = ?", c.GetID()).
 		Find(&galleryHasResource).Error
@@ -83,12 +81,12 @@ func (r *galleryResourceRepository) GetForResource(c contracts.Resource) ([]*Gal
 	return galleryHasResource, nil
 }
 
-func (r *galleryResourceRepository) GetGalleriesByResource(c contracts.Resource) ([]*GalleryHasResource, error) {
+func (r *galleryResourceRepository) GetByResource(c contracts.Resource) ([]*GalleryHasResource, error) {
 	var galleryHasResource []*GalleryHasResource
-	err := r.Connection().
+	err := r.db.
 		Where("resource_id = ? AND resource = ?", c.GetID(), c.GetResource()).
 		Or("gallery_id IN (?)",
-			r.Connection().Model(&GalleryHasResource{}).
+			r.db.Model(&GalleryHasResource{}).
 				Select("gallery_id").
 				Where("resource_id = ? AND resource = ?", c.GetID(), c.GetResource()),
 		).
@@ -104,7 +102,7 @@ func (r *galleryResourceRepository) GetGalleriesByResource(c contracts.Resource)
 }
 
 func (r *galleryResourceRepository) DetachResource(c contracts.Resource) error {
-	err := r.Connection().
+	err := r.db.
 		Where("resource = ?", c.GetResource()).
 		Where("resource_id = ?", c.GetID()).
 		Delete(&GalleryHasResource{}).Error
@@ -116,7 +114,7 @@ func (r *galleryResourceRepository) DetachResource(c contracts.Resource) error {
 
 func (r *galleryResourceRepository) GetByGalleryID(id uint) (*GalleryHasResource, error) {
 	var galleryHasResource GalleryHasResource
-	if err := r.Connection().
+	if err := r.db.
 		Where("gallery_id = ?", id).
 		First(&galleryHasResource).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -128,7 +126,7 @@ func (r *galleryResourceRepository) GetByGalleryID(id uint) (*GalleryHasResource
 }
 
 func (r *galleryResourceRepository) Delete(id uint) error {
-	err := r.Connection().Where("gallery_id = ?", id).Delete(&GalleryHasResource{}).Error
+	err := r.db.Where("gallery_id = ?", id).Delete(&GalleryHasResource{}).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil

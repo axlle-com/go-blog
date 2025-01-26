@@ -1,19 +1,19 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/errors"
+	. "github.com/axlle-com/blog/pkg/app/errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
 
-func Login(c *gin.Context) {
-	session := sessions.Default(c)
+func (c *controller) Login(ctx *gin.Context) {
+	session := sessions.Default(ctx)
 	userID := session.Get("user_id")
 	if userID != nil {
-		c.Redirect(http.StatusFound, "/")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/")
+		ctx.Abort()
 		return
 	}
 
@@ -23,7 +23,7 @@ func Login(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-	c.HTML(
+	ctx.HTML(
 		http.StatusOK,
 		"admin.login",
 		gin.H{

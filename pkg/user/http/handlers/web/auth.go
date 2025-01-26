@@ -1,9 +1,9 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/db"
-	. "github.com/axlle-com/blog/pkg/common/errors"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/db"
+	. "github.com/axlle-com/blog/pkg/app/errors"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/gin-contrib/sessions"
@@ -11,11 +11,11 @@ import (
 	"net/http"
 )
 
-func Auth(c *gin.Context) {
+func (c *controller) Auth(ctx *gin.Context) {
 	var authInput AuthInput
-	session := sessions.Default(c)
+	session := sessions.Default(ctx)
 
-	if err := c.ShouldBind(&authInput); err != nil {
+	if err := ctx.ShouldBind(&authInput); err != nil {
 		errors := ParseBindError(err)
 		for _, bindError := range errors {
 			session.AddFlash(FlashErrorString(bindError))
@@ -23,8 +23,8 @@ func Auth(c *gin.Context) {
 		if err := session.Save(); err != nil {
 			logger.Error(err)
 		}
-		c.Redirect(http.StatusFound, "/login")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
 
@@ -42,24 +42,24 @@ func Auth(c *gin.Context) {
 		if err != nil {
 			logger.Error(err)
 		}
-		c.Redirect(http.StatusFound, "/login")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
 	session.Set("user_id", userFound.ID)
 	session.Set("user", userFound)
 	sessionID := session.ID()
-	cache := db.Cache()
+	cache := db.NewCache()
 	cache.AddUserSession(userFound.ID, sessionID)
 
 	if err := session.Save(); err != nil {
 		logger.Error(err)
-		c.Redirect(http.StatusFound, "/login")
-		c.Abort()
+		ctx.Redirect(http.StatusFound, "/login")
+		ctx.Abort()
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/admin")
-	c.Abort()
+	ctx.Redirect(http.StatusFound, "/admin")
+	ctx.Abort()
 	return
 }

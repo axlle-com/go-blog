@@ -1,8 +1,7 @@
 package http
 
 import (
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/file"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -20,8 +19,8 @@ func (c *controller) UploadImage(ctx *gin.Context) {
 	var path string
 	_, img, _ := ctx.Request.FormFile("file")
 	if img != nil {
-		path, err = file.SaveUploadedFile(img, "temp")
-		if err != nil {
+		path, err = c.service.SaveUploadedFile(img, "temp")
+		if err != nil || path == "" {
 			logger.Error(err)
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
@@ -54,7 +53,7 @@ func (c *controller) UploadImages(ctx *gin.Context) {
 	}
 
 	files := form.File["files"]
-	paths := file.SaveUploadedFiles(files, "temp")
+	paths := c.service.SaveUploadedFiles(files, "temp")
 	if len(paths) <= 0 {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/gob"
-	"github.com/axlle-com/blog/pkg/common/config"
-	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/models/contracts"
-	"github.com/axlle-com/blog/pkg/common/routes"
-	"github.com/axlle-com/blog/pkg/common/web"
+	"github.com/axlle-com/blog/pkg/app"
+	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/app/routes"
+	"github.com/axlle-com/blog/pkg/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -30,14 +32,16 @@ func Init(cfg contracts.Config) *gin.Engine {
 		panic(err.Error())
 	}
 
-	store := db.RedisStore(cfg.RedisHost(), "", cfg.KeyCookie())
+	store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
 	router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
 	db.Init(cfg.DBUrl())
 
+	container := app.New()
+
 	//web.InitMinify()
 	web.InitTemplate(router)
-	routes.InitializeApiRoutes(router)
-	routes.InitializeWebRoutes(router)
+	routes.InitializeApiRoutes(router, container)
+	routes.InitializeWebRoutes(router, container)
 	return router
 }

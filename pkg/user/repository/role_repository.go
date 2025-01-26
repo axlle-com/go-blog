@@ -1,29 +1,35 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/pkg/common/db"
-	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/db"
+	app "github.com/axlle-com/blog/pkg/app/models"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
 
 type RoleRepository interface {
+	WithTx(tx *gorm.DB) RoleRepository
 	Create(post *models.Role) error
 	GetByID(id uint) (*models.Role, error)
 	GetByName(name string) (*models.Role, error)
 	Update(post *models.Role) error
 	Delete(id uint) error
 	GetAll() ([]models.Role, error)
-	GetPaginate(page, pageSize int) ([]models.Role, error)
+	WithPaginate(page, pageSize int) ([]models.Role, error)
 }
 
 type roleRepository struct {
-	*common.Paginate
 	db *gorm.DB
+	*app.Paginate
 }
 
 func NewRoleRepo() RoleRepository {
 	return &roleRepository{db: db.GetDB()}
+}
+
+func (r *roleRepository) WithTx(tx *gorm.DB) RoleRepository {
+	newR := &roleRepository{db: tx}
+	return newR
 }
 
 func (r *roleRepository) Create(post *models.Role) error {
@@ -62,7 +68,7 @@ func (r *roleRepository) GetAll() ([]models.Role, error) {
 	return m, nil
 }
 
-func (r *roleRepository) GetPaginate(page, pageSize int) ([]models.Role, error) {
+func (r *roleRepository) WithPaginate(page, pageSize int) ([]models.Role, error) {
 	var m []models.Role
 
 	err := r.db.Scopes(r.SetPaginate(page, pageSize)).Find(&m).Error

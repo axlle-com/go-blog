@@ -2,11 +2,9 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	. "github.com/axlle-com/blog/pkg/post/http/models"
-	. "github.com/axlle-com/blog/pkg/post/models"
-	"github.com/axlle-com/blog/pkg/post/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,10 +13,10 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 	form, formError := NewPostRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"errors":  formError.Errors,
-				"message": formError.Message,
-			})
+			ctx.JSON(
+				http.StatusBadRequest,
+				response.Fail(http.StatusBadRequest, formError.Message, formError.Errors),
+			)
 			ctx.Abort()
 		} else {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -26,30 +24,36 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := service.PostSave(form, c.GetUser(ctx))
+	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		ctx.JSON(
+			http.StatusInternalServerError,
+			response.Fail(http.StatusInternalServerError, err.Error(), nil),
+		)
 		return
 	}
 
-	categories, err := CategoryRepo().GetAll()
+	categories, err := c.category.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := template.Provider().GetAll()
+	templates := c.template.GetAll()
 
-	data := gin.H{
+	data := response.Body{
 		"categories": categories,
 		"templates":  templates,
 		"post":       post,
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": gin.H{
-			"view": c.RenderView("admin.post_inner", data, ctx),
-			"url":  fmt.Sprintf("/admin/posts/%d", post.ID),
-			"post": post,
-		},
-	})
+	ctx.JSON(
+		http.StatusCreated,
+		response.Created(
+			response.Body{
+				"view": c.RenderView("admin.post_inner", data, ctx),
+				"url":  fmt.Sprintf("/admin/posts/%d", post.ID),
+				"post": post,
+			},
+			"Запись создана",
+		),
+	)
 }

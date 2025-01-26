@@ -1,8 +1,7 @@
 package http
 
 import (
-	"errors"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,7 +11,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 	if len(filePath) > 0 {
 		filePath = filePath[1:]
 	} else {
-		logger.Error(errors.New("Не известный путь"))
+		logger.Error("Не известный путь")
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

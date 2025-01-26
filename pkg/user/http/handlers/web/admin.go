@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-func Index(c *gin.Context) {
-	c.HTML(
+func (c *controller) Index(ctx *gin.Context) {
+	ctx.HTML(
 		http.StatusOK,
 		"admin.index",
 		gin.H{
 			"title": "dashboard",
-			"menu":  menu.NewMenu(c.FullPath()),
+			"menu":  menu.NewMenu(ctx.FullPath()),
 		},
 	)
 }

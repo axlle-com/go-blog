@@ -1,28 +1,34 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/pkg/common/db"
-	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/db"
+	app "github.com/axlle-com/blog/pkg/app/models"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
 
 type PermissionRepository interface {
+	WithTx(tx *gorm.DB) PermissionRepository
 	Create(post *models.Permission) error
 	GetByID(id uint) (*models.Permission, error)
 	Update(post *models.Permission) error
 	Delete(id uint) error
 	GetAll() ([]models.Permission, error)
-	GetPaginate(page, pageSize int) ([]models.Permission, error)
+	WithPaginate(page, pageSize int) ([]models.Permission, error)
 }
 
 type permissionRepository struct {
-	*common.Paginate
 	db *gorm.DB
+	*app.Paginate
 }
 
-func NewPermissionRepository() PermissionRepository {
+func NewPermissionRepo() PermissionRepository {
 	return &permissionRepository{db: db.GetDB()}
+}
+
+func (r *permissionRepository) WithTx(tx *gorm.DB) PermissionRepository {
+	newR := &permissionRepository{db: tx}
+	return newR
 }
 
 func (r *permissionRepository) Create(post *models.Permission) error {
@@ -53,7 +59,7 @@ func (r *permissionRepository) GetAll() ([]models.Permission, error) {
 	return m, nil
 }
 
-func (r *permissionRepository) GetPaginate(page, pageSize int) ([]models.Permission, error) {
+func (r *permissionRepository) WithPaginate(page, pageSize int) ([]models.Permission, error) {
 	var m []models.Permission
 
 	err := r.db.Scopes(r.SetPaginate(page, pageSize)).Find(&m).Error

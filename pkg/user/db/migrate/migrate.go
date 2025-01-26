@@ -1,16 +1,23 @@
 package migrate
 
 import (
-	"fmt"
-	"github.com/axlle-com/blog/pkg/common/db"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
+	"gorm.io/gorm"
 )
 
-func Migrate() {
-	d := db.GetDB()
+type migrator struct {
+	db *gorm.DB
+}
 
-	err := d.AutoMigrate(
+func NewMigrator() contracts.Migrator {
+	return &migrator{db: db.GetDB()}
+}
+
+func (m *migrator) Migrate() {
+	err := m.db.AutoMigrate(
 		&models.User{},
 		&models.Role{},
 		&models.Permission{},
@@ -19,11 +26,9 @@ func Migrate() {
 		logger.Fatal(err)
 	}
 }
-func Rollback() {
-	d := db.GetDB()
-
-	dropIntermediateTables()
-	err := d.Migrator().DropTable(
+func (m *migrator) Rollback() {
+	m.dropIntermediateTables()
+	err := m.db.Migrator().DropTable(
 		&models.User{},
 		&models.Role{},
 		&models.Permission{},
@@ -33,9 +38,8 @@ func Rollback() {
 	}
 }
 
-func dropIntermediateTables() {
-	d := db.GetDB()
-	migrator := d.Migrator()
+func (m *migrator) dropIntermediateTables() {
+	migrator := m.db.Migrator()
 	intermediateTables := []string{
 		"user_has_role",
 		"user_has_permission",
@@ -43,9 +47,9 @@ func dropIntermediateTables() {
 	}
 	for _, table := range intermediateTables {
 		if err := migrator.DropTable(table); err != nil {
-			fmt.Println("Error dropping table:", table, err)
+			logger.Errorf("Error dropping table: %v, %v", table, err)
 			return
 		}
-		logger.Info(fmt.Sprintf("Dropped intermediate table:%s", table))
+		logger.Infof("Dropped intermediate table:%s", table)
 	}
 }

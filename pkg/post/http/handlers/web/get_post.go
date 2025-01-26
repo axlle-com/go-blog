@@ -1,16 +1,13 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/logger"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/menu"
-	. "github.com/axlle-com/blog/pkg/post/models"
-	template "github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func (c *webController) GetPost(ctx *gin.Context) {
+func (c *controller) GetPost(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
@@ -22,23 +19,20 @@ func (c *webController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := PostRepo().GetByID(id)
+	post, err := c.post.GetByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	post.Galleries = gallery.Provider().GetForResource(post)
+	post.Galleries = c.gallery.GetForResource(post)
 
-	categories, err := CategoryRepo().GetAll()
+	categories, err := c.category.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates, err := template.NewRepo().GetAll()
-	if err != nil {
-		logger.Error(err)
-	}
+	templates := c.template.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.post",

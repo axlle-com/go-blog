@@ -15,10 +15,11 @@
                             type="button"
                             class="btn btn-link btn-icon text-danger"
                             data-js-image-href="/admin/posts/{{ .ID }}/image"
-                            data-js-image-array-id="">
+                            data-js-image-delete>
                         <i class="material-icons">delete</i>
                     </button>
                 </div>
+                <input type="hidden" name="image" value="{{ .Image }}">
             </div>
         {{ end }}
     </div>

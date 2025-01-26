@@ -1,37 +1,36 @@
 package db
 
 import (
+	"github.com/axlle-com/blog/pkg/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/models"
-	. "github.com/axlle-com/blog/pkg/user/repository"
-	"log"
 )
 
-func SeedPermissions() {
-	permissions := []string{"create", "update"}
+func (s *seeder) seedPermissions() {
+	permissions := []string{"create", "update", "delete", "read"}
 	for _, name := range permissions {
 		permission := Permission{
 			Name: name,
 		}
-		err := NewPermissionRepository().Create(&permission)
+		err := s.permission.Create(&permission)
 		if err != nil {
-			log.Printf("Failed to create permission %v", err.Error())
+			logger.Errorf("Failed to create permission %v", err.Error())
 		}
 	}
 
-	log.Println("Database seeded Permission successfully!")
+	logger.Info("Database seeded Permission successfully!")
 }
 
-func SeedRoles() {
+func (s *seeder) seedRoles() {
 	roles := []string{"admin", "employee"}
 	for _, name := range roles {
 		role := Role{
 			Name: name,
 		}
-		err := NewRoleRepo().Create(&role)
+		err := s.role.Create(&role)
 		if err != nil {
-			log.Printf("Failed to create role %v", err.Error())
+			logger.Errorf("Failed to create role %v", err.Error())
 		}
 	}
 
-	log.Println("Database seeded Role successfully!")
+	logger.Info("Database seeded Role successfully!")
 }

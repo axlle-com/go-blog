@@ -1,7 +1,8 @@
 package http
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/pkg/file"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,11 +12,16 @@ type Controller interface {
 	UploadImages(*gin.Context)
 }
 
-func NewController(r *gin.Engine) Controller {
-	return &controller{engine: r}
+func New(
+	service *file.Service,
+) Controller {
+	return &controller{
+		service: service,
+	}
 }
 
 type controller struct {
 	*models.BaseAjax
-	engine *gin.Engine
+
+	service *file.Service
 }

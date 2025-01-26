@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func Logout(c *gin.Context) {
-	session := sessions.Default(c)
+func (c *controller) Logout(ctx *gin.Context) {
+	session := sessions.Default(ctx)
 	session.Clear()
 	session.Options(sessions.Options{
 		MaxAge: -1,
@@ -18,7 +18,7 @@ func Logout(c *gin.Context) {
 		log.Fatalln("Failed to log out")
 		return
 	}
-	c.Redirect(http.StatusFound, "/")
-	c.Abort()
+	ctx.Redirect(http.StatusFound, "/")
+	ctx.Abort()
 	return
 }

@@ -175,11 +175,13 @@ const _image = {
         const _this = this;
         $('body').on('click', '[data-js-image-delete]', function (evt) {
             let image = $(this).closest('.js-image-block').find('.image-box');
-            let input = $(this).closest('.js-image-block').find('input[name="temp_image"]');
+            let input = $(this).closest('.js-image-block').find('input[name="image"]');
             if (!image.length || !input.length) {
                 return;
             }
-            const request = new _glob.request({action: $(this).data('action')}).setMethod('delete')
+            const action = $(this).attr('data-js-image-href');
+            const request = new _glob.request({action: action})
+                .setMethod('delete')
                 .setPreloader('.js-product');
             request.sendForm((response) => {
                 if (response.message) {
@@ -207,10 +209,10 @@ const _image = {
             }
             new _glob.request(formData).setAction(action).sendForm((response) => {
                 if (response.data.images) {
-                    let idGallery = input.attr('data-gallery-id');
+                    let idGallery = input.attr('data-gallery-number');
                     if (!idGallery) {
                         idGallery = _glob.uuid();
-                        input.attr('data-gallery-id', idGallery);
+                        input.attr('data-gallery-number', idGallery);
                     }
                     _this.drawArray(response.data.images, idGallery)
                 }
@@ -227,9 +229,12 @@ const _image = {
             return
         }
         const _this = this;
-        const selector = `[data-gallery-id="${idGallery}"]`;
+        const selector = `[data-gallery-number="${idGallery}"]`;
+        const id = $(selector).attr('data-gallery-id');
+        const count = $(selector).closest('.js-galleries-general-block').find('.js-gallery-item').length;
         const block = $(selector).closest('.js-galleries-general-block').find('.js-gallery-block-saved');
         for (let i = 0; i < images.length; i++) {
+            let number = count + i;
             let url = images[i];
             let image = `<div class="md-block-5 js-gallery-item sort-handle">
                                 <div class="img rounded">
@@ -248,19 +253,19 @@ const _image = {
                                     </div>
                                 </div>
                                 <div>
-                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][id]" value="">
-                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][gallery_id]" value="${_glob.isEmpty(idGallery) ? '' : idGallery}">
-                                    <input type="hidden" name="galleries[${idGallery}][images][${i}][file]" value="${url}">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${number}][id]" value="">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${number}][gallery_id]" value="${_glob.isEmpty(id) ? '' : id}">
+                                    <input type="hidden" name="galleries[${idGallery}][images][${number}][file]" value="${url}">
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${i}][title]" value="">
+                                        <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${number}][title]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Описание" name="galleries[${idGallery}][images][${i}][description]" value="">
+                                        <input class="form-control form-shadow" placeholder="Описание" name="galleries[${idGallery}][images][${number}][description]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" type="number" placeholder="Сортировка" name="galleries[${idGallery}][images][${i}][sort]" value="">
+                                        <input class="form-control form-shadow" type="number" placeholder="Сортировка" name="galleries[${idGallery}][images][${number}][sort]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </div>

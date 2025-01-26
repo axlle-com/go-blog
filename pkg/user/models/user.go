@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/pkg/common/config"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 	"regexp"

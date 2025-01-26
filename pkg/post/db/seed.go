@@ -1,29 +1,64 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/pkg/common/db"
+	. "github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	. "github.com/axlle-com/blog/pkg/post/models"
+	. "github.com/axlle-com/blog/pkg/post/repository"
+	. "github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
-	"log"
+	"github.com/google/uuid"
 	"math/rand"
 	"time"
 )
 
-func SeedPosts(n int) {
-	ids := template.Provider().GetAllIds()
-	idsCategory, _ := CategoryRepo().GetAllIds()
-	idsUser := user.Provider().GetAllIds()
+type seeder struct {
+	postRepo         PostRepository
+	postService      *Service
+	categoryRepo     CategoryRepository
+	userProvider     user.UserProvider
+	templateProvider template.TemplateProvider
+}
+
+func NewSeeder(
+	post PostRepository,
+	postService *Service,
+	category CategoryRepository,
+	user user.UserProvider,
+	template template.TemplateProvider,
+) contracts.Seeder {
+	return &seeder{
+		postRepo:         post,
+		postService:      postService,
+		categoryRepo:     category,
+		userProvider:     user,
+		templateProvider: template,
+	}
+}
+
+func (s *seeder) Seed() {}
+
+func (s *seeder) SeedTest(n int) {
+	s.categories(n)
+	s.posts(n)
+}
+
+func (s *seeder) posts(n int) {
+	ids := s.templateProvider.GetAllIds()
+	idsCategory, _ := s.categoryRepo.GetAllIds()
+	idsUser := s.userProvider.GetAllIds()
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
 		post := Post{
+			UUID:               uuid.New(),
 			TemplateID:         &randomID,
 			PostCategoryID:     &randomCategoryID,
-			UserID:             &randomUserID,
 			MetaTitle:          StrPtr(faker.Sentence()),
 			MetaDescription:    StrPtr(faker.Sentence()),
 			IsPublished:        RandBool(),
@@ -49,20 +84,21 @@ func SeedPosts(n int) {
 			DeletedAt:          nil,
 		}
 
-		err := PostRepo().Create(&post)
+		userF, _ := s.userProvider.GetByID(randomUserID)
+		_, err := s.postService.Save(&post, userF)
 		if err != nil {
-			log.Printf("Failed to create user %d: %v", i, err.Error())
+			logger.Errorf("Failed to create userProvider %d: %v", i, err.Error())
 		}
 	}
-
-	log.Println("Database seeded Post successfully!")
+	logger.Info("Database seeded Post successfully!")
 }
 
-func SeedPostCategory(n int) {
-	ids := template.Provider().GetAllIds()
+func (s *seeder) categories(n int) {
+	ids := s.templateProvider.GetAllIds()
 	for i := 0; i < n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
+			UUID:               uuid.New(),
 			TemplateID:         &randomID,
 			PostCategoryID:     UintPtr(rand.Intn(100)),
 			MetaTitle:          StrPtr(faker.Sentence()),
@@ -83,11 +119,10 @@ func SeedPostCategory(n int) {
 			DeletedAt:          nil,
 		}
 
-		err := CategoryRepo().Create(&postCategory)
+		err := s.categoryRepo.Create(&postCategory)
 		if err != nil {
-			log.Printf("Failed to create user %d: %v", i, err.Error())
+			logger.Errorf("Failed to create userProvider %d: %v", i, err.Error())
 		}
 	}
-
-	log.Println("Database seeded Post successfully!")
+	logger.Info("Database seeded Post successfully!")
 }

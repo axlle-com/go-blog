@@ -1,12 +1,10 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/pkg/app/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
-	"github.com/axlle-com/blog/pkg/post/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -18,13 +16,13 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := PostRepo().GetByID(id)
+	post, err := c.post.GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 
-	if err := service.PostDelete(post); err != nil {
+	if err := c.service.PostDelete(post); err != nil {
 		logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -32,31 +30,36 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 
 	filter, validError := NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors":  validError.Errors,
-			"message": validError.Message,
-		})
+		ctx.JSON(
+			http.StatusBadRequest,
+			response.Fail(http.StatusBadRequest, validError.Message, validError.Errors),
+		)
 		ctx.Abort()
 		return
 	}
+
 	if filter == nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := models.Paginator(ctx.Request.URL.Query())
+
+	paginator := models.NewPaginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
-	users := user.Provider().GetAll()
-	templates := template.Provider().GetAll()
-	categories, err := CategoryRepo().GetAll()
-	if err != nil {
-		logger.Error(err)
-	}
-	posts, err := PostRepo().GetPaginate(paginator, filter)
+
+	users := c.user.GetAll()
+	templates := c.template.GetAll()
+
+	categories, err := c.category.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	data := gin.H{
+	posts, err := c.post.WithPaginate(paginator, filter)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	data := response.Body{
 		"title":      "Страница постов",
 		"posts":      posts,
 		"categories": categories,
@@ -66,6 +69,14 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		"filter":     filter,
 	}
 
-	data["view"] = c.RenderView("admin.posts_inner", data, ctx)
-	ctx.JSON(http.StatusOK, gin.H{"data": data})
+	ctx.JSON(
+		http.StatusOK,
+		response.OK(
+			response.Body{
+				"view": c.RenderView("admin.posts_inner", data, ctx),
+			},
+			"Запись удалена",
+			paginator,
+		),
+	)
 }

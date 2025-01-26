@@ -18,9 +18,11 @@
                             <input
                                     type="file"
                                     id="js-gallery-input-{{ .GetID }}"
-                                    data-gallery-id="{{ $index }}"
+                                    data-gallery-number="{{ $index }}"
+                                    data-gallery-id="{{ .GetID }}"
+                                    data-action="/admin/file/images"
                                     class="custom-input-file js-gallery-input"
-                                    name=""
+                                    name="files"
                                     multiple
                                     accept="image/*">
                         </div>
@@ -94,6 +96,7 @@
                         <input
                                 type="file"
                                 id="js-gallery-input-0"
+                                data-gallery-number="0"
                                 data-gallery-id="0"
                                 data-action="/admin/file/images"
                                 class="custom-input-file js-gallery-input"

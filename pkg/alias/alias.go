@@ -1,23 +1,37 @@
 package alias
 
 import (
+	"errors"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"gorm.io/gorm"
 	"regexp"
 	"strings"
 )
 
-func Generate(r contracts.Resource, s string) string {
-	alias := Create(s)
+type AliasProvider interface {
+	Generate(r contracts.Tabular, s string) string
+}
+
+func NewProvider(aliasRepo AliasRepository) AliasProvider {
+	return &provider{
+		aliasRepo: aliasRepo,
+	}
+}
+
+type provider struct {
+	aliasRepo AliasRepository
+}
+
+func (p *provider) Generate(tabular contracts.Tabular, s string) string {
+	alias := p.Create(s)
 	aliasNew := alias
 	counter := 1
-	repo := Repo()
 
 	for {
-		err := repo.GetByAlias(r.GetResource(), aliasNew, r.GetID())
-		if err == gorm.ErrRecordNotFound {
+		err := p.aliasRepo.GetByAlias(tabular.GetID(), tabular.GetTable(), aliasNew)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			break
 		} else if err != nil {
 			logger.Fatal(err)
@@ -30,15 +44,15 @@ func Generate(r contracts.Resource, s string) string {
 	return aliasNew
 }
 
-func Create(title string) string {
+func (p *provider) Create(title string) string {
 	title = strings.ToLower(title)
-	alias := transliterate(title)
+	alias := p.transliterate(title)
 	alias = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(alias, "-")
 	alias = strings.Trim(alias, "-")
 	return alias
 }
 
-func transliterate(input string) string {
+func (p *provider) transliterate(input string) string {
 	translitMap := map[rune]string{
 		'а': "a", 'б': "b", 'в': "v", 'г': "g", 'д': "d", 'е': "e", 'ё': "yo", 'ж': "zh",
 		'з': "z", 'и': "i", 'й': "y", 'к': "k", 'л': "l", 'м': "m", 'н': "n", 'о': "o",

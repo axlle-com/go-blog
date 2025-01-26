@@ -1,9 +1,7 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/gallery/models"
-	"github.com/axlle-com/blog/pkg/gallery/service"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -19,23 +17,21 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		return
 	}
 
-	galleryRepo := models.GalleryRepo()
-	_, err := galleryRepo.GetByID(id)
+	_, err := c.gallery.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
 		return
 	}
 
-	imageRepo := models.ImageRepo()
-	image, err := imageRepo.GetByID(imageId)
+	image, err := c.image.GetByID(imageId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
 		return
 	}
 
-	err = service.DeleteImage(image)
+	err = c.imageService.DeleteImage(image)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{

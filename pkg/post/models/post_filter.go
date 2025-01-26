@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/pkg/common/errors"
-	. "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/errors"
+	. "github.com/axlle-com/blog/pkg/app/models"
 	"github.com/gin-gonic/gin"
 )
 

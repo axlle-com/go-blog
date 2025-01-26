@@ -1,27 +1,30 @@
 package provider
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models/contracts"
-	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/gallery/repository"
 )
 
-type Image interface {
+type ImageProvider interface {
 	GetForGallery(id uint) []contracts.Image
 	GetAll() []contracts.Image
 }
 
-func ImageProvider() Image {
-	return &imageProvider{}
+func NewImageProvider(
+	image repository.GalleryImageRepository,
+) ImageProvider {
+	return &imageProvider{
+		image: image,
+	}
 }
 
 type imageProvider struct {
+	image repository.GalleryImageRepository
 }
 
 func (p *imageProvider) GetForGallery(id uint) []contracts.Image {
 	var collection []contracts.Image
-	images, err := models.
-		ImageRepo().
-		GetForGallery(id)
+	images, err := p.image.GetForGallery(id)
 	if err == nil {
 		for _, image := range images {
 			collection = append(collection, image)
@@ -33,9 +36,7 @@ func (p *imageProvider) GetForGallery(id uint) []contracts.Image {
 
 func (p *imageProvider) GetAll() []contracts.Image {
 	var collection []contracts.Image
-	images, err := models.
-		ImageRepo().
-		GetAll()
+	images, err := p.image.GetAll()
 	if err == nil {
 		for _, image := range images {
 			collection = append(collection, image)

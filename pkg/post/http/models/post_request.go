@@ -1,7 +1,7 @@
 package models
 
 import (
-	errorsForm "github.com/axlle-com/blog/pkg/common/errors"
+	errorsForm "github.com/axlle-com/blog/pkg/app/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +31,7 @@ type ImageRequest struct {
 
 type PostRequest struct {
 	ID                 string            `json:"id" form:"id" binding:"omitempty"`
+	UUID               string            `json:"uuid" form:"uuid" binding:"omitempty"`
 	UserID             string            `json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         string            `json:"template_id" form:"template_id" binding:"omitempty"`
 	PostCategoryID     string            `json:"post_category_id" form:"post_category_id" binding:"omitempty"`

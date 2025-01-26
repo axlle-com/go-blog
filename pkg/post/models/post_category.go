@@ -1,11 +1,13 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"time"
 )
 
 type PostCategory struct {
 	ID                 uint       `gorm:"primaryKey" json:"id"`
+	UUID               uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
 	MetaTitle          *string    `gorm:"size:100" json:"meta_title,omitempty"`
@@ -25,4 +27,14 @@ type PostCategory struct {
 	CreatedAt          *time.Time `json:"created_at,omitempty"`
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+}
+
+func (c *PostCategory) GetUUID() uuid.UUID {
+	return c.UUID
+}
+
+func (c *PostCategory) SetUUID() {
+	if c.UUID == uuid.Nil {
+		c.UUID = uuid.New()
+	}
 }

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models/contracts"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"mime/multipart"
 	"time"
 )

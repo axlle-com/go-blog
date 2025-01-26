@@ -2,19 +2,33 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/axlle-com/blog/pkg/gallery/repository"
 )
 
-func SaveImage(image *models.Image) (*models.Image, error) {
-	repo := models.ImageRepo()
+type ImageService struct {
+	imageRepo  repository.GalleryImageRepository
+	imageEvent *ImageEvent
+}
 
+func NewImageService(
+	image repository.GalleryImageRepository,
+	imageEvent *ImageEvent,
+) *ImageService {
+	return &ImageService{
+		imageRepo:  image,
+		imageEvent: imageEvent,
+	}
+}
+
+func (s *ImageService) SaveImage(image *models.Image) (*models.Image, error) {
 	if image.ID == 0 {
-		if err := repo.Create(image); err != nil {
+		if err := s.imageRepo.Create(image); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := repo.Update(image); err != nil {
+		if err := s.imageRepo.Update(image); err != nil {
 			return nil, err
 		}
 	}
@@ -22,12 +36,12 @@ func SaveImage(image *models.Image) (*models.Image, error) {
 	return image, nil
 }
 
-func DeleteImages(is []*models.Image) (err error) {
+func (s *ImageService) DeleteImages(is []*models.Image) (err error) {
 	var ids []uint
 	var resImages []*models.Image
 	var isErr bool
 	for _, im := range is {
-		if err := DeletingImage(im); err == nil {
+		if err := s.imageEvent.DeletingImage(im); err == nil {
 			ids = append(ids, im.ID)
 			resImages = append(resImages, im)
 		} else {
@@ -41,9 +55,9 @@ func DeleteImages(is []*models.Image) (err error) {
 	}
 
 	if len(ids) > 0 {
-		if err = models.ImageRepo().DeleteByIDs(ids); err == nil {
+		if err = s.imageRepo.DeleteByIDs(ids); err == nil {
 			for _, im := range resImages {
-				if err := DeletedImage(im); err != nil {
+				if err := s.imageEvent.DeletedImage(im); err != nil {
 					logger.Error(err)
 					isErr = true
 				}
@@ -57,13 +71,14 @@ func DeleteImages(is []*models.Image) (err error) {
 	return
 }
 
-func DeleteImage(im *models.Image) (err error) {
-	if err = DeletingImage(im); err != nil {
+func (s *ImageService) DeleteImage(im *models.Image) (err error) {
+	logger.Debug(s)
+	if err = s.imageEvent.DeletingImage(im); err != nil {
 		return
 	}
 
-	if err = models.ImageRepo().Delete(im); err == nil {
-		if err = DeletedImage(im); err != nil {
+	if err = s.imageRepo.Delete(im); err == nil {
+		if err = s.imageEvent.DeletedImage(im); err != nil {
 			return
 		}
 		return

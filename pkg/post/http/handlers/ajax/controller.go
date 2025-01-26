@@ -1,7 +1,11 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/pkg/common/models"
+	app "github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/pkg/post/repository"
+	"github.com/axlle-com/blog/pkg/post/service"
+	template "github.com/axlle-com/blog/pkg/template/provider"
+	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +17,28 @@ type Controller interface {
 	FilterPosts(*gin.Context)
 }
 
-func NewController(r *gin.Engine) Controller {
-	return &controller{engine: r}
+func New(
+	service *service.Service,
+	post repository.PostRepository,
+	category repository.CategoryRepository,
+	template template.TemplateProvider,
+	user user.UserProvider,
+) Controller {
+	return &controller{
+		service:  service,
+		post:     post,
+		category: category,
+		template: template,
+		user:     user,
+	}
 }
 
 type controller struct {
-	*models.BaseAjax
-	engine *gin.Engine
+	*app.BaseAjax
+
+	service  *service.Service
+	post     repository.PostRepository
+	category repository.CategoryRepository
+	template template.TemplateProvider
+	user     user.UserProvider
 }

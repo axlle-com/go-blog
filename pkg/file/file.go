@@ -3,8 +3,8 @@ package file
 import (
 	"errors"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/config"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
@@ -17,18 +17,24 @@ import (
 
 const staticPath = "/public/img/"
 
-func SaveUploadedFile(file *multipart.FileHeader, dist string) (path string, err error) {
-	if !isImageFile(file) {
+type Service struct {
+}
+
+func NewService() *Service {
+	return &Service{}
+}
+
+func (s *Service) SaveUploadedFile(file *multipart.FileHeader, dist string) (path string, err error) {
+	if !s.isImage(file) {
 		return "", errors.New(fmt.Sprintf("Файл:%s не является изображением", file.Filename))
 	}
-	path = fmt.Sprintf(config.Config().UploadPath()+"%s/%s%s", dist, uuid.New().String(), filepath.Ext(file.Filename))
-	if err = save(file, realPath(path)); err != nil {
+	if path, err = s.save(file, dist); err != nil {
 		return
 	}
 	return
 }
 
-func SaveUploadedFiles(files []*multipart.FileHeader, dist string) (uploadedFiles []string) {
+func (s *Service) SaveUploadedFiles(files []*multipart.FileHeader, dist string) (paths []string) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 
@@ -37,14 +43,14 @@ func SaveUploadedFiles(files []*multipart.FileHeader, dist string) (uploadedFile
 
 		go func(file *multipart.FileHeader, dist string) {
 			defer wg.Done()
-			path, e := SaveUploadedFile(file, dist)
+			path, e := s.SaveUploadedFile(file, dist)
 			if e != nil {
 				logger.Error(e)
 				return
 			}
 
 			mu.Lock()
-			uploadedFiles = append(uploadedFiles, path)
+			paths = append(paths, path)
 			mu.Unlock()
 		}(file, dist)
 	}
@@ -53,11 +59,11 @@ func SaveUploadedFiles(files []*multipart.FileHeader, dist string) (uploadedFile
 	return
 }
 
-func DeleteFile(file string) error {
+func (s *Service) DeleteFile(file string) error {
 	if strings.HasPrefix(file, staticPath) {
 		return nil
 	}
-	absPath, err := filepath.Abs(realPath(file))
+	absPath, err := filepath.Abs(s.realPath(file))
 	if err != nil {
 		return err
 	}
@@ -67,10 +73,12 @@ func DeleteFile(file string) error {
 	return os.Remove(absPath)
 }
 
-func save(file *multipart.FileHeader, dst string) error {
+func (s *Service) save(file *multipart.FileHeader, dst string) (string, error) {
+	name := s.newName(dst, filepath.Ext(file.Filename))
+	path := s.realPath(name)
 	src, err := file.Open()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func(src multipart.File) {
 		err := src.Close()
@@ -79,30 +87,34 @@ func save(file *multipart.FileHeader, dst string) error {
 		}
 	}(src)
 
-	if err = os.MkdirAll(filepath.Dir(dst), 0750); err != nil {
-		return err
+	if err = os.MkdirAll(filepath.Dir(path), 0750); err != nil {
+		return "", err
 	}
 
-	out, err := os.Create(dst)
+	out, err := os.Create(path)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer func(out *os.File) {
 		err := out.Close()
 		if err != nil {
-
+			logger.Error(err)
 		}
 	}(out)
 
 	_, err = io.Copy(out, src)
-	return err
+	return name, err
 }
 
-func realPath(path string) string {
+func (s *Service) newName(dist, ext string) string {
+	return fmt.Sprintf(config.Config().UploadPath()+"%s/%s%s", dist, uuid.New().String(), ext)
+}
+
+func (s *Service) realPath(path string) string {
 	return config.Config().SrcFolderBuilder(path)
 }
 
-func isImageFile(fileHeader *multipart.FileHeader) bool {
+func (s *Service) isImage(fileHeader *multipart.FileHeader) bool {
 	file, err := fileHeader.Open()
 	if err != nil {
 		return false

@@ -1,19 +1,18 @@
 package models
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/common/logger"
-	common "github.com/axlle-com/blog/pkg/common/models"
-	"github.com/axlle-com/blog/pkg/common/models/contracts"
-	"github.com/axlle-com/blog/pkg/file"
-	"net/http"
+	"github.com/google/uuid"
 	"time"
+
+	"encoding/json"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	app "github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 type Post struct {
 	ID                 uint                   `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
+	UUID               uuid.UUID              `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	UserID             *uint                  `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint                  `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
 	PostCategoryID     *uint                  `gorm:"index" json:"post_category_id" form:"post_category_id" binding:"omitempty"`
@@ -45,7 +44,17 @@ type Post struct {
 	Galleries          []contracts.Gallery    `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	dirty              map[string]interface{} `ignore:"true"`
 	original           *Post                  `ignore:"true"`
-	*common.Field      `ignore:"true"`
+	*app.Field         `ignore:"true"`
+}
+
+func (p *Post) GetUUID() uuid.UUID {
+	return p.UUID
+}
+
+func (p *Post) SetUUID() {
+	if p.UUID == uuid.Nil {
+		p.UUID = uuid.New()
+	}
 }
 
 func (p *Post) GetCategoryID() uint {
@@ -68,7 +77,7 @@ func (p *Post) GetID() uint {
 	return p.ID
 }
 
-func (p *Post) GetResource() string {
+func (p *Post) GetTable() string {
 	return "posts"
 }
 
@@ -81,69 +90,16 @@ func (p *Post) Updating() {
 }
 
 func (p *Post) Deleting() bool {
-	err := p.DeleteImageFile()
-	if err != nil {
-		return false
-	}
 	return true
 }
 
 func (p *Post) Saving() {
+	p.SetUUID()
 	p.SetDirty()
-	//logger.Print(p.GetDirty())
 	p.setTitleShort()
-	p.setAlias()
 	p.setURL()
 	p.setDate()
 	p.SetDirty()
-	//logger.Print(p.GetDirty())
-}
-
-func (p *Post) DeleteImageFile() error {
-	if p.Image == nil {
-		return nil
-	}
-	err := file.DeleteFile(*p.Image)
-	if err != nil {
-		return err
-	}
-	p.Image = nil
-	return nil
-}
-
-func (p *Post) UploadImageFile(r *http.Request) error {
-	_, img, _ := r.FormFile("file")
-	if img != nil {
-		newFileName := fmt.Sprintf("%s/%d", p.GetResource(), p.ID)
-		path, err := file.SaveUploadedFile(img, newFileName)
-		if err != nil {
-			logger.Error(err)
-			return err
-		}
-		if p.Image != nil {
-			err := p.DeleteImageFile()
-			if err != nil {
-				return err
-			}
-		}
-		p.Image = &path
-	}
-	return nil
-}
-
-func (p *Post) setAlias() {
-	if p.Title == "" {
-		return
-	}
-	if !p.isDirty("Alias") && p.Alias != "" {
-		return
-	}
-
-	if p.Alias == "" {
-		p.Alias = alias.Generate(p, p.Title)
-	} else {
-		p.Alias = alias.Generate(p, p.Alias)
-	}
 }
 
 func (p *Post) setURL() {

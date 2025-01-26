@@ -2,11 +2,8 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/logger"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	. "github.com/axlle-com/blog/pkg/post/http/models"
-	. "github.com/axlle-com/blog/pkg/post/models"
-	"github.com/axlle-com/blog/pkg/post/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -19,7 +16,7 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	_, err := PostRepo().GetByID(id)
+	found, err := c.post.GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
@@ -40,18 +37,19 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 	}
 
 	form.ID = strconv.Itoa(int(id))
-	post, err := service.PostSave(form, c.GetUser(ctx))
+	form.UUID = found.UUID.String()
+	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	categories, err := CategoryRepo().GetAll()
+	categories, err := c.category.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := template.Provider().GetAll()
+	templates := c.template.GetAll()
 
 	data := gin.H{
 		"categories": categories,

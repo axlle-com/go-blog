@@ -201,6 +201,7 @@ const _glob = {
             let keys = path.split('[').map(function (key) {
                 return key.replace(']', '');
             });
+            // _cl_(keys)
             keys.reduce(function (acc, key, i) {
                 if (i === keys.length - 1) {
                     if (
@@ -224,35 +225,39 @@ const _glob = {
         send(callback = null) {
             const _this = this;
             this.validateForm();
+
             if (this.hasErrors) {
                 _glob.noty.error('Заполнены не все обязательные поля');
                 return;
             }
+
             if (this.hasSend) {
                 _glob.console.error('Форма еще отправляется');
                 return;
             }
+
             if (this.preloader) {
                 this.preloader.show();
             }
+
             this.hasSend = true;
             let formObject = {};
             const csrf = $('meta[name="csrf-token"]').attr('content');
+
+            // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
                 _this.deepSet(formObject, key, value);
             });
-            $.ajax({
+
+            let ajaxOptions = {
                 url: _this.action,
                 headers: {'X-CSRF-TOKEN': csrf},
                 type: _this.method,
-                data: JSON.stringify(formObject),
                 dataType: 'json',
-                contentType: 'application/json',
-                beforeSend: function () {
-                },
+                beforeSend: function () {},
                 success: function (response) {
                     _this.setData(response).defaultBehavior();
-                    if (!!callback) {
+                    if (callback) {
                         callback(response);
                     }
                 },
@@ -265,7 +270,18 @@ const _glob = {
                         _this.preloader.hide();
                     }
                 }
-            });
+            };
+
+            // Если GET, передаем как обычные query-параметры
+            if (_this.method.toUpperCase() === 'GET') {
+                ajaxOptions.data = formObject;
+            } else {
+                // Для POST (или других типов, где нужно тело)
+                ajaxOptions.data = JSON.stringify(formObject);
+                ajaxOptions.contentType = 'application/json';
+            }
+
+            $.ajax(ajaxOptions);
         }
 
         sendForm(callback = null) {

@@ -1,13 +1,14 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/pkg/common/db"
-	common "github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/db"
+	app "github.com/axlle-com/blog/pkg/app/models"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
+	WithTx(tx *gorm.DB) UserRepository
 	Create(user *models.User) error
 	GetByID(id uint) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
@@ -19,12 +20,17 @@ type UserRepository interface {
 }
 
 type repository struct {
-	*common.Paginate
 	db *gorm.DB
+	*app.Paginate
 }
 
-func NewRepo() UserRepository {
+func NewUserRepo() UserRepository {
 	return &repository{db: db.GetDB()}
+}
+
+func (r *repository) WithTx(tx *gorm.DB) UserRepository {
+	newR := &repository{db: tx}
+	return newR
 }
 
 func (r *repository) Create(user *models.User) error {

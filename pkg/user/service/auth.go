@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/common/config"
+	"github.com/axlle-com/blog/pkg/app/config"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
@@ -13,19 +13,19 @@ import (
 )
 
 func Auth(authInput AuthInput) (userFound *user.User, err error) {
-	userRepo := repository.NewRepo()
+	userRepo := repository.NewUserRepo()
 	userFound, err = userRepo.GetByEmail(authInput.Email)
 
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return
 	}
 
 	if userFound == nil || userFound.ID == 0 {
-		return nil, errors.New("Invalid password or login")
+		return nil, errors.New("invalid password or login")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userFound.PasswordHash), []byte(authInput.Password)); err != nil {
-		return nil, errors.New("Invalid password or login")
+		return nil, errors.New("invalid password or login")
 	}
 
 	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

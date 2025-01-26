@@ -1,22 +1,21 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/pkg/common/logger"
-	"github.com/axlle-com/blog/pkg/common/models"
+	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/pkg/app/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func (c *controller) FilterPosts(ctx *gin.Context) {
-	filter, validError := NewPostFilter().ValidateForm(ctx)
+	filter, validError := NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"errors":  validError.Errors,
-			"message": validError.Message,
-		})
+		ctx.JSON(
+			http.StatusBadRequest,
+			response.Fail(http.StatusBadRequest, validError.Message, validError.Errors),
+		)
 		ctx.Abort()
 		return
 	}
@@ -25,19 +24,19 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.Paginator(ctx.Request.URL.Query())
+	paginator := models.NewPaginator(ctx.Request.URL.Query())
 	paginator.AddQueryString(string(filter.GetQueryString()))
-	posts, err := PostRepo().GetPaginate(paginator, filter)
+	posts, err := c.post.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	categories, err := CategoryRepo().GetAll()
+	categories, err := c.category.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := template.Provider().GetAll()
-	users := user.Provider().GetAll()
+	templates := c.template.GetAll()
+	users := c.user.GetAll()
 	data := gin.H{
 		"title":      "Страница постов",
 		"posts":      posts,
@@ -48,7 +47,17 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 		"filter":     filter,
 	}
 
-	data["view"] = c.RenderView("admin.posts_inner", data, ctx)
-	data["url"] = filter.GetURL()
-	ctx.JSON(http.StatusOK, gin.H{"data": data})
+	ctx.JSON(
+		http.StatusOK,
+		response.OK(
+			response.Body{
+				"posts":     posts,
+				"paginator": paginator,
+				"url":       filter.GetURL(),
+				"view":      c.RenderView("admin.posts_inner", data, ctx),
+			},
+			"",
+			paginator,
+		),
+	)
 }

@@ -3,16 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/common/config"
-	"github.com/axlle-com/blog/pkg/common/db"
+	"github.com/axlle-com/blog/pkg/app"
+	"os"
+
+	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/axlle-com/blog/pkg/app/db"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
-	dbPost "github.com/axlle-com/blog/pkg/post/db"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
+	postDB "github.com/axlle-com/blog/pkg/post/db"
+	postMigrate "github.com/axlle-com/blog/pkg/post/db/migrate"
 	dbTemplate "github.com/axlle-com/blog/pkg/template/db"
 	mTemplate "github.com/axlle-com/blog/pkg/template/db/migrate"
 	dbUser "github.com/axlle-com/blog/pkg/user/db"
 	mUser "github.com/axlle-com/blog/pkg/user/db/migrate"
-	"os"
+	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 )
 
 func main() {
@@ -33,14 +36,14 @@ var Commands = map[string]func(){
 	"hello": func() {
 		fmt.Println("Hello!")
 	},
-	"seed-teat": func() {
+	"seed-test": func() {
 		seedTest()
 	},
 	"migrate": func() {
 		migrate()
 	},
 	"refill": func() {
-		db.Cache().ResetUsersSession()
+		db.NewCache().ResetUsersSession()
 		rollback()
 		migrate()
 		seedTest()
@@ -56,26 +59,39 @@ func handleCommand(command string) {
 }
 
 func migrate() {
-	mUser.Migrate()
-	mPost.Migrate()
-	mTemplate.Migrate()
-	mGallery.Migrate()
+	mUser.NewMigrator().Migrate()
+	postMigrate.NewMigrator().Migrate()
+	mTemplate.NewMigrator().Migrate()
+	mGallery.NewMigrator().Migrate()
 }
 
 func rollback() {
-	mUser.Rollback()
-	mPost.Rollback()
-	mTemplate.Rollback()
-	mGallery.Rollback()
+	mUser.NewMigrator().Rollback()
+	postMigrate.NewMigrator().Rollback()
+	mTemplate.NewMigrator().Rollback()
+	mGallery.NewMigrator().Rollback()
 }
 
 func seedTest() {
-	dbUser.SeedPermissions()
-	dbUser.SeedRoles()
-	dbUser.SeedUsers(5)
-	dbUser.SeedUsersDefault()
+	container := app.New()
 
-	dbTemplate.SeedTemplate(5)
-	dbPost.SeedPostCategory(10)
-	dbPost.SeedPosts(100)
+	userSeeder := dbUser.NewSeeder(
+		container.UserRepository,
+		userRepository.NewRoleRepo(),
+		userRepository.NewPermissionRepo(),
+	)
+	userSeeder.SeedTest(5)
+	userSeeder.Seed()
+
+	dbTemplate.NewSeeder(
+		container.TemplateRepository,
+	).SeedTest(10)
+
+	postDB.NewSeeder(
+		container.PostRepo,
+		container.PostService,
+		container.CategoryRepo,
+		container.UserProvider,
+		container.TemplateProvider,
+	).SeedTest(100)
 }

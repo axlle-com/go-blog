@@ -1,16 +1,15 @@
 package service
 
 import (
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/post/models"
 )
 
-func PostDelete(post *models.Post) error {
-	err := gallery.Provider().DeleteForResource(post)
+func (s *Service) PostDelete(post *models.Post) error {
+	err := s.galleryProvider.DeleteForResource(post)
 	if err != nil {
 		return err
 	}
-	if err := models.PostRepo().Delete(post); err != nil {
+	if err := s.postRepo.Delete(post); err != nil {
 		return err
 	}
 	return nil

@@ -1,6 +1,8 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/pkg/gallery/repository"
+	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -10,12 +12,22 @@ type Controller interface {
 	DeleteImage(*gin.Context)
 }
 
-func NewController(r *gin.Engine) Controller {
-	return &controller{engine: r}
+func New(
+	gallery repository.GalleryRepository,
+	image repository.GalleryImageRepository,
+	imageService *service.ImageService,
+) Controller {
+	return &controller{
+		gallery:      gallery,
+		image:        image,
+		imageService: imageService,
+	}
 }
 
 type controller struct {
-	engine *gin.Engine
+	gallery      repository.GalleryRepository
+	image        repository.GalleryImageRepository
+	imageService *service.ImageService
 }
 
 func (c *controller) GetID(ctx *gin.Context) uint {

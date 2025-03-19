@@ -38,7 +38,7 @@ type Post struct {
 	Hits               uint                   `gorm:"not null;default:0" json:"hits" form:"hits" binding:"-"`
 	Sort               int                    `gorm:"not null;default:0" json:"sort" form:"sort" binding:"omitempty"`
 	Stars              float32                `gorm:"not null;default:0.0" json:"stars" form:"stars" binding:"-"`
-	CreatedAt          *time.Time             `json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
+	CreatedAt          *time.Time             `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
 	UpdatedAt          *time.Time             `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time             `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 	Galleries          []contracts.Gallery    `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`

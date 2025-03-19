@@ -21,7 +21,7 @@ func NewGalleryEvent(
 }
 
 func (e *GalleryEvent) DeletingGallery(g *models.Gallery) (err error) {
-	has, _ := e.resourceRepo.GetByGalleryID(g.ID)
+	has, _ := e.resourceRepo.GetByGalleryID(g.ID) // @todo сразу delete
 	if has != nil {
 		if err = e.resourceRepo.Delete(g.ID); err != nil {
 			return err

@@ -12,6 +12,8 @@ import (
 
 type AliasProvider interface {
 	Generate(r contracts.Tabular, s string) string
+	Create(title string) string
+	transliterate(input string) string
 }
 
 func NewProvider(aliasRepo AliasRepository) AliasProvider {

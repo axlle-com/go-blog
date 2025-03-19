@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Create(tt.args.title); got != tt.want {
+			if got := NewProvider(NewAliasRepo()).Create(tt.args.title); got != tt.want {
 				t.Errorf("Create() = %v, want %v", got, tt.want)
 			}
 		})
@@ -128,7 +128,7 @@ func TestTransliterate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := transliterate(tt.args.input); got != tt.want {
+			if got := NewProvider(NewAliasRepo()).transliterate(tt.args.input); got != tt.want {
 				t.Errorf("transliterate() = %v, want %v", got, tt.want)
 			}
 		})

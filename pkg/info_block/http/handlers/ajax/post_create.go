@@ -1,0 +1,59 @@
+package ajax
+
+import (
+	"fmt"
+	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/pkg/app/logger"
+	. "github.com/axlle-com/blog/pkg/post/http/models"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+func (c *controller) CreatePost(ctx *gin.Context) {
+	form, formError := NewPostRequest().ValidateJSON(ctx)
+	if form == nil {
+		if formError != nil {
+			ctx.JSON(
+				http.StatusBadRequest,
+				response.Fail(http.StatusBadRequest, formError.Message, formError.Errors),
+			)
+			ctx.Abort()
+		} else {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
+	if err != nil {
+		ctx.JSON(
+			http.StatusInternalServerError,
+			response.Fail(http.StatusInternalServerError, err.Error(), nil),
+		)
+		return
+	}
+
+	categories, err := c.category.GetAll()
+	if err != nil {
+		logger.Error(err)
+	}
+
+	templates := c.template.GetAll()
+
+	data := response.Body{
+		"categories": categories,
+		"templates":  templates,
+		"post":       post,
+	}
+	ctx.JSON(
+		http.StatusCreated,
+		response.Created(
+			response.Body{
+				"view": c.RenderView("admin.post_inner", data, ctx),
+				"url":  fmt.Sprintf("/admin/posts/%d", post.ID),
+				"post": post,
+			},
+			"Запись создана",
+		),
+	)
+}

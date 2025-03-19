@@ -14,11 +14,11 @@ type Image struct {
 	Title        *string               `gorm:"size:255" json:"title"`
 	Description  *string               `gorm:"type:text" json:"description"`
 	Sort         int                   `gorm:"default:0" json:"sort"`
-	CreatedAt    *time.Time            `json:"created_at,omitempty"`
+	CreatedAt    *time.Time            `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt    *time.Time            `json:"updated_at,omitempty"`
 	DeletedAt    *time.Time            `gorm:"index" json:"deleted_at,omitempty"`
-	FileHeader   *multipart.FileHeader `gorm:"-"`
-	Gallery      *Gallery              `gorm:"-"`
+	FileHeader   *multipart.FileHeader `gorm:"-" json:"-"`
+	Gallery      *Gallery              `gorm:"-" json:"-"`
 }
 
 func (*Image) TableName() string {

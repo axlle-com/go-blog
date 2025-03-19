@@ -8,6 +8,9 @@ import (
 	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
 	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
 	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
+	"github.com/axlle-com/blog/pkg/info_block/provider"
+	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
+	service2 "github.com/axlle-com/blog/pkg/info_block/service"
 	postAjax "github.com/axlle-com/blog/pkg/post/http/handlers/ajax"
 	postApi "github.com/axlle-com/blog/pkg/post/http/handlers/api"
 	postWeb "github.com/axlle-com/blog/pkg/post/http/handlers/web"
@@ -23,7 +26,7 @@ type Container struct {
 	FileService  *file.Service
 	FileProvider fileProvider.FileProvider
 
-	GalleryResourceRepository galleryRepo.GalleryResourceRepository
+	GalleryResourceRepo galleryRepo.GalleryResourceRepository
 
 	ImageRepo     galleryRepo.GalleryImageRepository
 	ImageEvent    *galleryService.ImageEvent
@@ -39,14 +42,23 @@ type Container struct {
 	PostService  *service.Service
 	CategoryRepo repository.CategoryRepository
 
-	TemplateProvider   templateProvider.TemplateProvider
-	TemplateRepository templateRepository.TemplateRepository
+	TemplateProvider templateProvider.TemplateProvider
+	TemplateRepo     templateRepository.TemplateRepository
 
-	UserRepository userRepository.UserRepository
-	UserProvider   userProvider.UserProvider
+	UserRepo     userRepository.UserRepository
+	UserProvider userProvider.UserProvider
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
+
+	InfoBlockHasResourceRepo repository2.InfoBlockHasResourceRepository
+	InfoBlockRepo            repository2.InfoBlockRepository
+	InfoBlockService         *service2.InfoBlockService
+	InfoBlockProvider        provider.InfoBlockProvider
+
+	PostTagRepo         repository.PostTagRepository
+	PostTagResourceRepo repository.PostTagResourceRepository
+	PostTagService      *service.PostTagService
 }
 
 func New() *Container {
@@ -78,11 +90,20 @@ func New() *Container {
 	pService := service.NewService(pRepo, gProvider, fProvider, aProvider)
 	cRepo := repository.NewCategoryRepo()
 
+	ibhrRepo := repository2.NewResourceRepo()
+	ibRepo := repository2.NewInfoBlockRepo()
+	ibService := service2.NewInfoBlockService(ibRepo, ibhrRepo)
+	ibProvider := provider.NewProvider(ibRepo, ibService)
+
+	ptRepo := repository.NewPostTagRepo()
+	ptrRepo := repository.NewResourceRepo()
+	ptService := service.NewPostTagService(ptRepo, ptrRepo)
+
 	return &Container{
 		FileService:  fService,
 		FileProvider: fProvider,
 
-		GalleryResourceRepository: rRepo,
+		GalleryResourceRepo: rRepo,
 
 		ImageRepo:     iRepo,
 		ImageEvent:    iEvent,
@@ -98,14 +119,23 @@ func New() *Container {
 		PostService:  pService,
 		CategoryRepo: cRepo,
 
-		TemplateProvider:   tProvider,
-		TemplateRepository: tRepo,
+		TemplateProvider: tProvider,
+		TemplateRepo:     tRepo,
 
-		UserRepository: uRepo,
-		UserProvider:   uProvider,
+		UserRepo:     uRepo,
+		UserProvider: uProvider,
 
 		AliasRepo:     aRepo,
 		AliasProvider: aProvider,
+
+		InfoBlockHasResourceRepo: ibhrRepo,
+		InfoBlockRepo:            ibRepo,
+		InfoBlockService:         ibService,
+		InfoBlockProvider:        ibProvider,
+
+		PostTagRepo:         ptRepo,
+		PostTagResourceRepo: ptrRepo,
+		PostTagService:      ptService,
 	}
 }
 

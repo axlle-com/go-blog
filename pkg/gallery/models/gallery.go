@@ -12,7 +12,7 @@ type Gallery struct {
 	Sort        int        `gorm:"default:0" json:"sort"`
 	Image       *string    `gorm:"size:255;" json:"image"`
 	URL         *string    `gorm:"size:255" json:"url"`
-	CreatedAt   *time.Time `json:"created_at,omitempty"`
+	CreatedAt   *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 	Images      []*Image   `json:"images,omitempty"`

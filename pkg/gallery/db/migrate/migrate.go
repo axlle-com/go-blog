@@ -22,6 +22,8 @@ func (m *migrator) Migrate() {
 		&models.Image{},
 		&models.GalleryHasResource{},
 	)
+	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_gallery_has_resources_resource_uuid ON gallery_has_resources USING hash (resource_uuid);`)
+
 	if err != nil {
 		logger.Fatal(err)
 	}

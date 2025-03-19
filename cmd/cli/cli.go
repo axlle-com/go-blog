@@ -9,6 +9,8 @@ import (
 	"github.com/axlle-com/blog/pkg/app/config"
 	"github.com/axlle-com/blog/pkg/app/db"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
+	sInfoBlock "github.com/axlle-com/blog/pkg/info_block/db"
+	mInfoBlock "github.com/axlle-com/blog/pkg/info_block/db/migrate"
 	postDB "github.com/axlle-com/blog/pkg/post/db"
 	postMigrate "github.com/axlle-com/blog/pkg/post/db/migrate"
 	dbTemplate "github.com/axlle-com/blog/pkg/template/db"
@@ -63,6 +65,7 @@ func migrate() {
 	postMigrate.NewMigrator().Migrate()
 	mTemplate.NewMigrator().Migrate()
 	mGallery.NewMigrator().Migrate()
+	mInfoBlock.NewMigrator().Migrate()
 }
 
 func rollback() {
@@ -70,13 +73,14 @@ func rollback() {
 	postMigrate.NewMigrator().Rollback()
 	mTemplate.NewMigrator().Rollback()
 	mGallery.NewMigrator().Rollback()
+	mInfoBlock.NewMigrator().Rollback()
 }
 
 func seedTest() {
 	container := app.New()
 
 	userSeeder := dbUser.NewSeeder(
-		container.UserRepository,
+		container.UserRepo,
 		userRepository.NewRoleRepo(),
 		userRepository.NewPermissionRepo(),
 	)
@@ -84,7 +88,7 @@ func seedTest() {
 	userSeeder.Seed()
 
 	dbTemplate.NewSeeder(
-		container.TemplateRepository,
+		container.TemplateRepo,
 	).SeedTest(10)
 
 	postDB.NewSeeder(
@@ -94,4 +98,10 @@ func seedTest() {
 		container.UserProvider,
 		container.TemplateProvider,
 	).SeedTest(100)
+
+	sInfoBlock.NewSeeder(
+		container.InfoBlockRepo,
+		container.InfoBlockService,
+		container.TemplateProvider,
+	).SeedTest(20)
 }

@@ -73,7 +73,7 @@ func SetupTestRouter() *gin.Engine {
 		mGallery.NewMigrator().Migrate()
 
 		dbUser.NewSeeder(
-			container.UserRepository,
+			container.UserRepo,
 			userRepository.NewRoleRepo(),
 			userRepository.NewPermissionRepo(),
 		).Seed()

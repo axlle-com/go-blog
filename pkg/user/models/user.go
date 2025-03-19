@@ -26,7 +26,7 @@ type User struct {
 	AuthToken          *string      `gorm:"size:500;default:null;index" json:"auth_token"`
 	AuthKey            *string      `gorm:"size:32;default:null;" json:"auth_key,omitempty"`
 	PasswordResetToken *string      `gorm:"size:255;unique" json:"password_reset_token,omitempty"`
-	CreatedAt          *time.Time   `json:"created_at,omitempty"`
+	CreatedAt          *time.Time   `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time   `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time   `gorm:"index" json:"deleted_at,omitempty"`
 	Roles              []Role       `gorm:"many2many:user_has_role;" json:"roles,omitempty"`

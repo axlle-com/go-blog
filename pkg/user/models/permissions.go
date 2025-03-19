@@ -5,7 +5,7 @@ import "time"
 type Permission struct {
 	ID        uint       `gorm:"primaryKey" json:"id"`
 	Name      string     `gorm:"size:255;unique" json:"name"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	DeletedAt *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 	Users     []User     `gorm:"many2many:user_has_permission;" json:"users,omitempty"`

@@ -20,7 +20,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	)
 
 	userController := user.New(
-		container.UserRepository,
+		container.UserRepo,
 	)
 
 	r.GET("/", ShowIndexPage)

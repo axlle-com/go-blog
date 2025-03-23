@@ -38,9 +38,10 @@ type Container struct {
 	GalleryService  *service.Service
 	GalleryProvider galleryProvider.GalleryProvider
 
-	PostRepo     repository.PostRepository
-	PostService  *service.Service
-	CategoryRepo repository.CategoryRepository
+	PostRepo          repository.PostRepository
+	PostService       *service.Service
+	CategoryRepo      repository.CategoryRepository
+	CategoriesService *service.CategoriesService
 
 	TemplateProvider templateProvider.TemplateProvider
 	TemplateRepo     templateRepository.TemplateRepository
@@ -89,6 +90,7 @@ func New() *Container {
 	pRepo := repository.NewPostRepo()
 	pService := service.NewService(pRepo, gProvider, fProvider, aProvider)
 	cRepo := repository.NewCategoryRepo()
+	cService := service.NewCategoryService(cRepo, tProvider, uProvider)
 
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()
@@ -115,9 +117,10 @@ func New() *Container {
 		GalleryService:  pService,
 		GalleryEvent:    gEvent,
 
-		PostRepo:     pRepo,
-		PostService:  pService,
-		CategoryRepo: cRepo,
+		PostRepo:          pRepo,
+		PostService:       pService,
+		CategoryRepo:      cRepo,
+		CategoriesService: cService,
 
 		TemplateProvider: tProvider,
 		TemplateRepo:     tRepo,
@@ -165,6 +168,16 @@ func (c *Container) PostWebController() postWeb.Controller {
 		c.PostService,
 		c.PostRepo,
 		c.CategoryRepo,
+		c.TemplateProvider,
+		c.UserProvider,
+		c.GalleryProvider,
+	)
+}
+
+func (c *Container) PostCategoryWebController() postWeb.ControllerCategory {
+	return postWeb.NewWebControllerCategory(
+		c.CategoryRepo,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,

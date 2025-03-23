@@ -11,6 +11,7 @@ type UserRepository interface {
 	WithTx(tx *gorm.DB) UserRepository
 	Create(user *models.User) error
 	GetByID(id uint) (*models.User, error)
+	GetByIDs(ids []uint) ([]*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	Update(user *models.User) error
 	Delete(id uint) error
@@ -44,6 +45,14 @@ func (r *repository) GetByID(id uint) (*models.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *repository) GetByIDs(ids []uint) ([]*models.User, error) {
+	var users []*models.User
+	if err := r.db.Where("id IN (?)", ids).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (r *repository) GetByEmail(email string) (*models.User, error) {

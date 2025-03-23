@@ -12,6 +12,7 @@ type TemplateRepository interface {
 	WithTx(tx *gorm.DB) TemplateRepository
 	Create(template *models.Template) error
 	GetByID(id uint) (*models.Template, error)
+	GetByIDs(ids []uint) ([]*models.Template, error)
 	Update(template *models.Template) error
 	Delete(id uint) error
 	GetAll() ([]*models.Template, error)
@@ -43,6 +44,14 @@ func (r *repository) GetByID(id uint) (*models.Template, error) {
 		return nil, err
 	}
 	return &template, nil
+}
+
+func (r *repository) GetByIDs(ids []uint) ([]*models.Template, error) {
+	var templates []*models.Template
+	if err := r.db.Where("id IN (?)", ids).Find(&templates).Error; err != nil {
+		return nil, err
+	}
+	return templates, nil
 }
 
 func (r *repository) Update(template *models.Template) error {

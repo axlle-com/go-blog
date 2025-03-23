@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/pkg/app/db"
 	"github.com/axlle-com/blog/pkg/app/logger"
 	app "github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"gorm.io/gorm"
 )
@@ -14,12 +15,14 @@ type CategoryRepository interface {
 	WithTx(tx *gorm.DB) CategoryRepository
 	Create(postCategory *models.PostCategory) error
 	GetByID(id uint) (*models.PostCategory, error)
+	GetByIDs(ids []uint) ([]*models.PostCategory, error)
+	GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error)
 	Update(new *models.PostCategory, old *models.PostCategory) error
 	DeleteByID(id uint) error
 	Delete(category *models.PostCategory) error
 	GetAll() ([]*models.PostCategory, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(page, pageSize int) ([]*models.PostCategory, error)
+	WithPaginate(paginator contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error)
 	GetRoots() ([]*models.PostCategory, error)
 	GetDescendants(category *models.PostCategory) ([]*models.PostCategory, error)
 	GetDescendantsByID(id uint) ([]*models.PostCategory, error)
@@ -113,6 +116,27 @@ func (r *categoryRepository) GetByID(id uint) (*models.PostCategory, error) {
 	return &postCategory, nil
 }
 
+func (r *categoryRepository) GetByIDs(ids []uint) ([]*models.PostCategory, error) {
+	var categories []*models.PostCategory
+	if err := r.db.Where("id IN (?)", ids).Find(&categories).Error; err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (r *categoryRepository) GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error) {
+	var categories []*models.PostCategory
+	if err := r.db.Where("id IN (?)", ids).Find(&categories).Error; err != nil {
+		return nil, err
+	}
+
+	collection := make(map[uint]*models.PostCategory, len(categories))
+	for _, item := range categories {
+		collection[item.ID] = item
+	}
+	return collection, nil
+}
+
 func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCategory) error {
 	new.Updating()
 	oldID, newID := uint(0), uint(0)
@@ -161,10 +185,13 @@ func (r *categoryRepository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *categoryRepository) WithPaginate(page, pageSize int) ([]*models.PostCategory, error) {
+func (r *categoryRepository) WithPaginate(p contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	var categories []*models.PostCategory
 
-	err := r.db.Model(&models.PostCategory{}).Scopes(r.SetPaginate(page, pageSize)).Find(&categories).Error
+	category := models.PostCategory{}
+	err := r.db.Model(&category).Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
+		Order(fmt.Sprintf("%s.id ASC", category.GetTable())).
+		Find(&categories).Error
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
 )
@@ -8,6 +9,7 @@ import (
 type PostCategory struct {
 	ID                 uint       `gorm:"primaryKey" json:"id"`
 	UUID               uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
+	UserID             *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
 	LeftSet            int        `gorm:"index" json:"-"`
@@ -30,6 +32,11 @@ type PostCategory struct {
 	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+
+	Category  *PostCategory       `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
+	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 }
 
 func (c *PostCategory) GetUUID() uuid.UUID {
@@ -66,6 +73,30 @@ func (c *PostCategory) GetTemplateID() uint {
 		templateID = *c.TemplateID
 	}
 	return templateID
+}
+
+func (c *PostCategory) GetCategoryTitleShort() string {
+	var titleShort string
+	if c.Category != nil {
+		titleShort = *c.Category.TitleShort
+	}
+	return titleShort
+}
+
+func (c *PostCategory) GetTemplateTitle() string {
+	var title string
+	if c.Template != nil {
+		title = c.Template.GetTitle()
+	}
+	return title
+}
+
+func (c *PostCategory) UserLastName() string {
+	var lastName string
+	if c.User != nil {
+		lastName = c.User.GetLastName()
+	}
+	return lastName
 }
 
 func (c *PostCategory) GetID() uint {
@@ -108,4 +139,11 @@ func (c *PostCategory) setTitleShort() {
 	if *c.TitleShort == "" {
 		c.TitleShort = nil
 	}
+}
+
+func (c *PostCategory) Date() string {
+	if c.CreatedAt == nil {
+		return ""
+	}
+	return c.CreatedAt.Format("02.01.2006 15:04:05")
 }

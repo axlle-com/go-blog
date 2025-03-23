@@ -9,6 +9,8 @@ import (
 type TemplateProvider interface {
 	GetAll() []contracts.Template
 	GetAllIds() []uint
+	GetByIDs(ids []uint) ([]contracts.Template, error)
+	GetMapByIDs(ids []uint) (map[uint]contracts.Template, error)
 }
 
 func NewProvider(
@@ -24,10 +26,10 @@ type provider struct {
 }
 
 func (p *provider) GetAll() []contracts.Template {
-	ts, err := p.templateRepo.GetAll()
+	all, err := p.templateRepo.GetAll()
 	if err == nil {
-		var collection []contracts.Template
-		for _, t := range ts {
+		collection := make([]contracts.Template, 0, len(all))
+		for _, t := range all {
 			collection = append(collection, t)
 		}
 		return collection
@@ -43,4 +45,30 @@ func (p *provider) GetAllIds() []uint {
 	}
 	logger.Error(err)
 	return nil
+}
+
+func (p *provider) GetByIDs(ids []uint) ([]contracts.Template, error) {
+	all, err := p.templateRepo.GetByIDs(ids)
+	if err == nil {
+		collection := make([]contracts.Template, 0, len(all))
+		for _, t := range all {
+			collection = append(collection, t)
+		}
+		return collection, nil
+	}
+	logger.Error(err)
+	return nil, err
+}
+
+func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.Template, error) {
+	all, err := p.templateRepo.GetByIDs(ids)
+	if err == nil {
+		collection := make(map[uint]contracts.Template, len(all))
+		for _, template := range all {
+			collection[template.ID] = template
+		}
+		return collection, nil
+	}
+	logger.Error(err)
+	return nil, err
 }

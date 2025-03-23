@@ -1,0 +1,11 @@
+{{ define "admin.categories" }}
+    {{ template "admin.header" . }}
+    <div class="main-body">
+        {{/*        {{ Breadcrumbs::render('posts') }}*/}}
+        <h5>{{ .Title }}</h5>
+        <div class="a-block-inner">
+            {{ template "admin.categories_inner" . }}
+        </div>
+    </div>
+    {{ template "admin.footer" . }}
+{{ end }}

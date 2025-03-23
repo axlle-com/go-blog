@@ -13,6 +13,7 @@ import (
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	postController := container.PostController()
 	postWebController := container.PostWebController()
+	postCategoryWebController := container.PostCategoryWebController()
 	galleryController := container.GalleryAjaxController()
 
 	fileController := file.New(
@@ -46,6 +47,10 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.PUT("/posts/:id", postController.UpdatePost)
 		protected.DELETE("/posts/:id", postController.DeletePost)
 		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
+
+		protected.GET("/categories", postCategoryWebController.GetCategories)
+		protected.GET("/categories/:id", postCategoryWebController.GetCategory)
+		protected.GET("/categories/form", postCategoryWebController.CreateCategory)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}

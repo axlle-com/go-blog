@@ -7,6 +7,7 @@ import (
 	. "github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/bxcodec/faker/v3"
+	"strconv"
 	"time"
 )
 
@@ -25,11 +26,11 @@ func NewSeeder(
 func (s *seeder) Seed() {}
 
 func (s *seeder) SeedTest(n int) {
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
 		template := Template{}
 
 		now := time.Now()
-		template.Title = faker.Sentence()
+		template.Title = "TitleTemplate #" + strconv.Itoa(i)
 		template.Name = faker.Username()
 		template.Tabular = db.StrPtr(faker.Username())
 		template.CreatedAt = &now

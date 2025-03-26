@@ -43,7 +43,7 @@ func GetDB() *gorm.DB {
 			logger.Fatal(err)
 		}
 	}
-	return instance.Debug()
+	return instance //.Debug()
 }
 
 func GetDBTest() *gorm.DB {
@@ -57,5 +57,5 @@ func GetDBTest() *gorm.DB {
 			log.Fatalln(err)
 		}
 	}
-	return instanceTest
+	return instanceTest //.Debug()
 }

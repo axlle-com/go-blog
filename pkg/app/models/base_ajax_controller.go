@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -24,7 +25,7 @@ func (c *BaseAjax) GetID(ctx *gin.Context) uint {
 	return uint(id)
 }
 
-func (c *BaseAjax) GetUser(ctx *gin.Context) *user.User {
+func (c *BaseAjax) GetUser(ctx *gin.Context) contracts.User {
 	userData, exists := ctx.Get("user")
 	if !exists {
 		ctx.Redirect(http.StatusFound, "/login")

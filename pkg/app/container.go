@@ -8,6 +8,8 @@ import (
 	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
 	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
 	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
+	"github.com/axlle-com/blog/pkg/info_block/http/handlers/ajax"
+	"github.com/axlle-com/blog/pkg/info_block/http/handlers/web"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
 	service2 "github.com/axlle-com/blog/pkg/info_block/service"
@@ -20,6 +22,7 @@ import (
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
+	service3 "github.com/axlle-com/blog/pkg/user/service"
 )
 
 type Container struct {
@@ -35,27 +38,32 @@ type Container struct {
 
 	GalleryRepo     galleryRepo.GalleryRepository
 	GalleryEvent    *galleryService.GalleryEvent
-	GalleryService  *service.Service
+	GalleryService  *service.PostService
 	GalleryProvider galleryProvider.GalleryProvider
 
 	PostRepo          repository.PostRepository
-	PostService       *service.Service
+	PostService       *service.PostService
+	PostsService      *service.PostsService
 	CategoryRepo      repository.CategoryRepository
 	CategoriesService *service.CategoriesService
+	CategoryService   *service.CategoryService
 
 	TemplateProvider templateProvider.TemplateProvider
 	TemplateRepo     templateRepository.TemplateRepository
 
-	UserRepo     userRepository.UserRepository
-	UserProvider userProvider.UserProvider
+	UserRepo        userRepository.UserRepository
+	UserProvider    userProvider.UserProvider
+	UserService     *service3.UserService
+	UserAuthService *service3.AuthService
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
 
-	InfoBlockHasResourceRepo repository2.InfoBlockHasResourceRepository
-	InfoBlockRepo            repository2.InfoBlockRepository
-	InfoBlockService         *service2.InfoBlockService
-	InfoBlockProvider        provider.InfoBlockProvider
+	InfoBlockHasResourceRepo   repository2.InfoBlockHasResourceRepository
+	InfoBlockRepo              repository2.InfoBlockRepository
+	InfoBlockService           *service2.InfoBlockService
+	InfoBlockCollectionService *service2.InfoBlockCollectionService
+	InfoBlockProvider          provider.InfoBlockProvider
 
 	PostTagRepo         repository.PostTagRepository
 	PostTagResourceRepo repository.PostTagResourceRepository
@@ -63,11 +71,11 @@ type Container struct {
 }
 
 func New() *Container {
-	fService := file.NewService()
-	fProvider := fileProvider.NewProvider(fService)
+	fileService := file.NewService()
+	fileProv := fileProvider.NewProvider(fileService)
 
 	iRepo := galleryRepo.NewImageRepo()
-	iEvent := galleryService.NewImageEvent(fProvider)
+	iEvent := galleryService.NewImageEvent(fileProv)
 	iService := galleryService.NewImageService(iRepo, iEvent)
 	iProvider := galleryProvider.NewImageProvider(iRepo)
 
@@ -83,27 +91,34 @@ func New() *Container {
 
 	uRepo := userRepository.NewUserRepo()
 	uProvider := userProvider.NewProvider(uRepo)
+	uService := service3.NewUserService(uRepo)
+	uaService := service3.NewAuthService(uService)
 
 	aRepo := alias.NewAliasRepo()
 	aProvider := alias.NewProvider(aRepo)
 
 	pRepo := repository.NewPostRepo()
-	pService := service.NewService(pRepo, gProvider, fProvider, aProvider)
+
 	cRepo := repository.NewCategoryRepo()
-	cService := service.NewCategoryService(cRepo, tProvider, uProvider)
+	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
+	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv)
+
+	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider)
+	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider)
 
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()
-	ibService := service2.NewInfoBlockService(ibRepo, ibhrRepo)
-	ibProvider := provider.NewProvider(ibRepo, ibService)
+	ibService := service2.NewInfoBlockService(ibRepo, ibhrRepo, gProvider)
+	ibcService := service2.NewInfoBlockCollectionService(ibRepo, ibhrRepo, gProvider, tProvider, uProvider)
+	ibProvider := provider.NewProvider(ibService, ibcService)
 
 	ptRepo := repository.NewPostTagRepo()
 	ptrRepo := repository.NewResourceRepo()
 	ptService := service.NewPostTagService(ptRepo, ptrRepo)
 
 	return &Container{
-		FileService:  fService,
-		FileProvider: fProvider,
+		FileService:  fileService,
+		FileProvider: fileProv,
 
 		GalleryResourceRepo: rRepo,
 
@@ -119,22 +134,27 @@ func New() *Container {
 
 		PostRepo:          pRepo,
 		PostService:       pService,
+		PostsService:      psService,
 		CategoryRepo:      cRepo,
-		CategoriesService: cService,
+		CategoriesService: csService,
+		CategoryService:   cService,
 
 		TemplateProvider: tProvider,
 		TemplateRepo:     tRepo,
 
-		UserRepo:     uRepo,
-		UserProvider: uProvider,
+		UserRepo:        uRepo,
+		UserProvider:    uProvider,
+		UserService:     uService,
+		UserAuthService: uaService,
 
 		AliasRepo:     aRepo,
 		AliasProvider: aProvider,
 
-		InfoBlockHasResourceRepo: ibhrRepo,
-		InfoBlockRepo:            ibRepo,
-		InfoBlockService:         ibService,
-		InfoBlockProvider:        ibProvider,
+		InfoBlockHasResourceRepo:   ibhrRepo,
+		InfoBlockRepo:              ibRepo,
+		InfoBlockService:           ibService,
+		InfoBlockCollectionService: ibcService,
+		InfoBlockProvider:          ibProvider,
 
 		PostTagRepo:         ptRepo,
 		PostTagResourceRepo: ptrRepo,
@@ -145,8 +165,8 @@ func New() *Container {
 func (c *Container) PostApiController() postApi.Controller {
 	return postApi.New(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
@@ -156,8 +176,9 @@ func (c *Container) PostApiController() postApi.Controller {
 func (c *Container) PostController() postAjax.Controller {
 	return postAjax.New(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.PostsService,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 	)
@@ -166,21 +187,31 @@ func (c *Container) PostController() postAjax.Controller {
 func (c *Container) PostWebController() postWeb.Controller {
 	return postWeb.NewWebController(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.PostsService,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
 	)
 }
 
-func (c *Container) PostCategoryWebController() postWeb.ControllerCategory {
+func (c *Container) CategoryWebController() postWeb.ControllerCategory {
 	return postWeb.NewWebControllerCategory(
-		c.CategoryRepo,
 		c.CategoriesService,
+		c.CategoryService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+	)
+}
+
+func (c *Container) CategoryController() postAjax.CategoryController {
+	return postAjax.NewCategoryController(
+		c.CategoriesService,
+		c.CategoryService,
+		c.TemplateProvider,
+		c.UserProvider,
 	)
 }
 
@@ -189,5 +220,24 @@ func (c *Container) GalleryAjaxController() galleryAjax.Controller {
 		c.GalleryRepo,
 		c.ImageRepo,
 		c.ImageService,
+	)
+}
+
+func (c *Container) InfoBlockController() ajax.InfoBlockController {
+	return ajax.NewInfoBlockController(
+		c.InfoBlockService,
+		c.InfoBlockCollectionService,
+		c.TemplateProvider,
+		c.UserProvider,
+	)
+}
+
+func (c *Container) InfoBlockWebController() web.InfoBlockWebController {
+	return web.NewInfoBlockWebController(
+		c.InfoBlockService,
+		c.InfoBlockCollectionService,
+		c.TemplateProvider,
+		c.UserProvider,
+		c.GalleryProvider,
 	)
 }

@@ -3,21 +3,20 @@ package web
 import (
 	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/app/models"
+	. "github.com/axlle-com/blog/pkg/info_block/models"
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
-	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"time"
 )
 
-func (c *controller) GetPosts(ctx *gin.Context) {
+func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	start := time.Now()
 	user := c.GetUser(ctx)
 	if user == nil {
 		return
 	}
-	filter, validError := NewPostFilter().ValidateQuery(ctx)
+	filter, validError := NewInfoBlockFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,
@@ -30,25 +29,22 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
-	templates := c.template.GetAll()
-	users := c.user.GetAll()
-	categories, err := c.category.GetAll()
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/info-blocks")
+
+	templates := c.templateProvider.GetAll()
+	users := c.userProvider.GetAll()
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
 
-	posts, err := c.post.WithPaginate(paginator, filter)
-	if err != nil {
-		logger.Error(err)
-	}
-	log.Printf("Total time: %v", time.Since(start))
-	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
-		"title":      "Страница постов",
+	blocks := c.blockCollectionService.GetAggregates(blocksTemp)
+	logger.Debugf("Total time: %v", time.Since(start))
+	ctx.HTML(http.StatusOK, "admin.blocks", gin.H{
+		"title":      "Страница инфо блоков",
 		"user":       user,
-		"posts":      posts,
-		"categories": categories,
+		"infoBlocks": blocks,
 		"templates":  templates,
 		"users":      users,
 		"paginator":  paginator,

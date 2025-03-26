@@ -16,13 +16,13 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.post.GetByID(id)
+	post, err := c.postService.GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 
-	if err := c.service.PostDelete(post); err != nil {
+	if err := c.postService.PostDelete(post); err != nil {
 		logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -43,24 +43,25 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/posts")
 
 	users := c.user.GetAll()
 	templates := c.template.GetAll()
 
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	posts, err := c.post.WithPaginate(paginator, filter)
+	posts, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
 
 	data := response.Body{
 		"title":      "Страница постов",
+		"post":       &Post{},
 		"posts":      posts,
 		"categories": categories,
 		"templates":  templates,

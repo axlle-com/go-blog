@@ -12,9 +12,7 @@ type PostCategory struct {
 	UserID             *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
-	LeftSet            int        `gorm:"index" json:"-"`
-	RightSet           int        `gorm:"index" json:"-"`
-	Level              int        `gorm:"index" json:"-"`
+	Path               string     `gorm:"index" json:"-"`
 	MetaTitle          *string    `gorm:"size:100" json:"meta_title,omitempty"`
 	MetaDescription    *string    `gorm:"size:200" json:"meta_description,omitempty"`
 	Alias              string     `gorm:"size:255;unique" json:"alias"`
@@ -37,6 +35,10 @@ type PostCategory struct {
 	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+}
+
+func (c *PostCategory) AdminURL() string {
+	return "/admin/categories"
 }
 
 func (c *PostCategory) GetUUID() uuid.UUID {

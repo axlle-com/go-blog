@@ -5,7 +5,6 @@ import (
 	. "github.com/axlle-com/blog/pkg/app/errors"
 	"github.com/axlle-com/blog/pkg/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
-	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -28,7 +27,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 		return
 	}
 
-	userFound, err := service.Auth(authInput)
+	userFound, err := c.authService.Auth(authInput)
 	if err != nil {
 		session.AddFlash(
 			FlashErrorString(

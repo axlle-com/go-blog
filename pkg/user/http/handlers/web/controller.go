@@ -2,7 +2,7 @@ package web
 
 import (
 	app "github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/user/repository"
+	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,16 +14,19 @@ type Controller interface {
 	Index(ctx *gin.Context)
 }
 
-func New(
-	user repository.UserRepository,
+func NewUserWebController(
+	userService *service.UserService,
+	authService *service.AuthService,
 ) Controller {
 	return &controller{
-		user: user,
+		userService: userService,
+		authService: authService,
 	}
 }
 
 type controller struct {
 	*app.BaseAjax
 
-	user repository.UserRepository
+	userService *service.UserService
+	authService *service.AuthService
 }

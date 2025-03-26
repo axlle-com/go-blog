@@ -6,21 +6,20 @@ import (
 	"net/http"
 )
 
-func (c *controller) DeletePostImage(ctx *gin.Context) {
+func (c *categoryController) DeleteCategoryImage(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
-	post, err := c.post.GetByID(id)
+	category, err := c.categoryService.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
 		return
 	}
 
-	post.SetOriginal(post)
-	err = c.service.DeleteImageFile(post)
+	err = c.categoryService.DeleteImageFile(category)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -28,7 +27,8 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 		return
 	}
 
-	err = c.post.Update(post)
+	newCategory := *category
+	_, err = c.categoryService.Update(&newCategory, category, c.GetUser(ctx))
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

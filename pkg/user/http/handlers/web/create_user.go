@@ -18,7 +18,7 @@ func (c *controller) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	var userFound, err = c.user.GetByEmail(authInput.Email)
+	var userFound, err = c.userService.GetByEmail(authInput.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -33,7 +33,7 @@ func (c *controller) CreateUser(ctx *gin.Context) {
 		Email: authInput.Email,
 	}
 
-	if err := c.user.Create(&newUser); err != nil {
+	if err := c.userService.Create(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

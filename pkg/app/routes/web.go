@@ -13,16 +13,21 @@ import (
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	postController := container.PostController()
 	postWebController := container.PostWebController()
-	postCategoryWebController := container.PostCategoryWebController()
+	postCategoryWebController := container.CategoryWebController()
+	postCategoryController := container.CategoryController()
 	galleryController := container.GalleryAjaxController()
 
-	fileController := file.New(
+	fileController := file.NewFileController(
 		container.FileService,
 	)
 
-	userController := user.New(
-		container.UserRepo,
+	userController := user.NewUserWebController(
+		container.UserService,
+		container.UserAuthService,
 	)
+
+	infoBlockController := container.InfoBlockWebController()
+	infoBlockAjaxController := container.InfoBlockController()
 
 	r.GET("/", ShowIndexPage)
 	r.GET("/login", userController.Login)
@@ -50,7 +55,20 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 
 		protected.GET("/categories", postCategoryWebController.GetCategories)
 		protected.GET("/categories/:id", postCategoryWebController.GetCategory)
+		protected.POST("/categories", postCategoryController.CreateCategory)
+		protected.PUT("/categories/:id", postCategoryController.UpdateCategory)
+		protected.DELETE("/categories/:id/image", postCategoryController.DeleteCategoryImage)
+		protected.DELETE("/categories/:id", postCategoryController.DeleteCategory)
 		protected.GET("/categories/form", postCategoryWebController.CreateCategory)
+		protected.GET("/categories/filter", postCategoryController.FilterCategory)
+
+		protected.GET("/info-blocks", infoBlockController.GetInfoBlocks)
+		protected.GET("/info-blocks/:id", infoBlockController.GetInfoBlock)
+
+		protected.POST("/info-blocks", infoBlockAjaxController.CreateInfoBlock)
+		protected.PUT("/info-blocks/:id", infoBlockAjaxController.UpdateInfoBlock)
+		protected.DELETE("/info-blocks/:id", infoBlockAjaxController.DeleteInfoBlock)
+		protected.GET("/info-blocks/filter", infoBlockAjaxController.FilterInfoBlock)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}

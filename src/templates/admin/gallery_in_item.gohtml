@@ -1,8 +1,8 @@
 {{ define "admin.gallery_in_item" }}
     <div class="catalog-tabs">
-        {{ if .post.Galleries }}
+        {{ if .Galleries }}
             {{ $index := 0 }}
-            {{ range .post.Galleries }}
+            {{ range .Galleries }}
                 <div class="js-galleries-general-block">
                     <input
                             type="hidden"

@@ -3,7 +3,6 @@ package web
 import (
 	app "github.com/axlle-com/blog/pkg/app/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -17,27 +16,27 @@ type ControllerCategory interface {
 }
 
 func NewWebControllerCategory(
-	categoryRepo repository.CategoryRepository,
-	categoryService *service.CategoriesService,
+	categoriesService *service.CategoriesService,
+	categoryService *service.CategoryService,
 	template template.TemplateProvider,
 	user user.UserProvider,
 	gallery gallery.GalleryProvider,
 ) ControllerCategory {
 	return &controllerCategory{
-		categoryRepo:    categoryRepo,
-		categoryService: categoryService,
-		template:        template,
-		user:            user,
-		gallery:         gallery,
+		categoriesService: categoriesService,
+		categoryService:   categoryService,
+		templateProvider:  template,
+		userProvider:      user,
+		galleryProvider:   gallery,
 	}
 }
 
 type controllerCategory struct {
 	*app.BaseAjax
 
-	categoryRepo    repository.CategoryRepository
-	categoryService *service.CategoriesService
-	template        template.TemplateProvider
-	user            user.UserProvider
-	gallery         gallery.GalleryProvider
+	categoriesService *service.CategoriesService
+	categoryService   *service.CategoryService
+	templateProvider  template.TemplateProvider
+	userProvider      user.UserProvider
+	galleryProvider   gallery.GalleryProvider
 }

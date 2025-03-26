@@ -5,6 +5,8 @@ import (
 )
 
 type Paginator interface {
+	SetURL(url string)
+	GetURL() template.URL
 	SetPage()
 	GetPage() int
 	SetPageSize()

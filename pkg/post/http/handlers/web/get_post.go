@@ -19,7 +19,7 @@ func (c *controller) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.post.GetByID(id)
+	post, err := c.postService.GetByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
@@ -27,7 +27,7 @@ func (c *controller) GetPost(ctx *gin.Context) {
 
 	post.Galleries = c.gallery.GetForResource(post)
 
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -37,12 +37,12 @@ func (c *controller) GetPost(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":      "Страница поста",
-			"user":       user,
-			"categories": categories,
-			"templates":  templates,
-			"menu":       models.NewMenu(ctx.FullPath()),
-			"post":       post,
+			"title":        "Страница поста",
+			"userProvider": user,
+			"categories":   categories,
+			"templates":    templates,
+			"menu":         models.NewMenu(ctx.FullPath()),
+			"post":         post,
 		},
 	)
 }

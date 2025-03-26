@@ -100,8 +100,8 @@ func seedTest() {
 	).SeedTest(100)
 
 	sInfoBlock.NewSeeder(
-		container.InfoBlockRepo,
 		container.InfoBlockService,
 		container.TemplateProvider,
+		container.UserProvider,
 	).SeedTest(20)
 }

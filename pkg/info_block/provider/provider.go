@@ -5,7 +5,6 @@ import (
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	app "github.com/axlle-com/blog/pkg/app/service"
 	"github.com/axlle-com/blog/pkg/info_block/models"
-	"github.com/axlle-com/blog/pkg/info_block/repository"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 )
 
@@ -17,22 +16,22 @@ type InfoBlockProvider interface {
 }
 
 func NewProvider(
-	infoBlockRepo repository.InfoBlockRepository,
-	service *service.InfoBlockService,
+	blockService *service.InfoBlockService,
+	collectionService *service.InfoBlockCollectionService,
 ) InfoBlockProvider {
 	return &provider{
-		infoBlockRepo: infoBlockRepo,
-		service:       service,
+		blockService:      blockService,
+		collectionService: collectionService,
 	}
 }
 
 type provider struct {
-	infoBlockRepo repository.InfoBlockRepository
-	service       *service.InfoBlockService
+	blockService      *service.InfoBlockService
+	collectionService *service.InfoBlockCollectionService
 }
 
 func (p *provider) GetForResource(resource contracts.Resource) []contracts.InfoBlock {
-	infoBlocks, err := p.infoBlockRepo.GetForResource(resource)
+	infoBlocks, err := p.blockService.GetForResource(resource)
 	collection := make([]contracts.InfoBlock, 0, len(infoBlocks))
 	if err == nil {
 		for _, infoBlock := range infoBlocks {
@@ -45,7 +44,7 @@ func (p *provider) GetForResource(resource contracts.Resource) []contracts.InfoB
 }
 
 func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
-	err = p.service.DeleteForResource(resource)
+	err = p.blockService.DeleteForResource(resource)
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,7 @@ func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
 
 func (p *provider) GetAll() []contracts.InfoBlock {
 	var collection []contracts.InfoBlock
-	infoBlocks, err := p.infoBlockRepo.GetAll()
+	infoBlocks, err := p.collectionService.GetAll()
 	if err == nil {
 		for _, infoBlock := range infoBlocks {
 			collection = append(collection, infoBlock)
@@ -69,16 +68,16 @@ func (p *provider) GetAll() []contracts.InfoBlock {
 func (p *provider) SaveFromForm(g any, resource contracts.Resource) (infoBlock contracts.InfoBlock, err error) {
 	ib := app.LoadStruct(&models.InfoBlock{}, g).(*models.InfoBlock)
 	if ib.ID == 0 {
-		infoBlock, err = p.service.CreateInfoBlock(ib)
+		infoBlock, err = p.blockService.Create(ib, nil)
 	} else {
-		infoBlock, err = p.service.UpdateInfoBlock(ib)
+		infoBlock, err = p.blockService.Update(ib)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = p.service.Attach(resource, infoBlock)
+	err = p.blockService.Attach(resource, infoBlock)
 	if err != nil {
 		return nil, err
 	}

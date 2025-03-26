@@ -5,31 +5,34 @@ import (
 	"github.com/axlle-com/blog/pkg/app/config"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	user "github.com/axlle-com/blog/pkg/user/models"
-	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"time"
 )
 
-func Auth(authInput AuthInput) (userFound *user.User, err error) {
-	userRepo := repository.NewUserRepo()
-	userFound, err = userRepo.GetByEmail(authInput.Email)
+type AuthService struct {
+	userService *UserService
+}
 
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+func NewAuthService(
+	userService *UserService,
+) *AuthService {
+	return &AuthService{userService: userService}
+}
+
+func (s *AuthService) Auth(authInput AuthInput) (user *user.User, err error) {
+	user, err = s.userService.GetByEmail(authInput.Email)
+
+	if err != nil {
 		return
 	}
 
-	if userFound == nil || userFound.ID == 0 {
-		return nil, errors.New("invalid password or login")
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(userFound.PasswordHash), []byte(authInput.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(authInput.Password)); err != nil {
 		return nil, errors.New("invalid password or login")
 	}
 
 	generateToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  userFound.ID,
+		"id":  user.ID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -37,7 +40,7 @@ func Auth(authInput AuthInput) (userFound *user.User, err error) {
 	if err != nil {
 		return
 	}
-	userFound.AuthToken = &token
+	user.AuthToken = &token
 
 	return
 }

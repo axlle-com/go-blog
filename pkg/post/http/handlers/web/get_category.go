@@ -19,30 +19,30 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 		return
 	}
 
-	category, err := c.categoryRepo.GetByID(id)
+	category, err := c.categoryService.GetByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	category.Galleries = c.gallery.GetForResource(category)
+	category.Galleries = c.galleryProvider.GetForResource(category)
 
-	categories, err := c.categoryRepo.GetAll()
+	categories, err := c.categoriesService.GetAllForParent(category)
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := c.template.GetAll()
+	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":      "Страница категории",
-			"user":       user,
-			"categories": categories,
-			"templates":  templates,
-			"menu":       models.NewMenu(ctx.FullPath()),
-			"category":   category,
+			"title":        "Страница категории",
+			"userProvider": user,
+			"categories":   categories,
+			"templates":    templates,
+			"menu":         models.NewMenu(ctx.FullPath()),
+			"category":     category,
 		},
 	)
 }

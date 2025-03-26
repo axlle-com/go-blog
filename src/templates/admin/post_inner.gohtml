@@ -1,8 +1,8 @@
 {{ define "admin.post_inner" }}
     {{ if eq .post.ID 0 }}
-        <form id="global-form" action="/admin/posts" method="post">
+        <form id="global-form" action="{{ .post.AdminURL }}" method="post">
     {{ else}}
-        <form id="global-form" action="/admin/posts/{{ .post.ID }}" method="put">
+        <form id="global-form" action="{{ .post.AdminURL }}/{{ .post.ID }}" method="put">
     {{ end }}
     <div class="row">
         <div class="col-lg-12">
@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <div class="list-with-gap mb-2">
                         <button type="button" class="btn btn-success js-save-button">Сохранить</button>
-                        <a type="button" class="btn btn-secondary" href="/admin/posts">Выйти</a>
+                        <a type="button" class="btn btn-secondary" href="{{ .post.AdminURL }}">Выйти</a>
                     </div>
                     <div class="list-with-gap mb-2">
                         <ul class="nav nav-gap-x-1 mt-3" role="tablist">
@@ -395,7 +395,7 @@
                         </div>
                         <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
                              aria-labelledby="profile-tab-faded">
-                            {{ template "admin.gallery_in_item" . }}
+                            {{ template "admin.gallery_in_item" .post }}
                         </div>
                         <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
                              aria-labelledby="info-block-tab-faded">

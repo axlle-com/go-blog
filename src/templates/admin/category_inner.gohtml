@@ -1,8 +1,8 @@
 {{ define "admin.category_inner" }}
     {{ if eq .category.ID 0 }}
-        <form id="global-form" action="/admin/posts" method="post">
+        <form id="global-form" action="{{ .category.AdminURL }}" method="post">
     {{ else}}
-        <form id="global-form" action="/admin/posts/{{ .category.ID }}" method="put">
+        <form id="global-form" action="{{ .category.AdminURL }}/{{ .category.ID }}" method="put">
     {{ end }}
     <div class="row">
         <div class="col-lg-12">
@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <div class="list-with-gap mb-2">
                         <button type="button" class="btn btn-success js-save-button">Сохранить</button>
-                        <a type="button" class="btn btn-secondary" href="/admin/posts">Выйти</a>
+                        <a type="button" class="btn btn-secondary" href="{{ .category.AdminURL }}">Выйти</a>
                     </div>
                     <div class="list-with-gap mb-2">
                         <ul class="nav nav-gap-x-1 mt-3" role="tablist">
@@ -206,7 +206,7 @@
                                                         class="custom-control-input"
                                                         name="show_image_post"
                                                         id="show_image_post"
-                                                        {{ if .category.ShowImagePost }}
+                                                        {{ if .category.ShowImage }}
                                                             checked
                                                         {{ end }}
                                                         value="1">
@@ -215,65 +215,10 @@
                                                 </label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input
-                                                        type="checkbox"
-                                                        class="custom-control-input"
-                                                        name="show_image_category"
-                                                        id="show_image_category"
-                                                        {{ if .category.ShowImageCategory }}
-                                                            checked
-                                                        {{ end }}
-                                                        value="1">
-                                                <label class="custom-control-label" for="show_image_category">
-                                                    Отобразить изображение в категории
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </fieldset>
-                                    <fieldset class="form-block">
-                                        <div class="custom-control custom-checkbox">
-                                            <input
-                                                    type="checkbox"
-                                                    class="custom-control-input"
-                                                    name="has_comments"
-                                                    id="has_comments"
-                                                    {{ if .category.HasComments }}
-                                                        checked
-                                                    {{ end }}
-                                                    value="1">
-                                            <label class="custom-control-label" for="has_comments">
-                                                Подключить комментарии
-                                            </label>
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
                                         <legend>Публикация</legend>
-                                        <div class="input-group datepicker-wrap form-group">
-                                            <label for="blogTitle">Дата публикации</label>
-                                            <input
-                                                    type="text"
-                                                    class="form-control"
-                                                    name="date_pub"
-                                                    value="{{ .category.DatePub | date }}"
-                                                    placeholder="Укажите дату"
-                                                    autocomplete="off"
-                                                    data-input>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-light btn-icon"
-                                                        type="button"
-                                                        title="Choose date"
-                                                        data-toggle>
-                                                    <i class="material-icons">calendar_today</i>
-                                                </button>
-                                                <button class="btn btn-light btn-icon"
-                                                        type="button"
-                                                        title="Clear"
-                                                        data-clear>
-                                                    <i class="material-icons">close</i>
-                                                </button>
-                                            </div>
-                                        </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox">
                                                 <input
@@ -288,44 +233,6 @@
                                                 <label class="custom-control-label"
                                                        for="is_published">Опубликовано</label>
                                                 <div class="invalid-feedback"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox">
-                                                <input
-                                                        type="checkbox"
-                                                        class="custom-control-input"
-                                                        name="show_date"
-                                                        id="show_date"
-                                                        {{ if .category.ShowDate }}
-                                                            checked
-                                                        {{ end }}
-                                                        value="1">
-                                                <label class="custom-control-label" for="show_date">
-                                                    Показывать дату в посте
-                                                </label>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </div>
-                                        <div class="input-group datepicker-wrap form-group">
-                                            <label for="blogTitle">Дата окончания публикации</label>
-                                            <input
-                                                    type="text"
-                                                    class="form-control"
-                                                    name="date_end"
-                                                    value="{{ .category.DateEnd | date }}"
-                                                    placeholder="Укажите дату"
-                                                    autocomplete="off"
-                                                    data-input>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-light btn-icon" type="button"
-                                                        title="Choose date" data-toggle>
-                                                    <i class="material-icons">calendar_today</i>
-                                                </button>
-                                                <button class="btn btn-light btn-icon" type="button"
-                                                        title="Clear" data-clear>
-                                                    <i class="material-icons">close</i>
-                                                </button>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -395,7 +302,7 @@
                         </div>
                         <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
                              aria-labelledby="profile-tab-faded">
-                            {{ template "admin.gallery_in_item" . }}
+                            {{ template "admin.gallery_in_item" .category }}
                         </div>
                         <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
                              aria-labelledby="info-block-tab-faded">

@@ -189,3 +189,7 @@ func (p *Post) isDirty(s string) bool {
 	_, ok := p.dirty[s]
 	return ok
 }
+
+func (p *Post) AdminURL() string {
+	return "/admin/posts"
+}

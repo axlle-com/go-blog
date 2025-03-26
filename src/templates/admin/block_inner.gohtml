@@ -1,0 +1,116 @@
+{{ define "admin.block_inner" }}
+    {{ if eq .infoBlock.ID 0 }}
+        <form id="global-form" action="{{ .infoBlock.AdminURL }}" method="post">
+    {{ else}}
+        <form id="global-form" action="{{ .infoBlock.AdminURL }}/{{ .infoBlock.ID }}" method="put">
+    {{ end }}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="list-with-gap mb-2">
+                        <button type="button" class="btn btn-success js-save-button">Сохранить</button>
+                        <a type="button" class="btn btn-secondary" href="{{ .infoBlock.AdminURL }}">Выйти</a>
+                    </div>
+                    <div class="list-with-gap mb-2">
+                        <ul class="nav nav-gap-x-1 mt-3" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded active"
+                                   id="home-tab-faded"
+                                   data-toggle="tab"
+                                   href="#home-page"
+                                   role="tab"
+                                   aria-controls="home-page"
+                                   aria-selected="false">Основное</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="profile-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab2Faded"
+                                   role="tab"
+                                   aria-controls="tab2Faded"
+                                   aria-selected="false">Галерея</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="settings-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab4Faded"
+                                   role="tab"
+                                   aria-controls="tab4Faded"
+                                   aria-selected="true">Настройки</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show"
+                             id="home-page"
+                             role="tabpanel"
+                             aria-labelledby="home-tab-faded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <fieldset class="form-block">
+                                        <legend>Связь данных</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Шаблон</label>
+                                            <select
+                                                    class="form-control select2"
+                                                    data-placeholder="Шаблон"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="template_id"
+                                                    data-validator="template_id">
+                                                <option></option>
+                                                {{ range .templates}}
+                                                    <option value="{{ .ID }}"
+                                                            {{ if eq .ID $.infoBlock.GetTemplateID }}selected{{ end }}>
+                                                        {{ .Title }}
+                                                    </option>
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Заголовок</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Обычный</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Обычный"
+                                                    name="title"
+                                                    id="title"
+                                                    value="{{ .infoBlock.Title }}"
+                                                    data-validator-required
+                                                    data-validator="title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <div class="form-group small">
+                                            <textarea
+                                                    name="description"
+                                                    id="description"
+                                                    class="form-control summernote-500">{{ ptrStr .infoBlock.Description }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <fieldset class="form-block">
+                                        <legend>Изображение</legend>
+                                        {{ template "admin.image" .infoBlock }}
+                                        {{ template "admin.image_empty" .infoBlock }}
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
+                             aria-labelledby="profile-tab-faded">
+                            {{ template "admin.gallery_in_item" .infoBlock }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </form>
+{{ end }}

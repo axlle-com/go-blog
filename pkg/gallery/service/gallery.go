@@ -5,6 +5,7 @@ import (
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -63,47 +64,44 @@ func (s *GalleryService) Attach(resource contracts.Resource, gallery contracts.G
 	return nil
 }
 
-func (s *GalleryService) DeleteForResource(resource contracts.Resource) (err error) {
+func (s *GalleryService) DeleteForResource(resource contracts.Resource) error {
 	byResource, err := s.resourceRepo.GetByResource(resource)
 	if err != nil {
 		return err
 	}
-
-	all := make(map[uint]*models.GalleryHasResource)
-	only := make(map[uint]*models.GalleryHasResource)
-	detach := make(map[uint]*models.GalleryHasResource)
-	var galleryIDs []uint
-	if byResource == nil {
+	if len(byResource) == 0 {
 		return nil
 	}
 
-	for _, r := range byResource {
-		if r.ResourceUUID != resource.GetUUID() {
-			all[r.GalleryID] = r
+	// Группируем записи по GalleryID
+	galleryResources := make(map[uint][]uuid.UUID)
+	for _, res := range byResource {
+		galleryResources[res.GalleryID] = append(galleryResources[res.GalleryID], res.ResourceUUID)
+	}
+
+	var detachGalleryIDs []uint
+	var deleteGalleryIDs []uint
+
+	// Определяем для каждой галереи, сколько ресурсов ей принадлежит
+	for galleryID, resources := range galleryResources {
+		if len(resources) > 1 {
+			detachGalleryIDs = append(detachGalleryIDs, galleryID)
 		} else {
-			only[r.GalleryID] = r
+			deleteGalleryIDs = append(deleteGalleryIDs, galleryID)
 		}
 	}
 
-	for id, _ := range only {
-		if _, ok := all[id]; ok {
-			detach[id] = all[id]
-		} else {
-			galleryIDs = append(galleryIDs, id)
-		}
-	}
-
-	if len(detach) > 0 { // TODO need test
-		for _, r := range detach {
-			err = s.resourceRepo.DeleteByParams(r.ResourceUUID, r.GalleryID)
+	if len(detachGalleryIDs) > 0 {
+		for _, galleryID := range detachGalleryIDs {
+			err = s.resourceRepo.DeleteByParams(resource.GetUUID(), galleryID)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	if len(galleryIDs) > 0 {
-		galleries, err := s.galleryRepo.WithImages().GetByIDs(galleryIDs)
+	if len(deleteGalleryIDs) > 0 {
+		galleries, err := s.galleryRepo.WithImages().GetByIDs(deleteGalleryIDs)
 		if err != nil {
 			return err
 		}

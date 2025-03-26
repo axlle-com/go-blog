@@ -2,7 +2,9 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"github.com/axlle-com/blog/pkg/app/db"
+	app "github.com/axlle-com/blog/pkg/app/models"
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"gorm.io/gorm"
@@ -12,6 +14,7 @@ type InfoBlockRepository interface {
 	WithTx(tx *gorm.DB) InfoBlockRepository
 	Create(infoBlock *models.InfoBlock) error
 	GetByID(id uint) (*models.InfoBlock, error)
+	WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
 	Update(infoBlock *models.InfoBlock) error
 	Delete(infoBlock *models.InfoBlock) error
 	GetAll() ([]*models.InfoBlock, error)
@@ -22,6 +25,7 @@ type InfoBlockRepository interface {
 
 type infoBlockRepository struct {
 	db *gorm.DB
+	*app.Paginate
 }
 
 func NewInfoBlockRepo() InfoBlockRepository {
@@ -46,9 +50,30 @@ func (r *infoBlockRepository) GetByID(id uint) (*models.InfoBlock, error) {
 	return &model, nil
 }
 
+func (r *infoBlockRepository) WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
+	var infoBlocks []*models.InfoBlock
+	var total int64
+
+	infoBlock := models.InfoBlock{}
+
+	query := r.db.Model(&infoBlock)
+	query.Count(&total)
+
+	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
+		Order(fmt.Sprintf("%s.id ASC", infoBlock.GetTable())).
+		Find(&infoBlocks).Error
+	if err != nil {
+		return nil, err
+	}
+
+	p.SetTotal(int(total))
+	return infoBlocks, nil
+}
+
 func (r *infoBlockRepository) Update(infoBlock *models.InfoBlock) error {
 	infoBlock.Updating()
 	return r.db.Select(
+		"UserID",
 		"TemplateID",
 		"MetaTitle",
 		"Media",

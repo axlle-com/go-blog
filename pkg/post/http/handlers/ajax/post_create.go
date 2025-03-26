@@ -24,7 +24,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
+	post, err := c.postService.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -33,7 +33,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

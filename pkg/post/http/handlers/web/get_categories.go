@@ -6,7 +6,6 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"time"
 )
@@ -30,28 +29,29 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/categories")
 
-	templates := c.template.GetAll()
-	users := c.user.GetAll()
-	categories, err := c.categoryRepo.GetAll()
+	templates := c.templateProvider.GetAll()
+	users := c.userProvider.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	postCategoriesTemp, err := c.categoryRepo.WithPaginate(paginator, filter)
+	postCategoriesTemp, err := c.categoriesService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	postCategories := c.categoryService.GetAggregates(postCategoriesTemp)
+	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
-	log.Printf("Total time: %v", time.Since(start))
+	logger.Debugf("Total time: %v", time.Since(start))
 	ctx.HTML(http.StatusOK, "admin.categories", gin.H{
 		"title":          "Страница категорий",
-		"user":           user,
+		"userProvider":   user,
 		"postCategories": postCategories,
 		"categories":     categories,
+		"category":       &PostCategory{},
 		"templates":      templates,
 		"users":          users,
 		"paginator":      paginator,

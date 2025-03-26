@@ -6,7 +6,6 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"time"
 )
@@ -30,29 +29,32 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/posts")
+
 	templates := c.template.GetAll()
 	users := c.user.GetAll()
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	posts, err := c.post.WithPaginate(paginator, filter)
+	posts, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	log.Printf("Total time: %v", time.Since(start))
+
+	logger.Debugf("Total time: %v", time.Since(start))
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
-		"title":      "Страница постов",
-		"user":       user,
-		"posts":      posts,
-		"categories": categories,
-		"templates":  templates,
-		"users":      users,
-		"paginator":  paginator,
-		"filter":     filter,
-		"menu":       models2.NewMenu(ctx.FullPath()),
+		"title":        "Страница постов",
+		"userProvider": user,
+		"post":         &Post{},
+		"posts":        posts,
+		"categories":   categories,
+		"templates":    templates,
+		"users":        users,
+		"paginator":    paginator,
+		"filter":       filter,
+		"menu":         models2.NewMenu(ctx.FullPath()),
 	})
 }

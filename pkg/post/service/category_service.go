@@ -1,104 +1,138 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/pkg/app/logger"
+	"errors"
+	"github.com/axlle-com/blog/pkg/alias"
+	"github.com/axlle-com/blog/pkg/app/db"
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/post/models"
+	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/pkg/file/provider"
+	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
+	http "github.com/axlle-com/blog/pkg/post/http/models"
+	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/axlle-com/blog/pkg/post/repository"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
-	"sync"
 )
 
-type CategoriesService struct {
-	categoryRepo repository.CategoryRepository
-	template     template.TemplateProvider
-	user         user.UserProvider
+type CategoryService struct {
+	categoryRepo    repository.CategoryRepository
+	galleryProvider gallery.GalleryProvider
+	fileProvider    provider.FileProvider
+	aliasProvider   alias.AliasProvider
 }
 
 func NewCategoryService(
 	categoryRepo repository.CategoryRepository,
-	template template.TemplateProvider,
-	user user.UserProvider,
-) *CategoriesService {
-	return &CategoriesService{
-		categoryRepo: categoryRepo,
-		template:     template,
-		user:         user,
+	aliasProvider alias.AliasProvider,
+	galleryProvider gallery.GalleryProvider,
+	fileProvider provider.FileProvider,
+) *CategoryService {
+	return &CategoryService{
+		categoryRepo:    categoryRepo,
+		galleryProvider: galleryProvider,
+		fileProvider:    fileProvider,
+		aliasProvider:   aliasProvider,
 	}
 }
 
-func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*models.PostCategory {
-	var templateIDs []uint
-	var userIDs []uint
-	var categoryIDs []uint
+func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts.User) (category *PostCategory, err error) {
+	categoryForm := app.LoadStruct(&PostCategory{}, form).(*PostCategory)
 
-	for _, category := range categories {
-		if category.TemplateID != nil {
-			templateIDs = append(templateIDs, *category.TemplateID)
-		}
-		if category.UserID != nil {
-			userIDs = append(userIDs, *category.UserID)
-		}
-		if category.PostCategoryID != nil {
-			categoryIDs = append(categoryIDs, *category.PostCategoryID)
-		}
+	categoryForm.Alias = s.GenerateAlias(categoryForm)
+
+	if found == nil {
+		id := user.GetID()
+		categoryForm.UserID = &id
+		category, err = s.Create(categoryForm, user)
+	} else {
+		categoryForm.ID = found.ID
+		categoryForm.UUID = found.UUID
+		category, err = s.Update(categoryForm, found, user)
 	}
 
-	var wg sync.WaitGroup
-
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
-	var parents map[uint]*models.PostCategory
-
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-		if len(templateIDs) > 0 {
-			var err error
-			templates, err = s.template.GetMapByIDs(templateIDs)
-			if err != nil {
-				logger.Error(err)
-			}
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		if len(userIDs) > 0 {
-			var err error
-			users, err = s.user.GetMapByIDs(userIDs)
-			if err != nil {
-				logger.Error(err)
-			}
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		if len(categoryIDs) > 0 {
-			var err error
-			parents, err = s.categoryRepo.GetMapByIDs(categoryIDs)
-			if err != nil {
-				logger.Error(err)
-			}
-		}
-	}()
-
-	wg.Wait()
-
-	for _, category := range categories {
-		if category.TemplateID != nil {
-			category.Template = templates[*category.TemplateID]
-		}
-		if category.UserID != nil {
-			category.User = users[*category.UserID]
-		}
-		if category.PostCategoryID != nil {
-			category.Category = parents[*category.PostCategoryID]
-		}
+	if err != nil {
+		return
 	}
 
-	return categories
+	if len(form.Galleries) > 0 {
+		slice := make([]contracts.Gallery, 0)
+		for _, gRequest := range form.Galleries {
+			if gRequest == nil {
+				continue
+			}
+
+			g, err := s.galleryProvider.SaveFromForm(gRequest, category)
+			if err != nil || g == nil {
+				continue
+			}
+			slice = append(slice, g)
+		}
+		category.Galleries = slice
+	}
+	return
+}
+
+func (s *CategoryService) GetByID(id uint) (*PostCategory, error) {
+	return s.categoryRepo.GetByID(id)
+}
+
+func (s *CategoryService) Delete(category *PostCategory) error {
+	err := s.galleryProvider.DeleteForResource(category)
+	if err != nil {
+		return err
+	}
+
+	return s.categoryRepo.Delete(category)
+}
+
+func (s *CategoryService) Create(category *PostCategory, user contracts.User) (*PostCategory, error) {
+	id := user.GetID()
+	category.UserID = &id
+	if err := s.categoryRepo.Create(category); err != nil {
+		return nil, err
+	}
+	return category, nil
+}
+
+func (s *CategoryService) Update(category *PostCategory, found *PostCategory, user contracts.User) (*PostCategory, error) {
+	tx := db.GetDB().Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := s.categoryRepo.WithTx(tx).Update(category, found); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
+
+func (s *CategoryService) GenerateAlias(category *PostCategory) string {
+	var aliasStr string
+	if category.Alias == "" {
+		aliasStr = category.Title
+	} else {
+		aliasStr = category.Alias
+	}
+
+	return s.aliasProvider.Generate(category, aliasStr)
+}
+
+func (s *CategoryService) DeleteImageFile(category *PostCategory) error {
+	if category.Image == nil {
+		return errors.New("image is nil")
+	}
+	err := s.fileProvider.DeleteFile(*category.Image)
+	if err != nil {
+		return err
+	}
+	category.Image = nil
+	return nil
 }

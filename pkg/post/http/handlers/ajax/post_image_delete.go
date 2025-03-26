@@ -12,7 +12,7 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
-	post, err := c.post.GetByID(id)
+	post, err := c.postService.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		ctx.Abort()
@@ -20,7 +20,7 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 	}
 
 	post.SetOriginal(post)
-	err = c.service.DeleteImageFile(post)
+	err = c.postService.DeleteImageFile(post)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -28,7 +28,7 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 		return
 	}
 
-	err = c.post.Update(post)
+	err = c.postService.Update(post)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

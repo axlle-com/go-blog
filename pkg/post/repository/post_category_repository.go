@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/pkg/app/db"
 	"github.com/axlle-com/blog/pkg/app/logger"
@@ -9,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type CategoryRepository interface {
@@ -21,6 +21,7 @@ type CategoryRepository interface {
 	DeleteByID(id uint) error
 	Delete(category *models.PostCategory) error
 	GetAll() ([]*models.PostCategory, error)
+	GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error)
 	GetAllIds() ([]uint, error)
 	WithPaginate(paginator contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error)
 	GetRoots() ([]*models.PostCategory, error)
@@ -41,79 +42,12 @@ func (r *categoryRepository) WithTx(tx *gorm.DB) CategoryRepository {
 	return &categoryRepository{db: tx}
 }
 
-func (r *categoryRepository) GetDescendants(category *models.PostCategory) ([]*models.PostCategory, error) {
-	var descendants []*models.PostCategory
-	err := r.db.
-		Where("left_set > ? AND right_set < ?", category.LeftSet, category.RightSet).
-		Order("left_set ASC").
-		Find(&descendants).Error
-	if err != nil {
-		return nil, err
-	}
-	return descendants, nil
-}
-
 func (r *categoryRepository) GetDescendantsByID(id uint) ([]*models.PostCategory, error) {
 	category, err := r.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 	return r.GetDescendants(category)
-}
-
-func (r *categoryRepository) Create(category *models.PostCategory) error {
-	category.Creating()
-
-	if category.PostCategoryID == nil || *category.PostCategoryID == 0 {
-		return r.createRoot(category)
-	}
-	return r.createChild(category)
-}
-
-func (r *categoryRepository) Delete(category *models.PostCategory) error {
-	var node models.PostCategory
-	if err := r.db.First(&node, category.ID).Error; err != nil {
-		return err
-	}
-
-	size := node.RightSet - node.LeftSet + 1
-
-	// Удаляем узел и потомков
-	if err := r.db.Where("left_set BETWEEN ? AND ?", node.LeftSet, node.RightSet).
-		Delete(&models.PostCategory{}).Error; err != nil {
-		return err
-	}
-
-	// Корректируем только если это не последний корень
-	if !(node.PostCategoryID == nil || *node.PostCategoryID == 0) {
-		if err := r.db.Model(&models.PostCategory{}).
-			Where("right_set > ?", node.RightSet).
-			UpdateColumn("right_set", gorm.Expr("right_set - ?", size)).
-			Error; err != nil {
-			return err
-		}
-
-		return r.db.Model(&models.PostCategory{}).
-			Where("left_set > ?", node.RightSet).
-			UpdateColumn("left_set", gorm.Expr("left_set - ?", size)).
-			Error
-	}
-
-	return nil
-}
-
-func (r *categoryRepository) GetRoots() ([]*models.PostCategory, error) {
-	var roots []*models.PostCategory
-	err := r.db.Where("post_category_id IS NULL").Find(&roots).Error
-	return roots, err
-}
-
-func (r *categoryRepository) GetByID(id uint) (*models.PostCategory, error) {
-	var postCategory models.PostCategory
-	if err := r.db.First(&postCategory, id).Error; err != nil {
-		return nil, err
-	}
-	return &postCategory, nil
 }
 
 func (r *categoryRepository) GetByIDs(ids []uint) ([]*models.PostCategory, error) {
@@ -137,28 +71,29 @@ func (r *categoryRepository) GetMapByIDs(ids []uint) (map[uint]*models.PostCateg
 	return collection, nil
 }
 
-func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCategory) error {
-	new.Updating()
-	oldID, newID := uint(0), uint(0)
-	if old.PostCategoryID != nil {
-		oldID = *old.PostCategoryID
-	}
-	if new.PostCategoryID != nil {
-		newID = *new.PostCategoryID
-	}
-	if oldID != newID {
-		new.LeftSet = old.LeftSet
-		new.RightSet = old.RightSet
-		new.Level = old.Level
-
-		err := r.moveTo(new, new.PostCategoryID)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-
-	return r.db.Save(new).Error
+func (r *categoryRepository) save(category *models.PostCategory) error {
+	return r.db.Select(
+		"UserID",
+		"TemplateID",
+		"PostCategoryID",
+		"LeftSet",
+		"RightSet",
+		"Level",
+		"MetaTitle",
+		"MetaDescription",
+		"Alias",
+		"URL",
+		"IsPublished",
+		"IsFavourites",
+		"InSitemap",
+		"Image",
+		"ShowImage",
+		"Title",
+		"TitleShort",
+		"DescriptionPreview",
+		"Description",
+		"Sort",
+	).Save(category).Error
 }
 
 func (r *categoryRepository) DeleteByID(id uint) error {
@@ -187,202 +122,148 @@ func (r *categoryRepository) GetAllIds() ([]uint, error) {
 
 func (r *categoryRepository) WithPaginate(p contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	var categories []*models.PostCategory
+	var total int64
 
 	category := models.PostCategory{}
-	err := r.db.Model(&category).Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
+
+	query := r.db.Model(&category)
+	query.Count(&total)
+
+	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
 		Order(fmt.Sprintf("%s.id ASC", category.GetTable())).
 		Find(&categories).Error
 	if err != nil {
 		return nil, err
 	}
+
+	p.SetTotal(int(total))
 	return categories, nil
 }
 
-func (r *categoryRepository) createRoot(category *models.PostCategory) error {
-	var maxRight struct{ Value int }
-	if err := r.db.Model(&models.PostCategory{}).
-		Select("COALESCE(MAX(right_set), 0) as value").
-		Scan(&maxRight).Error; err != nil {
-		return err
-	}
-
-	category.LeftSet = maxRight.Value + 1
-	category.RightSet = maxRight.Value + 2
-	category.Level = 0
-	category.PostCategoryID = nil
-
-	return r.db.Create(category).Error
+func (r *categoryRepository) Delete(category *models.PostCategory) error {
+	likePattern := fmt.Sprintf("%s%%", category.Path)
+	return r.db.Where("path LIKE ?", likePattern).Delete(&models.PostCategory{}).Error
 }
 
-func (r *categoryRepository) createChild(category *models.PostCategory) error {
+func (r *categoryRepository) GetRoots() ([]*models.PostCategory, error) {
+	var roots []*models.PostCategory
+	err := r.db.Where("post_category_id IS NULL").Find(&roots).Error
+	return roots, err
+}
+
+func (r *categoryRepository) Create(category *models.PostCategory) error {
+	category.Creating()
+	if category.PostCategoryID == nil || *category.PostCategoryID == 0 {
+		if err := r.db.Create(category).Error; err != nil {
+			return err
+		}
+		// Для корневой категории путь – просто /id/
+		category.Path = fmt.Sprintf("/%d/", category.ID)
+		return r.db.Model(category).Update("path", category.Path).Error
+	}
+
+	// Если есть родитель, получаем его данные.
 	var parent models.PostCategory
-	if category.PostCategoryID == nil {
-		return errors.New("parent category required for child")
-	}
-
 	if err := r.db.First(&parent, *category.PostCategoryID).Error; err != nil {
-		return err
+		return fmt.Errorf("не найден родитель: %w", err)
 	}
 
-	// Сохраняем исходное значение правой границы родителя
-	target := parent.RightSet
-
-	// Обновляем правую границу для всех узлов, у которых right_set >= target
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("right_set >= ?", target).
-		UpdateColumn("right_set", gorm.Expr("right_set + 2")).
-		Error; err != nil {
+	if err := r.db.Create(category).Error; err != nil {
 		return err
 	}
-
-	// Обновляем левую границу для всех узлов, у которых left_set > target
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set > ?", target).
-		UpdateColumn("left_set", gorm.Expr("left_set + 2")).
-		Error; err != nil {
-		return err
-	}
-
-	// Назначаем границы для нового узла, используя сохранённое значение target
-	category.LeftSet = target
-	category.RightSet = target + 1
-	category.Level = parent.Level + 1
-
-	return r.db.Create(category).Error
+	// Путь дочернего узла – путь родителя + id дочернего.
+	category.Path = fmt.Sprintf("%s%d/", parent.Path, category.ID)
+	return r.db.Model(category).Update("path", category.Path).Error
 }
 
-func (r *categoryRepository) moveTo(category *models.PostCategory, newParentID *uint) error {
-	// Перемещение в корень
-	if newParentID == nil {
-		return r.moveToRoot(category)
+func (r *categoryRepository) GetByID(id uint) (*models.PostCategory, error) {
+	var category models.PostCategory
+	if err := r.db.First(&category, id).Error; err != nil {
+		return nil, err
 	}
-
-	// Стандартное перемещение
-	return r.moveToParent(category, *newParentID)
+	return &category, nil
 }
 
-func (r *categoryRepository) moveToRoot(category *models.PostCategory) error {
-	var maxRight struct{ Value int }
-	if err := r.db.Model(&models.PostCategory{}).
-		Select("COALESCE(MAX(right_set), 0) as value").
-		Scan(&maxRight).Error; err != nil {
-		return fmt.Errorf("failed to get max right_set: %w", err)
+func (r *categoryRepository) GetDescendants(category *models.PostCategory) ([]*models.PostCategory, error) {
+	var descendants []*models.PostCategory
+	likePattern := fmt.Sprintf("%s%%", category.Path)
+	err := r.db.
+		Where("path LIKE ? AND id <> ?", likePattern, category.ID).
+		Order("id ASC").
+		Find(&descendants).Error
+	if err != nil {
+		return nil, err
 	}
-
-	// Рассчитываем параметры для перемещения
-	size := category.RightSet - category.LeftSet + 1
-	newLeft := maxRight.Value + 1
-	newRight := maxRight.Value + size
-	offset := newLeft - category.LeftSet
-
-	// Обновляем границы перемещаемого поддерева
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set BETWEEN ? AND ?", category.LeftSet, category.RightSet).
-		Updates(map[string]interface{}{
-			"left_set":  gorm.Expr("left_set + ?", offset),
-			"right_set": gorm.Expr("right_set + ?", offset),
-			"level":     gorm.Expr("level - ?", category.Level),
-		}).Error; err != nil {
-		return fmt.Errorf("failed to update subtree: %w", err)
-	}
-
-	// Корректируем оставшиеся узлы
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set > ?", category.RightSet).
-		UpdateColumn("left_set", gorm.Expr("left_set - ?", size)).
-		Error; err != nil {
-		return fmt.Errorf("failed to shift left_sets: %w", err)
-	}
-
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("right_set > ?", category.RightSet).
-		UpdateColumn("right_set", gorm.Expr("right_set - ?", size)).
-		Error; err != nil {
-		return fmt.Errorf("failed to shift right_sets: %w", err)
-	}
-
-	// Обновляем параметры корневой категории
-	category.PostCategoryID = nil
-	category.LeftSet = newLeft
-	category.RightSet = newRight
-	category.Level = 0
-
-	return r.db.Save(category).Error
+	return descendants, nil
 }
 
-func (r *categoryRepository) moveToParent(category *models.PostCategory, newParentID uint) error {
-	var newParent models.PostCategory
-	if err := r.db.First(&newParent, newParentID).Error; err != nil {
-		return fmt.Errorf("new parent not found: %w", err)
+func (r *categoryRepository) GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error) {
+	var descendants []*models.PostCategory
+	likePattern := fmt.Sprintf("%s%%", parent.Path)
+	err := r.db.
+		Where("path NOT LIKE ? AND id <> ?", likePattern, parent.ID).
+		Order("id ASC").
+		Find(&descendants).Error
+	if err != nil {
+		return nil, err
+	}
+	return descendants, nil
+}
+
+func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCategory) error {
+	new.Updating()
+
+	// Если родитель не изменился – просто сохраняем изменения.
+	oldParent, newParent := uint(0), uint(0)
+	if old.PostCategoryID != nil {
+		oldParent = *old.PostCategoryID
+	}
+	if new.PostCategoryID != nil {
+		newParent = *new.PostCategoryID
 	}
 
-	// Нельзя перемещать узел в самого себя или в своего потомка
-	if category.ID == newParent.ID {
-		return errors.New("cannot move to self")
-	}
-	if newParent.LeftSet > category.LeftSet && newParent.RightSet < category.RightSet {
-		return errors.New("cannot move to descendant")
+	if oldParent == newParent {
+		return r.save(new)
 	}
 
-	size := category.RightSet - category.LeftSet + 1
-	newPosition := newParent.RightSet
+	// Если родитель меняется, требуется пересчитать путь для нового поддерева.
+	var newParentCategory models.PostCategory
+	if newParent != 0 {
+		if err := r.db.First(&newParentCategory, newParent).Error; err != nil {
+			return fmt.Errorf("не найден новый родитель: %w", err)
+		}
+	}
 
-	// Освобождаем место в новом положении
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("right_set >= ?", newPosition).
-		UpdateColumn("right_set", gorm.Expr("right_set + ?", size)).
-		Error; err != nil {
+	// Сохраняем старый путь для поиска потомков.
+	oldPath := old.Path
+	// Сохраняем новый путь для узла.
+	var newPath string
+	if newParent == 0 {
+		// Перемещение в корень
+		newPath = fmt.Sprintf("/%d/", new.ID)
+	} else {
+		newPath = fmt.Sprintf("%s%d/", newParentCategory.Path, new.ID)
+	}
+
+	// Обновляем путь для узла и всех потомков.
+	var descendants []*models.PostCategory
+	if err := r.db.
+		Where("path LIKE ?", fmt.Sprintf("%s%%", oldPath)).
+		Find(&descendants).Error; err != nil {
 		return err
 	}
 
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set >= ?", newPosition).
-		UpdateColumn("left_set", gorm.Expr("left_set + ?", size)).
-		Error; err != nil {
-		return err
+	// Рассчитываем смещение нового пути относительно старого.
+	// Для каждого потомка новый путь = newPath + (old descendant.Path без префикса oldPath).
+	for _, node := range descendants {
+		relative := strings.TrimPrefix(node.Path, oldPath)
+		node.Path = newPath + relative
+		if err := r.db.Model(node).Update("path", node.Path).Error; err != nil {
+			return err
+		}
 	}
 
-	// Если узел перемещается вправо от исходной позиции
-	if category.LeftSet < newPosition {
-		newPosition -= size
-	}
-
-	// Вычисляем смещения для обновления
-	offset := newPosition - category.LeftSet
-	levelDiff := newParent.Level + 1 - category.Level
-
-	// Обновляем перемещаемый узел и его потомков в базе
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set BETWEEN ? AND ?", category.LeftSet, category.RightSet).
-		Updates(map[string]interface{}{
-			"left_set":  gorm.Expr("left_set + ?", offset),
-			"right_set": gorm.Expr("right_set + ?", offset),
-			"level":     gorm.Expr("level + ?", levelDiff),
-		}).Error; err != nil {
-		return err
-	}
-
-	// Обновляем значения в структуре, чтобы они соответствовали изменениям в базе
-	category.LeftSet += offset
-	category.RightSet += offset
-	category.Level += levelDiff
-
-	// Заполняем освободившееся место в базе
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("left_set > ?", category.RightSet).
-		UpdateColumn("left_set", gorm.Expr("left_set - ?", size)).
-		Error; err != nil {
-		return err
-	}
-
-	if err := r.db.Model(&models.PostCategory{}).
-		Where("right_set > ?", category.RightSet).
-		UpdateColumn("right_set", gorm.Expr("right_set - ?", size)).
-		Error; err != nil {
-		return err
-	}
-
-	// Обновляем ссылку на родителя в структуре
-	category.PostCategoryID = &newParent.ID
-	return r.db.Save(category).Error
+	// Обновляем сам узел.
+	new.Path = newPath
+	return r.save(new)
 }

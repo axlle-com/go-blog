@@ -5,31 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewPostRequest() *PostRequest {
-	return &PostRequest{}
+func NewCategoryRequest() *CategoryRequest {
+	return &CategoryRequest{}
 }
 
-type GalleryRequest struct {
-	ID          string          `json:"id" form:"id" binding:"omitempty"`
-	Title       string          `json:"title" form:"title" binding:"omitempty"`
-	Description string          `json:"description" form:"description" binding:"omitempty"`
-	Sort        string          `json:"sort" form:"sort" binding:"omitempty"`
-	Image       string          `json:"image" form:"image" binding:"omitempty"`
-	URL         string          `json:"url" form:"url" binding:"omitempty"`
-	Images      []*ImageRequest `json:"images" form:"images" binding:"omitempty"`
-}
-
-type ImageRequest struct {
-	ID           string `json:"id" form:"id" binding:"omitempty"`
-	GalleryID    string `json:"gallery_id" form:"gallery_id" binding:"omitempty"`
-	OriginalName string `json:"original_name" form:"original_name" binding:"omitempty"`
-	File         string `json:"file" form:"file" binding:"omitempty"`
-	Title        string `json:"title" form:"title" binding:"omitempty"`
-	Description  string `json:"description" form:"description" binding:"omitempty"`
-	Sort         string `json:"sort" form:"sort" binding:"omitempty"`
-}
-
-type PostRequest struct {
+type CategoryRequest struct {
 	ID                 string            `json:"id" form:"id" binding:"omitempty"`
 	UUID               string            `json:"uuid" form:"uuid" binding:"omitempty"`
 	UserID             string            `json:"user_id" form:"user_id" binding:"omitempty"`
@@ -58,7 +38,7 @@ type PostRequest struct {
 	Galleries          []*GalleryRequest `json:"galleries" form:"galleries" binding:"omitempty"`
 }
 
-func (p *PostRequest) ValidateForm(ctx *gin.Context) (*PostRequest, *errorsForm.Errors) {
+func (p *CategoryRequest) ValidateForm(ctx *gin.Context) (*CategoryRequest, *errorsForm.Errors) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
 		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
@@ -73,7 +53,7 @@ func (p *PostRequest) ValidateForm(ctx *gin.Context) (*PostRequest, *errorsForm.
 	return p, nil
 }
 
-func (p *PostRequest) ValidateJSON(ctx *gin.Context) (*PostRequest, *errorsForm.Errors) {
+func (p *CategoryRequest) ValidateJSON(ctx *gin.Context) (*CategoryRequest, *errorsForm.Errors) {
 	if err := ctx.ShouldBindJSON(&p); err != nil {
 		errBind := errorsForm.ParseBindErrorToMap(err)
 		return nil, errBind

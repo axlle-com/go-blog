@@ -24,13 +24,14 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
-	posts, err := c.post.WithPaginate(paginator, filter)
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/posts")
+
+	posts, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -39,6 +40,7 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 	users := c.user.GetAll()
 	data := gin.H{
 		"title":      "Страница постов",
+		"post":       &Post{},
 		"posts":      posts,
 		"categories": categories,
 		"templates":  templates,

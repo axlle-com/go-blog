@@ -2,35 +2,50 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/info_block/models"
-	"github.com/axlle-com/blog/pkg/info_block/repository"
+	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	. "github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/axlle-com/blog/pkg/info_block/repository"
 )
 
 type InfoBlockService struct {
-	infoBlockRepo repository.InfoBlockRepository
-	resourceRepo  repository.InfoBlockHasResourceRepository
+	infoBlockRepo   repository.InfoBlockRepository
+	resourceRepo    repository.InfoBlockHasResourceRepository
+	galleryProvider provider.GalleryProvider
 }
 
 func NewInfoBlockService(
 	infoBlockRepo repository.InfoBlockRepository,
 	resourceRepo repository.InfoBlockHasResourceRepository,
+	galleryProvider provider.GalleryProvider,
 ) *InfoBlockService {
 	return &InfoBlockService{
-		infoBlockRepo: infoBlockRepo,
-		resourceRepo:  resourceRepo,
+		infoBlockRepo:   infoBlockRepo,
+		resourceRepo:    resourceRepo,
+		galleryProvider: galleryProvider,
 	}
 }
 
-func (s *InfoBlockService) CreateInfoBlock(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+func (s *InfoBlockService) GetByID(id uint) (*InfoBlock, error) {
+	return s.infoBlockRepo.GetByID(id)
+}
+
+func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*InfoBlock, error) {
+	if user != nil {
+		id := user.GetID()
+		infoBlock.UserID = &id
+	}
 	if err := s.infoBlockRepo.Create(infoBlock); err != nil {
 		return nil, err
 	}
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) UpdateInfoBlock(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+func (s *InfoBlockService) Update(infoBlock *InfoBlock) (*InfoBlock, error) {
 	if err := s.infoBlockRepo.Update(infoBlock); err != nil {
 		return nil, err
 	}
@@ -45,7 +60,7 @@ func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contrac
 	}
 	if hasRepo == nil {
 		err = s.resourceRepo.Create(
-			&models.InfoBlockHasResource{
+			&InfoBlockHasResource{
 				ResourceUUID: resource.GetUUID(),
 				InfoBlockID:  infoBlock.GetID(),
 			},
@@ -54,51 +69,52 @@ func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contrac
 	return nil
 }
 
-func (s *InfoBlockService) DeleteForResource(resource contracts.Resource) (err error) {
+func (s *InfoBlockService) GetForResource(resource contracts.Resource) (infoBlocks []*InfoBlock, err error) {
+	return s.infoBlockRepo.GetForResource(resource)
+}
+
+func (s *InfoBlockService) DeleteForResource(resource contracts.Resource) error {
 	byResource, err := s.resourceRepo.GetByResource(resource)
 	if err != nil {
 		return err
 	}
-
-	all := make(map[uint]*models.InfoBlockHasResource)
-	only := make(map[uint]*models.InfoBlockHasResource)
-	detach := make(map[uint]*models.InfoBlockHasResource)
-	var infoBlockIDs []uint
-	if byResource == nil {
+	if len(byResource) == 0 {
 		return nil
 	}
 
-	for _, r := range byResource {
-		if r.ResourceUUID != resource.GetUUID() {
-			all[r.InfoBlockID] = r
+	// Группируем записи по InfoBlockID
+	blockResources := make(map[uint][]uuid.UUID)
+	for _, res := range byResource {
+		blockResources[res.InfoBlockID] = append(blockResources[res.InfoBlockID], res.ResourceUUID)
+	}
+
+	var detachBlockIDs []uint
+	var deleteBlockIDs []uint
+
+	// Определяем для каждой, сколько ресурсов ей принадлежит
+	for infoBlockID, resources := range blockResources {
+		if len(resources) > 1 {
+			detachBlockIDs = append(detachBlockIDs, infoBlockID)
 		} else {
-			only[r.InfoBlockID] = r
+			deleteBlockIDs = append(deleteBlockIDs, infoBlockID)
 		}
 	}
 
-	for id, _ := range only {
-		if _, ok := all[id]; ok {
-			detach[id] = all[id]
-		} else {
-			infoBlockIDs = append(infoBlockIDs, id)
-		}
-	}
-
-	if len(detach) > 0 { // TODO need test
-		for _, r := range detach {
-			err = s.resourceRepo.DeleteByParams(r.ResourceUUID, r.InfoBlockID)
+	if len(detachBlockIDs) > 0 {
+		for _, blockID := range detachBlockIDs {
+			err = s.resourceRepo.DeleteByParams(resource.GetUUID(), blockID)
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	if len(infoBlockIDs) > 0 {
-		infoBlocks, err := s.infoBlockRepo.GetByIDs(infoBlockIDs)
+	if len(deleteBlockIDs) > 0 {
+		blocks, err := s.infoBlockRepo.GetByIDs(deleteBlockIDs)
 		if err != nil {
 			return err
 		}
-		err = s.DeleteInfoBlocks(infoBlocks)
+		err = s.DeleteInfoBlocks(blocks)
 		if err != nil {
 			return err
 		}
@@ -106,7 +122,7 @@ func (s *InfoBlockService) DeleteForResource(resource contracts.Resource) (err e
 	return nil
 }
 
-func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err error) {
+func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error) {
 	var ids []uint
 	for _, infoBlock := range infoBlocks {
 		ids = append(ids, infoBlock.ID)
@@ -118,4 +134,41 @@ func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err
 		}
 	}
 	return err
+}
+
+func (s *InfoBlockService) Delete(infoBlocks *InfoBlock) (err error) {
+	return s.infoBlockRepo.Delete(infoBlocks)
+}
+
+func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts.User) (infoBlock *InfoBlock, err error) {
+	blockForm := app.LoadStruct(&InfoBlock{}, form).(*InfoBlock)
+
+	if found == nil {
+		infoBlock, err = s.Create(blockForm, user)
+	} else {
+		blockForm.ID = found.ID
+		blockForm.UUID = found.UUID
+		infoBlock, err = s.Update(blockForm)
+	}
+
+	if err != nil {
+		return
+	}
+
+	if len(form.Galleries) > 0 {
+		slice := make([]contracts.Gallery, 0)
+		for _, gRequest := range form.Galleries {
+			if gRequest == nil {
+				continue
+			}
+
+			g, err := s.galleryProvider.SaveFromForm(gRequest, infoBlock)
+			if err != nil || g == nil {
+				continue
+			}
+			slice = append(slice, g)
+		}
+		infoBlock.Galleries = slice
+	}
+	return
 }

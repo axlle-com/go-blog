@@ -15,7 +15,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 	}
 
 	post := &models.Post{}
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
@@ -25,12 +25,12 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":      "Страница поста",
-			"user":       user,
-			"categories": categories,
-			"templates":  templates,
-			"menu":       models2.NewMenu(ctx.FullPath()),
-			"post":       post,
+			"title":        "Страница поста",
+			"userProvider": user,
+			"categories":   categories,
+			"templates":    templates,
+			"menu":         models2.NewMenu(ctx.FullPath()),
+			"post":         post,
 		},
 	)
 }

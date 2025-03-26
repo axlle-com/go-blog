@@ -2,10 +2,10 @@
     <div class="card">
         <div class="card-body">
             <div class="btn-group btn-group-sm mb-3" role="group">
-                <a class="btn btn-light has-icon" href="/admin/posts/form">
+                <a class="btn btn-light has-icon" href="{{ .category.AdminURL }}/form">
                     <i class="material-icons mr-1">add_circle_outline</i>Новая
                 </a>
-                <a type="button" class="btn btn-light has-icon" href="/admin/posts">
+                <a type="button" class="btn btn-light has-icon" href="{{ .category.AdminURL }}">
                     <i class="material-icons mr-1">refresh</i>Обновить
                 </a>
                 <button type="button" class="btn btn-light has-icon">
@@ -13,7 +13,7 @@
                 </button>
             </div>
             <div class="table-responsive">
-                <form id="index-form-filter" action="/admin/posts/filter" method="get"></form>
+                <form id="index-form-filter" action="{{ .category.AdminURL }}/filter" method="get"></form>
                 <table
                         class="table table-bordered table-sm has-checkAll mb-0"
                         data-bulk-target="#bulk-dropdown"
@@ -172,16 +172,16 @@
                             <td class="td-col-date">{{ .Date }}</td>
                             <td class="td-col-action text-center">
                                 <div class="btn-group btn-group-xs" role="group">
-                                    <a href="/admin/posts/{{ .ID }}"
+                                    <a href="{{ .AdminURL }}/{{ .ID }}"
                                        class="btn btn-link btn-icon bigger-130 text-success">
                                         <i data-feather="edit"></i>
                                     </a>
-                                    <a href="/admin/posts/print/{{ .ID }}"
+                                    <a href="{{ .AdminURL }}/print/{{ .ID }}"
                                        class="btn btn-link btn-icon bigger-130 text-info" target="_blank">
                                         <i data-feather="printer"></i>
                                     </a>
                                     <form class="btn btn-link btn-icon bigger-130 delete-button" id="global-form"
-                                          method="delete" action="/admin/posts/{{ .ID }}?{{ $.paginator.PrintFullQuery }}">
+                                          method="delete" action="{{ .AdminURL }}/{{ .ID }}?{{ $.paginator.PrintFullQuery }}">
                                         <a class="text-danger js-delete-button">
                                             <i data-feather="trash"></i>
                                         </a>

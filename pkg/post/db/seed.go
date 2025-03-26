@@ -12,12 +12,13 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/google/uuid"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
 type seeder struct {
 	postRepo         PostRepository
-	postService      *Service
+	postService      *PostService
 	categoryRepo     CategoryRepository
 	userProvider     user.UserProvider
 	templateProvider template.TemplateProvider
@@ -25,7 +26,7 @@ type seeder struct {
 
 func NewSeeder(
 	post PostRepository,
-	postService *Service,
+	postService *PostService,
 	category CategoryRepository,
 	user user.UserProvider,
 	template template.TemplateProvider,
@@ -51,7 +52,7 @@ func (s *seeder) posts(n int) {
 	idsCategory, _ := s.categoryRepo.GetAllIds()
 	idsUser := s.userProvider.GetAllIds()
 	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
@@ -68,8 +69,8 @@ func (s *seeder) posts(n int) {
 			ShowImageCategory:  RandBool(),
 			InSitemap:          RandBool(),
 			Media:              StrPtr(faker.Word()),
-			Title:              faker.Sentence(),
-			TitleShort:         StrPtr(faker.Sentence()),
+			Title:              "TitlePost #" + strconv.Itoa(i),
+			TitleShort:         StrPtr("TitlePostShort #" + strconv.Itoa(i)),
 			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
 			ShowDate:           RandBool(),
@@ -94,13 +95,23 @@ func (s *seeder) posts(n int) {
 }
 
 func (s *seeder) categories(n int) {
+	rand.Seed(time.Now().UnixNano())
 	ids := s.templateProvider.GetAllIds()
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
+		idsCategory, _ := s.categoryRepo.GetAllIds()
+		var randomCategoryID *uint
+		if len(idsCategory) > 0 {
+			randomCategoryID = &idsCategory[rand.Intn(len(idsCategory))]
+			if rand.Intn(2) == 1 {
+				randomCategoryID = nil
+			}
+		}
+
 		randomID := ids[rand.Intn(len(ids))]
 		postCategory := PostCategory{
 			UUID:               uuid.New(),
 			TemplateID:         &randomID,
-			PostCategoryID:     UintPtr(rand.Intn(100)),
+			PostCategoryID:     randomCategoryID,
 			MetaTitle:          StrPtr(faker.Sentence()),
 			MetaDescription:    StrPtr(faker.Sentence()),
 			Alias:              faker.Username(),
@@ -108,8 +119,8 @@ func (s *seeder) categories(n int) {
 			IsPublished:        IntToBoolPtr(),
 			IsFavourites:       IntToBoolPtr(),
 			InSitemap:          IntToBoolPtr(),
-			Title:              faker.Sentence(),
-			TitleShort:         StrPtr(faker.Sentence()),
+			Title:              "TitleCategory #" + strconv.Itoa(i),
+			TitleShort:         StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
 			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
 			Image:              StrPtr("/public/img/404.svg"),
@@ -121,7 +132,7 @@ func (s *seeder) categories(n int) {
 
 		err := s.categoryRepo.Create(&postCategory)
 		if err != nil {
-			logger.Errorf("Failed to create userProvider %d: %v", i, err.Error())
+			logger.Errorf("Failed to create postCategory %d: %v", i, err.Error())
 		}
 	}
 	logger.Info("Database seeded Post successfully!")

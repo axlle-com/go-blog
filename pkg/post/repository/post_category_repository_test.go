@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/app/config"
 	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/pkg/app/models"
 	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
 	"github.com/bxcodec/faker/v3"
 	"testing"
@@ -192,12 +193,12 @@ func TestWithPaginate(t *testing.T) {
 	}
 
 	// Получаем первую страницу (page 1, pageSize 5).
-	page1, err := repo.WithPaginate(1, 5)
+	page1, err := repo.WithPaginate(models.PaginatorFromPage(1, 5), nil)
 	assert.NoError(t, err)
 	assert.Len(t, page1, 5)
 
 	// Получаем вторую страницу.
-	page2, err := repo.WithPaginate(2, 5)
+	page2, err := repo.WithPaginate(models.PaginatorFromPage(2, 5), nil)
 	assert.NoError(t, err)
 	assert.Len(t, page2, 5)
 

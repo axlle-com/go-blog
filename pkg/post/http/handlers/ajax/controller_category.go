@@ -1,42 +1,39 @@
-package web
+package ajax
 
 import (
 	app "github.com/axlle-com/blog/pkg/app/models"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
-type ControllerCategory interface {
-	GetCategory(*gin.Context)
-	GetCategories(*gin.Context)
+type CategoryController interface {
+	UpdateCategory(*gin.Context)
 	CreateCategory(*gin.Context)
+	DeleteCategory(*gin.Context)
+	FilterCategory(*gin.Context)
 }
 
-func NewWebControllerCategory(
+func NewCategoryController(
 	categoriesService *service.CategoriesService,
 	categoryService *service.CategoryService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	gallery gallery.GalleryProvider,
-) ControllerCategory {
-	return &controllerCategory{
+) CategoryController {
+	return &categoryController{
 		categoriesService: categoriesService,
 		categoryService:   categoryService,
 		templateProvider:  template,
 		userProvider:      user,
-		galleryProvider:   gallery,
 	}
 }
 
-type controllerCategory struct {
+type categoryController struct {
 	*app.BaseAjax
 
 	categoriesService *service.CategoriesService
 	categoryService   *service.CategoryService
 	templateProvider  template.TemplateProvider
 	userProvider      user.UserProvider
-	galleryProvider   gallery.GalleryProvider
 }

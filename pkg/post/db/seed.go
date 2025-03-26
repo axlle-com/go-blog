@@ -17,7 +17,7 @@ import (
 
 type seeder struct {
 	postRepo         PostRepository
-	postService      *Service
+	postService      *PostService
 	categoryRepo     CategoryRepository
 	userProvider     user.UserProvider
 	templateProvider template.TemplateProvider
@@ -25,7 +25,7 @@ type seeder struct {
 
 func NewSeeder(
 	post PostRepository,
-	postService *Service,
+	postService *PostService,
 	category CategoryRepository,
 	user user.UserProvider,
 	template template.TemplateProvider,

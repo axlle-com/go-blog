@@ -15,22 +15,22 @@ func (c *controllerCategory) CreateCategory(ctx *gin.Context) {
 	}
 
 	category := &models.PostCategory{}
-	categories, err := c.categoryRepo.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := c.template.GetAll()
+	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":      "Страница категории",
-			"user":       user,
-			"categories": categories,
-			"templates":  templates,
-			"menu":       models2.NewMenu(ctx.FullPath()),
-			"category":   category,
+			"title":        "Страница категории",
+			"userProvider": user,
+			"categories":   categories,
+			"templates":    templates,
+			"menu":         models2.NewMenu(ctx.FullPath()),
+			"category":     category,
 		},
 	)
 }

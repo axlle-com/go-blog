@@ -9,8 +9,8 @@ import (
 	"net/http"
 )
 
-func (c *controller) CreatePost(ctx *gin.Context) {
-	form, formError := NewPostRequest().ValidateJSON(ctx)
+func (c *categoryController) CreateCategory(ctx *gin.Context) {
+	form, formError := NewCategoryRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(
@@ -24,7 +24,7 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
+	category, err := c.categoryService.SaveFromRequest(form, nil, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -33,25 +33,25 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := c.template.GetAll()
+	templates := c.templateProvider.GetAll()
 
 	data := response.Body{
 		"categories": categories,
 		"templates":  templates,
-		"post":       post,
+		"category":   category,
 	}
 	ctx.JSON(
 		http.StatusCreated,
 		response.Created(
 			response.Body{
-				"view": c.RenderView("admin.post_inner", data, ctx),
-				"url":  fmt.Sprintf("/admin/posts/%d", post.ID),
-				"post": post,
+				"view":     c.RenderView("admin.category_inner", data, ctx),
+				"url":      fmt.Sprintf("/admin/categories/%d", category.ID),
+				"category": category,
 			},
 			"Запись создана",
 		),

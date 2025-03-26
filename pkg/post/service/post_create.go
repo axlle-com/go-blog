@@ -5,10 +5,9 @@ import (
 	app "github.com/axlle-com/blog/pkg/app/service"
 	http "github.com/axlle-com/blog/pkg/post/http/models"
 	"github.com/axlle-com/blog/pkg/post/models"
-	user "github.com/axlle-com/blog/pkg/user/models"
 )
 
-func (s *Service) SaveFromRequest(form *http.PostRequest, user *user.User) (*models.Post, error) {
+func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.User) (*models.Post, error) {
 	postForm := app.LoadStruct(&models.Post{}, form).(*models.Post)
 	post, err := s.Save(postForm, user)
 	if err != nil {
@@ -33,8 +32,9 @@ func (s *Service) SaveFromRequest(form *http.PostRequest, user *user.User) (*mod
 	return post, nil
 }
 
-func (s *Service) Save(post *models.Post, user *user.User) (*models.Post, error) {
-	post.UserID = &user.ID
+func (s *PostService) Save(post *models.Post, user contracts.User) (*models.Post, error) {
+	id := user.GetID()
+	post.UserID = &id
 	var alias string
 	if post.Alias == "" {
 		alias = post.Title

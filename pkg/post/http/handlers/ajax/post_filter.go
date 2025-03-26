@@ -24,13 +24,12 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.NewPaginator(ctx.Request.URL.Query())
-	paginator.AddQueryString(string(filter.GetQueryString()))
-	posts, err := c.post.WithPaginate(paginator, filter)
+	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	posts, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

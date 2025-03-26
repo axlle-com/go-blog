@@ -1,11 +1,12 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"html/template"
 	"math"
 	"net/url"
 	"strconv"
+
+	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 const DefaultPageSize = 20
@@ -18,12 +19,22 @@ type paginator struct {
 	QueryString template.URL `json:"queryString"`
 }
 
-func NewPaginator(q url.Values) contracts.Paginator {
+func PaginatorFromQuery(query url.Values) contracts.Paginator {
 	p := &paginator{
-		Query: q,
+		Query: query,
 	}
 	p.SetPage()
 	p.SetPageSize()
+	p.seQueryString()
+
+	return p
+}
+
+func PaginatorFromPage(page, pageSize int) contracts.Paginator {
+	p := &paginator{
+		Page:     page,
+		PageSize: pageSize,
+	}
 	return p
 }
 
@@ -65,6 +76,27 @@ func (p *paginator) GetTotal() int {
 
 func (p *paginator) GetPage() int {
 	return p.Page
+}
+
+func (p *paginator) seQueryString() {
+	if p.Query == nil {
+		return
+	}
+
+	query := make(url.Values)
+	for key, values := range p.Query {
+		if key == "page" || key == "pageSize" {
+			continue
+		}
+		query[key] = values
+	}
+
+	temp := query.Encode()
+	if temp == "" {
+		return
+	}
+
+	p.QueryString = template.URL(temp)
 }
 
 func (p *paginator) SetPageSize() {

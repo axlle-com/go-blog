@@ -13,15 +13,17 @@ import (
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	postController := container.PostController()
 	postWebController := container.PostWebController()
-	postCategoryWebController := container.PostCategoryWebController()
+	postCategoryWebController := container.CategoryWebController()
+	postCategoryController := container.CategoryController()
 	galleryController := container.GalleryAjaxController()
 
-	fileController := file.New(
+	fileController := file.NewFileController(
 		container.FileService,
 	)
 
-	userController := user.New(
-		container.UserRepo,
+	userController := user.NewUserWebController(
+		container.UserService,
+		container.UserAuthService,
 	)
 
 	r.GET("/", ShowIndexPage)
@@ -51,6 +53,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.GET("/categories", postCategoryWebController.GetCategories)
 		protected.GET("/categories/:id", postCategoryWebController.GetCategory)
 		protected.GET("/categories/form", postCategoryWebController.CreateCategory)
+		protected.GET("/categories/filter", postCategoryController.FilterCategory)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}

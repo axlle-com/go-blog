@@ -12,7 +12,7 @@ type Controller interface {
 	UploadImages(*gin.Context)
 }
 
-func New(
+func NewFileController(
 	service *file.Service,
 ) Controller {
 	return &controller{

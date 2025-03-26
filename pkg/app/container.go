@@ -20,6 +20,7 @@ import (
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
+	service3 "github.com/axlle-com/blog/pkg/user/service"
 )
 
 type Container struct {
@@ -35,19 +36,23 @@ type Container struct {
 
 	GalleryRepo     galleryRepo.GalleryRepository
 	GalleryEvent    *galleryService.GalleryEvent
-	GalleryService  *service.Service
+	GalleryService  *service.PostService
 	GalleryProvider galleryProvider.GalleryProvider
 
 	PostRepo          repository.PostRepository
-	PostService       *service.Service
+	PostService       *service.PostService
+	PostsService      *service.PostsService
 	CategoryRepo      repository.CategoryRepository
 	CategoriesService *service.CategoriesService
+	CategoryService   *service.CategoryService
 
 	TemplateProvider templateProvider.TemplateProvider
 	TemplateRepo     templateRepository.TemplateRepository
 
-	UserRepo     userRepository.UserRepository
-	UserProvider userProvider.UserProvider
+	UserRepo        userRepository.UserRepository
+	UserProvider    userProvider.UserProvider
+	UserService     *service3.UserService
+	UserAuthService *service3.AuthService
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
@@ -83,14 +88,20 @@ func New() *Container {
 
 	uRepo := userRepository.NewUserRepo()
 	uProvider := userProvider.NewProvider(uRepo)
+	uService := service3.NewUserService(uRepo)
+	uaService := service3.NewAuthService(uService)
 
 	aRepo := alias.NewAliasRepo()
 	aProvider := alias.NewProvider(aRepo)
 
 	pRepo := repository.NewPostRepo()
-	pService := service.NewService(pRepo, gProvider, fProvider, aProvider)
+
 	cRepo := repository.NewCategoryRepo()
-	cService := service.NewCategoryService(cRepo, tProvider, uProvider)
+	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
+	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fProvider)
+
+	pService := service.NewPostService(pRepo, csService, cService, gProvider, fProvider, aProvider)
+	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fProvider, aProvider)
 
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()
@@ -119,14 +130,18 @@ func New() *Container {
 
 		PostRepo:          pRepo,
 		PostService:       pService,
+		PostsService:      psService,
 		CategoryRepo:      cRepo,
-		CategoriesService: cService,
+		CategoriesService: csService,
+		CategoryService:   cService,
 
 		TemplateProvider: tProvider,
 		TemplateRepo:     tRepo,
 
-		UserRepo:     uRepo,
-		UserProvider: uProvider,
+		UserRepo:        uRepo,
+		UserProvider:    uProvider,
+		UserService:     uService,
+		UserAuthService: uaService,
 
 		AliasRepo:     aRepo,
 		AliasProvider: aProvider,
@@ -145,8 +160,8 @@ func New() *Container {
 func (c *Container) PostApiController() postApi.Controller {
 	return postApi.New(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
@@ -156,8 +171,9 @@ func (c *Container) PostApiController() postApi.Controller {
 func (c *Container) PostController() postAjax.Controller {
 	return postAjax.New(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.PostsService,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 	)
@@ -166,21 +182,31 @@ func (c *Container) PostController() postAjax.Controller {
 func (c *Container) PostWebController() postWeb.Controller {
 	return postWeb.NewWebController(
 		c.PostService,
-		c.PostRepo,
-		c.CategoryRepo,
+		c.PostsService,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
 	)
 }
 
-func (c *Container) PostCategoryWebController() postWeb.ControllerCategory {
+func (c *Container) CategoryWebController() postWeb.ControllerCategory {
 	return postWeb.NewWebControllerCategory(
-		c.CategoryRepo,
 		c.CategoriesService,
+		c.CategoryService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+	)
+}
+
+func (c *Container) CategoryController() postAjax.CategoryController {
+	return postAjax.NewCategoryController(
+		c.CategoriesService,
+		c.CategoryService,
+		c.TemplateProvider,
+		c.UserProvider,
 	)
 }
 

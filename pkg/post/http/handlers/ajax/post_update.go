@@ -16,7 +16,7 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	found, err := c.post.GetByID(id)
+	found, err := c.postService.GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
@@ -38,13 +38,13 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 
 	form.ID = strconv.Itoa(int(id))
 	form.UUID = found.UUID.String()
-	post, err := c.service.SaveFromRequest(form, c.GetUser(ctx))
+	post, err := c.postService.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	categories, err := c.category.GetAll()
+	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}

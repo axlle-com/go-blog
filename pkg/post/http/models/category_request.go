@@ -5,11 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewPostRequest() *PostRequest {
-	return &PostRequest{}
+func NewCategoryRequest() *CategoryRequest {
+	return &CategoryRequest{}
 }
 
-type PostRequest struct {
+type CategoryRequest struct {
 	ID                 string            `json:"id" form:"id" binding:"omitempty"`
 	UUID               string            `json:"uuid" form:"uuid" binding:"omitempty"`
 	UserID             string            `json:"user_id" form:"user_id" binding:"omitempty"`
@@ -38,7 +38,7 @@ type PostRequest struct {
 	Galleries          []*GalleryRequest `json:"galleries" form:"galleries" binding:"omitempty"`
 }
 
-func (p *PostRequest) ValidateForm(ctx *gin.Context) (*PostRequest, *errorsForm.Errors) {
+func (p *CategoryRequest) ValidateForm(ctx *gin.Context) (*CategoryRequest, *errorsForm.Errors) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
 		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
@@ -53,7 +53,7 @@ func (p *PostRequest) ValidateForm(ctx *gin.Context) (*PostRequest, *errorsForm.
 	return p, nil
 }
 
-func (p *PostRequest) ValidateJSON(ctx *gin.Context) (*PostRequest, *errorsForm.Errors) {
+func (p *CategoryRequest) ValidateJSON(ctx *gin.Context) (*CategoryRequest, *errorsForm.Errors) {
 	if err := ctx.ShouldBindJSON(&p); err != nil {
 		errBind := errorsForm.ParseBindErrorToMap(err)
 		return nil, errBind

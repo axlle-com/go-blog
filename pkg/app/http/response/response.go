@@ -6,6 +6,13 @@ import (
 )
 
 type Body map[string]any
+type message map[string]any
+
+func Message(message string) map[string]any {
+	return map[string]any{
+		"message": message,
+	}
+}
 
 func OK(data any, message string, pagination contracts.Paginator) map[string]any {
 	return Successful(http.StatusOK, data, message, pagination)

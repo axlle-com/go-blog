@@ -3,7 +3,6 @@ package api
 import (
 	app "github.com/axlle-com/blog/pkg/app/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -19,30 +18,30 @@ type Controller interface {
 }
 
 func New(
-	service *service.Service,
-	post repository.PostRepository,
-	category repository.CategoryRepository,
+	service *service.PostService,
+	category *service.CategoryService,
+	categories *service.CategoriesService,
 	template template.TemplateProvider,
 	user user.UserProvider,
 	gallery gallery.GalleryProvider,
 ) Controller {
 	return &controller{
-		service:  service,
-		post:     post,
-		category: category,
-		template: template,
-		user:     user,
-		gallery:  gallery,
+		service:    service,
+		category:   category,
+		categories: categories,
+		template:   template,
+		user:       user,
+		gallery:    gallery,
 	}
 }
 
 type controller struct {
 	*app.BaseAjax
 
-	service  *service.Service
-	post     repository.PostRepository
-	category repository.CategoryRepository
-	template template.TemplateProvider
-	user     user.UserProvider
-	gallery  gallery.GalleryProvider
+	service    *service.PostService
+	category   *service.CategoryService
+	categories *service.CategoriesService
+	template   template.TemplateProvider
+	user       user.UserProvider
+	gallery    gallery.GalleryProvider
 }

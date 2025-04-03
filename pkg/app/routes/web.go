@@ -1,13 +1,18 @@
 package routes
 
 import (
+	"fmt"
+	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	"github.com/gin-gonic/gin"
+	"github.com/mssola/user_agent"
+	"net/http"
+	"strings"
+
 	"github.com/axlle-com/blog/pkg/app"
 	"github.com/axlle-com/blog/pkg/app/middleware"
 	file "github.com/axlle-com/blog/pkg/file/http"
 	post "github.com/axlle-com/blog/pkg/post/http/handlers/web"
 	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
-	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
@@ -29,6 +34,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	infoBlockController := container.InfoBlockWebController()
 	infoBlockAjaxController := container.InfoBlockController()
 
+	r.Use(middleware.Error())
 	r.GET("/", ShowIndexPage)
 	r.GET("/login", userController.Login)
 	r.POST("/auth", userController.Auth)
@@ -73,9 +79,32 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
 	r.GET("/:alias", post.GetPostFront)
+
+	r.NoRoute(func(ctx *gin.Context) {
+		path := ctx.Request.URL.Path
+
+		if strings.HasPrefix(path, "/admin") {
+			ctx.HTML(http.StatusNotFound, "admin.404", gin.H{
+				"title": "Админка — 404",
+				"menu":  models2.NewMenu(ctx.FullPath()),
+			})
+		} else {
+			ctx.HTML(http.StatusNotFound, "404", gin.H{
+				"title": "Страница не найдена",
+			})
+		}
+	})
 }
 
 func ShowIndexPage(c *gin.Context) {
+	ua := user_agent.New(c.GetHeader("User-Agent"))
+	name, version := ua.Browser()
+
+	fmt.Println("Browser:", name, version)
+	fmt.Println("OS:", ua.OS())
+	fmt.Println("Mobile?", ua.Mobile())
+	fmt.Println(DetectDeviceType(c.GetHeader("User-Agent")))
+
 	c.HTML(
 		http.StatusOK,
 		"index",
@@ -84,4 +113,19 @@ func ShowIndexPage(c *gin.Context) {
 			"payload": nil,
 		},
 	)
+}
+
+func DetectDeviceType(uaString string) string {
+	ua := user_agent.New(uaString)
+
+	switch {
+	case ua.Bot():
+		return "bot"
+	case strings.Contains(uaString, "iPad"):
+		return "tablet"
+	case ua.Mobile():
+		return "mobile"
+	default:
+		return "desktop"
+	}
 }

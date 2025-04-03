@@ -88,6 +88,13 @@ func (p *Post) GetTemplateID() uint {
 	return templateID
 }
 
+func (p *Post) Date() string {
+	if p.CreatedAt == nil {
+		return ""
+	}
+	return p.CreatedAt.Format("02.01.2006 15:04:05")
+}
+
 func (p *Post) GetCategoryTitleShort() string {
 	var titleShort string
 	if p.Category != nil {

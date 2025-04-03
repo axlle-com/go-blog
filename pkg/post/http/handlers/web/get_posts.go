@@ -30,7 +30,7 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 		return
 	}
 	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL("/admin/posts")
+	paginator.SetURL((&Post{}).AdminURL())
 
 	templates := c.template.GetAll()
 	users := c.user.GetAll()
@@ -39,10 +39,11 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	posts, err := c.postsService.WithPaginate(paginator, filter)
+	postsTemp, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
+	posts := c.postsService.GetAggregates(postsTemp)
 
 	logger.Debugf("Total time: %v", time.Since(start))
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{

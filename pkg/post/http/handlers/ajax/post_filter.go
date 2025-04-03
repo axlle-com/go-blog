@@ -27,10 +27,12 @@ func (c *controller) FilterPosts(ctx *gin.Context) {
 	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL("/admin/posts")
 
-	posts, err := c.postsService.WithPaginate(paginator, filter)
+	postsTemp, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
+	posts := c.postsService.GetAggregates(postsTemp)
+
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)

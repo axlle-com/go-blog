@@ -1,4 +1,9 @@
 {{ define "admin.404"}}
-<h1>{{ .Title }}</h1>
-<h6>{{ .Content }}</h6>
+    {{ template "admin.header" . }}
+    <div class="main-body">
+        {{/*        {{ Breadcrumbs::render($breadcrumbsName, $model ?? null) }}*/}}
+        <h5>{{ .title }}</h5>
+        <div class="a-block-inner"></div>
+    </div>
+    {{ template "admin.footer" . }}
 {{ end}}

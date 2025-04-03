@@ -54,10 +54,12 @@ func (c *controller) DeletePost(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	posts, err := c.postsService.WithPaginate(paginator, filter)
+	postsTemp, err := c.postsService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
+
+	posts := c.postsService.GetAggregates(postsTemp)
 
 	data := response.Body{
 		"title":      "Страница постов",

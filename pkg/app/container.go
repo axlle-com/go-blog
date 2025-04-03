@@ -104,7 +104,7 @@ func New() *Container {
 	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv)
 
 	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider)
-	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider)
+	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider)
 
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()

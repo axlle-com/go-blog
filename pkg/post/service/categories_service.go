@@ -103,7 +103,7 @@ func (s *CategoriesService) GetAggregates(categories []*PostCategory) []*PostCat
 		defer wg.Done()
 		if len(categoryIDs) > 0 {
 			var err error
-			parents, err = s.categoryRepo.GetMapByIDs(categoryIDs)
+			parents, err = s.GetMapByIDs(categoryIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -137,4 +137,16 @@ func (s *CategoriesService) GetAllForParent(parent *PostCategory) ([]*PostCatego
 
 func (s *CategoriesService) WithPaginate(p contracts.Paginator, filter *CategoryFilter) ([]*PostCategory, error) {
 	return s.categoryRepo.WithPaginate(p, filter)
+}
+
+func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*PostCategory, error) {
+	categories, err := s.categoryRepo.GetByIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	collection := make(map[uint]*PostCategory, len(categories))
+	for _, item := range categories {
+		collection[item.ID] = item
+	}
+	return collection, nil
 }

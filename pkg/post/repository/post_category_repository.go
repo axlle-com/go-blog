@@ -16,7 +16,6 @@ type CategoryRepository interface {
 	Create(postCategory *models.PostCategory) error
 	GetByID(id uint) (*models.PostCategory, error)
 	GetByIDs(ids []uint) ([]*models.PostCategory, error)
-	GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error)
 	Update(new *models.PostCategory, old *models.PostCategory) error
 	DeleteByID(id uint) error
 	Delete(category *models.PostCategory) error
@@ -56,19 +55,6 @@ func (r *categoryRepository) GetByIDs(ids []uint) ([]*models.PostCategory, error
 		return nil, err
 	}
 	return categories, nil
-}
-
-func (r *categoryRepository) GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error) {
-	var categories []*models.PostCategory
-	if err := r.db.Where("id IN (?)", ids).Find(&categories).Error; err != nil {
-		return nil, err
-	}
-
-	collection := make(map[uint]*models.PostCategory, len(categories))
-	for _, item := range categories {
-		collection[item.ID] = item
-	}
-	return collection, nil
 }
 
 func (r *categoryRepository) save(category *models.PostCategory) error {

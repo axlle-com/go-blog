@@ -17,7 +17,7 @@ type PostRepository interface {
 	Update(post *models.Post) error
 	Delete(post *models.Post) error
 	GetAll() ([]*models.Post, error)
-	WithPaginate(paginator contracts.Paginator, filter *models.PostFilter) ([]*models.PostFull, error)
+	WithPaginate(paginator contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error)
 	GetByAlias(alias string) (*models.Post, error)
 	GetByAliasNotID(alias string, id uint) (*models.Post, error)
 }
@@ -93,23 +93,11 @@ func (r *postRepository) GetAll() ([]*models.Post, error) {
 	return posts, nil
 }
 
-func (r *postRepository) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.PostFull, error) {
-	var posts []*models.PostFull
+func (r *postRepository) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
+	var posts []*models.Post
 	var total int64
 
-	query := r.db.Table("posts").
-		Select(
-			"posts.*",
-			"post_categories.title as category_title",
-			"post_categories.title_short as category_title_short",
-			"templates.title as template_title",
-			"templates.name as template_name",
-			"users.first_name as user_first_name",
-			"users.last_name as user_last_name",
-		).
-		Joins("left join post_categories on post_categories.id = posts.post_category_id").
-		Joins("left join users on users.id = posts.user_id").
-		Joins("left join templates on templates.id = posts.template_id")
+	query := r.db.Model(&posts)
 
 	// TODO WHERE IN; LIKE
 	for col, val := range filter.GetMap() {

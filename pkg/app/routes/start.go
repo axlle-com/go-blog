@@ -85,7 +85,7 @@ func SetupTestRouter() *gin.Engine {
 		store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
-		web.InitTemplate(router)
+		web.NewTemplate(router)
 		InitializeApiRoutes(router, container)
 		InitializeWebRoutes(router, container)
 		db.NewCache().ResetUsersSession()

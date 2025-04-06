@@ -236,6 +236,22 @@
                                             <input
                                                     type="checkbox"
                                                     class="custom-control-input"
+                                                    name="is_main"
+                                                    id="is_main"
+                                                    {{ if .post.IsMain }}
+                                                        checked
+                                                    {{ end }}
+                                                    value="1">
+                                            <label class="custom-control-label" for="is_main">
+                                                Вывести на главную
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <div class="custom-control custom-checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    class="custom-control-input"
                                                     name="has_comments"
                                                     id="has_comments"
                                                     {{ if .post.HasComments }}

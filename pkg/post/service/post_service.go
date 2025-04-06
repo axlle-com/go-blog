@@ -35,6 +35,10 @@ func NewPostService(
 	}
 }
 
+func (s *PostService) GetByParam(field string, value any) (*models.Post, error) {
+	return s.postRepo.GetByParam(field, value)
+}
+
 func (s *PostService) GetByID(id uint) (*models.Post, error) {
 	return s.postRepo.GetByID(id)
 }

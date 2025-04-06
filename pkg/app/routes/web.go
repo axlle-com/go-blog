@@ -1,21 +1,22 @@
 package routes
 
 import (
-	"fmt"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
-	"github.com/mssola/user_agent"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/axlle-com/blog/pkg/app"
 	"github.com/axlle-com/blog/pkg/app/middleware"
+	"github.com/axlle-com/blog/pkg/app/web"
 	file "github.com/axlle-com/blog/pkg/file/http"
-	post "github.com/axlle-com/blog/pkg/post/http/handlers/web"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 )
 
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
+	postFrontWebController := container.PostFrontWebController()
 	postController := container.PostController()
 	postWebController := container.PostWebController()
 	postCategoryWebController := container.CategoryWebController()
@@ -35,7 +36,10 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	infoBlockAjaxController := container.InfoBlockController()
 
 	r.Use(middleware.Error())
-	r.GET("/", ShowIndexPage)
+	r.Use(middleware.Analytic())
+	r.GET("/", postFrontWebController.GetHome)
+	r.GET("/test", ShowIndexPageTest)
+	r.POST("/test", SavePageTest)
 	r.GET("/login", userController.Login)
 	r.POST("/auth", userController.Auth)
 	r.POST("/user", userController.CreateUser)
@@ -78,7 +82,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
-	r.GET("/:alias", post.GetPostFront)
+	r.GET("/:alias", postFrontWebController.GetPost)
 
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
@@ -86,7 +90,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		if strings.HasPrefix(path, "/admin") {
 			ctx.HTML(http.StatusNotFound, "admin.404", gin.H{
 				"title": "Админка — 404",
-				"menu":  models2.NewMenu(ctx.FullPath()),
+				"menu":  menu.NewMenu(ctx.FullPath()),
 			})
 		} else {
 			ctx.HTML(http.StatusNotFound, "404", gin.H{
@@ -96,36 +100,40 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	})
 }
 
-func ShowIndexPage(c *gin.Context) {
-	ua := user_agent.New(c.GetHeader("User-Agent"))
-	name, version := ua.Browser()
-
-	fmt.Println("Browser:", name, version)
-	fmt.Println("OS:", ua.OS())
-	fmt.Println("Mobile?", ua.Mobile())
-	fmt.Println(DetectDeviceType(c.GetHeader("User-Agent")))
+func ShowIndexPageTest(c *gin.Context) {
+	fileName := filepath.Base("index.gohtml")
+	templatePath := filepath.Join("src/templates", fileName)
+	data, err := os.ReadFile(templatePath)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Ошибка чтения файла: %s", err.Error())
+		return
+	}
 
 	c.HTML(
 		http.StatusOK,
-		"index",
+		"test",
 		gin.H{
 			"title":   "Home Page",
-			"payload": nil,
+			"payload": string(data),
 		},
 	)
 }
 
-func DetectDeviceType(uaString string) string {
-	ua := user_agent.New(uaString)
-
-	switch {
-	case ua.Bot():
-		return "bot"
-	case strings.Contains(uaString, "iPad"):
-		return "tablet"
-	case ua.Mobile():
-		return "mobile"
-	default:
-		return "desktop"
+func SavePageTest(c *gin.Context) {
+	code := c.PostForm("code")
+	if code == "" {
+		c.String(http.StatusBadRequest, "Не передано содержимое шаблона (code)")
+		return
 	}
+
+	fileName := filepath.Base("index.gohtml")
+	templatePath := filepath.Join("src/templates", fileName)
+
+	err := os.WriteFile(templatePath, []byte(code), 0644)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Ошибка записи файла: %s", err.Error())
+		return
+	}
+	web.NewTemplate(nil).ReLoad()
+	c.String(http.StatusOK, "Файл успешно сохранён")
 }

@@ -36,7 +36,8 @@ func logWithCaller(level logrus.Level, args ...any) {
 	if conf.LogLevel() < int(level) {
 		return
 	}
-
+	getLogger().Log(level, args...)
+	return
 	// runtime.Caller(3) - почему 3?
 	//   1) сам logWithCaller
 	//   2) функция-обёртка (например, Error() или Fatal() ниже)

@@ -7,11 +7,9 @@ import (
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 func (c *controller) GetPosts(ctx *gin.Context) {
-	start := time.Now()
 	user := c.GetUser(ctx)
 	if user == nil {
 		return
@@ -45,7 +43,6 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 	}
 	posts := c.postsService.GetAggregates(postsTemp)
 
-	logger.Debugf("Total time: %v", time.Since(start))
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
 		"title":        "Страница постов",
 		"userProvider": user,

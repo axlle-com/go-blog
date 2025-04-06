@@ -1,0 +1,63 @@
+{{ define "test" }}
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Редактирование шаблона: {{.fileName}}</title>
+        <!-- Подключаем стили CodeMirror -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+        <!-- Тема редактора (опционально) -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+        <style>
+            .CodeMirror {
+                border: 1px solid #ddd;
+                height: auto;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Редактирование шаблона: test </h1>
+    <textarea id="code" name="code">{{.payload}}</textarea>
+    <br>
+    <button onclick="saveCode()">Сохранить</button>
+
+    <!-- Подключаем скрипты CodeMirror -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <!-- Режим для языка Go (или можно использовать HTML, если шаблон на gohtml) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script>
+        // Инициализация CodeMirror на textarea
+        var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            lineNumbers: true,
+            mode: "text/x-go",
+            theme: "material-darker",
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: true
+        });
+
+        // Пример функции сохранения: можно реализовать AJAX-запрос на сервер для записи изменений
+        function saveCode() {
+            var code = editor.getValue();
+            fetch('/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    code: code
+                }),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data); // выводим ответ сервера
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при сохранении');
+                });
+        }
+    </script>
+    </body>
+    </html>
+{{end}}

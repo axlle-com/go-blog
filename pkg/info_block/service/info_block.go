@@ -2,12 +2,12 @@ package service
 
 import (
 	"errors"
-	app "github.com/axlle-com/blog/pkg/app/service"
-	"github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 )

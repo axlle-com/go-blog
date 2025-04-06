@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/gob"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+
 	"github.com/axlle-com/blog/pkg/app"
 	"github.com/axlle-com/blog/pkg/app/config"
 	"github.com/axlle-com/blog/pkg/app/db"
@@ -10,8 +13,6 @@ import (
 	"github.com/axlle-com/blog/pkg/app/routes"
 	"github.com/axlle-com/blog/pkg/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func Init(cfg contracts.Config) *gin.Engine {
 	container := app.New()
 
 	//web.InitMinify()
-	web.InitTemplate(router)
+	web.NewTemplate(router)
 	routes.InitializeApiRoutes(router, container)
 	routes.InitializeWebRoutes(router, container)
 	return router

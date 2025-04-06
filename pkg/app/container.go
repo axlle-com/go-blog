@@ -13,6 +13,7 @@ import (
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
 	service2 "github.com/axlle-com/blog/pkg/info_block/service"
+	web2 "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
 	postAjax "github.com/axlle-com/blog/pkg/post/http/handlers/ajax"
 	postApi "github.com/axlle-com/blog/pkg/post/http/handlers/api"
 	postWeb "github.com/axlle-com/blog/pkg/post/http/handlers/web"
@@ -236,6 +237,18 @@ func (c *Container) InfoBlockWebController() web.InfoBlockWebController {
 	return web.NewInfoBlockWebController(
 		c.InfoBlockService,
 		c.InfoBlockCollectionService,
+		c.TemplateProvider,
+		c.UserProvider,
+		c.GalleryProvider,
+	)
+}
+
+func (c *Container) PostFrontWebController() web2.PostController {
+	return web2.NewFrontWebController(
+		c.PostService,
+		c.PostsService,
+		c.CategoryService,
+		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,

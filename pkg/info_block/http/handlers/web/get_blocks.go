@@ -7,11 +7,9 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
-	start := time.Now()
 	user := c.GetUser(ctx)
 	if user == nil {
 		return
@@ -40,7 +38,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	}
 
 	blocks := c.blockCollectionService.GetAggregates(blocksTemp)
-	logger.Debugf("Total time: %v", time.Since(start))
+
 	ctx.HTML(http.StatusOK, "admin.blocks", gin.H{
 		"title":      "Страница инфо блоков",
 		"user":       user,

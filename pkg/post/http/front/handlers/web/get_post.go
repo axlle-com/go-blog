@@ -1,31 +1,28 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
 )
 
-func GetPostFront(c *gin.Context) {
-	alias := c.Param("alias")
+func (c *postController) GetPost(ctx *gin.Context) {
+	alias := ctx.Param("alias")
 	if !isValidAlias(alias) {
-		c.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
-		c.Abort()
+		ctx.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
+		ctx.Abort()
 		return
 	}
 
-	id := c.Param("id")
-	h := db.GetDB()
-	var post models.Post
-
-	if result := h.First(&post, id); result.Error != nil {
-		c.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
-		return
+	post, err := c.postService.GetByParam("alias", alias)
+	if err != nil || post == nil {
+		logger.Error(err)
+		post = &models.Post{}
 	}
 
-	c.HTML(
+	ctx.HTML(
 		http.StatusOK,
 		"index",
 		gin.H{

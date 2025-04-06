@@ -19,6 +19,7 @@ type PostRequest struct {
 	MetaDescription    string            `json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
 	Alias              string            `json:"alias" form:"alias" binding:"omitempty,max=255"`
 	URL                string            `json:"url" form:"url" binding:"omitempty,max=1000"`
+	IsMain             string            `json:"is_main" form:"is_main" binding:"omitempty"`
 	IsPublished        string            `json:"is_published" form:"is_published" binding:"omitempty"`
 	IsFavourites       string            `json:"is_favourites" form:"is_favourites" binding:"omitempty"`
 	HasComments        string            `json:"has_comments" form:"has_comments" binding:"omitempty"`

@@ -14,6 +14,8 @@ type PostRepository interface {
 	WithTx(tx *gorm.DB) PostRepository
 	Create(post *models.Post) error
 	GetByID(id uint) (*models.Post, error)
+	GetByParam(field string, value any) (*models.Post, error)
+	GetByParams(params map[string]any) ([]*models.Post, error)
 	Update(post *models.Post) error
 	Delete(post *models.Post) error
 	GetAll() ([]*models.Post, error)
@@ -59,6 +61,7 @@ func (r *postRepository) Update(post *models.Post) error {
 		"MetaDescription",
 		"Alias",
 		"URL",
+		"IsMain",
 		"IsPublished",
 		"IsFavourites",
 		"HasComments",
@@ -116,6 +119,25 @@ func (r *postRepository) WithPaginate(p contracts.Paginator, filter *models.Post
 
 	p.SetTotal(int(total))
 	if err != nil {
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (r *postRepository) GetByParam(field string, value any) (*models.Post, error) {
+	var post models.Post
+	condition := map[string]any{
+		field: value,
+	}
+	if err := r.db.Where(condition).First(&post).Error; err != nil {
+		return nil, err
+	}
+	return &post, nil
+}
+
+func (r *postRepository) GetByParams(params map[string]any) ([]*models.Post, error) {
+	var posts []*models.Post
+	if err := r.db.Where(params).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil

@@ -20,7 +20,7 @@ type InfoBlockRepository interface {
 	GetAll() ([]*models.InfoBlock, error)
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
 	DeleteByIDs(ids []uint) (err error)
-	GetForResource(resource contracts.Resource) ([]*models.InfoBlock, error)
+	GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error)
 }
 
 type infoBlockRepository struct {
@@ -112,11 +112,14 @@ func (r *infoBlockRepository) DeleteByIDs(ids []uint) (err error) {
 	return r.db.Where("id IN ?", ids).Delete(&models.InfoBlock{}).Error
 }
 
-func (r *infoBlockRepository) GetForResource(resource contracts.Resource) ([]*models.InfoBlock, error) {
-	var infoBlocks []*models.InfoBlock
+func (r *infoBlockRepository) GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error) {
+	var infoBlocks []*models.InfoBlockResponse
 	query := r.db.
 		Joins("inner join info_block_has_resources as r on info_blocks.id = r.info_block_id").
+		Select("info_blocks.*", "r.id as relation_id", "r.sort as sort", "r.Position as position").
 		Where("r.resource_uuid = ?", resource.GetUUID()).
+		Order("r.sort ASC").
+		Order("r.position ASC").
 		Model(&models.InfoBlock{})
 
 	err := query.Find(&infoBlocks).Error

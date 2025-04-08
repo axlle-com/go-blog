@@ -8,15 +8,15 @@ import (
 	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
 	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
 	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
-	"github.com/axlle-com/blog/pkg/info_block/http/handlers/ajax"
-	"github.com/axlle-com/blog/pkg/info_block/http/handlers/web"
+	"github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/ajax"
+	"github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/web"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
 	service2 "github.com/axlle-com/blog/pkg/info_block/service"
+	ajax2 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
+	postApi "github.com/axlle-com/blog/pkg/post/http/admin/handlers/api"
+	web3 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/web"
 	web2 "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
-	postAjax "github.com/axlle-com/blog/pkg/post/http/handlers/ajax"
-	postApi "github.com/axlle-com/blog/pkg/post/http/handlers/api"
-	postWeb "github.com/axlle-com/blog/pkg/post/http/handlers/web"
 	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/axlle-com/blog/pkg/post/service"
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
@@ -104,18 +104,19 @@ func New() *Container {
 	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
 	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv)
 
-	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider)
-	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider)
-
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()
-	ibService := service2.NewInfoBlockService(ibRepo, ibhrRepo, gProvider)
+
 	ibcService := service2.NewInfoBlockCollectionService(ibRepo, ibhrRepo, gProvider, tProvider, uProvider)
+	ibService := service2.NewInfoBlockService(ibRepo, ibcService, ibhrRepo, gProvider)
 	ibProvider := provider.NewProvider(ibService, ibcService)
 
 	ptRepo := repository.NewPostTagRepo()
 	ptrRepo := repository.NewResourceRepo()
 	ptService := service.NewPostTagService(ptRepo, ptrRepo)
+
+	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider, ibProvider)
+	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider)
 
 	return &Container{
 		FileService:  fileService,
@@ -174,19 +175,20 @@ func (c *Container) PostApiController() postApi.Controller {
 	)
 }
 
-func (c *Container) PostController() postAjax.Controller {
-	return postAjax.New(
+func (c *Container) PostController() ajax2.Controller {
+	return ajax2.New(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
 		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
+		c.InfoBlockProvider,
 	)
 }
 
-func (c *Container) PostWebController() postWeb.Controller {
-	return postWeb.NewWebController(
+func (c *Container) PostWebController() web3.Controller {
+	return web3.NewWebController(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
@@ -194,11 +196,12 @@ func (c *Container) PostWebController() postWeb.Controller {
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+		c.InfoBlockProvider,
 	)
 }
 
-func (c *Container) CategoryWebController() postWeb.ControllerCategory {
-	return postWeb.NewWebControllerCategory(
+func (c *Container) CategoryWebController() web3.ControllerCategory {
+	return web3.NewWebControllerCategory(
 		c.CategoriesService,
 		c.CategoryService,
 		c.TemplateProvider,
@@ -207,8 +210,8 @@ func (c *Container) CategoryWebController() postWeb.ControllerCategory {
 	)
 }
 
-func (c *Container) CategoryController() postAjax.CategoryController {
-	return postAjax.NewCategoryController(
+func (c *Container) CategoryController() ajax2.CategoryController {
+	return ajax2.NewCategoryController(
 		c.CategoriesService,
 		c.CategoryService,
 		c.TemplateProvider,

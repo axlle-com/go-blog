@@ -72,7 +72,6 @@ func (s *ImageService) DeleteImages(is []*models.Image) (err error) {
 }
 
 func (s *ImageService) DeleteImage(im *models.Image) (err error) {
-	logger.Debug(s)
 	if err = s.imageEvent.DeletingImage(im); err != nil {
 		return
 	}

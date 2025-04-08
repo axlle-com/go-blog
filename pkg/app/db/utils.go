@@ -39,6 +39,9 @@ func ParseDate(dateStr string) *time.Time {
 }
 
 func StrPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
 	return &s
 }
 
@@ -46,36 +49,64 @@ func TimePtr(t time.Time) *time.Time {
 	return &t
 }
 
-func UintPtr(u int) *uint {
+func IntToUintPtr(u int) *uint {
 	v := uint(u)
 	return &v
 }
 
+func UintPtr(u uint) *uint {
+	if u == 0 {
+		return nil
+	}
+	return &u
+}
+
 func IntPtr(i int) *int {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Int8Ptr(i int8) *int8 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Int16Ptr(i int16) *int16 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Int32Ptr(i int32) *int32 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Int64Ptr(i int64) *int64 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Float32Ptr(i float32) *float32 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 
 func Float64Ptr(i float64) *float64 {
+	if i == 0 {
+		return nil
+	}
 	return &i
 }
 

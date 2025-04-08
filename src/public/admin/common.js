@@ -302,7 +302,6 @@ const _image = {
         });
     },
     gallerySort: function () {
-
     },
     imageBlockEmpty: function () {
         return `
@@ -345,18 +344,22 @@ const _post = {
     }
 };
 const _infoBlock = {
+    _block: {},
     add: function () {
         const _this = this;
-        $('body').on('click', '.js-info-block-add', function () {
-            let div = $(this).closest('.js-info-block-select-form');
-            let select = div.find('select').val();
-            const request = new _glob.request({action: '/admin/ajax/info-block/get-for-resource/' + select});
-            request.setMethod('GET').send((response) => {
-                if (response.status) {
-                    let html = $(response.data.view);
-                    $('.js-info-block-general-block').append(html);
-                    _config.select2();
-                }
+        $('body').on('click', '.js-info-blocks-add', function (evt) {
+            const select = $(this).closest('.js-info-blocks-general-block').find('.js-info-blocks-select');
+            const action = select.find('option:selected').data('action');
+            if (!action) {
+                _glob.console.error('Пустой идентификатор')
+                return
+            }
+            const request = new _glob.request({action});
+            request.setMethod('POST').send((response) => {
+                select.val(null).trigger('change');
+                let html = $(response.data.view);
+                _this._block.html(html);
+                _config.run();
             });
         });
     },
@@ -379,6 +382,7 @@ const _infoBlock = {
         });
     },
     run: function () {
+        this._block = $('.js-info-block-saved');
         this.add();
         this.delete();
     }

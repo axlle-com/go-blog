@@ -50,11 +50,17 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 	}
 
 	templates := c.template.GetAll()
+	infoBlocks := c.infoBlock.GetAll()
 
 	data := gin.H{
 		"categories": categories,
 		"templates":  templates,
 		"post":       post,
+		"collection": gin.H{
+			"infoBlocks":     infoBlocks,
+			"postInfoBlocks": post.InfoBlocks,
+			"relationID":     post.ID,
+		},
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

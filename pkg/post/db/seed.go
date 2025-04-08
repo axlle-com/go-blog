@@ -124,7 +124,7 @@ func (s *seeder) categories(n int) {
 			DescriptionPreview: StrPtr(faker.Paragraph()),
 			Description:        StrPtr(faker.Paragraph()),
 			Image:              StrPtr("/public/img/404.svg"),
-			Sort:               UintPtr(rand.Intn(100)),
+			Sort:               IntToUintPtr(rand.Intn(100)),
 			CreatedAt:          TimePtr(time.Now()),
 			UpdatedAt:          TimePtr(time.Now()),
 			DeletedAt:          nil,

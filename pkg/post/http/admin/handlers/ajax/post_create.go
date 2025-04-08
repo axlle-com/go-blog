@@ -39,11 +39,17 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 	}
 
 	templates := c.template.GetAll()
+	infoBlocks := c.infoBlock.GetAll()
 
 	data := response.Body{
 		"categories": categories,
 		"templates":  templates,
 		"post":       post,
+		"collection": gin.H{
+			"infoBlocks":     infoBlocks,
+			"postInfoBlocks": post.InfoBlocks,
+			"relationID":     post.ID,
+		},
 	}
 	ctx.JSON(
 		http.StatusCreated,

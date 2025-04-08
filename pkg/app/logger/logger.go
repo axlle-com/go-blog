@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
 	"os"
 	"runtime"
@@ -92,6 +93,10 @@ func Infof(format string, a ...any) {
 
 func Debug(args ...any) {
 	log(logrus.DebugLevel, args...)
+}
+
+func Dump(args ...any) {
+	spew.Dump(args)
 }
 
 func Debugf(format string, a ...any) {

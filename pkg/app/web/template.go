@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"html/template"
 	"net/url"
@@ -56,6 +57,7 @@ func (t *Template) loadTemplates(templatesDir string) *template.Template {
 		"query":   query,
 		"ptrStr":  ptrStr,
 		"ptrUint": ptrUint,
+		"json":    jsonFunc,
 	})
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -106,4 +108,12 @@ func ptrUint(i *uint) uint {
 		return 0
 	}
 	return *i
+}
+
+func jsonFunc(v interface{}) (string, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }

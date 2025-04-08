@@ -2,36 +2,43 @@ package service
 
 import (
 	"errors"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	app "github.com/axlle-com/blog/pkg/app/service"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type InfoBlockService struct {
-	infoBlockRepo   repository.InfoBlockRepository
-	resourceRepo    repository.InfoBlockHasResourceRepository
-	galleryProvider provider.GalleryProvider
+	infoBlockRepo       repository.InfoBlockRepository
+	infoBlockCollection *InfoBlockCollectionService
+	resourceRepo        repository.InfoBlockHasResourceRepository
+	galleryProvider     provider.GalleryProvider
 }
 
 func NewInfoBlockService(
 	infoBlockRepo repository.InfoBlockRepository,
+	infoBlockCollection *InfoBlockCollectionService,
 	resourceRepo repository.InfoBlockHasResourceRepository,
 	galleryProvider provider.GalleryProvider,
 ) *InfoBlockService {
 	return &InfoBlockService{
-		infoBlockRepo:   infoBlockRepo,
-		resourceRepo:    resourceRepo,
-		galleryProvider: galleryProvider,
+		infoBlockRepo:       infoBlockRepo,
+		infoBlockCollection: infoBlockCollection,
+		resourceRepo:        resourceRepo,
+		galleryProvider:     galleryProvider,
 	}
 }
 
 func (s *InfoBlockService) GetByID(id uint) (*InfoBlock, error) {
 	return s.infoBlockRepo.GetByID(id)
+}
+
+func (s *InfoBlockService) GetByIDs(ids []uint) ([]*InfoBlock, error) {
+	return s.infoBlockRepo.GetByIDs(ids)
 }
 
 func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*InfoBlock, error) {
@@ -54,23 +61,36 @@ func (s *InfoBlockService) Update(infoBlock *InfoBlock) (*InfoBlock, error) {
 }
 
 func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contracts.InfoBlock) error {
-	hasRepo, err := s.resourceRepo.GetByParams(resource.GetUUID(), infoBlock.GetID())
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	hasRepo, err := s.resourceRepo.GetByID(infoBlock.GetRelationID())
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
+
 	if hasRepo == nil {
 		err = s.resourceRepo.Create(
 			&InfoBlockHasResource{
 				ResourceUUID: resource.GetUUID(),
 				InfoBlockID:  infoBlock.GetID(),
+				Sort:         infoBlock.GetSort(),
+				Position:     infoBlock.GetPosition(),
 			},
 		)
+	} else {
+		hasRepo.Position = infoBlock.GetPosition()
+		hasRepo.Sort = infoBlock.GetSort()
+		err = s.resourceRepo.Update(hasRepo)
 	}
-	return nil
+
+	return err
 }
 
-func (s *InfoBlockService) GetForResource(resource contracts.Resource) (infoBlocks []*InfoBlock, err error) {
-	return s.infoBlockRepo.GetForResource(resource)
+func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*InfoBlockResponse {
+	infoBlocks, err := s.infoBlockRepo.GetForResource(resource)
+	if err != nil {
+		logger.Error(err)
+		return nil
+	}
+	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
 }
 
 func (s *InfoBlockService) DeleteForResource(resource contracts.Resource) error {

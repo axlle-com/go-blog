@@ -19,13 +19,12 @@ func (c *controller) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.postService.GetByID(id)
+	post, err := c.postService.GetAggregateByID(id)
 	if err != nil {
+		logger.Error(err.Error())
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
-
-	post.Galleries = c.gallery.GetForResource(post)
 
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
@@ -33,16 +32,22 @@ func (c *controller) GetPost(ctx *gin.Context) {
 	}
 
 	templates := c.template.GetAll()
+	infoBlocks := c.infoBlock.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":        "Страница поста",
-			"userProvider": user,
-			"categories":   categories,
-			"templates":    templates,
-			"menu":         models.NewMenu(ctx.FullPath()),
-			"post":         post,
+			"title":      "Страница поста",
+			"user":       user,
+			"categories": categories,
+			"templates":  templates,
+			"menu":       models.NewMenu(ctx.FullPath()),
+			"post":       post,
+			"collection": gin.H{
+				"infoBlocks":     infoBlocks,
+				"postInfoBlocks": post.InfoBlocks,
+				"relationID":     post.ID,
+			},
 		},
 	)
 }

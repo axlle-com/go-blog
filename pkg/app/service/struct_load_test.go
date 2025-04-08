@@ -395,7 +395,7 @@ func getDestination() DestinationStruct {
 	inner6 := getDestinationInner()
 	return DestinationStruct{
 		Uint:                   100,
-		UintPtr:                db.UintPtr(100),
+		UintPtr:                db.IntToUintPtr(100),
 		Int:                    200,
 		IntPtr:                 db.IntPtr(200),
 		Int8:                   80,
@@ -433,7 +433,7 @@ func getDestination() DestinationStruct {
 func getDestinationInner() DestinationStructInner {
 	return DestinationStructInner{
 		Uint:       100,
-		UintPtr:    db.UintPtr(100),
+		UintPtr:    db.IntToUintPtr(100),
 		Int:        200,
 		IntPtr:     db.IntPtr(200),
 		Int8:       80,
@@ -484,7 +484,7 @@ func checkString(form FormStruct, dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Uint: %d, получено: %d", expectedUint, dest.Uint)
 	}
 	if dest.UintPtr == nil || *dest.UintPtr != uint(expectedUintPtr) {
-		t.Errorf("Ожидалось UintPtr: %d, получено: %v", expectedUintPtr, *dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %d, получено: %v", expectedUintPtr, *dest.UintPtr)
 	}
 	if dest.Int != expectedInt {
 		t.Errorf("Ожидалось Int: %d, получено: %d", expectedInt, dest.Int)
@@ -620,7 +620,7 @@ func checkStringInner(form FormStruct, dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Inner.Uint: %v, получено: %v", uint(expectedUint), dest.Inner.Uint)
 	}
 	if dest.Inner.UintPtr == nil || *dest.Inner.UintPtr != uint(expectedUintPtr) {
-		t.Errorf("Ожидалось Inner.UintPtr: %d, получено: %v", expectedUintPtr, *dest.Inner.UintPtr)
+		t.Errorf("Ожидалось Inner.IntToUintPtr: %d, получено: %v", expectedUintPtr, *dest.Inner.UintPtr)
 	}
 	if dest.Inner.Int != expectedInt {
 		t.Errorf("Ожидалось Inner.Int: %d, получено: %d", expectedInt, dest.Inner.Int)
@@ -710,7 +710,7 @@ func checkStringInnerPtr(form FormStruct, dest DestinationStruct, t *testing.T) 
 		t.Errorf("Ожидалось InnerPtr.Uint: %v, получено: %v", uint(expectedUint), dest.InnerPtr.Uint)
 	}
 	if dest.InnerPtr.UintPtr == nil || *dest.InnerPtr.UintPtr != uint(expectedUintPtr) {
-		t.Errorf("Ожидалось InnerPtr.UintPtr: %d, получено: %v", expectedUintPtr, *dest.InnerPtr.UintPtr)
+		t.Errorf("Ожидалось InnerPtr.IntToUintPtr: %d, получено: %v", expectedUintPtr, *dest.InnerPtr.UintPtr)
 	}
 	if dest.InnerPtr.Int != expectedInt {
 		t.Errorf("Ожидалось InnerPtr.Int: %d, получено: %d", expectedInt, dest.InnerPtr.Int)
@@ -800,7 +800,7 @@ func checkStringInnerPtrFake(form FormStruct, dest DestinationStruct, t *testing
 		t.Errorf("Ожидалось InnerPtrFake.Uint: %v, получено: %v", uint(expectedUint), dest.InnerPtrFake.Uint)
 	}
 	if dest.InnerPtrFake.UintPtr == nil || *dest.InnerPtrFake.UintPtr != uint(expectedUintPtr) {
-		t.Errorf("Ожидалось InnerPtrFake.UintPtr: %d, получено: %v", expectedUintPtr, *dest.InnerPtrFake.UintPtr)
+		t.Errorf("Ожидалось InnerPtrFake.IntToUintPtr: %d, получено: %v", expectedUintPtr, *dest.InnerPtrFake.UintPtr)
 	}
 	if dest.InnerPtrFake.Int != expectedInt {
 		t.Errorf("Ожидалось InnerPtrFake.Int: %d, получено: %d", expectedInt, dest.InnerPtrFake.Int)
@@ -895,7 +895,7 @@ func checkStringSliceInner(form FormStruct, dest DestinationStruct, t *testing.T
 			t.Errorf("Ожидалось Inner.Uint: %v, получено: %v", uint(expectedUint), strct.Uint)
 		}
 		if strct.UintPtr == nil || *strct.UintPtr != uint(expectedUintPtr) {
-			t.Errorf("Ожидалось Inner.UintPtr: %d, получено: %v", expectedUintPtr, *strct.UintPtr)
+			t.Errorf("Ожидалось Inner.IntToUintPtr: %d, получено: %v", expectedUintPtr, *strct.UintPtr)
 		}
 		if strct.Int != expectedInt {
 			t.Errorf("Ожидалось Inner.Int: %d, получено: %d", expectedInt, strct.Int)
@@ -998,7 +998,7 @@ func checkStringSliceInnerPtrTwo(form FormStruct, dest DestinationStruct, t *tes
 			t.Errorf("Ожидалось Inner.Uint: %v, получено: %v", uint(expectedUint), strct.Uint)
 		}
 		if strct.UintPtr == nil || *strct.UintPtr != uint(expectedUintPtr) {
-			t.Errorf("Ожидалось Inner.UintPtr: %d, получено: %v", expectedUintPtr, *strct.UintPtr)
+			t.Errorf("Ожидалось Inner.IntToUintPtr: %d, получено: %v", expectedUintPtr, *strct.UintPtr)
 		}
 		if strct.Int != expectedInt {
 			t.Errorf("Ожидалось Inner.Int: %d, получено: %d", expectedInt, strct.Int)
@@ -1069,7 +1069,7 @@ func checkStringEmpty(dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Uint: %d, получено: %d", 0, dest.Uint)
 	}
 	if dest.UintPtr != nil {
-		t.Errorf("Ожидалось UintPtr: %v, получено: %v", nil, dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %v, получено: %v", nil, dest.UintPtr)
 	}
 	if dest.Int != 0 {
 		t.Errorf("Ожидалось Int: %d, получено: %d", 0, dest.Int)
@@ -1149,7 +1149,7 @@ func checkStringInnerEmpty(dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Uint: %d, получено: %d", 0, dest.Inner.Uint)
 	}
 	if dest.Inner.UintPtr != nil {
-		t.Errorf("Ожидалось UintPtr: %v, получено: %v", nil, dest.Inner.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %v, получено: %v", nil, dest.Inner.UintPtr)
 	}
 	if dest.Inner.Int != 0 {
 		t.Errorf("Ожидалось Int: %d, получено: %d", 0, dest.Inner.Int)
@@ -1224,7 +1224,7 @@ func checkType(src SourceStruct, dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Uint: %d, получено: %d", src.Uint, dest.Uint)
 	}
 	if dest.UintPtr == nil || *dest.UintPtr != src.UintPtr {
-		t.Errorf("Ожидалось UintPtr: %d, получено: %v", src.UintPtr, *dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %d, получено: %v", src.UintPtr, *dest.UintPtr)
 	}
 	if dest.Int != src.Int {
 		t.Errorf("Ожидалось Int: %d, получено: %d", src.Int, dest.Int)
@@ -1336,7 +1336,7 @@ func checkTypeInner(src SourceStructInner, dest DestinationStructInner, t *testi
 		t.Errorf("Ожидалось Uint: %d, получено: %d", src.Uint, dest.Uint)
 	}
 	if dest.UintPtr == nil || *dest.UintPtr != src.UintPtr {
-		t.Errorf("Ожидалось UintPtr: %d, получено: %v", src.UintPtr, *dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %d, получено: %v", src.UintPtr, *dest.UintPtr)
 	}
 	if dest.Int != src.Int {
 		t.Errorf("Ожидалось Int: %d, получено: %d", src.Int, dest.Int)
@@ -1406,7 +1406,7 @@ func checkTypeEmpty(src SourceStruct, dest DestinationStruct, t *testing.T) {
 		t.Errorf("Ожидалось Uint: %d, получено: %d", src.Uint, dest.Uint)
 	}
 	if dest.UintPtr != nil {
-		t.Errorf("Ожидалось UintPtr: %v, получено: %v", nil, dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %v, получено: %v", nil, dest.UintPtr)
 	}
 	if dest.Int != src.Int {
 		t.Errorf("Ожидалось Int: %d, получено: %d", src.Int, dest.Int)
@@ -1486,7 +1486,7 @@ func checkTypeInnerEmpty(src SourceStructInner, dest DestinationStructInner, t *
 		t.Errorf("Ожидалось Uint: %d, получено: %d", src.Uint, dest.Uint)
 	}
 	if dest.UintPtr != nil {
-		t.Errorf("Ожидалось UintPtr: %v, получено: %v", nil, dest.UintPtr)
+		t.Errorf("Ожидалось IntToUintPtr: %v, получено: %v", nil, dest.UintPtr)
 	}
 	if dest.Int != src.Int {
 		t.Errorf("Ожидалось Int: %d, получено: %d", src.Int, dest.Int)

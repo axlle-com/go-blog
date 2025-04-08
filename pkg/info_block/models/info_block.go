@@ -23,10 +23,31 @@ type InfoBlock struct {
 	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+
+	Sort        int                   `gorm:"-" json:"sort" form:"sort" binding:"omitempty"`
+	Position    string                `gorm:"-" json:"position" form:"position" binding:"omitempty"`
+	HasResource *InfoBlockHasResource `gorm:"-" json:"has_resource" form:"has_resource" binding:"omitempty"`
 }
 
 func (i *InfoBlock) GetUUID() uuid.UUID {
 	return i.UUID
+}
+
+func (i *InfoBlock) GetPosition() string {
+	return i.Position
+}
+
+func (i *InfoBlock) GetPositions() []string {
+	return []string{
+		"top",
+		"bottom",
+		"left",
+		"right",
+	}
+}
+
+func (i *InfoBlock) GetSort() int {
+	return i.Sort
 }
 
 func (i *InfoBlock) SetUUID() {
@@ -45,6 +66,14 @@ func (i *InfoBlock) GetTemplateID() uint {
 		templateID = *i.TemplateID
 	}
 	return templateID
+}
+
+func (i *InfoBlock) GetRelationID() uint {
+	var id uint
+	if i.HasResource != nil {
+		id = i.HasResource.ID
+	}
+	return id
 }
 
 func (i *InfoBlock) GetTemplateTitle() string {
@@ -80,6 +109,10 @@ func (i *InfoBlock) GetTable() string {
 
 func (i *InfoBlock) GetTitle() string {
 	return i.Title
+}
+
+func (i *InfoBlock) GetMedia() string {
+	return *i.Media
 }
 
 func (i *InfoBlock) GetDescription() string {

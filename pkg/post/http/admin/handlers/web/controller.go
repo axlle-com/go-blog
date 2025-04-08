@@ -1,7 +1,9 @@
-package ajax
+package web
 
 import (
 	app "github.com/axlle-com/blog/pkg/app/models"
+	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/axlle-com/blog/pkg/info_block/provider"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -9,20 +11,20 @@ import (
 )
 
 type Controller interface {
-	UpdatePost(*gin.Context)
+	GetPost(*gin.Context)
+	GetPosts(*gin.Context)
 	CreatePost(*gin.Context)
-	DeletePost(*gin.Context)
-	DeletePostImage(*gin.Context)
-	FilterPosts(*gin.Context)
 }
 
-func New(
+func NewWebController(
 	service *service.PostService,
 	services *service.PostsService,
 	category *service.CategoryService,
 	categories *service.CategoriesService,
 	template template.TemplateProvider,
 	user user.UserProvider,
+	gallery gallery.GalleryProvider,
+	infoBlock provider.InfoBlockProvider,
 ) Controller {
 	return &controller{
 		postService:       service,
@@ -31,6 +33,8 @@ func New(
 		categoriesService: categories,
 		template:          template,
 		user:              user,
+		gallery:           gallery,
+		infoBlock:         infoBlock,
 	}
 }
 
@@ -43,4 +47,6 @@ type controller struct {
 	categoriesService *service.CategoriesService
 	template          template.TemplateProvider
 	user              user.UserProvider
+	gallery           gallery.GalleryProvider
+	infoBlock         provider.InfoBlockProvider
 }

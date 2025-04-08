@@ -37,7 +37,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	blocks := c.blockCollectionService.GetAggregates(blocksTemp)
+	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	ctx.HTML(http.StatusOK, "admin.blocks", gin.H{
 		"title":      "Страница инфо блоков",

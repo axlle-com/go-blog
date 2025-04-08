@@ -43,10 +43,11 @@ type Post struct {
 	UpdatedAt          *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
-	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	Category  *PostCategory       `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
-	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Category   *PostCategory         `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
+	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User       contracts.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 
 	dirty      map[string]interface{} `ignore:"true"`
 	original   *Post                  `ignore:"true"`

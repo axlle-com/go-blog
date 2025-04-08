@@ -62,6 +62,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.PUT("/posts/:id", postController.UpdatePost)
 		protected.DELETE("/posts/:id", postController.DeletePost)
 		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
+		protected.POST("/posts/:id/info-blocks/:info_block_id", postController.AddPostInfoBlock)
 
 		protected.GET("/categories", postCategoryWebController.GetCategories)
 		protected.GET("/categories/:id", postCategoryWebController.GetCategory)
@@ -79,6 +80,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.PUT("/info-blocks/:id", infoBlockAjaxController.UpdateInfoBlock)
 		protected.DELETE("/info-blocks/:id", infoBlockAjaxController.DeleteInfoBlock)
 		protected.GET("/info-blocks/filter", infoBlockAjaxController.FilterInfoBlock)
+		protected.GET("/ajax/info-blocks/:id", infoBlockAjaxController.GetInfoBlock)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}

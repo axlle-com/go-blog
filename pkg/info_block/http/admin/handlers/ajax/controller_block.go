@@ -9,6 +9,7 @@ import (
 )
 
 type InfoBlockController interface {
+	GetInfoBlock(ctx *gin.Context)
 	UpdateInfoBlock(*gin.Context)
 	CreateInfoBlock(*gin.Context)
 	DeleteInfoBlock(*gin.Context)

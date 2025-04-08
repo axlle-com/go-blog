@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	app "github.com/axlle-com/blog/pkg/app/service"
 	http "github.com/axlle-com/blog/pkg/post/http/models"
@@ -29,6 +30,20 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.Use
 		}
 		post.Galleries = slice
 	}
+
+	if len(form.InfoBlocks) > 0 {
+		interfaceSlice := make([]any, len(form.InfoBlocks))
+		for i, block := range form.InfoBlocks {
+			interfaceSlice[i] = block
+		}
+
+		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, post)
+		if err != nil {
+			logger.Error(err)
+		}
+		post.InfoBlocks = slice
+	}
+
 	return post, nil
 }
 

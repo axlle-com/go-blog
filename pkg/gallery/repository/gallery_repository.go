@@ -4,8 +4,8 @@ import (
 	"github.com/axlle-com/blog/pkg/app/db"
 	"github.com/axlle-com/blog/pkg/app/logger"
 	app "github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,8 @@ type GalleryRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Gallery, error)
 	GetAllIds() ([]uint, error)
-	GetForResource(contracts.Resource) ([]*models.Gallery, error)
+	GetForResource(uuid.UUID) ([]*models.GalleryResponse, error)
+	GetForResources([]uuid.UUID) ([]*models.GalleryResponse, error)
 	WithImages() GalleryRepository
 	WithTx(tx *gorm.DB) GalleryRepository
 }
@@ -97,11 +98,32 @@ func (r *galleryRepository) GetAll() ([]*models.Gallery, error) {
 	return galleries, nil
 }
 
-func (r *galleryRepository) GetForResource(resource contracts.Resource) ([]*models.Gallery, error) {
-	var galleries []*models.Gallery
+func (r *galleryRepository) GetForResource(uuid uuid.UUID) ([]*models.GalleryResponse, error) {
+	var galleries []*models.GalleryResponse
 	query := r.db.
 		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").
-		Where("r.resource_uuid = ?", resource.GetUUID()).
+		Select("galleries.*, r.*").
+		Where("r.resource_uuid = ?", uuid).
+		Order("r.sort ASC").
+		Model(&models.Gallery{})
+
+	if r.withImages {
+		query.Preload("Images", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sort ASC")
+		})
+	}
+
+	err := query.Find(&galleries).Error
+	return galleries, err
+}
+
+func (r *galleryRepository) GetForResources(uuids []uuid.UUID) ([]*models.GalleryResponse, error) {
+	var galleries []*models.GalleryResponse
+	query := r.db.
+		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").
+		Select("galleries.*, r.*").
+		Where("r.resource_uuid in ?", uuids).
+		Order("r.sort ASC").
 		Model(&models.Gallery{})
 
 	if r.withImages {

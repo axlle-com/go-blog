@@ -1,0 +1,135 @@
+{{ define "admin.info_block_in_item_inner" }}
+    {{ if .postInfoBlocks }}
+        {{ $index := 0 }}
+        {{ range .postInfoBlocks }}
+            {{ $block := . }}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        Инфо-блок
+                        <div class="btn-group btn-group-sm ml-auto" role="group">
+                            <button type="button" class="btn btn-light btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="feather feather-printer">
+                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                    <rect x="6" y="14" width="12" height="8"></rect>
+                                </svg>
+                            </button>
+                            <a type="button" class="btn btn-light btn-icon"
+                               href="/admin/info-blocks/{{ .ID }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="feather feather-edit">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </a>
+                            <a type="button" class="btn btn-light btn-icon"
+                               href="/admin/info-blocks/{{ .ID }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="feather feather-trash">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </a>
+                        </div>
+                        <button type="button" data-action="close"
+                                class="ml-1 btn btn-sm btn-light btn-icon">
+                            <i class="material-icons">close</i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ .Title }}</h5>
+                        <p class="card-text">{{ .Description }}</p>
+                        {{ if .Galleries }}
+                            {{ range .Galleries }}
+                                <section id="section" class="m-1 mb-3">
+                                    <div class="list-with-gap" id="example-gallery">
+                                        {{ if .Images }}
+                                            {{ range .Images }}
+                                                <div class="img rounded">
+                                                    <div class="image-box-in-block"
+                                                         style="background-image: url({{ .File }}); background-size: cover;background-position: center;">
+                                                    </div>
+                                                    <div class="overlay bg-dark"></div>
+                                                    <div class="overlay-content text-center justify-content-end">
+                                                        <div class="btn-group btn-group-sm mb-1"
+                                                             role="group">
+                                                            <button data-index="1"
+                                                                    data-size="1280x853"
+                                                                    data-target="{{ .File }}"
+                                                                    type="button"
+                                                                    class="open-ps btn btn-link btn-icon text-light">
+                                                                <i class="material-icons">zoom_in</i>
+                                                            </button>
+                                                            <button type="button"
+                                                                    class="btn btn-link btn-icon text-light">
+                                                                <i class="material-icons">edit</i>
+                                                            </button>
+                                                            <button type="button"
+                                                                    class="btn btn-link btn-icon text-danger">
+                                                                <i class="material-icons">delete</i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {{ end }}
+                                        {{ end }}
+                                    </div>
+                                </section>
+                            {{ end }}
+                        {{ end }}
+                        <div class="card-text">
+                            <div class="img rounded">
+                                <input
+                                        type="hidden"
+                                        name="info_blocks[{{ $index }}][id]"
+                                        value="{{ .GetID }}">
+                                <input
+                                        type="hidden"
+                                        name="info_blocks[{{ $index }}][relation_id]"
+                                        value="{{ .GetRelationID }}">
+                            </div>
+                            <div>
+                                <div class="form-group small">
+                                    <label for="blogTitle">Позиция</label>
+                                    <select
+                                            class="form-control select2"
+                                            data-placeholder="Позиция"
+                                            data-select2-search="true"
+                                            data-allow-clear="true"
+                                            name="info_blocks[{{ $index }}][position]"
+                                            data-validator="position">
+                                        <option></option>
+                                        {{ range $key, $pos := .GetPositions }}
+                                            <option value="{{ $pos }}" {{ if eq $pos $block.GetPosition }} selected{{ end }}>
+                                                {{ $pos }}
+                                            </option>
+                                        {{ end }}
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="form-group small">
+                                    <input
+                                            class="form-control form-shadow"
+                                            placeholder="Сортировка"
+                                            type="number"
+                                            name="info_blocks[{{ $index }}][sort]"
+                                            value="{{ .GetSort }}">
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ $index = add $index 1 }}
+        {{ end }}
+    {{ end }}
+{{ end }}

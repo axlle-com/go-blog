@@ -404,6 +404,12 @@ form.delete-button{
     width: 100%;
 }
 
+.image-box-in-block {
+    height: 100px;
+    width: 100%;
+    min-width: 100px;
+}
+
 #home-page .img {
     position: relative;
     display: block;

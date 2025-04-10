@@ -1,10 +1,9 @@
 package models
 
 import (
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
-
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 type InfoBlock struct {
@@ -20,9 +19,9 @@ type InfoBlock struct {
 	UpdatedAt   *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt   *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
-	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
-	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	Template  contracts2.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User      contracts2.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries []contracts2.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 
 	Sort        int                   `gorm:"-" json:"sort" form:"sort" binding:"omitempty"`
 	Position    string                `gorm:"-" json:"position" form:"position" binding:"omitempty"`
@@ -123,7 +122,7 @@ func (i *InfoBlock) GetImage() string {
 	return *i.Image
 }
 
-func (i *InfoBlock) GetGalleries() []contracts.Gallery {
+func (i *InfoBlock) GetGalleries() []contracts2.Gallery {
 	return i.Galleries
 }
 

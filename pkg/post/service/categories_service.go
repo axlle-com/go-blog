@@ -1,9 +1,9 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/axlle-com/blog/pkg/post/repository"
@@ -71,8 +71,8 @@ func (s *CategoriesService) GetAggregates(categories []*PostCategory) []*PostCat
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
+	var users map[uint]contracts2.User
+	var templates map[uint]contracts2.Template
 	var parents map[uint]*PostCategory
 
 	wg.Add(3)
@@ -135,7 +135,7 @@ func (s *CategoriesService) GetAllForParent(parent *PostCategory) ([]*PostCatego
 	return s.categoryRepo.GetAllForParent(parent)
 }
 
-func (s *CategoriesService) WithPaginate(p contracts.Paginator, filter *CategoryFilter) ([]*PostCategory, error) {
+func (s *CategoriesService) WithPaginate(p contracts2.Paginator, filter *CategoryFilter) ([]*PostCategory, error) {
 	return s.categoryRepo.WithPaginate(p, filter)
 }
 

@@ -1,7 +1,7 @@
 package models
 
 import (
-	errorsForm "github.com/axlle-com/blog/pkg/app/errors"
+	errorsForm "github.com/axlle-com/blog/app/errors"
 	"github.com/gin-gonic/gin"
 )
 

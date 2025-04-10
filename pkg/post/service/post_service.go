@@ -1,8 +1,8 @@
 package service
 
 import (
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	provider2 "github.com/axlle-com/blog/pkg/info_block/provider"
@@ -52,8 +52,8 @@ func (s *PostService) GetAggregateByID(id uint) (*models.Post, error) {
 func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 	var wg sync.WaitGroup
 
-	var galleries = make([]contracts.Gallery, 0)
-	var infoBlocks = make([]contracts.InfoBlock, 0)
+	var galleries = make([]contracts2.Gallery, 0)
+	var infoBlocks = make([]contracts2.InfoBlock, 0)
 
 	wg.Add(2)
 

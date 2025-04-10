@@ -1,10 +1,10 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"github.com/axlle-com/blog/pkg/app/logger"
 	"github.com/axlle-com/blog/pkg/post/models"
 )
 

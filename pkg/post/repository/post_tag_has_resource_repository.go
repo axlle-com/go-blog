@@ -2,9 +2,9 @@ package repository
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/db"
-	app "github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"

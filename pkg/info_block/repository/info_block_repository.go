@@ -3,9 +3,9 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/app/db"
-	app "github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	app "github.com/axlle-com/blog/app/models"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"gorm.io/gorm"
 )
@@ -14,13 +14,13 @@ type InfoBlockRepository interface {
 	WithTx(tx *gorm.DB) InfoBlockRepository
 	Create(infoBlock *models.InfoBlock) error
 	GetByID(id uint) (*models.InfoBlock, error)
-	WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
+	WithPaginate(p contracts2.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
 	Update(infoBlock *models.InfoBlock) error
 	Delete(infoBlock *models.InfoBlock) error
 	GetAll() ([]*models.InfoBlock, error)
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
 	DeleteByIDs(ids []uint) (err error)
-	GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error)
+	GetForResource(resource contracts2.Resource) ([]*models.InfoBlockResponse, error)
 }
 
 type infoBlockRepository struct {
@@ -50,7 +50,7 @@ func (r *infoBlockRepository) GetByID(id uint) (*models.InfoBlock, error) {
 	return &model, nil
 }
 
-func (r *infoBlockRepository) WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
+func (r *infoBlockRepository) WithPaginate(p contracts2.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
 	var infoBlocks []*models.InfoBlock
 	var total int64
 
@@ -112,7 +112,7 @@ func (r *infoBlockRepository) DeleteByIDs(ids []uint) (err error) {
 	return r.db.Where("id IN ?", ids).Delete(&models.InfoBlock{}).Error
 }
 
-func (r *infoBlockRepository) GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error) {
+func (r *infoBlockRepository) GetForResource(resource contracts2.Resource) ([]*models.InfoBlockResponse, error) {
 	var infoBlocks []*models.InfoBlockResponse
 	query := r.db.
 		Joins("inner join info_block_has_resources as r on info_blocks.id = r.info_block_id").

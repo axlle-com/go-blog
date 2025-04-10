@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models"
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"

@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/app"
+	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/config"
+	db2 "github.com/axlle-com/blog/app/db"
 	"os"
 
-	"github.com/axlle-com/blog/pkg/app/config"
-	"github.com/axlle-com/blog/pkg/app/db"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	sInfoBlock "github.com/axlle-com/blog/pkg/info_block/db"
 	mInfoBlock "github.com/axlle-com/blog/pkg/info_block/db/migrate"
@@ -22,7 +22,7 @@ import (
 
 func main() {
 	var command string
-	db.Init(config.Config().DBUrl())
+	db2.Init(config.Config().DBUrl())
 	flag.StringVar(&command, "command", "", "Command to execute")
 	flag.Parse()
 
@@ -45,7 +45,7 @@ var Commands = map[string]func(){
 		migrate()
 	},
 	"refill": func() {
-		db.NewCache().ResetUsersSession()
+		db2.NewCache().ResetUsersSession()
 		rollback()
 		migrate()
 		seedTest()

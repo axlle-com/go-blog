@@ -1,10 +1,9 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
-
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 type GalleryResponse struct {

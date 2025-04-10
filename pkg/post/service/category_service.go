@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
+	"github.com/axlle-com/blog/app/db"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	app "github.com/axlle-com/blog/pkg/app/service"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	http "github.com/axlle-com/blog/pkg/post/http/models"
@@ -34,7 +34,7 @@ func NewCategoryService(
 	}
 }
 
-func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts.User) (category *PostCategory, err error) {
+func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts2.User) (category *PostCategory, err error) {
 	categoryForm := app.LoadStruct(&PostCategory{}, form).(*PostCategory)
 
 	categoryForm.Alias = s.GenerateAlias(categoryForm)
@@ -54,7 +54,7 @@ func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *Pos
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts.Gallery, 0)
+		slice := make([]contracts2.Gallery, 0)
 		for _, gRequest := range form.Galleries {
 			if gRequest == nil {
 				continue
@@ -84,7 +84,7 @@ func (s *CategoryService) Delete(category *PostCategory) error {
 	return s.categoryRepo.Delete(category)
 }
 
-func (s *CategoryService) Create(category *PostCategory, user contracts.User) (*PostCategory, error) {
+func (s *CategoryService) Create(category *PostCategory, user contracts2.User) (*PostCategory, error) {
 	id := user.GetID()
 	category.UserID = &id
 	if err := s.categoryRepo.Create(category); err != nil {
@@ -93,7 +93,7 @@ func (s *CategoryService) Create(category *PostCategory, user contracts.User) (*
 	return category, nil
 }
 
-func (s *CategoryService) Update(category *PostCategory, found *PostCategory, user contracts.User) (*PostCategory, error) {
+func (s *CategoryService) Update(category *PostCategory, found *PostCategory, user contracts2.User) (*PostCategory, error) {
 	tx := db.GetDB().Begin()
 
 	defer func() {

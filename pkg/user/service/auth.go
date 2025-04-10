@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/config"
+	"github.com/axlle-com/blog/app/config"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/golang-jwt/jwt/v4"

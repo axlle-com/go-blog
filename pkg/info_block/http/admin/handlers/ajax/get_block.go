@@ -1,7 +1,7 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/app/http/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

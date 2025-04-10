@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 )
 
@@ -16,9 +16,9 @@ type InfoBlockResponse struct {
 	Description *string   `json:"description" form:"description" binding:"omitempty"`
 	Image       *string   `json:"image" form:"image" binding:"omitempty,max=255"`
 
-	Template  contracts.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
-	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	Template  contracts2.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User      contracts2.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries []contracts2.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 
 	RelationID uint   `gorm:"relation_id" json:"relation_id" form:"relation_id" binding:"omitempty"`
 	Sort       int    `gorm:"sort" json:"sort" form:"sort" binding:"omitempty"`
@@ -90,7 +90,7 @@ func (i *InfoBlockResponse) GetImage() string {
 	return *i.Image
 }
 
-func (i *InfoBlockResponse) GetGalleries() []contracts.Gallery {
+func (i *InfoBlockResponse) GetGalleries() []contracts2.Gallery {
 	return i.Galleries
 }
 
@@ -98,7 +98,7 @@ func (i *InfoBlockResponse) GetRelationID() uint {
 	return i.RelationID
 }
 
-func (i *InfoBlockResponse) FromInterface(infoBlock contracts.InfoBlock) {
+func (i *InfoBlockResponse) FromInterface(infoBlock contracts2.InfoBlock) {
 	i.ID = infoBlock.GetID()
 	i.UUID = infoBlock.GetUUID()
 	i.TemplateID = db.UintPtr(infoBlock.GetTemplateID())

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/file"
 	"github.com/gin-gonic/gin"
 )

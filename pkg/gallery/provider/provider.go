@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"
@@ -11,12 +11,12 @@ import (
 )
 
 type GalleryProvider interface {
-	GetForResource(contracts.Resource) []contracts.Gallery
-	GetForResources([]contracts.Resource) []contracts.Gallery
-	GetIndexesForResources(resources []contracts.Resource) map[uuid.UUID][]contracts.Gallery
-	GetAll() []contracts.Gallery
-	SaveFromForm(g any, resource contracts.Resource) (contracts.Gallery, error)
-	DeleteForResource(contracts.Resource) error
+	GetForResource(contracts2.Resource) []contracts2.Gallery
+	GetForResources([]contracts2.Resource) []contracts2.Gallery
+	GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery
+	GetAll() []contracts2.Gallery
+	SaveFromForm(g any, resource contracts2.Resource) (contracts2.Gallery, error)
+	DeleteForResource(contracts2.Resource) error
 }
 
 func NewProvider(
@@ -34,9 +34,9 @@ type provider struct {
 	service *service.GalleryService
 }
 
-func (p *provider) GetForResource(resource contracts.Resource) []contracts.Gallery {
+func (p *provider) GetForResource(resource contracts2.Resource) []contracts2.Gallery {
 	galleries, err := p.gallery.WithImages().GetForResource(resource.GetUUID())
-	collection := make([]contracts.Gallery, 0, len(galleries))
+	collection := make([]contracts2.Gallery, 0, len(galleries))
 	if err == nil {
 		for _, gallery := range galleries {
 			collection = append(collection, gallery)
@@ -47,14 +47,14 @@ func (p *provider) GetForResource(resource contracts.Resource) []contracts.Galle
 	return nil
 }
 
-func (p *provider) GetForResources(resources []contracts.Resource) []contracts.Gallery {
+func (p *provider) GetForResources(resources []contracts2.Resource) []contracts2.Gallery {
 	uuids := make([]uuid.UUID, 0, len(resources))
 	for _, resource := range resources {
 		uuids = append(uuids, resource.GetUUID())
 	}
 
 	galleries, err := p.gallery.WithImages().GetForResources(uuids)
-	collection := make([]contracts.Gallery, 0, len(galleries))
+	collection := make([]contracts2.Gallery, 0, len(galleries))
 	if err == nil {
 		for _, gallery := range galleries {
 			collection = append(collection, gallery)
@@ -65,18 +65,18 @@ func (p *provider) GetForResources(resources []contracts.Resource) []contracts.G
 	return nil
 }
 
-func (p *provider) GetIndexesForResources(resources []contracts.Resource) map[uuid.UUID][]contracts.Gallery {
+func (p *provider) GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery {
 	uuids := make([]uuid.UUID, 0, len(resources))
 	for _, resource := range resources {
 		uuids = append(uuids, resource.GetUUID())
 	}
 
 	galleries, err := p.gallery.WithImages().GetForResources(uuids)
-	collection := make(map[uuid.UUID][]contracts.Gallery)
+	collection := make(map[uuid.UUID][]contracts2.Gallery)
 	if err == nil {
 		for _, gallery := range galleries {
 			if _, ok := collection[gallery.GetResourceUUID()]; !ok {
-				collection[gallery.GetResourceUUID()] = make([]contracts.Gallery, 0)
+				collection[gallery.GetResourceUUID()] = make([]contracts2.Gallery, 0)
 			}
 			collection[gallery.GetResourceUUID()] = append(collection[gallery.GetResourceUUID()], gallery)
 		}
@@ -86,7 +86,7 @@ func (p *provider) GetIndexesForResources(resources []contracts.Resource) map[uu
 	return nil
 }
 
-func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
+func (p *provider) DeleteForResource(resource contracts2.Resource) (err error) {
 	err = p.service.DeleteForResource(resource)
 	if err != nil {
 		return err
@@ -95,8 +95,8 @@ func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
 	return nil
 }
 
-func (p *provider) GetAll() []contracts.Gallery {
-	var collection []contracts.Gallery
+func (p *provider) GetAll() []contracts2.Gallery {
+	var collection []contracts2.Gallery
 	galleries, err := p.gallery.GetAll()
 	if err == nil {
 		for _, gallery := range galleries {
@@ -108,7 +108,7 @@ func (p *provider) GetAll() []contracts.Gallery {
 	return nil
 }
 
-func (p *provider) SaveFromForm(g any, resource contracts.Resource) (gallery contracts.Gallery, err error) {
+func (p *provider) SaveFromForm(g any, resource contracts2.Resource) (gallery contracts2.Gallery, err error) {
 	gal := app.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
 	if gal.ID == 0 {
 		gallery, err = p.service.CreateGallery(gal)

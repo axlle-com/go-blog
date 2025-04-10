@@ -2,9 +2,9 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
@@ -41,7 +41,7 @@ func (s *InfoBlockService) GetByIDs(ids []uint) ([]*InfoBlock, error) {
 	return s.infoBlockRepo.GetByIDs(ids)
 }
 
-func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*InfoBlock, error) {
+func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts2.User) (*InfoBlock, error) {
 	if user != nil {
 		id := user.GetID()
 		infoBlock.UserID = &id
@@ -60,7 +60,7 @@ func (s *InfoBlockService) Update(infoBlock *InfoBlock) (*InfoBlock, error) {
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contracts.InfoBlock) error {
+func (s *InfoBlockService) Attach(resource contracts2.Resource, infoBlock contracts2.InfoBlock) error {
 	hasRepo, err := s.resourceRepo.GetByID(infoBlock.GetRelationID())
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -84,7 +84,7 @@ func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contrac
 	return err
 }
 
-func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*InfoBlockResponse {
+func (s *InfoBlockService) GetForResource(resource contracts2.Resource) []*InfoBlockResponse {
 	infoBlocks, err := s.infoBlockRepo.GetForResource(resource)
 	if err != nil {
 		logger.Error(err)
@@ -93,7 +93,7 @@ func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*InfoBl
 	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
 }
 
-func (s *InfoBlockService) DeleteForResource(resource contracts.Resource) error {
+func (s *InfoBlockService) DeleteForResource(resource contracts2.Resource) error {
 	byResource, err := s.resourceRepo.GetByResource(resource)
 	if err != nil {
 		return err
@@ -160,7 +160,7 @@ func (s *InfoBlockService) Delete(infoBlocks *InfoBlock) (err error) {
 	return s.infoBlockRepo.Delete(infoBlocks)
 }
 
-func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts.User) (infoBlock *InfoBlock, err error) {
+func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts2.User) (infoBlock *InfoBlock, err error) {
 	blockForm := app.LoadStruct(&InfoBlock{}, form).(*InfoBlock)
 
 	if found == nil {
@@ -176,7 +176,7 @@ func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock,
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts.Gallery, 0)
+		slice := make([]contracts2.Gallery, 0)
 		for _, gRequest := range form.Galleries {
 			if gRequest == nil {
 				continue

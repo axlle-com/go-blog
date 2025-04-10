@@ -1,13 +1,13 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"sync"
 
 	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/post/models"
@@ -82,8 +82,8 @@ func (s *PostsService) GetAggregates(posts []*models.Post) []*models.Post {
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
+	var users map[uint]contracts2.User
+	var templates map[uint]contracts2.Template
 	var categories map[uint]*models.PostCategory
 
 	wg.Add(3)
@@ -138,6 +138,6 @@ func (s *PostsService) GetAggregates(posts []*models.Post) []*models.Post {
 	return posts
 }
 
-func (s *PostsService) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
+func (s *PostsService) WithPaginate(p contracts2.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
 	return s.postRepo.WithPaginate(p, filter)
 }

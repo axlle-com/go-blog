@@ -1,9 +1,8 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/app/models/contracts"
 	"time"
-
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 type PostTag struct {

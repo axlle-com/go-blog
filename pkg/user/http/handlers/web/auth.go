@@ -1,9 +1,9 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/pkg/app/db"
-	. "github.com/axlle-com/blog/pkg/app/errors"
-	"github.com/axlle-com/blog/pkg/app/logger"
+	"github.com/axlle-com/blog/app/db"
+	. "github.com/axlle-com/blog/app/errors"
+	"github.com/axlle-com/blog/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"

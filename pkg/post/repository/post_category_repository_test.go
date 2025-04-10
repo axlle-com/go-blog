@@ -2,8 +2,8 @@ package repository_test
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/pkg/app/config"
-	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/db"
 	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
 	"testing"
 

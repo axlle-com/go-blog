@@ -1,13 +1,13 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/app/logger"
+	app "github.com/axlle-com/blog/app/models"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
 
 	"encoding/json"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	app "github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
 )
 
 type Post struct {
@@ -43,11 +43,11 @@ type Post struct {
 	UpdatedAt          *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
-	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
-	Category   *PostCategory         `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
-	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User       contracts.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries  []contracts2.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contracts2.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Category   *PostCategory          `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
+	Template   contracts2.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User       contracts2.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 
 	dirty      map[string]interface{} `ignore:"true"`
 	original   *Post                  `ignore:"true"`

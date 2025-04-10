@@ -3,8 +3,8 @@ package alias
 import (
 	"errors"
 	"fmt"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"gorm.io/gorm"
 	"regexp"
 	"strings"

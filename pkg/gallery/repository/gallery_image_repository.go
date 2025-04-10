@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	app "github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/logger"
+	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"gorm.io/gorm"
 )

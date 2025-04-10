@@ -1,9 +1,9 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	. "github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	. "github.com/axlle-com/blog/pkg/post/repository"
 	. "github.com/axlle-com/blog/pkg/post/service"

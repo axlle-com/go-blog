@@ -1,7 +1,7 @@
 package alias
 
 import (
-	"github.com/axlle-com/blog/pkg/app/db"
+	"github.com/axlle-com/blog/app/db"
 	"gorm.io/gorm"
 )
 

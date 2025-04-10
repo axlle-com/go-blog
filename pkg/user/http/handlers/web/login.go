@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/pkg/app/errors"
+	. "github.com/axlle-com/blog/app/errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"log"

@@ -2,16 +2,16 @@ package main
 
 import (
 	"encoding/gob"
+	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
+	routes2 "github.com/axlle-com/blog/app/routes"
+	"github.com/axlle-com/blog/app/web"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
-	"github.com/axlle-com/blog/pkg/app"
-	"github.com/axlle-com/blog/pkg/app/config"
-	"github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/models"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/app/routes"
-	"github.com/axlle-com/blog/pkg/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
 )
 
@@ -42,7 +42,7 @@ func Init(cfg contracts.Config) *gin.Engine {
 
 	//web.InitMinify()
 	web.NewTemplate(router)
-	routes.InitializeApiRoutes(router, container)
-	routes.InitializeWebRoutes(router, container)
+	routes2.InitializeApiRoutes(router, container)
+	routes2.InitializeWebRoutes(router, container)
 	return router
 }

@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/axlle-com/blog/pkg/post/repository"
 	"gorm.io/gorm"
@@ -39,7 +39,7 @@ func (s *PostTagService) UpdatePostTag(postTag *models.PostTag) (*models.PostTag
 	return postTag, nil
 }
 
-func (s *PostTagService) Attach(resource contracts.Resource, postTag contracts.PostTag) error {
+func (s *PostTagService) Attach(resource contracts2.Resource, postTag contracts2.PostTag) error {
 	hasRepo, err := s.resourceRepo.GetByParams(resource.GetUUID(), postTag.GetID())
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -55,7 +55,7 @@ func (s *PostTagService) Attach(resource contracts.Resource, postTag contracts.P
 	return nil
 }
 
-func (s *PostTagService) DeleteForResource(resource contracts.Resource) (err error) {
+func (s *PostTagService) DeleteForResource(resource contracts2.Resource) (err error) {
 	byResource, err := s.resourceRepo.GetByResource(resource)
 	if err != nil {
 		return err

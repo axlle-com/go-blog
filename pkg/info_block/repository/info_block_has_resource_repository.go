@@ -2,8 +2,8 @@ package repository
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/pkg/app/db"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"

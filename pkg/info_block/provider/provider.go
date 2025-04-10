@@ -1,20 +1,20 @@
 package provider
 
 import (
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 )
 
 type InfoBlockProvider interface {
-	GetForResource(contracts.Resource) []contracts.InfoBlock
-	GetAll() []contracts.InfoBlock
-	Attach(id uint, resource contracts.Resource) (infoBlocks []contracts.InfoBlock, err error)
-	SaveForm(block any, resource contracts.Resource) (contracts.InfoBlock, error)
-	SaveFormBatch(blocks []any, resource contracts.Resource) (infoBlock []contracts.InfoBlock, err error)
-	DeleteForResource(contracts.Resource) error
+	GetForResource(contracts2.Resource) []contracts2.InfoBlock
+	GetAll() []contracts2.InfoBlock
+	Attach(id uint, resource contracts2.Resource) (infoBlocks []contracts2.InfoBlock, err error)
+	SaveForm(block any, resource contracts2.Resource) (contracts2.InfoBlock, error)
+	SaveFormBatch(blocks []any, resource contracts2.Resource) (infoBlock []contracts2.InfoBlock, err error)
+	DeleteForResource(contracts2.Resource) error
 }
 
 func NewProvider(
@@ -32,20 +32,20 @@ type provider struct {
 	collectionService *service.InfoBlockCollectionService
 }
 
-func (p *provider) GetForResource(resource contracts.Resource) []contracts.InfoBlock {
+func (p *provider) GetForResource(resource contracts2.Resource) []contracts2.InfoBlock {
 	infoBlocks := p.blockService.GetForResource(resource)
 	if infoBlocks == nil {
 		return nil
 	}
 
-	collection := make([]contracts.InfoBlock, 0, len(infoBlocks))
+	collection := make([]contracts2.InfoBlock, 0, len(infoBlocks))
 	for _, infoBlock := range infoBlocks {
 		collection = append(collection, infoBlock)
 	}
 	return collection
 }
 
-func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
+func (p *provider) DeleteForResource(resource contracts2.Resource) (err error) {
 	err = p.blockService.DeleteForResource(resource)
 	if err != nil {
 		return err
@@ -54,8 +54,8 @@ func (p *provider) DeleteForResource(resource contracts.Resource) (err error) {
 	return nil
 }
 
-func (p *provider) GetAll() []contracts.InfoBlock {
-	var collection []contracts.InfoBlock
+func (p *provider) GetAll() []contracts2.InfoBlock {
+	var collection []contracts2.InfoBlock
 	infoBlocks, err := p.collectionService.GetAll()
 	if err == nil {
 		for _, infoBlock := range infoBlocks {
@@ -67,7 +67,7 @@ func (p *provider) GetAll() []contracts.InfoBlock {
 	return nil
 }
 
-func (p *provider) Attach(id uint, resource contracts.Resource) (infoBlocks []contracts.InfoBlock, err error) {
+func (p *provider) Attach(id uint, resource contracts2.Resource) (infoBlocks []contracts2.InfoBlock, err error) {
 	infoBlock, err := p.blockService.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (p *provider) Attach(id uint, resource contracts.Resource) (infoBlocks []co
 	return infoBlocks, nil
 }
 
-func (p *provider) SaveForm(block any, resource contracts.Resource) (infoBlock contracts.InfoBlock, err error) {
+func (p *provider) SaveForm(block any, resource contracts2.Resource) (infoBlock contracts2.InfoBlock, err error) {
 	ib := app.LoadStruct(&models.InfoBlockResponse{}, block).(*models.InfoBlockResponse)
 
 	infoBlock, err = p.blockService.GetByID(ib.GetID())
@@ -98,7 +98,7 @@ func (p *provider) SaveForm(block any, resource contracts.Resource) (infoBlock c
 	return ib, nil
 }
 
-func (p *provider) SaveFormBatch(blocks []any, resource contracts.Resource) (infoBlock []contracts.InfoBlock, err error) {
+func (p *provider) SaveFormBatch(blocks []any, resource contracts2.Resource) (infoBlock []contracts2.InfoBlock, err error) {
 	var blocksIDs []uint
 	infoBlockResponses := make([]*models.InfoBlockResponse, 0, len(blocks))
 	for _, block := range blocks {

@@ -1,9 +1,9 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/pkg/app/http/response"
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models"
+	"github.com/axlle-com/blog/app/http/response"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
 	"net/http"

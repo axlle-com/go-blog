@@ -2,7 +2,7 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/pkg/app/http/response"
+	"github.com/axlle-com/blog/app/http/response"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/gin-gonic/gin"
 	"net/http"

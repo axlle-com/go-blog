@@ -1,14 +1,14 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/pkg/app/logger"
-	"github.com/axlle-com/blog/pkg/app/models/contracts"
-	app "github.com/axlle-com/blog/pkg/app/service"
+	"github.com/axlle-com/blog/app/logger"
+	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	app "github.com/axlle-com/blog/app/service"
 	http "github.com/axlle-com/blog/pkg/post/http/models"
 	"github.com/axlle-com/blog/pkg/post/models"
 )
 
-func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.User) (*models.Post, error) {
+func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts2.User) (*models.Post, error) {
 	postForm := app.LoadStruct(&models.Post{}, form).(*models.Post)
 	post, err := s.Save(postForm, user)
 	if err != nil {
@@ -16,7 +16,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.Use
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts.Gallery, 0)
+		slice := make([]contracts2.Gallery, 0)
 		for _, gRequest := range form.Galleries {
 			if gRequest == nil {
 				continue
@@ -47,7 +47,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.Use
 	return post, nil
 }
 
-func (s *PostService) Save(post *models.Post, user contracts.User) (*models.Post, error) {
+func (s *PostService) Save(post *models.Post, user contracts2.User) (*models.Post, error) {
 	id := user.GetID()
 	post.UserID = &id
 	var alias string

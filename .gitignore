@@ -5,6 +5,6 @@
 /dev.env
 /src/public/uploads/
 /.env
-/pkg/app/testutils/.env
+/app/testutils/.env
 /coverage.out
 /coverage.html

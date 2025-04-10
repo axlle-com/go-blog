@@ -1,7 +1,7 @@
 package web
 
 import (
-	app "github.com/axlle-com/blog/pkg/app/models"
+	app "github.com/axlle-com/blog/app/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	"github.com/axlle-com/blog/pkg/post/service"

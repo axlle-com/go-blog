@@ -16,7 +16,7 @@ type GalleryProvider interface {
 	GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery
 	GetAll() []contracts2.Gallery
 	SaveFromForm(g any, resource contracts2.Resource) (contracts2.Gallery, error)
-	DeleteForResource(contracts2.Resource) error
+	DetachResource(contracts2.Resource) error
 }
 
 func NewProvider(
@@ -86,7 +86,7 @@ func (p *provider) GetIndexesForResources(resources []contracts2.Resource) map[u
 	return nil
 }
 
-func (p *provider) DeleteForResource(resource contracts2.Resource) (err error) {
+func (p *provider) DetachResource(resource contracts2.Resource) (err error) {
 	err = p.service.DeleteForResource(resource)
 	if err != nil {
 		return err

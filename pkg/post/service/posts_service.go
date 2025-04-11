@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/axlle-com/blog/app/logger"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	provider2 "github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"sync"
@@ -23,6 +24,7 @@ type PostsService struct {
 	aliasProvider     alias.AliasProvider
 	userProvider      user.UserProvider
 	templateProvider  template.TemplateProvider
+	infoBlockProvider provider2.InfoBlockProvider
 }
 
 func NewPostsService(
@@ -34,6 +36,7 @@ func NewPostsService(
 	aliasProvider alias.AliasProvider,
 	userProvider user.UserProvider,
 	templateProvider template.TemplateProvider,
+	infoBlockProvider provider2.InfoBlockProvider,
 ) *PostsService {
 	return &PostsService{
 		postRepo:          postRepo,
@@ -44,6 +47,7 @@ func NewPostsService(
 		aliasProvider:     aliasProvider,
 		userProvider:      userProvider,
 		templateProvider:  templateProvider,
+		infoBlockProvider: infoBlockProvider,
 	}
 }
 

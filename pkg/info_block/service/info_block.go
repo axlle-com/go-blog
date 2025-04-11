@@ -8,7 +8,6 @@ import (
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -93,53 +92,8 @@ func (s *InfoBlockService) GetForResource(resource contracts2.Resource) []*InfoB
 	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
 }
 
-func (s *InfoBlockService) DeleteForResource(resource contracts2.Resource) error {
-	byResource, err := s.resourceRepo.GetByResource(resource)
-	if err != nil {
-		return err
-	}
-	if len(byResource) == 0 {
-		return nil
-	}
-
-	// Группируем записи по InfoBlockID
-	blockResources := make(map[uint][]uuid.UUID)
-	for _, res := range byResource {
-		blockResources[res.InfoBlockID] = append(blockResources[res.InfoBlockID], res.ResourceUUID)
-	}
-
-	var detachBlockIDs []uint
-	var deleteBlockIDs []uint
-
-	// Определяем для каждой, сколько ресурсов ей принадлежит
-	for infoBlockID, resources := range blockResources {
-		if len(resources) > 1 {
-			detachBlockIDs = append(detachBlockIDs, infoBlockID)
-		} else {
-			deleteBlockIDs = append(deleteBlockIDs, infoBlockID)
-		}
-	}
-
-	if len(detachBlockIDs) > 0 {
-		for _, blockID := range detachBlockIDs {
-			err = s.resourceRepo.DeleteByParams(resource.GetUUID(), blockID)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(deleteBlockIDs) > 0 {
-		blocks, err := s.infoBlockRepo.GetByIDs(deleteBlockIDs)
-		if err != nil {
-			return err
-		}
-		err = s.DeleteInfoBlocks(blocks)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (s *InfoBlockService) DetachResource(resource contracts2.Resource) error {
+	return s.resourceRepo.DetachResource(resource)
 }
 
 func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error) {
@@ -157,6 +111,9 @@ func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error)
 }
 
 func (s *InfoBlockService) Delete(infoBlocks *InfoBlock) (err error) {
+	if err = s.resourceRepo.DetachInfoBlock(infoBlocks); err != nil {
+		return err
+	}
 	return s.infoBlockRepo.Delete(infoBlocks)
 }
 

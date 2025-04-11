@@ -76,7 +76,7 @@ func (s *CategoryService) GetByID(id uint) (*PostCategory, error) {
 }
 
 func (s *CategoryService) Delete(category *PostCategory) error {
-	err := s.galleryProvider.DeleteForResource(category)
+	err := s.galleryProvider.DetachResource(category)
 	if err != nil {
 		return err
 	}

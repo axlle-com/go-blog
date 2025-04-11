@@ -15,11 +15,11 @@ type InfoBlockHasResourceRepository interface {
 	DeleteByParams(resourceUUID uuid.UUID, infoBlockID uint) error
 	GetByID(id uint) (*models.InfoBlockHasResource, error)
 	GetForResource(contracts.Resource) ([]*models.InfoBlockHasResource, error)
-	GetByGalleryID(uint) (*models.InfoBlockHasResource, error)
 	GetByResource(c contracts.Resource) ([]*models.InfoBlockHasResource, error)
 	Create(*models.InfoBlockHasResource) error
 	Delete(uint) error
 	DetachResource(contracts.Resource) error
+	DetachInfoBlock(infoBlock *models.InfoBlock) error
 	Update(infoBlockHasResource *models.InfoBlockHasResource) error
 }
 
@@ -119,21 +119,18 @@ func (r *infoBlockResource) DetachResource(resource contracts.Resource) error {
 	return err
 }
 
-func (r *infoBlockResource) GetByGalleryID(id uint) (*models.InfoBlockHasResource, error) {
-	var infoBlockHasResource models.InfoBlockHasResource
-	if err := r.db.
-		Where("info_block_id = ?", id).
-		First(&infoBlockHasResource).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
+func (r *infoBlockResource) DetachInfoBlock(infoBlock *models.InfoBlock) error {
+	err := r.db.
+		Where("info_block_id = ?", infoBlock.ID).
+		Delete(&models.InfoBlockHasResource{}).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
 	}
-	return &infoBlockHasResource, nil
+	return err
 }
 
 func (r *infoBlockResource) Delete(id uint) error {
-	err := r.db.Where("info_block_id = ?", id).Delete(&models.InfoBlockHasResource{}).Error
+	err := r.db.Where("id = ?", id).Delete(&models.InfoBlockHasResource{}).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil

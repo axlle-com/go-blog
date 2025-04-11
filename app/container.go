@@ -116,7 +116,7 @@ func New() *Container {
 	ptService := service.NewPostTagService(ptRepo, ptrRepo)
 
 	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider, ibProvider)
-	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider)
+	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider, ibProvider)
 
 	return &Container{
 		FileService:  fileService,

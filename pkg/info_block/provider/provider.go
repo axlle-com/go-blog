@@ -14,7 +14,7 @@ type InfoBlockProvider interface {
 	Attach(id uint, resource contracts2.Resource) (infoBlocks []contracts2.InfoBlock, err error)
 	SaveForm(block any, resource contracts2.Resource) (contracts2.InfoBlock, error)
 	SaveFormBatch(blocks []any, resource contracts2.Resource) (infoBlock []contracts2.InfoBlock, err error)
-	DeleteForResource(contracts2.Resource) error
+	DetachResource(contracts2.Resource) error
 }
 
 func NewProvider(
@@ -45,8 +45,8 @@ func (p *provider) GetForResource(resource contracts2.Resource) []contracts2.Inf
 	return collection
 }
 
-func (p *provider) DeleteForResource(resource contracts2.Resource) (err error) {
-	err = p.blockService.DeleteForResource(resource)
+func (p *provider) DetachResource(resource contracts2.Resource) (err error) {
+	err = p.blockService.DetachResource(resource)
 	if err != nil {
 		return err
 	}

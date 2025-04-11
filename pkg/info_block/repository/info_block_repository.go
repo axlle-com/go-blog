@@ -73,7 +73,6 @@ func (r *infoBlockRepository) WithPaginate(p contracts2.Paginator, filter *model
 func (r *infoBlockRepository) Update(infoBlock *models.InfoBlock) error {
 	infoBlock.Updating()
 	return r.db.Select(
-		"UserID",
 		"TemplateID",
 		"MetaTitle",
 		"Media",

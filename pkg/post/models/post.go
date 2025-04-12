@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
@@ -200,5 +201,8 @@ func (p *Post) isDirty(s string) bool {
 }
 
 func (p *Post) AdminURL() string {
-	return "/admin/posts"
+	if p.ID == 0 {
+		return "/admin/posts"
+	}
+	return fmt.Sprintf("/admin/posts/%d", p.ID)
 }

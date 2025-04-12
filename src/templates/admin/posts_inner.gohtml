@@ -22,7 +22,7 @@
                     <thead class="thead-primary">
                     <tr class="column-filter">
                         <th colspan="2" class="width-5"></th>
-                        <th>
+                        <th class="width-5">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right">
                                 <input
                                         form="index-form-filter"
@@ -67,7 +67,7 @@
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
-                        <th class="width-80">
+                        <th class="width-30">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right border-primary">
                                 <select
                                         form="index-form-filter"
@@ -88,7 +88,7 @@
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
-                        <th class="width-200">
+                        <th class="width-20">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right border-primary">
                                 <select
                                         form="index-form-filter"
@@ -109,7 +109,7 @@
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
-                        <th class="width-200">
+                        <th class="width-10">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right">
                                 <input
                                         form="index-form-filter"
@@ -136,7 +136,7 @@
                             </div>
                         </th>
                         <th scope="col" class="text-center">Детали</th>
-                        <th scope="col" class="width-7"><a href="javascript:void(0)" class="sorting asc">ID</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting asc">ID</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Заголовок</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Категория</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Шаблон</a></th>
@@ -172,16 +172,16 @@
                             <td class="td-col-date">{{ .Date }}</td>
                             <td class="td-col-action text-center">
                                 <div class="btn-group btn-group-xs" role="group">
-                                    <a href="{{ .AdminURL }}/{{ .ID }}"
+                                    <a href="{{ .AdminURL }}"
                                        class="btn btn-link btn-icon bigger-130 text-success">
                                         <i data-feather="edit"></i>
                                     </a>
-                                    <a href="{{ .AdminURL }}/print/{{ .ID }}"
+                                    <a href="{{ .AdminURL }}/print"
                                        class="btn btn-link btn-icon bigger-130 text-info" target="_blank">
                                         <i data-feather="printer"></i>
                                     </a>
                                     <form class="btn btn-link btn-icon bigger-130 delete-button" id="global-form"
-                                          method="delete" action="{{ .AdminURL }}/{{ .ID }}?{{ $.paginator.PrintFullQuery }}">
+                                          method="delete" action="{{ .AdminURL }}?{{ $.paginator.PrintFullQuery }}">
                                         <a class="text-danger js-delete-button">
                                             <i data-feather="trash"></i>
                                         </a>

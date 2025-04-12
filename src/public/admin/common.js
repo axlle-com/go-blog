@@ -16,7 +16,7 @@ const _auth = {
 };
 const _form = {
     _block: {},
-    confirm: function (button, title) {
+    confirm: function (button, title, confirmButtonText = 'Сохранить') {
         const _this = this;
         _this._block.on('click', button, function (e) {
             const saveButton = $(this);
@@ -25,7 +25,7 @@ const _form = {
                 title: title,
                 text: 'Изменения нельзя будет отменить',
                 showDenyButton: true,
-                confirmButtonText: 'Сохранить',
+                confirmButtonText: confirmButtonText,
                 denyButtonText: 'Отменить',
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -58,7 +58,7 @@ const _form = {
         this._block = $(selector);
         if (this._block.length) {
             this.confirm('.js-save-button', 'Вы уверены что хотите сохранить все изменения?');
-            this.confirm('.js-delete-button', 'Вы уверены что хотите удалить?');
+            this.confirm('.js-delete-button', 'Вы уверены что хотите удалить?', 'Удалить');
         }
     }
 };
@@ -348,6 +348,7 @@ const _infoBlock = {
     add: function () {
         const _this = this;
         $('body').on('click', '.js-info-blocks-add', function (evt) {
+            _this._block = $('.js-info-block-saved');
             const select = $(this).closest('.js-info-blocks-general-block').find('.js-info-blocks-select');
             const action = select.find('option:selected').data('action');
             if (!action) {
@@ -355,10 +356,17 @@ const _infoBlock = {
                 return
             }
             const request = new _glob.request({action});
-            request.setMethod('POST').send((response) => {
+            request.setMethod('GET').send((response) => {
                 select.val(null).trigger('change');
                 let html = $(response.data.view);
-                _this._block.html(html);
+                const count = $('input[name^="info_blocks["][name$="[id]"]').length;
+                html.find('[name^="info_blocks["]').each(function () {
+                    const $el = $(this);
+                    const name = $el.attr('name');
+                    const newName = name.replace(/^info_blocks\[\d+\]/, 'info_blocks[' + count + ']');
+                    $el.attr('name', newName);
+                });
+                _this._block.append(html);
                 _config.run();
             });
         });
@@ -381,10 +389,27 @@ const _infoBlock = {
             }
         });
     },
+    detach: function () {
+        const _this = this;
+        $('body').on('click', '.js-info-blocks-detach', function (evt) {
+            const action = $(this).attr('data-action');
+            const block = $(this).closest('.js-info-blocks-item');
+            if (action) {
+                const request = new _glob.request({action});
+                request.setMethod('DELETE').send((response) => {
+                    _cl_(response)
+                    block.remove();
+                });
+            } else {
+                block.remove();
+            }
+        });
+    },
     run: function () {
         this._block = $('.js-info-block-saved');
         this.add();
         this.delete();
+        this.detach();
     }
 };
 const _config = {

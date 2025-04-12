@@ -101,19 +101,20 @@ func New() *Container {
 	pRepo := repository.NewPostRepo()
 
 	cRepo := repository.NewCategoryRepo()
-	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
-	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv)
 
 	ibhrRepo := repository2.NewResourceRepo()
 	ibRepo := repository2.NewInfoBlockRepo()
 
 	ibcService := service2.NewInfoBlockCollectionService(ibRepo, ibhrRepo, gProvider, tProvider, uProvider)
-	ibService := service2.NewInfoBlockService(ibRepo, ibcService, ibhrRepo, gProvider)
+	ibService := service2.NewInfoBlockService(ibRepo, ibcService, ibhrRepo, gProvider, tProvider, uProvider)
 	ibProvider := provider.NewProvider(ibService, ibcService)
 
 	ptRepo := repository.NewPostTagRepo()
 	ptrRepo := repository.NewResourceRepo()
 	ptService := service.NewPostTagService(ptRepo, ptrRepo)
+
+	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
+	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv, ibProvider)
 
 	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider, ibProvider)
 	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider, ibProvider)
@@ -207,6 +208,7 @@ func (c *Container) CategoryWebController() web3.ControllerCategory {
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+		c.InfoBlockProvider,
 	)
 }
 
@@ -216,6 +218,7 @@ func (c *Container) CategoryController() ajax2.CategoryController {
 		c.CategoryService,
 		c.TemplateProvider,
 		c.UserProvider,
+		c.InfoBlockProvider,
 	)
 }
 

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
@@ -92,7 +93,10 @@ func (i *InfoBlock) UserLastName() string {
 }
 
 func (i *InfoBlock) AdminURL() string {
-	return "/admin/info-blocks"
+	if i.ID == 0 {
+		return "/admin/info-blocks"
+	}
+	return fmt.Sprintf("/admin/info-blocks/%d", i.ID)
 }
 
 func (i *InfoBlock) Date() string {

@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/errors"
 	. "github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func NewInfoBlockFilter() *InfoBlockFilter {
@@ -52,5 +53,12 @@ func (p *InfoBlockFilter) PrintPostCategoryID() uint {
 }
 
 func (p *InfoBlockFilter) GetURL() string {
-	return string("posts?" + p.GetQueryString())
+	return string("info-blocks?" + p.GetQueryString())
+}
+
+func (p *InfoBlockFilter) PrintID() string {
+	if p.ID == nil {
+		return ""
+	}
+	return strconv.Itoa(int(*p.ID))
 }

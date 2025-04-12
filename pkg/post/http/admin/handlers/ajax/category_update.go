@@ -1,7 +1,6 @@
 package ajax
 
 import (
-	"fmt"
 	"github.com/axlle-com/blog/app/logger"
 	. "github.com/axlle-com/blog/pkg/post/http/models"
 	"github.com/gin-gonic/gin"
@@ -47,17 +46,23 @@ func (c *categoryController) UpdateCategory(ctx *gin.Context) {
 	}
 
 	templates := c.templateProvider.GetAll()
+	infoBlocks := c.infoBlockProvider.GetAll()
 
 	data := gin.H{
 		"categories": categories,
 		"templates":  templates,
 		"category":   category,
+		"collection": gin.H{
+			"infoBlocks":         infoBlocks,
+			"ifoBlockCollection": category.InfoBlocks,
+			"relationURL":        category.AdminURL(),
+		},
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
 			"view":     c.RenderView("admin.category_inner", data, ctx),
-			"url":      fmt.Sprintf("/admin/categories/%d", category.ID),
+			"url":      category.AdminURL(),
 			"category": category,
 		},
 	})

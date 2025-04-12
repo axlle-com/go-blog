@@ -45,7 +45,7 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "admin.categories", gin.H{
 		"title":          "Страница категорий",
-		"userProvider":   user,
+		"user":           user,
 		"postCategories": postCategories,
 		"categories":     categories,
 		"category":       &PostCategory{},

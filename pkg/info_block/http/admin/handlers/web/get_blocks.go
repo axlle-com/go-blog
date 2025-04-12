@@ -32,17 +32,18 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 
 	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
+
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
-
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	ctx.HTML(http.StatusOK, "admin.blocks", gin.H{
 		"title":      "Страница инфо блоков",
 		"user":       user,
 		"infoBlocks": blocks,
+		"infoBlock":  &InfoBlock{},
 		"templates":  templates,
 		"users":      users,
 		"paginator":  paginator,

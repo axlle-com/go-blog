@@ -53,7 +53,7 @@ func (r *permissionRepository) Delete(id uint) error {
 
 func (r *permissionRepository) GetAll() ([]models.Permission, error) {
 	var m []models.Permission
-	if err := r.db.Find(&m).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&m).Error; err != nil {
 		return nil, err
 	}
 	return m, nil

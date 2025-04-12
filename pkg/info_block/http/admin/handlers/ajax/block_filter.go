@@ -26,16 +26,19 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 
 	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL("/admin/info-blocks")
-	blocks, err := c.blockCollectionService.WithPaginate(paginator, filter)
+
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
+	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
 	data := response.Body{
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
+		"infoBlock":  &InfoBlock{},
 		"templates":  templates,
 		"users":      users,
 		"paginator":  paginator,

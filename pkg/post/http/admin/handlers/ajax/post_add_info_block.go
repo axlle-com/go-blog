@@ -26,7 +26,7 @@ func (c *controller) AddPostInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	postInfoBlocks, err := c.infoBlock.Attach(uint(infoBlockId), found)
+	ifoBlockCollection, err := c.infoBlock.Attach(uint(infoBlockId), found)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
 		return
@@ -34,16 +34,15 @@ func (c *controller) AddPostInfoBlock(ctx *gin.Context) {
 
 	infoBlocks := c.infoBlock.GetAll()
 	data := gin.H{
-		"infoBlocks":     infoBlocks,
-		"postInfoBlocks": postInfoBlocks,
-		"relationID":     found.ID,
+		"infoBlocks":         infoBlocks,
+		"ifoBlockCollection": ifoBlockCollection,
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"view":           c.RenderView("admin.info_block_in_item_inner", data, ctx),
-			"infoBlocks":     infoBlocks,
-			"postInfoBlocks": postInfoBlocks,
+			"view":               c.RenderView("admin.info_block_in_item_inner", data, ctx),
+			"infoBlocks":         infoBlocks,
+			"ifoBlockCollection": ifoBlockCollection,
 		},
 	})
 }

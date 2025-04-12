@@ -92,7 +92,7 @@ func (r *galleryRepository) DeleteByIDs(ids []uint) (err error) {
 
 func (r *galleryRepository) GetAll() ([]*models.Gallery, error) {
 	var galleries []*models.Gallery
-	if err := r.db.Find(&galleries).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&galleries).Error; err != nil {
 		return nil, err
 	}
 	return galleries, nil

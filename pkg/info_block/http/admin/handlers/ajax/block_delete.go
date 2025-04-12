@@ -49,14 +49,16 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	users := c.userProvider.GetAll()
 	templates := c.templateProvider.GetAll()
 
-	blocks, err := c.blockCollectionService.WithPaginate(paginator, filter)
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
 		logger.Error(err)
 	}
+	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	data := response.Body{
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
+		"infoBlock":  &InfoBlock{},
 		"templates":  templates,
 		"users":      users,
 		"paginator":  paginator,

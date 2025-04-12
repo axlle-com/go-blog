@@ -90,7 +90,7 @@ func (r *postRepository) Delete(post *models.Post) error {
 
 func (r *postRepository) GetAll() ([]*models.Post, error) {
 	var posts []*models.Post
-	if err := r.db.Find(&posts).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
@@ -100,21 +100,24 @@ func (r *postRepository) WithPaginate(p contracts.Paginator, filter *models.Post
 	var posts []*models.Post
 	var total int64
 
+	post := models.Post{}
+	table := post.GetTable()
+
 	query := r.db.Model(&posts)
 
 	// TODO WHERE IN; LIKE
 	for col, val := range filter.GetMap() {
 		if col == "title" {
-			query = query.Where(fmt.Sprintf("posts.%v ilike ?", col), fmt.Sprintf("%%%v%%", val))
+			query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
 			continue
 		}
-		query = query.Where(fmt.Sprintf("posts.%v = ?", col), val)
+		query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
 	}
 
 	query.Count(&total)
 
 	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
-		Order("posts.id ASC").
+		Order(fmt.Sprintf("%s.id ASC", table)).
 		Scan(&posts).Error
 
 	p.SetTotal(int(total))

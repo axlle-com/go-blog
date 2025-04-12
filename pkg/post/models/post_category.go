@@ -1,7 +1,8 @@
 package models
 
 import (
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"fmt"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
 	"time"
 )
@@ -31,14 +32,18 @@ type PostCategory struct {
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
-	Category  *PostCategory        `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
-	Galleries []contracts2.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	Template  contracts2.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User      contracts2.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Category   *PostCategory         `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
+	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User       contracts.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 }
 
 func (c *PostCategory) AdminURL() string {
-	return "/admin/categories"
+	if c.ID == 0 {
+		return "/admin/categories"
+	}
+	return fmt.Sprintf("/admin/categories/%d", c.ID)
 }
 
 func (c *PostCategory) GetUUID() uuid.UUID {

@@ -10,25 +10,22 @@ import (
 
 func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts2.User) (*models.Post, error) {
 	postForm := app.LoadStruct(&models.Post{}, form).(*models.Post)
-	post, err := s.Save(postForm, user)
+	model, err := s.Save(postForm, user)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts2.Gallery, 0)
-		for _, gRequest := range form.Galleries {
-			if gRequest == nil {
-				continue
-			}
-
-			g, err := s.galleryProvider.SaveFromForm(gRequest, post)
-			if err != nil || g == nil {
-				continue
-			}
-			slice = append(slice, g)
+		interfaceSlice := make([]any, len(form.Galleries))
+		for i, gallery := range form.Galleries {
+			interfaceSlice[i] = gallery
 		}
-		post.Galleries = slice
+
+		slice, err := s.galleryProvider.SaveFormBatch(interfaceSlice, model)
+		if err != nil {
+			logger.Error(err)
+		}
+		model.Galleries = slice
 	}
 
 	if len(form.InfoBlocks) > 0 {
@@ -37,14 +34,14 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts2.Us
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, post)
+		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model)
 		if err != nil {
 			logger.Error(err)
 		}
-		post.InfoBlocks = slice
+		model.InfoBlocks = slice
 	}
 
-	return post, nil
+	return model, nil
 }
 
 func (s *PostService) Save(post *models.Post, user contracts2.User) (*models.Post, error) {

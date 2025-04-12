@@ -44,15 +44,15 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 	posts := c.postsService.GetAggregates(postsTemp)
 
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
-		"title":        "Страница постов",
-		"userProvider": user,
-		"post":         &Post{},
-		"posts":        posts,
-		"categories":   categories,
-		"templates":    templates,
-		"users":        users,
-		"paginator":    paginator,
-		"filter":       filter,
-		"menu":         models2.NewMenu(ctx.FullPath()),
+		"title":      "Страница постов",
+		"user":       user,
+		"post":       &Post{},
+		"posts":      posts,
+		"categories": categories,
+		"templates":  templates,
+		"users":      users,
+		"paginator":  paginator,
+		"filter":     filter,
+		"menu":       models2.NewMenu(ctx.FullPath()),
 	})
 }

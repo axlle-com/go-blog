@@ -3,6 +3,7 @@ package web
 import (
 	app "github.com/axlle-com/blog/app/models"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/axlle-com/blog/pkg/info_block/provider"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -21,6 +22,7 @@ func NewWebControllerCategory(
 	template template.TemplateProvider,
 	user user.UserProvider,
 	gallery gallery.GalleryProvider,
+	infoBlockProvider provider.InfoBlockProvider,
 ) ControllerCategory {
 	return &controllerCategory{
 		categoriesService: categoriesService,
@@ -28,6 +30,7 @@ func NewWebControllerCategory(
 		templateProvider:  template,
 		userProvider:      user,
 		galleryProvider:   gallery,
+		infoBlockProvider: infoBlockProvider,
 	}
 }
 
@@ -39,4 +42,5 @@ type controllerCategory struct {
 	templateProvider  template.TemplateProvider
 	userProvider      user.UserProvider
 	galleryProvider   gallery.GalleryProvider
+	infoBlockProvider provider.InfoBlockProvider
 }

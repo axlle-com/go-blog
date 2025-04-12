@@ -89,7 +89,7 @@ func (r *postTagRepository) DeleteByIDs(ids []uint) (err error) {
 
 func (r *postTagRepository) GetAll() ([]*models.PostTag, error) {
 	var galleries []*models.PostTag
-	if err := r.db.Find(&galleries).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&galleries).Error; err != nil {
 		return nil, err
 	}
 	return galleries, nil

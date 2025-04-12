@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"github.com/axlle-com/blog/app/logger"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
@@ -8,6 +9,8 @@ import (
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/google/uuid"
+	"strings"
+	"sync"
 )
 
 type GalleryProvider interface {
@@ -15,7 +18,8 @@ type GalleryProvider interface {
 	GetForResources([]contracts2.Resource) []contracts2.Gallery
 	GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery
 	GetAll() []contracts2.Gallery
-	SaveFromForm(g any, resource contracts2.Resource) (contracts2.Gallery, error)
+	SaveForm(g any, resource contracts2.Resource) (contracts2.Gallery, error)
+	SaveFormBatch(anys []any, resource contracts2.Resource) (galleries []contracts2.Gallery, err error)
 	DetachResource(contracts2.Resource) error
 }
 
@@ -108,7 +112,7 @@ func (p *provider) GetAll() []contracts2.Gallery {
 	return nil
 }
 
-func (p *provider) SaveFromForm(g any, resource contracts2.Resource) (gallery contracts2.Gallery, err error) {
+func (p *provider) SaveForm(g any, resource contracts2.Resource) (gallery contracts2.Gallery, err error) {
 	gal := app.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
 	if gal.ID == 0 {
 		gallery, err = p.service.CreateGallery(gal)
@@ -126,4 +130,67 @@ func (p *provider) SaveFromForm(g any, resource contracts2.Resource) (gallery co
 	}
 
 	return gallery, nil
+}
+
+func (p *provider) SaveFormBatch(anys []any, resource contracts2.Resource) (galleries []contracts2.Gallery, err error) {
+	var wg sync.WaitGroup
+
+	// Блокировки для конкурентного доступа к срезам.
+	var galleriesMu sync.Mutex
+	var errorsMu sync.Mutex
+
+	var errs []error
+
+	for _, gall := range anys {
+		wg.Add(1)
+		// Передаем gall как параметр, чтобы избежать проблем замыкания.
+		go func(g any) {
+			defer wg.Done()
+			var localErr error
+			var gallery *models.Gallery
+			gal := app.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
+
+			// Если галерея новая, создаем, иначе обновляем
+			if gal.ID == 0 {
+				gallery, localErr = p.service.CreateGallery(gal)
+			} else {
+				gallery, localErr = p.service.UpdateGallery(gal)
+			}
+
+			if localErr != nil {
+				logger.Error(localErr)
+				errorsMu.Lock()
+				errs = append(errs, localErr)
+				errorsMu.Unlock()
+				return
+			}
+
+			localErr = p.service.Attach(resource, gallery)
+			if localErr != nil {
+				logger.Error(localErr)
+				errorsMu.Lock()
+				errs = append(errs, localErr)
+				errorsMu.Unlock()
+				return
+			}
+
+			// Если все успешно, добавляем галерею в итоговый срез.
+			galleriesMu.Lock()
+			galleries = append(galleries, gallery)
+			galleriesMu.Unlock()
+		}(gall)
+	}
+
+	wg.Wait()
+
+	if len(errs) > 0 {
+		errMsg := ""
+		for _, e := range errs {
+			errMsg += e.Error() + "; "
+		}
+		errMsg = strings.TrimSuffix(errMsg, "; ")
+		err = errors.New(errMsg)
+	}
+
+	return galleries, err
 }

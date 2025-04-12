@@ -8,6 +8,7 @@ import (
 
 type TemplateProvider interface {
 	GetAll() []contracts.Template
+	GetByID(id uint) (contracts.Template, error)
 	GetAllIds() []uint
 	GetByIDs(ids []uint) ([]contracts.Template, error)
 	GetMapByIDs(ids []uint) (map[uint]contracts.Template, error)
@@ -45,6 +46,15 @@ func (p *provider) GetAllIds() []uint {
 	}
 	logger.Error(err)
 	return nil
+}
+
+func (p *provider) GetByID(id uint) (contracts.Template, error) {
+	model, err := p.templateRepo.GetByID(id)
+	if err == nil {
+		return model, nil
+	}
+	logger.Error(err)
+	return nil, err
 }
 
 func (p *provider) GetByIDs(ids []uint) ([]contracts.Template, error) {

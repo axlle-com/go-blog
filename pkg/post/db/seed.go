@@ -97,7 +97,10 @@ func (s *seeder) posts(n int) {
 func (s *seeder) categories(n int) {
 	rand.Seed(time.Now().UnixNano())
 	ids := s.templateProvider.GetAllIds()
+	idsUser := s.userProvider.GetAllIds()
+
 	for i := 1; i <= n; i++ {
+		randomUserID := idsUser[rand.Intn(len(idsUser))]
 		idsCategory, _ := s.categoryRepo.GetAllIds()
 		var randomCategoryID *uint
 		if len(idsCategory) > 0 {
@@ -112,6 +115,7 @@ func (s *seeder) categories(n int) {
 			UUID:               uuid.New(),
 			TemplateID:         &randomID,
 			PostCategoryID:     randomCategoryID,
+			UserID:             &randomUserID,
 			MetaTitle:          StrPtr(faker.Sentence()),
 			MetaDescription:    StrPtr(faker.Sentence()),
 			Alias:              faker.Username(),

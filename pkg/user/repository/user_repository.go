@@ -41,7 +41,7 @@ func (r *repository) Create(user *models.User) error {
 
 func (r *repository) GetByID(id uint) (*models.User, error) {
 	var user models.User
-	if err := r.db.First(&user, id).Error; err != nil {
+	if err := r.db.Select(user.Fields()).First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -49,7 +49,7 @@ func (r *repository) GetByID(id uint) (*models.User, error) {
 
 func (r *repository) GetByIDs(ids []uint) ([]*models.User, error) {
 	var users []*models.User
-	if err := r.db.Where("id IN (?)", ids).Find(&users).Error; err != nil {
+	if err := r.db.Select((&models.User{}).Fields()).Where("id IN (?)", ids).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -87,7 +87,7 @@ func (r *repository) Delete(id uint) error {
 
 func (r *repository) GetAll() ([]*models.User, error) {
 	var users []*models.User
-	if err := r.db.Find(&users).Error; err != nil {
+	if err := r.db.Select((&models.User{}).Fields()).Order("id ASC").Find(&users).Error; err != nil {
 		return users, err
 	}
 	return users, nil

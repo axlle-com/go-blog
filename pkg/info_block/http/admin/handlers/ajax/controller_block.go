@@ -14,6 +14,8 @@ type InfoBlockController interface {
 	CreateInfoBlock(*gin.Context)
 	DeleteInfoBlock(*gin.Context)
 	FilterInfoBlock(*gin.Context)
+	GetInfoBlockCard(*gin.Context)
+	DetachInfoBlock(*gin.Context)
 }
 
 func NewInfoBlockController(

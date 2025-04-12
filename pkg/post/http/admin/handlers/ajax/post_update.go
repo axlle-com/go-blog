@@ -57,9 +57,9 @@ func (c *controller) UpdatePost(ctx *gin.Context) {
 		"templates":  templates,
 		"post":       post,
 		"collection": gin.H{
-			"infoBlocks":     infoBlocks,
-			"postInfoBlocks": post.InfoBlocks,
-			"relationID":     post.ID,
+			"infoBlocks":         infoBlocks,
+			"ifoBlockCollection": post.InfoBlocks,
+			"relationURL":        post.AdminURL(),
 		},
 	}
 

@@ -20,17 +20,34 @@ type User struct {
 	IsPhone            *bool        `gorm:"default:false" json:"is_phone,omitempty"`
 	Status             int8         `gorm:"default:0" json:"status"`
 	Avatar             *string      `gorm:"size:255" json:"avatar,omitempty"`
-	Password           string       `gorm:"-" json:"password"`
-	PasswordHash       string       `gorm:"size:255;not null" json:"password_hash"`
-	RememberToken      *string      `gorm:"size:500;default:null;index" json:"remember_token,omitempty"`
-	AuthToken          *string      `gorm:"size:500;default:null;index" json:"auth_token"`
-	AuthKey            *string      `gorm:"size:32;default:null;" json:"auth_key,omitempty"`
-	PasswordResetToken *string      `gorm:"size:255;unique" json:"password_reset_token,omitempty"`
+	Password           string       `gorm:"-" json:"-"`
+	PasswordHash       string       `gorm:"size:255;not null" json:"-"`
+	RememberToken      *string      `gorm:"size:500;default:null;index" json:"-"`
+	AuthToken          *string      `gorm:"size:500;default:null;index" json:"-"`
+	AuthKey            *string      `gorm:"size:32;default:null;" json:"-"`
+	PasswordResetToken *string      `gorm:"size:255;unique" json:"-"`
 	CreatedAt          *time.Time   `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time   `json:"updated_at,omitempty"`
-	DeletedAt          *time.Time   `gorm:"index" json:"deleted_at,omitempty"`
+	DeletedAt          *time.Time   `gorm:"index" json:"-"`
 	Roles              []Role       `gorm:"many2many:user_has_role;" json:"roles,omitempty"`
 	Permissions        []Permission `gorm:"many2many:user_has_permission;" json:"permissions,omitempty"`
+}
+
+func (u *User) Fields() []string {
+	return []string{
+		"id",
+		"first_name",
+		"last_name",
+		"patronymic",
+		"phone",
+		"email",
+		"is_email",
+		"is_phone",
+		"status",
+		"avatar",
+		"created_at",
+		"updated_at",
+	}
 }
 
 func (u *User) Creating() {

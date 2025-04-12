@@ -6,6 +6,7 @@ import (
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
+	"sync"
 )
 
 type InfoBlockProvider interface {
@@ -99,20 +100,21 @@ func (p *provider) SaveForm(block any, resource contracts2.Resource) (infoBlock 
 }
 
 func (p *provider) SaveFormBatch(blocks []any, resource contracts2.Resource) (infoBlock []contracts2.InfoBlock, err error) {
-	var blocksIDs []uint
-	infoBlockResponses := make([]*models.InfoBlockResponse, 0, len(blocks))
+	var wg sync.WaitGroup
+
 	for _, block := range blocks {
-		iBlock := app.LoadStruct(&models.InfoBlockResponse{}, block).(*models.InfoBlockResponse)
-		infoBlockResponses = append(infoBlockResponses, iBlock)
-		blocksIDs = append(blocksIDs, iBlock.GetID())
+		wg.Add(1)
+		// Передаём block как параметр, чтобы избежать проблем замыкания
+		go func(b any) {
+			defer wg.Done()
+			iBlock := app.LoadStruct(&models.InfoBlockResponse{}, b).(*models.InfoBlockResponse)
+			if err := p.blockService.Attach(resource, iBlock); err != nil {
+				logger.Error(err)
+			}
+		}(block)
 	}
 
-	for _, iBlock := range infoBlockResponses {
-		err = p.blockService.Attach(resource, iBlock)
-		if err != nil {
-			return nil, err
-		}
-	}
+	wg.Wait()
 
 	infoBlocks := p.GetForResource(resource)
 	return infoBlocks, nil

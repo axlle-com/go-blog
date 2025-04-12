@@ -44,9 +44,9 @@ func (c *controller) GetPost(ctx *gin.Context) {
 			"menu":       models.NewMenu(ctx.FullPath()),
 			"post":       post,
 			"collection": gin.H{
-				"infoBlocks":     infoBlocks,
-				"postInfoBlocks": post.InfoBlocks,
-				"relationID":     post.ID,
+				"infoBlocks":         infoBlocks,
+				"ifoBlockCollection": post.InfoBlocks,
+				"relationURL":        post.AdminURL(),
 			},
 		},
 	)

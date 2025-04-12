@@ -19,7 +19,7 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 		return
 	}
 
-	category, err := c.categoryService.GetByID(id)
+	category, err := c.categoryService.GetAggregateByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
@@ -33,16 +33,22 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 	}
 
 	templates := c.templateProvider.GetAll()
+	infoBlocks := c.infoBlockProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":        "Страница категории",
-			"userProvider": user,
-			"categories":   categories,
-			"templates":    templates,
-			"menu":         models.NewMenu(ctx.FullPath()),
-			"category":     category,
+			"title":      "Страница категории",
+			"user":       user,
+			"categories": categories,
+			"templates":  templates,
+			"menu":       models.NewMenu(ctx.FullPath()),
+			"category":   category,
+			"collection": gin.H{
+				"infoBlocks":         infoBlocks,
+				"ifoBlockCollection": category.InfoBlocks,
+				"relationURL":        category.AdminURL(),
+			},
 		},
 	)
 }

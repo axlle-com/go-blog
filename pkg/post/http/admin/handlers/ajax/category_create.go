@@ -1,7 +1,6 @@
 package ajax
 
 import (
-	"fmt"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
 	. "github.com/axlle-com/blog/pkg/post/http/models"
@@ -33,24 +32,30 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 		return
 	}
 
-	categories, err := c.categoriesService.GetAll()
+	categories, err := c.categoriesService.GetAllForParent(category)
 	if err != nil {
 		logger.Error(err)
 	}
 
 	templates := c.templateProvider.GetAll()
+	infoBlocks := c.infoBlockProvider.GetAll()
 
 	data := response.Body{
 		"categories": categories,
 		"templates":  templates,
 		"category":   category,
+		"collection": gin.H{
+			"infoBlocks":         infoBlocks,
+			"ifoBlockCollection": category.InfoBlocks,
+			"relationURL":        category.AdminURL(),
+		},
 	}
 	ctx.JSON(
 		http.StatusCreated,
 		response.Created(
 			response.Body{
 				"view":     c.RenderView("admin.category_inner", data, ctx),
-				"url":      fmt.Sprintf("/admin/categories/%d", category.ID),
+				"url":      category.AdminURL(),
 				"category": category,
 			},
 			"Запись создана",

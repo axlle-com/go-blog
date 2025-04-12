@@ -25,12 +25,12 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":        "Страница поста",
-			"userProvider": user,
-			"categories":   categories,
-			"templates":    templates,
-			"menu":         models2.NewMenu(ctx.FullPath()),
-			"post":         post,
+			"title":      "Страница поста",
+			"user":       user,
+			"categories": categories,
+			"templates":  templates,
+			"menu":       models2.NewMenu(ctx.FullPath()),
+			"post":       post,
 		},
 	)
 }

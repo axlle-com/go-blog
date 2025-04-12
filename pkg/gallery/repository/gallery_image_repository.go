@@ -62,7 +62,7 @@ func (r *galleryImageRepository) DeleteByIDs(ids []uint) (err error) {
 
 func (r *galleryImageRepository) GetAll() ([]*models.Image, error) {
 	var images []*models.Image
-	if err := r.db.Find(&images).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&images).Error; err != nil {
 		return nil, err
 	}
 	return images, nil

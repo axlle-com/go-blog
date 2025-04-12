@@ -26,17 +26,20 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 
 	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL("/admin/categories")
-	postCategories, err := c.categoriesService.WithPaginate(paginator, filter)
-	if err != nil {
-		logger.Error(err)
-	}
+
+	templates := c.templateProvider.GetAll()
+	users := c.userProvider.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.Error(err)
 	}
 
-	templates := c.templateProvider.GetAll()
-	users := c.userProvider.GetAll()
+	postCategoriesTemp, err := c.categoriesService.WithPaginate(paginator, filter)
+	if err != nil {
+		logger.Error(err)
+	}
+	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
+
 	data := response.Body{
 		"title":          "Страница категорий",
 		"category":       &PostCategory{},

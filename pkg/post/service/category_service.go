@@ -3,21 +3,25 @@ package service
 import (
 	"errors"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/logger"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
+	provider2 "github.com/axlle-com/blog/pkg/info_block/provider"
 	http "github.com/axlle-com/blog/pkg/post/http/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/axlle-com/blog/pkg/post/repository"
+	"sync"
 )
 
 type CategoryService struct {
-	categoryRepo    repository.CategoryRepository
-	galleryProvider gallery.GalleryProvider
-	fileProvider    provider.FileProvider
-	aliasProvider   alias.AliasProvider
+	categoryRepo      repository.CategoryRepository
+	galleryProvider   gallery.GalleryProvider
+	fileProvider      provider.FileProvider
+	aliasProvider     alias.AliasProvider
+	infoBlockProvider provider2.InfoBlockProvider
 }
 
 func NewCategoryService(
@@ -25,28 +29,60 @@ func NewCategoryService(
 	aliasProvider alias.AliasProvider,
 	galleryProvider gallery.GalleryProvider,
 	fileProvider provider.FileProvider,
+	infoBlockProvider provider2.InfoBlockProvider,
 ) *CategoryService {
 	return &CategoryService{
-		categoryRepo:    categoryRepo,
-		galleryProvider: galleryProvider,
-		fileProvider:    fileProvider,
-		aliasProvider:   aliasProvider,
+		categoryRepo:      categoryRepo,
+		galleryProvider:   galleryProvider,
+		fileProvider:      fileProvider,
+		aliasProvider:     aliasProvider,
+		infoBlockProvider: infoBlockProvider,
 	}
 }
 
-func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts2.User) (category *PostCategory, err error) {
+func (s *CategoryService) GetAggregateByID(id uint) (*PostCategory, error) {
+	category, err := s.categoryRepo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return s.Aggregate(category)
+}
+
+func (s *CategoryService) Aggregate(category *PostCategory) (*PostCategory, error) {
+	var wg sync.WaitGroup
+
+	var galleries = make([]contracts2.Gallery, 0)
+	var infoBlocks = make([]contracts2.InfoBlock, 0)
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		galleries = s.galleryProvider.GetForResource(category)
+	}()
+
+	go func() {
+		defer wg.Done()
+		infoBlocks = s.infoBlockProvider.GetForResource(category)
+	}()
+
+	wg.Wait()
+
+	category.Galleries = galleries
+	category.InfoBlocks = infoBlocks
+
+	return category, nil
+}
+
+func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts2.User) (model *PostCategory, err error) {
 	categoryForm := app.LoadStruct(&PostCategory{}, form).(*PostCategory)
 
 	categoryForm.Alias = s.GenerateAlias(categoryForm)
 
 	if found == nil {
-		id := user.GetID()
-		categoryForm.UserID = &id
-		category, err = s.Create(categoryForm, user)
+		model, err = s.Create(categoryForm, user)
 	} else {
-		categoryForm.ID = found.ID
-		categoryForm.UUID = found.UUID
-		category, err = s.Update(categoryForm, found, user)
+		model, err = s.Update(categoryForm, found, user)
 	}
 
 	if err != nil {
@@ -54,21 +90,32 @@ func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *Pos
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts2.Gallery, 0)
-		for _, gRequest := range form.Galleries {
-			if gRequest == nil {
-				continue
-			}
-
-			g, err := s.galleryProvider.SaveFromForm(gRequest, category)
-			if err != nil || g == nil {
-				continue
-			}
-			slice = append(slice, g)
+		interfaceSlice := make([]any, len(form.Galleries))
+		for i, gall := range form.Galleries {
+			interfaceSlice[i] = gall
 		}
-		category.Galleries = slice
+
+		slice, err := s.galleryProvider.SaveFormBatch(interfaceSlice, model)
+		if err != nil {
+			logger.Error(err)
+		}
+		model.Galleries = slice
 	}
-	return
+
+	if len(form.InfoBlocks) > 0 {
+		interfaceSlice := make([]any, len(form.InfoBlocks))
+		for i, block := range form.InfoBlocks {
+			interfaceSlice[i] = block
+		}
+
+		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model)
+		if err != nil {
+			logger.Error(err)
+		}
+		model.InfoBlocks = slice
+	}
+
+	return model, nil
 }
 
 func (s *CategoryService) GetByID(id uint) (*PostCategory, error) {
@@ -94,6 +141,9 @@ func (s *CategoryService) Create(category *PostCategory, user contracts2.User) (
 }
 
 func (s *CategoryService) Update(category *PostCategory, found *PostCategory, user contracts2.User) (*PostCategory, error) {
+	category.ID = found.ID
+	category.UUID = found.UUID
+
 	tx := db.GetDB().Begin()
 
 	defer func() {

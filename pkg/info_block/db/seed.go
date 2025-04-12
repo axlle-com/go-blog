@@ -40,11 +40,13 @@ func (s *seeder) SeedTest(n int) {
 
 func (s *seeder) infoBlocks(n int) {
 	idsUser := s.userProvider.GetAllIds()
-	randomUserID := idsUser[rand.Intn(len(idsUser))]
 	ids := s.templateProvider.GetAllIds()
 	rand.Seed(time.Now().UnixNano())
+
 	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
+		randomUserID := idsUser[rand.Intn(len(idsUser))]
+
 		infoBlock := InfoBlock{
 			TemplateID:  &randomID,
 			Media:       StrPtr(faker.Word()),

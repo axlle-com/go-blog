@@ -25,12 +25,12 @@ func (c *controllerCategory) CreateCategory(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":        "Страница категории",
-			"userProvider": user,
-			"categories":   categories,
-			"templates":    templates,
-			"menu":         models2.NewMenu(ctx.FullPath()),
-			"category":     category,
+			"title":      "Страница категории",
+			"user":       user,
+			"categories": categories,
+			"templates":  templates,
+			"menu":       models2.NewMenu(ctx.FullPath()),
+			"category":   category,
 		},
 	)
 }

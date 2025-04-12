@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/errors"
 	. "github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func NewCategoryFilterFilter() *CategoryFilter {
@@ -52,5 +53,12 @@ func (p *CategoryFilter) PrintPostCategoryID() uint {
 }
 
 func (p *CategoryFilter) GetURL() string {
-	return string("posts?" + p.GetQueryString())
+	return string("categories?" + p.GetQueryString())
+}
+
+func (p *CategoryFilter) PrintID() string {
+	if p.ID == nil {
+		return ""
+	}
+	return strconv.Itoa(int(*p.ID))
 }

@@ -3,12 +3,15 @@ package service
 import (
 	"errors"
 	"github.com/axlle-com/blog/app/logger"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
+	tProvider "github.com/axlle-com/blog/pkg/template/provider"
+	provider2 "github.com/axlle-com/blog/pkg/user/provider"
 	"gorm.io/gorm"
+	"sync"
 )
 
 type InfoBlockService struct {
@@ -16,6 +19,8 @@ type InfoBlockService struct {
 	infoBlockCollection *InfoBlockCollectionService
 	resourceRepo        repository.InfoBlockHasResourceRepository
 	galleryProvider     provider.GalleryProvider
+	templateProvider    tProvider.TemplateProvider
+	userProvider        provider2.UserProvider
 }
 
 func NewInfoBlockService(
@@ -23,12 +28,16 @@ func NewInfoBlockService(
 	infoBlockCollection *InfoBlockCollectionService,
 	resourceRepo repository.InfoBlockHasResourceRepository,
 	galleryProvider provider.GalleryProvider,
+	templateProvider tProvider.TemplateProvider,
+	userProvider provider2.UserProvider,
 ) *InfoBlockService {
 	return &InfoBlockService{
 		infoBlockRepo:       infoBlockRepo,
 		infoBlockCollection: infoBlockCollection,
 		resourceRepo:        resourceRepo,
 		galleryProvider:     galleryProvider,
+		templateProvider:    templateProvider,
+		userProvider:        userProvider,
 	}
 }
 
@@ -36,11 +45,52 @@ func (s *InfoBlockService) GetByID(id uint) (*InfoBlock, error) {
 	return s.infoBlockRepo.GetByID(id)
 }
 
+func (s *InfoBlockService) Aggregate(infoBlock *InfoBlock) *InfoBlock {
+	var wg sync.WaitGroup
+
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		if infoBlock.TemplateID != nil && *infoBlock.TemplateID != 0 {
+			var err error
+			infoBlock.Template, err = s.templateProvider.GetByID(*infoBlock.TemplateID)
+			if err != nil {
+				logger.Error(err)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if infoBlock.UserID != nil && *infoBlock.UserID != 0 {
+			var err error
+			infoBlock.User, err = s.userProvider.GetByID(*infoBlock.UserID)
+			if err != nil {
+				logger.Error(err)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		var err error
+		infoBlock.Galleries = s.galleryProvider.GetForResource(infoBlock)
+		if err != nil {
+			logger.Error(err)
+		}
+	}()
+
+	wg.Wait()
+
+	return infoBlock
+}
+
 func (s *InfoBlockService) GetByIDs(ids []uint) ([]*InfoBlock, error) {
 	return s.infoBlockRepo.GetByIDs(ids)
 }
 
-func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts2.User) (*InfoBlock, error) {
+func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*InfoBlock, error) {
 	if user != nil {
 		id := user.GetID()
 		infoBlock.UserID = &id
@@ -59,7 +109,7 @@ func (s *InfoBlockService) Update(infoBlock *InfoBlock) (*InfoBlock, error) {
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) Attach(resource contracts2.Resource, infoBlock contracts2.InfoBlock) error {
+func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contracts.InfoBlock) error {
 	hasRepo, err := s.resourceRepo.GetByID(infoBlock.GetRelationID())
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -83,7 +133,7 @@ func (s *InfoBlockService) Attach(resource contracts2.Resource, infoBlock contra
 	return err
 }
 
-func (s *InfoBlockService) GetForResource(resource contracts2.Resource) []*InfoBlockResponse {
+func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*InfoBlockResponse {
 	infoBlocks, err := s.infoBlockRepo.GetForResource(resource)
 	if err != nil {
 		logger.Error(err)
@@ -92,8 +142,12 @@ func (s *InfoBlockService) GetForResource(resource contracts2.Resource) []*InfoB
 	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
 }
 
-func (s *InfoBlockService) DetachResource(resource contracts2.Resource) error {
+func (s *InfoBlockService) DetachResource(resource contracts.Resource) error {
 	return s.resourceRepo.DetachResource(resource)
+}
+
+func (s *InfoBlockService) DeleteResource(id uint) error {
+	return s.resourceRepo.Delete(id)
 }
 
 func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error) {
@@ -117,7 +171,7 @@ func (s *InfoBlockService) Delete(infoBlocks *InfoBlock) (err error) {
 	return s.infoBlockRepo.Delete(infoBlocks)
 }
 
-func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts2.User) (infoBlock *InfoBlock, err error) {
+func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts.User) (infoBlock *InfoBlock, err error) {
 	blockForm := app.LoadStruct(&InfoBlock{}, form).(*InfoBlock)
 
 	if found == nil {
@@ -133,13 +187,13 @@ func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock,
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts2.Gallery, 0)
+		slice := make([]contracts.Gallery, 0)
 		for _, gRequest := range form.Galleries {
 			if gRequest == nil {
 				continue
 			}
 
-			g, err := s.galleryProvider.SaveFromForm(gRequest, infoBlock)
+			g, err := s.galleryProvider.SaveForm(gRequest, infoBlock)
 			if err != nil || g == nil {
 				continue
 			}

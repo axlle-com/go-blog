@@ -55,8 +55,19 @@ func (r *infoBlockRepository) WithPaginate(p contracts2.Paginator, filter *model
 	var total int64
 
 	infoBlock := models.InfoBlock{}
+	table := infoBlock.GetTable()
 
 	query := r.db.Model(&infoBlock)
+
+	// TODO WHERE IN; LIKE
+	for col, val := range filter.GetMap() {
+		if col == "title" {
+			query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
+			continue
+		}
+		query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
+	}
+
 	query.Count(&total)
 
 	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
@@ -91,7 +102,7 @@ func (r *infoBlockRepository) Delete(infoBlock *models.InfoBlock) error {
 
 func (r *infoBlockRepository) GetAll() ([]*models.InfoBlock, error) {
 	var infoBlocks []*models.InfoBlock
-	if err := r.db.Find(&infoBlocks).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&infoBlocks).Error; err != nil {
 		return nil, err
 	}
 	return infoBlocks, nil

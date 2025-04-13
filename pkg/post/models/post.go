@@ -59,6 +59,10 @@ func (p *Post) GetUUID() uuid.UUID {
 	return p.UUID
 }
 
+func (p *Post) GetName() string {
+	return p.GetTable()
+}
+
 func (p *Post) SetUUID() {
 	if p.UUID == uuid.Nil {
 		p.UUID = uuid.New()

@@ -9,6 +9,7 @@ import (
 
 type TemplateController interface {
 	GetTemplate(ctx *gin.Context)
+	GetResourceTemplate(ctx *gin.Context)
 	UpdateTemplate(*gin.Context)
 	CreateTemplate(*gin.Context)
 	DeleteTemplate(*gin.Context)

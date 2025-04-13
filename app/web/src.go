@@ -44,13 +44,16 @@ func InitMinify() {
 		"src/resources/plugins/sortablejs/Sortable.min.js",
 		"src/resources/plugins/js/script.min.js",
 		"src/resources/plugins/date-format/date-format.js",
+		"src/resources/plugins/npm/codemirror-bundle.js",
 	}
 
 	CSS := []string{
 		"src/resources/plugins/bootstrap-5.0.2-dist/css/bootstrap.min.css",
 	}
 	JS := []string{
+		"src/resources/plugins/jquery-3-6-0/jquery.min.js",
 		"src/resources/plugins/bootstrap-5.0.2-dist/js/bootstrap.min.js",
+		"src/public/admin/glob.js",
 	}
 
 	m := minify.New()

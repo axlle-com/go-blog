@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"fmt"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -49,7 +48,7 @@ func ParseBindErrorToMap(err error) *Errors {
 			errors[field] = message(fieldErr)
 		}
 	} else {
-		errors[GeneralFieldName] = fmt.Sprintf("%s", err.Error())
+		errors[GeneralFieldName] = err.Error()
 	}
 
 	return &Errors{

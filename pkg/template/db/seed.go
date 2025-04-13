@@ -32,7 +32,7 @@ func (s *seeder) SeedTest(n int) {
 		now := time.Now()
 		template.Title = "TitleTemplate #" + strconv.Itoa(i)
 		template.Name = faker.Username()
-		template.Tabular = db.StrPtr(faker.Username())
+		template.ResourceName = db.StrPtr(faker.Username())
 		template.CreatedAt = &now
 		template.UpdatedAt = &now
 

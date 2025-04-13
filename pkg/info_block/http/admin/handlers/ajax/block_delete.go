@@ -69,7 +69,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		http.StatusOK,
 		response.OK(
 			response.Body{
-				"view": c.RenderView("admin.blocks_inner", data, ctx),
+				"view": c.RenderView("admin.info_blocks_inner", data, ctx),
 			},
 			"Запись удалена",
 			paginator,

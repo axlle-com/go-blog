@@ -1,0 +1,144 @@
+{{ define "admin.template_inner" }}
+    {{ if eq .templateModel.ID 0 }}
+        <form id="global-form" action="{{ .templateModel.AdminURL }}" method="post">
+    {{ else}}
+        <form id="global-form" action="{{ .templateModel.AdminURL }}" method="put">
+    {{ end }}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="list-with-gap mb-2">
+                        <button type="button" class="btn btn-success js-save-button">Сохранить</button>
+                        <a type="button" class="btn btn-secondary" href="/admin/templates">Выйти</a>
+                    </div>
+                    <div class="list-with-gap mb-2">
+                        <ul class="nav nav-gap-x-1 mt-3" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded active"
+                                   id="home-tab-faded"
+                                   data-toggle="tab"
+                                   href="#home-page"
+                                   role="tab"
+                                   aria-controls="home-page"
+                                   aria-selected="false">Основное</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="profile-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab2Faded"
+                                   role="tab"
+                                   aria-controls="tab2Faded"
+                                   aria-selected="false">Настройки</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show"
+                             id="home-page"
+                             role="tabpanel"
+                             aria-labelledby="home-tab-faded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <fieldset class="form-block">
+                                        <legend>Связь данных</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Ресурсы</label>
+                                            <select
+                                                    class="form-control select2 js-template-select"
+                                                    data-placeholder="Категория"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="resource_name"
+                                                    data-validator="resource_name">
+                                                <option></option>
+                                                {{ range $key, $value := .resources }}
+                                                    {{ if eq (ptrStr $.filter.ResourceName) $key }}
+                                                        <option value="/admin/templates/resources/{{ $key }}" selected>{{ $key }}</option>
+                                                    {{ else }}
+                                                        <option value="/admin/templates/resources/{{ $key }}">{{ $key }}</option>
+                                                    {{ end }}
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Идентификация</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Заголовок</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Обычный"
+                                                    name="title"
+                                                    id="title"
+                                                    value="{{ .templateModel.Title }}"
+                                                    data-validator-required
+                                                    data-validator="title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <legend>Заголовок</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Имя</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Обычный"
+                                                    name="name"
+                                                    id="name"
+                                                    value="{{ .templateModel.Name }}"
+                                                    data-validator-required
+                                                    data-validator="name">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <div class="form-group small">
+                                        <label for="HTML">HTML</label>
+                                        <div id="HTML">{{ ptrStr .templateModel.HTML }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <fieldset class="form-block">
+                                        <legend>Идентификация</legend>
+                                        <div class="form-group small">
+                                            <div class="custom-control custom-checkbox">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="show_image_post"
+                                                        id="show_image_post"
+                                                        {{ if .templateModel.IsMain }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label" for="show_image_post">
+                                                    Шаблон для всех
+                                                </label>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab2Faded" role="tabpanel" aria-labelledby="profile-tab-faded">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-group small">
+                                        <div id="JS">{{ ptrStr .templateModel.JS }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-group small">
+                                        <div id="CSS">{{ ptrStr .templateModel.CSS }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </form>
+{{ end }}

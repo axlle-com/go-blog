@@ -79,6 +79,14 @@ func Errorf(format string, a ...any) {
 	logWithCaller(logrus.ErrorLevel, fmt.Errorf(format, a...))
 }
 
+func Warning(args ...any) {
+	logWithCaller(logrus.WarnLevel, args...)
+}
+
+func Warningf(format string, a ...any) {
+	logWithCaller(logrus.WarnLevel, fmt.Errorf(format, a...))
+}
+
 func Fatal(args ...any) {
 	logWithCaller(logrus.FatalLevel, args...)
 }

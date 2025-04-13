@@ -12,12 +12,12 @@ func NeTemplateFilter() *TemplateFilter {
 }
 
 type TemplateFilter struct {
-	ID      *uint   `json:"id" form:"id" binding:"omitempty"`
-	UserID  *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
-	Title   *string `json:"title" form:"title" binding:"omitempty"`
-	Name    *string `json:"name" form:"name" binding:"omitempty"`
-	Tabular *string `json:"tabular" form:"tabular" binding:"omitempty"`
-	Date    *string `json:"date" form:"date" binding:"omitempty"`
+	ID           *uint   `json:"id" form:"id" binding:"omitempty"`
+	UserID       *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
+	Title        *string `json:"title" form:"title" binding:"omitempty"`
+	Name         *string `json:"name" form:"name" binding:"omitempty"`
+	ResourceName *string `json:"resource_name" form:"resource_name" binding:"omitempty"`
+	Date         *string `json:"date" form:"date" binding:"omitempty"`
 	Filter
 }
 

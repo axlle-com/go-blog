@@ -1,6 +1,7 @@
 package ajax
 
 import (
+	mApp "github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 
@@ -33,13 +34,14 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 	}
 
 	data := response.Body{
-		"template": template,
+		"templateModel": template,
+		"resources":     mApp.NewResource().Resources(),
 	}
 	ctx.JSON(
 		http.StatusCreated,
 		response.Created(
 			response.Body{
-				"view":     c.RenderView("admin.block_inner", data, ctx),
+				"view":     c.RenderView("admin.template_inner", data, ctx),
 				"url":      template.AdminURL(),
 				"template": template,
 			},

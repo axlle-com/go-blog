@@ -1,11 +1,11 @@
-{{ define "admin.blocks_inner" }}
+{{ define "admin.templates_inner" }}
     <div class="card">
         <div class="card-body">
             <div class="btn-group btn-group-sm mb-3" role="group">
-                <a class="btn btn-light has-icon" href="{{ .infoBlock.AdminURL }}/form">
+                <a class="btn btn-light has-icon" href="{{ .templateModel.AdminURL }}/form">
                     <i class="material-icons mr-1">add_circle_outline</i>Новая
                 </a>
-                <a type="button" class="btn btn-light has-icon" href="{{ .infoBlock.AdminURL }}">
+                <a type="button" class="btn btn-light has-icon" href="{{ .templateModel.AdminURL }}">
                     <i class="material-icons mr-1">refresh</i>Обновить
                 </a>
                 <button type="button" class="btn btn-light has-icon">
@@ -13,7 +13,7 @@
                 </button>
             </div>
             <div class="table-responsive">
-                <form id="index-form-filter" action="{{ .infoBlock.AdminURL }}/filter" method="get"></form>
+                <form id="index-form-filter" action="{{ .templateModel.AdminURL }}/filter" method="get"></form>
                 <table
                         class="table table-bordered table-sm has-checkAll mb-0 fixed-table"
                         data-bulk-target="#bulk-dropdown"
@@ -46,21 +46,33 @@
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
+                        <th class="width-30">
+                            <label class="input-clearable input-icon input-icon-sm input-icon-right">
+                                <input
+                                        form="index-form-filter"
+                                        name="title"
+                                        value="{{ ptrStr .filter.Name }}"
+                                        type="text"
+                                        class="form-control form-control-sm border-primary"
+                                        placeholder="Заголовок">
+                                <i data-toggle="clear" class="material-icons">clear</i>
+                            </label>
+                        </th>
                         <th class="width-20">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right border-primary">
                                 <select
                                         form="index-form-filter"
                                         class="form-control select2"
                                         data-allow-clear="true"
-                                        data-placeholder="Шаблон"
+                                        data-placeholder="Ресурс"
                                         data-select2-search="true"
-                                        name="template_id">
+                                        name="resource_name">
                                     <option></option>
-                                    {{ range .templates }}
-                                        {{ if eq $.filter.PrintTemplateID .ID }}
-                                            <option value="{{ .ID }}" selected>{{ .Title }}</option>
+                                    {{ range $key, $value := .resources }}
+                                        {{ if eq (ptrStr $.filter.ResourceName) $key }}
+                                            <option value="{{ $key }}" selected>{{ $value }}</option>
                                         {{ else }}
-                                            <option value="{{ .ID }}">{{ .Title }}</option>
+                                            <option value="{{ $key }}">{{ $value }}</option>
                                         {{ end }}
                                     {{ end }}
                                 </select>
@@ -117,14 +129,15 @@
                         <th scope="col" class="text-center">Детали</th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting asc">ID</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Заголовок</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Шаблон</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">Название</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">Ресурс</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Автор</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Дата создания</a></th>
                         <th scope="col" class="text-center">Действие</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {{range .infoBlocks }}
+                    {{range .templates }}
                         <tr class="js-producer-table">
                             <td>
                                 <div class="custom-control custom-control-nolabel custom-checkbox">
@@ -144,7 +157,8 @@
                             </td>
                             <td class="td-col-id">{{.ID}}</td>
                             <td class="td-col-title">{{ ptrStr .Title }}</td>
-                            <td>{{ .GetTemplateTitle }}</td>
+                            <td>{{ ptrStr .Name }}</td>
+                            <td>{{ ptrStr .ResourceName }}</td>
                             <td class="td-col-autor">{{ .UserLastName }}</td>
                             <td class="td-col-date">{{ .Date }}</td>
                             <td class="td-col-action text-center">
@@ -171,7 +185,7 @@
                                 <ul class="data-detail ml-5">
                                     <li><span>Заголовок: </span> <span>{{ .Title }}</span></li>
                                     <li><span>Описание короткое: </span>
-                                        <span>{{ .Description }}</span>
+                                        <span>{{ .Name }}</span>
                                     </li>
                                 </ul>
                             </td>

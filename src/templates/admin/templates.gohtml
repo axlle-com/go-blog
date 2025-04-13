@@ -1,10 +1,10 @@
-{{ define "admin.block" }}
+{{ define "admin.templates" }}
     {{ template "admin.header" . }}
     <div class="main-body">
-        {{/*        {{ Breadcrumbs::render($breadcrumbsName, $model ?? null) }}*/}}
+        {{/*        {{ Breadcrumbs::render('posts') }}*/}}
         <h5>{{ .Title }}</h5>
         <div class="a-block-inner">
-            {{ template "admin.block_inner" . }}
+            {{ template "admin.templates_inner" . }}
         </div>
     </div>
     {{ template "admin.footer" . }}

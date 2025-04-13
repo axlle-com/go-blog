@@ -17,7 +17,7 @@ func (c *infoBlockWebController) CreateInfoBlock(ctx *gin.Context) {
 	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
-		"admin.block",
+		"admin.info_block",
 		gin.H{
 			"title":     "Страница инфо блока",
 			"user":      user,

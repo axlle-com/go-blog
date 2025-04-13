@@ -52,7 +52,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 				"infoBlocks": blocks,
 				"paginator":  paginator,
 				"url":        filter.GetURL(),
-				"view":       c.RenderView("admin.blocks_inner", data, ctx),
+				"view":       c.RenderView("admin.info_blocks_inner", data, ctx),
 			},
 			"",
 			paginator,

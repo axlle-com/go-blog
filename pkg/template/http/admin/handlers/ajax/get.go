@@ -27,7 +27,7 @@ func (c *templateController) GetTemplate(ctx *gin.Context) {
 				"url":      nil,
 				"template": found,
 			},
-			"Запись создана",
+			"",
 			nil,
 		),
 	)

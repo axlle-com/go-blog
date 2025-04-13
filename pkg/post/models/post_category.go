@@ -50,6 +50,10 @@ func (c *PostCategory) GetUUID() uuid.UUID {
 	return c.UUID
 }
 
+func (c *PostCategory) GetName() string {
+	return c.GetTable()
+}
+
 func (c *PostCategory) SetUUID() {
 	if c.UUID == uuid.Nil {
 		c.UUID = uuid.New()

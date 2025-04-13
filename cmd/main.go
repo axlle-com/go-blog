@@ -40,7 +40,7 @@ func Init(cfg contracts.Config) *gin.Engine {
 
 	container := app.New()
 
-	//web.InitMinify()
+	web.InitMinify()
 	web.NewTemplate(router)
 	routes2.InitializeApiRoutes(router, container)
 	routes2.InitializeWebRoutes(router, container)

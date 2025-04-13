@@ -100,8 +100,8 @@ type PostResponse struct {
 	DescriptionPreview *string                  `gorm:"type:text" json:"description_preview" form:"description_preview" binding:"omitempty"`
 	Description        *string                  `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
 	ShowDate           bool                     `gorm:"not null;default:false" json:"show_date" form:"show_date" binding:"omitempty"`
-	DatePub            *time.Time               `json:"date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
-	DateEnd            *time.Time               `json:"date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
+	DatePub            *time.Time               `json:"date_pub,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
+	DateEnd            *time.Time               `json:"date_end,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
 	Image              *string                  `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
 	Hits               uint                     `gorm:"not null;default:0" json:"hits" form:"hits" binding:"-"`
 	Sort               int                      `gorm:"not null;default:0" json:"sort" form:"sort" binding:"omitempty"`

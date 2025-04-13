@@ -36,12 +36,13 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 
 	users := c.userProvider.GetAll()
 	data := response.Body{
-		"title":     "Страница инфо блоков",
-		"template":  empty,
-		"templates": templates,
-		"users":     users,
-		"paginator": paginator,
-		"filter":    filter,
+		"title":         "Страница шаблонов",
+		"templateModel": empty,
+		"templates":     templates,
+		"users":         users,
+		"paginator":     paginator,
+		"filter":        filter,
+		"resources":     models.NewResource().Resources(),
 	}
 
 	ctx.JSON(
@@ -51,7 +52,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 				"templates": templates,
 				"paginator": paginator,
 				"url":       filter.GetURL(),
-				"view":      c.RenderView("admin.blocks_inner", data, ctx),
+				"view":      c.RenderView("admin.templates_inner", data, ctx),
 			},
 			"",
 			paginator,

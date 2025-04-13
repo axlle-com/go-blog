@@ -2,7 +2,7 @@ package web
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
+	mApp "github.com/axlle-com/blog/app/models"
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 	}
 
 	empty := &Template{}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := mApp.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	users := c.userProvider.GetAll()
@@ -40,14 +40,15 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 	}
 	templates := c.templateCollectionService.Aggregates(temp)
 
-	ctx.HTML(http.StatusOK, "admin.blocks", gin.H{
-		"title":     "Страница инфо блоков",
-		"user":      user,
-		"template":  empty,
-		"templates": templates,
-		"users":     users,
-		"paginator": paginator,
-		"filter":    filter,
-		"menu":      models2.NewMenu(ctx.FullPath()),
+	ctx.HTML(http.StatusOK, "admin.templates", gin.H{
+		"title":         "Страница шаблонов",
+		"user":          user,
+		"templateModel": empty,
+		"resources":     mApp.NewResource().Resources(),
+		"templates":     templates,
+		"users":         users,
+		"paginator":     paginator,
+		"filter":        filter,
+		"menu":          models2.NewMenu(ctx.FullPath()),
 	})
 }

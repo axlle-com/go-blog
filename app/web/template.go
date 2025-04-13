@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"html/template"
 	"net/url"
@@ -13,6 +14,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var dynamicTemplates = make(map[string]string)
 
 type Template struct {
 	config contracts.Config
@@ -46,6 +49,23 @@ func (t *Template) init() {
 func (t *Template) ReLoad() {
 	templates := t.loadTemplates(t.config.SrcFolderBuilder("templates"))
 	t.router.SetHTMLTemplate(templates)
+}
+
+func (t *Template) AddTemplateFromString(name, tmplStr string) error {
+	dynamicTemplates[name] = tmplStr
+
+	baseTmpl := t.loadTemplates(t.config.SrcFolderBuilder("templates"))
+
+	for name, tmplStr := range dynamicTemplates {
+		newTmpl := baseTmpl.New(name)
+		if _, err := newTmpl.Parse(tmplStr); err != nil {
+			logger.Error(err)
+			continue
+		}
+	}
+
+	t.router.SetHTMLTemplate(baseTmpl)
+	return nil
 }
 
 func (t *Template) loadTemplates(templatesDir string) *template.Template {

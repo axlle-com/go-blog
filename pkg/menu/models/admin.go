@@ -18,6 +18,7 @@ func NewMenu(currentRoute string) []AdminMenu {
 		{Path: "/admin/posts", Name: "Посты", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 		{Path: "/admin/categories", Name: "Категории", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 		{Path: "/admin/info-blocks", Name: "Инфоблоки", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/templates", Name: "Шаблоны", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 	}
 
 	baseRoute := extractBaseRoute(currentRoute)

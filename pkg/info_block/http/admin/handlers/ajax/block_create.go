@@ -42,7 +42,7 @@ func (c *blockController) CreateInfoBlock(ctx *gin.Context) {
 		http.StatusCreated,
 		response.Created(
 			response.Body{
-				"view":      c.RenderView("admin.block_inner", data, ctx),
+				"view":      c.RenderView("admin.info_block_inner", data, ctx),
 				"url":       fmt.Sprintf("/admin/info-blocks/%d", block.ID),
 				"infoBlock": block,
 			},

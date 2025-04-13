@@ -60,6 +60,7 @@ func (s *GalleryService) Attach(resource contracts2.Resource, gallery contracts2
 				GalleryID:    gallery.GetID(),
 			},
 		)
+		return err
 	}
 	return nil
 }

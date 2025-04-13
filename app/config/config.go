@@ -47,7 +47,8 @@ func LoadConfig() (err error) {
 	once.Do(func() {
 		instance = &config{Mutex: &sync.Mutex{}}
 
-		rootDir, err := instance.root()
+		var rootDir string
+		rootDir, err = instance.root()
 		if err != nil {
 			err = fmt.Errorf("ошибка определения корневой директории: %w", err)
 			return

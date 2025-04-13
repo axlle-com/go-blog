@@ -10,3 +10,8 @@
 ```bash
   go test -count=1 -race ./...
 ```
+
+### Запуск анализа
+```bash
+  staticcheck ./...
+```

@@ -397,7 +397,6 @@ const _infoBlock = {
             if (action) {
                 const request = new _glob.request({action});
                 request.setMethod('DELETE').send((response) => {
-                    _cl_(response)
                     block.remove();
                 });
             } else {
@@ -410,6 +409,30 @@ const _infoBlock = {
         this.add();
         this.delete();
         this.detach();
+    }
+};
+const _template = {
+    _block: {},
+    add: function () {
+        const _this = this;
+        $('body').on('change', '.js-template-select', function (evt) {
+            const action = $(this).val();
+            const block = $(this).closest('.a-block-inner').find('#HTML');
+            if (action) {
+                const request = new _glob.request({action});
+                request.setMethod('GET').send((response) => {
+                    block.html('')
+                    MyCodeMirror6.createEditor(document.getElementById('HTML'), response.data.view);
+                });
+            }
+        });
+
+    },
+    run: function () {
+        MyCodeMirror6.createEditor(document.getElementById('HTML'), `<div></div>`);
+        MyCodeMirror6.createEditor(document.getElementById('JS'), ``);
+        MyCodeMirror6.createEditor(document.getElementById('CSS'), ``);
+        this.add();
     }
 };
 const _config = {
@@ -550,4 +573,5 @@ $(document).ready(function () {
     _config.run();
     _auth.run();
     _post.run();
+    _template.run();
 })

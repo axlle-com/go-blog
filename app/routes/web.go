@@ -35,11 +35,14 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	infoBlockController := container.InfoBlockWebController()
 	infoBlockAjaxController := container.InfoBlockController()
 
+	templateController := container.TemplateWebController()
+	templateAjaxController := container.TemplateController()
+
 	r.Use(middleware2.Error())
 	r.Use(middleware2.Analytic())
 	r.GET("/", postFrontWebController.GetHome)
 	r.GET("/test", ShowIndexPageTest)
-	r.POST("/test", SavePageTest)
+	r.POST("/test", SavePageTest2)
 	r.GET("/login", userController.Login)
 	r.POST("/auth", userController.Auth)
 	r.POST("/user", userController.CreateUser)
@@ -84,6 +87,15 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.GET("/ajax/info-blocks/:id", infoBlockAjaxController.GetInfoBlock)
 		protected.GET("/ajax/info-blocks/:id/card", infoBlockAjaxController.GetInfoBlockCard)
 		protected.DELETE("/ajax/info-blocks/:id/detach", infoBlockAjaxController.DetachInfoBlock)
+
+		protected.GET("/templates", templateController.GetTemplates)
+		protected.GET("/templates/:id", templateController.GetTemplate)
+
+		protected.POST("/templates", templateAjaxController.CreateTemplate)
+		protected.PUT("/templates/:id", templateAjaxController.UpdateTemplate)
+		protected.DELETE("/templates/:id", templateAjaxController.DeleteTemplate)
+		protected.GET("/templates/filter", templateAjaxController.FilterTemplate)
+		protected.GET("/templates/resources/:template", templateAjaxController.GetResourceTemplate)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
@@ -140,5 +152,19 @@ func SavePageTest(c *gin.Context) {
 		return
 	}
 	web.NewTemplate(nil).ReLoad()
+	c.String(http.StatusOK, "Файл успешно сохранён")
+}
+
+func SavePageTest2(c *gin.Context) {
+	code := c.PostForm("code")
+	if code == "" {
+		c.String(http.StatusBadRequest, "Не передано содержимое шаблона (code)")
+		return
+	}
+
+	err := web.NewTemplate(nil).AddTemplateFromString("index", code)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+	}
 	c.String(http.StatusOK, "Файл успешно сохранён")
 }

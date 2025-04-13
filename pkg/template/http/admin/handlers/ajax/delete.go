@@ -56,19 +56,20 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 	templates := c.templateCollectionService.Aggregates(temp)
 
 	data := response.Body{
-		"title":     "Страница инфо блоков",
-		"template":  empty,
-		"templates": templates,
-		"users":     users,
-		"paginator": paginator,
-		"filter":    filter,
+		"title":         "Страница шаблонов",
+		"templateModel": empty,
+		"templates":     templates,
+		"users":         users,
+		"paginator":     paginator,
+		"filter":        filter,
+		"resources":     models.NewResource().Resources(),
 	}
 
 	ctx.JSON(
 		http.StatusOK,
 		response.OK(
 			response.Body{
-				"view": c.RenderView("admin.blocks_inner", data, ctx),
+				"view": c.RenderView("admin.templates_inner", data, ctx),
 			},
 			"Запись удалена",
 			paginator,

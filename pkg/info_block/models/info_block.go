@@ -33,6 +33,10 @@ func (i *InfoBlock) GetUUID() uuid.UUID {
 	return i.UUID
 }
 
+func (i *InfoBlock) GetName() string {
+	return i.GetTable()
+}
+
 func (i *InfoBlock) GetPosition() string {
 	return i.Position
 }

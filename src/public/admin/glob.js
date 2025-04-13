@@ -488,10 +488,18 @@ const _glob = {
         }
     },
     setMaps: function () {
-        const cookie = new this.cookie('_maps_');
+        const cookie = new this.cookie('_maps');
         if (!cookie.get()) {
             cookie.value = true;
             cookie.options = {expires: '', path: '/'};
+            cookie.set();
+        }
+    },
+    resolution: function () {
+        const cookie = new this.cookie('resolution');
+        if (!cookie.get()) {
+            cookie.value = window.screen.width + ";" + window.screen.height;
+            cookie.options = {expires: 86400, path: '/'};
             cookie.set();
         }
     },
@@ -624,6 +632,7 @@ const _glob = {
         }
         this.validation.control();
         this.setMaps();
+        this.resolution();
         this.synchronization();
         this.lazyLoading.loading('[data-js-image-lazy-loading]', 'src');
     }

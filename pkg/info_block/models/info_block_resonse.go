@@ -29,6 +29,10 @@ func (i *InfoBlockResponse) GetUUID() uuid.UUID {
 	return i.UUID
 }
 
+func (i *InfoBlockResponse) GetName() string {
+	return (&InfoBlock{}).GetTable()
+}
+
 func (i *InfoBlockResponse) GetPosition() string {
 	return i.Position
 }

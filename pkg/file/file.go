@@ -1,7 +1,6 @@
 package file
 
 import (
-	"errors"
 	"fmt"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
@@ -26,7 +25,7 @@ func NewService() *Service {
 
 func (s *Service) SaveUploadedFile(file *multipart.FileHeader, dist string) (path string, err error) {
 	if !s.isImage(file) {
-		return "", errors.New(fmt.Sprintf("Файл:%s не является изображением", file.Filename))
+		return "", fmt.Errorf("Файл:%s не является изображением", file.Filename)
 	}
 	if path, err = s.save(file, dist); err != nil {
 		return

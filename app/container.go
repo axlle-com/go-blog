@@ -19,8 +19,11 @@ import (
 	web2 "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
 	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/axlle-com/blog/pkg/post/service"
+	ajax3 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
+	web4 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/web"
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
+	service4 "github.com/axlle-com/blog/pkg/template/service"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	service3 "github.com/axlle-com/blog/pkg/user/service"
@@ -49,8 +52,10 @@ type Container struct {
 	CategoriesService *service.CategoriesService
 	CategoryService   *service.CategoryService
 
-	TemplateProvider templateProvider.TemplateProvider
-	TemplateRepo     templateRepository.TemplateRepository
+	TemplateProvider          templateProvider.TemplateProvider
+	TemplateRepo              templateRepository.TemplateRepository
+	TemplateService           *service4.TemplateService
+	TemplateCollectionService *service4.TemplateCollectionService
 
 	UserRepo        userRepository.UserRepository
 	UserProvider    userProvider.UserProvider
@@ -87,13 +92,15 @@ func New() *Container {
 	gService := galleryService.NewGalleryService(gRepo, gEvent, iService, rRepo)
 	gProvider := galleryProvider.NewProvider(gRepo, gService)
 
-	tRepo := templateRepository.NewTemplateRepo()
-	tProvider := templateProvider.NewProvider(tRepo)
-
 	uRepo := userRepository.NewUserRepo()
 	uProvider := userProvider.NewProvider(uRepo)
 	uService := service3.NewUserService(uRepo)
 	uaService := service3.NewAuthService(uService)
+
+	tRepo := templateRepository.NewTemplateRepo()
+	tProvider := templateProvider.NewProvider(tRepo)
+	tService := service4.NewTemplateService(tRepo, uProvider)
+	tCollectionService := service4.NewTemplateCollectionService(tService, tRepo, uProvider)
 
 	aRepo := alias.NewAliasRepo()
 	aProvider := alias.NewProvider(aRepo)
@@ -142,8 +149,10 @@ func New() *Container {
 		CategoriesService: csService,
 		CategoryService:   cService,
 
-		TemplateProvider: tProvider,
-		TemplateRepo:     tRepo,
+		TemplateProvider:          tProvider,
+		TemplateRepo:              tRepo,
+		TemplateService:           tService,
+		TemplateCollectionService: tCollectionService,
 
 		UserRepo:        uRepo,
 		UserProvider:    uProvider,
@@ -258,5 +267,21 @@ func (c *Container) PostFrontWebController() web2.PostController {
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+	)
+}
+
+func (c *Container) TemplateWebController() web4.TemplateWebController {
+	return web4.NewTemplateWebController(
+		c.TemplateService,
+		c.TemplateCollectionService,
+		c.UserProvider,
+	)
+}
+
+func (c *Container) TemplateController() ajax3.TemplateController {
+	return ajax3.NewTemplateController(
+		c.TemplateService,
+		c.TemplateCollectionService,
+		c.UserProvider,
 	)
 }

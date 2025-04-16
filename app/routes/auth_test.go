@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestLogin(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 
 	testsOK := map[string]map[string]int{
 		"/admin/posts": {

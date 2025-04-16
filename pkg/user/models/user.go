@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"regexp"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 type User struct {
 	ID                 uint         `gorm:"primaryKey" json:"id"`
+	UUID               uuid.UUID    `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	FirstName          string       `gorm:"size:255;not null;default:'Undefined'" json:"first_name"`
 	LastName           string       `gorm:"size:255;not null;default:'Undefined'" json:"last_name"`
 	Patronymic         *string      `gorm:"size:255" json:"patronymic,omitempty"`
@@ -36,6 +38,7 @@ type User struct {
 func (u *User) Fields() []string {
 	return []string{
 		"id",
+		"uuid",
 		"first_name",
 		"last_name",
 		"patronymic",
@@ -50,9 +53,16 @@ func (u *User) Fields() []string {
 	}
 }
 
+func (u *User) SetUUID() {
+	if u.UUID == uuid.Nil {
+		u.UUID = uuid.New()
+	}
+}
+
 func (u *User) Creating() {
 	u.SetPasswordHash()
 	u.SetPhone()
+	u.SetUUID()
 }
 
 func (u *User) Updating() {
@@ -148,10 +158,14 @@ func (u *User) GetStatus() int8 {
 	return u.Status
 }
 
-func (u *User) GetRoles() int8 {
-	return u.Status
+func (u *User) GetRoles() []string {
+	return nil
 }
 
-func (u *User) GetPermissions() int8 {
-	return u.Status
+func (u *User) GetPermissions() []string {
+	return nil
+}
+
+func (u *User) GetUUID() uuid.UUID {
+	return u.UUID
 }

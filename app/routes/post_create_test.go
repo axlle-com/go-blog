@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/db"
@@ -113,7 +114,7 @@ type PostResponse struct {
 }
 
 func TestFailedCreatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 	requestBody := `{"email":"axlle@mail","password":"123456"}`
 
 	t.Run("Failed login", func(t *testing.T) {
@@ -159,7 +160,7 @@ func TestFailedCreatePost(t *testing.T) {
 }
 
 func TestSuccessfulCreatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 
 	mGallery.NewMigrator().Rollback()
 	mGallery.NewMigrator().Migrate()

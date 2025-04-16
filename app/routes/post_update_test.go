@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/db"
@@ -18,7 +19,7 @@ import (
 )
 
 func TestFailedUpdatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 	requestBody := `{"title":"title"}`
 	var oPost *PostResponse
 
@@ -99,7 +100,7 @@ func TestFailedUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 	mGallery.NewMigrator().Rollback()
 	mGallery.NewMigrator().Migrate()
 	mPost.NewMigrator().Rollback()
@@ -312,7 +313,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePostAlias(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 	mPost.NewMigrator().Rollback()
 	mPost.NewMigrator().Migrate()
 

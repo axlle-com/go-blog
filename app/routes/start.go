@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
@@ -40,8 +41,8 @@ func PerformLogin(router *gin.Engine) ([]*http.Cookie, error) {
 	return cookie, nil
 }
 
-func StartWithLogin() (router *gin.Engine, cookie []*http.Cookie, err error) {
-	router = SetupTestRouter()
+func StartWithLogin(ctx context.Context) (router *gin.Engine, cookie []*http.Cookie, err error) {
+	router = SetupTestRouter(ctx)
 	requestBody := `{"email":"admin@admin.ru","password":"123456"}`
 
 	w := httptest.NewRecorder()
@@ -58,14 +59,14 @@ func StartWithLogin() (router *gin.Engine, cookie []*http.Cookie, err error) {
 	return router, cookie, nil
 }
 
-func SetupTestRouter() *gin.Engine {
+func SetupTestRouter(ctx context.Context) *gin.Engine {
 	if router == nil {
 		cfg := config.Config()
 		cfg.SetTestENV()
 
 		db2.Init(cfg.DBUrlTest())
 
-		container := app.New()
+		container := app.New(ctx)
 
 		mUser.NewMigrator().Migrate()
 		mTemplate.NewMigrator().Migrate()

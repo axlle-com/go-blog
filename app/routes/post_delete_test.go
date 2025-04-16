@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestFailedDeletePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 
 	t.Run("Failed delete post", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -42,7 +43,7 @@ func TestFailedDeletePost(t *testing.T) {
 }
 
 func TestSuccessfulDeletePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin()
+	router, cookies, _ := StartWithLogin(context.Background())
 	mGallery.NewMigrator().Rollback()
 	mGallery.NewMigrator().Migrate()
 	mPost.NewMigrator().Rollback()

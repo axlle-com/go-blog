@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/file"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
@@ -13,12 +15,16 @@ import (
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
 	service2 "github.com/axlle-com/blog/pkg/info_block/service"
+	web5 "github.com/axlle-com/blog/pkg/message/http/admin/handlers/web"
+	repository3 "github.com/axlle-com/blog/pkg/message/repository"
+	service5 "github.com/axlle-com/blog/pkg/message/service"
 	ajax2 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
 	postApi "github.com/axlle-com/blog/pkg/post/http/admin/handlers/api"
 	web3 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/web"
 	web2 "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
 	"github.com/axlle-com/blog/pkg/post/repository"
 	"github.com/axlle-com/blog/pkg/post/service"
+	"github.com/axlle-com/blog/pkg/queue"
 	ajax3 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
 	web4 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/web"
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
@@ -30,6 +36,8 @@ import (
 )
 
 type Container struct {
+	Queue contracts.Queue
+
 	FileService  *file.Service
 	FileProvider fileProvider.FileProvider
 
@@ -57,10 +65,12 @@ type Container struct {
 	TemplateService           *service4.TemplateService
 	TemplateCollectionService *service4.TemplateCollectionService
 
-	UserRepo        userRepository.UserRepository
-	UserProvider    userProvider.UserProvider
-	UserService     *service3.UserService
-	UserAuthService *service3.AuthService
+	UserRepo          userRepository.UserRepository
+	UserGuest         userRepository.UserGuestRepository
+	UserProvider      userProvider.UserProvider
+	UserGuestProvider userProvider.UserGuestProvider
+	UserService       *service3.UserService
+	UserAuthService   *service3.AuthService
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
@@ -74,9 +84,16 @@ type Container struct {
 	PostTagRepo         repository.PostTagRepository
 	PostTagResourceRepo repository.PostTagResourceRepository
 	PostTagService      *service.PostTagService
+
+	MessageRep               repository3.MessageRepository
+	MessageService           *service5.MessageService
+	MessageCollectionService *service5.MessageCollectionService
 }
 
-func New() *Container {
+func New(ctx context.Context) *Container {
+	newQueue := queue.NewQueue()
+	newQueue.StartWorkers(ctx, 4)
+
 	fileService := file.NewService()
 	fileProv := fileProvider.NewProvider(fileService)
 
@@ -93,7 +110,9 @@ func New() *Container {
 	gProvider := galleryProvider.NewProvider(gRepo, gService)
 
 	uRepo := userRepository.NewUserRepo()
+	ugRepo := userRepository.NewUserGuestRepo()
 	uProvider := userProvider.NewProvider(uRepo)
+	ugProvider := userProvider.NewGuestProvider(ugRepo)
 	uService := service3.NewUserService(uRepo)
 	uaService := service3.NewAuthService(uService)
 
@@ -101,6 +120,10 @@ func New() *Container {
 	tProvider := templateProvider.NewProvider(tRepo)
 	tService := service4.NewTemplateService(tRepo, uProvider)
 	tCollectionService := service4.NewTemplateCollectionService(tService, tRepo, uProvider)
+
+	mRepo := repository3.NewMessageRepo()
+	mService := service5.NewMessageService(mRepo, uProvider, ugProvider)
+	mcService := service5.NewMessageCollectionService(mRepo, mService, uProvider, ugProvider)
 
 	aRepo := alias.NewAliasRepo()
 	aProvider := alias.NewProvider(aRepo)
@@ -127,6 +150,8 @@ func New() *Container {
 	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider, ibProvider)
 
 	return &Container{
+		Queue: newQueue,
+
 		FileService:  fileService,
 		FileProvider: fileProv,
 
@@ -154,10 +179,12 @@ func New() *Container {
 		TemplateService:           tService,
 		TemplateCollectionService: tCollectionService,
 
-		UserRepo:        uRepo,
-		UserProvider:    uProvider,
-		UserService:     uService,
-		UserAuthService: uaService,
+		UserRepo:          uRepo,
+		UserGuest:         ugRepo,
+		UserProvider:      uProvider,
+		UserGuestProvider: ugProvider,
+		UserService:       uService,
+		UserAuthService:   uaService,
 
 		AliasRepo:     aRepo,
 		AliasProvider: aProvider,
@@ -171,6 +198,10 @@ func New() *Container {
 		PostTagRepo:         ptRepo,
 		PostTagResourceRepo: ptrRepo,
 		PostTagService:      ptService,
+
+		MessageRep:               mRepo,
+		MessageService:           mService,
+		MessageCollectionService: mcService,
 	}
 }
 
@@ -282,6 +313,14 @@ func (c *Container) TemplateController() ajax3.TemplateController {
 	return ajax3.NewTemplateController(
 		c.TemplateService,
 		c.TemplateCollectionService,
+		c.UserProvider,
+	)
+}
+
+func (c *Container) MessageController() web5.MessageWebController {
+	return web5.NewMessageWebController(
+		c.MessageService,
+		c.MessageCollectionService,
 		c.UserProvider,
 	)
 }

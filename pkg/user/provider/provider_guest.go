@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserProvider interface {
+type UserGuestProvider interface {
 	GetAll() []contracts.User
 	GetAllIds() []uint
 	GetByID(id uint) (contracts.User, error)
@@ -16,20 +16,20 @@ type UserProvider interface {
 	GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.User, error)
 }
 
-func NewProvider(
-	user repository.UserRepository,
+func NewGuestProvider(
+	userGuest repository.UserGuestRepository,
 ) UserProvider {
-	return &provider{
-		userRepo: user,
+	return &userGuestProvider{
+		userGuest: userGuest,
 	}
 }
 
-type provider struct {
-	userRepo repository.UserRepository
+type userGuestProvider struct {
+	userGuest repository.UserGuestRepository
 }
 
-func (p *provider) GetAll() []contracts.User {
-	all, err := p.userRepo.GetAll()
+func (p *userGuestProvider) GetAll() []contracts.User {
+	all, err := p.userGuest.GetAll()
 	if err == nil && len(all) > 0 {
 		var users []contracts.User
 		for _, item := range all {
@@ -41,8 +41,8 @@ func (p *provider) GetAll() []contracts.User {
 	return nil
 }
 
-func (p *provider) GetAllIds() []uint {
-	t, err := p.userRepo.GetAllIds()
+func (p *userGuestProvider) GetAllIds() []uint {
+	t, err := p.userGuest.GetAllIds()
 	if err == nil {
 		return t
 	}
@@ -50,8 +50,8 @@ func (p *provider) GetAllIds() []uint {
 	return nil
 }
 
-func (p *provider) GetByID(id uint) (contracts.User, error) {
-	t, err := p.userRepo.GetByID(id)
+func (p *userGuestProvider) GetByID(id uint) (contracts.User, error) {
+	t, err := p.userGuest.GetByID(id)
 	if err == nil {
 		return t, nil
 	}
@@ -59,8 +59,8 @@ func (p *provider) GetByID(id uint) (contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetByIDs(ids []uint) ([]contracts.User, error) {
-	all, err := p.userRepo.GetByIDs(ids)
+func (p *userGuestProvider) GetByIDs(ids []uint) ([]contracts.User, error) {
+	all, err := p.userGuest.GetByIDs(ids)
 	if err == nil && len(all) > 0 {
 		collection := make([]contracts.User, 0, len(all))
 		for _, item := range all {
@@ -72,8 +72,8 @@ func (p *provider) GetByIDs(ids []uint) ([]contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.User, error) {
-	all, err := p.userRepo.GetByIDs(ids)
+func (p *userGuestProvider) GetMapByIDs(ids []uint) (map[uint]contracts.User, error) {
+	all, err := p.userGuest.GetByIDs(ids)
 
 	if err == nil && len(all) > 0 {
 		users := make(map[uint]contracts.User)
@@ -88,8 +88,8 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.User, error) {
-	all, err := p.userRepo.GetByUUIDs(uuids)
+func (p *userGuestProvider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.User, error) {
+	all, err := p.userGuest.GetByUUIDs(uuids)
 
 	if err == nil && len(all) > 0 {
 		users := make(map[uuid.UUID]contracts.User)

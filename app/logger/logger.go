@@ -91,6 +91,10 @@ func Fatal(args ...any) {
 	logWithCaller(logrus.FatalLevel, args...)
 }
 
+func Fatalf(format string, a ...any) {
+	logWithCaller(logrus.FatalLevel, fmt.Errorf(format, a...))
+}
+
 func Info(args ...any) {
 	log(logrus.InfoLevel, args...)
 }

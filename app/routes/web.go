@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/axlle-com/blog/app"
 	middleware2 "github.com/axlle-com/blog/app/middleware"
+	middleware1 "github.com/axlle-com/blog/app/middleware/analytic"
 	"github.com/axlle-com/blog/app/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -38,8 +39,11 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	templateController := container.TemplateWebController()
 	templateAjaxController := container.TemplateController()
 
+	messageController := container.MessageController()
+
+	analytic := middleware1.NewAnalytic(container.Queue)
 	r.Use(middleware2.Error())
-	r.Use(middleware2.Analytic())
+	r.Use(analytic.Handler())
 	r.GET("/", postFrontWebController.GetHome)
 	r.GET("/test", ShowIndexPageTest)
 	r.POST("/test", SavePageTest2)
@@ -96,6 +100,9 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.DELETE("/templates/:id", templateAjaxController.DeleteTemplate)
 		protected.GET("/templates/filter", templateAjaxController.FilterTemplate)
 		protected.GET("/templates/resources/:template", templateAjaxController.GetResourceTemplate)
+
+		protected.GET("/messages", messageController.GetMessages)
+		protected.GET("/messages/:id", messageController.GetMessage)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}

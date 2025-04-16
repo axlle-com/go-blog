@@ -46,6 +46,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 		return
 	}
 	session.Set("user_id", userFound.ID)
+	session.Set("user_uuid", userFound.UUID.String())
 	session.Set("user", userFound)
 	sessionID := session.ID()
 	cache := db.NewCache()

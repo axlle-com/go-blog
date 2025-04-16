@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/user/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,6 +13,7 @@ type UserRepository interface {
 	Create(user *models.User) error
 	GetByID(id uint) (*models.User, error)
 	GetByIDs(ids []uint) ([]*models.User, error)
+	GetByUUIDs(uuids []uuid.UUID) ([]*models.User, error)
 	GetByEmail(email string) (*models.User, error)
 	Update(user *models.User) error
 	Delete(id uint) error
@@ -50,6 +52,14 @@ func (r *repository) GetByID(id uint) (*models.User, error) {
 func (r *repository) GetByIDs(ids []uint) ([]*models.User, error) {
 	var users []*models.User
 	if err := r.db.Select((&models.User{}).Fields()).Where("id IN (?)", ids).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (r *repository) GetByUUIDs(uuids []uuid.UUID) ([]*models.User, error) {
+	var users []*models.User
+	if err := r.db.Select((&models.User{}).Fields()).Where("uuid IN (?)", uuids).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

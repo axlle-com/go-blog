@@ -3,22 +3,53 @@ package analytic
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/analytic/provider"
 	"time"
 )
 
-func NewAnalyticsJob(event AnalyticsEvent) *AnalyticsJob {
-	return &AnalyticsJob{event}
+func NewAnalyticsJob(
+	event AnalyticsEvent,
+	analyticProvider provider.AnalyticProvider,
+) *AnalyticsJob {
+	return &AnalyticsJob{
+		event:            &event,
+		analyticProvider: analyticProvider,
+		start:            time.Now(),
+	}
 }
 
 type AnalyticsJob struct {
-	ev AnalyticsEvent
+	start            time.Time
+	event            *AnalyticsEvent
+	analyticProvider provider.AnalyticProvider
 }
 
-func (p *AnalyticsJob) Run(ctx context.Context) error {
-	str, _ := toMap(p.ev)
-	fmt.Println(time.Now().Format("15:04:05"), ":", str)
+func (j *AnalyticsJob) Run(ctx context.Context) error {
+	_, err := j.analyticProvider.SaveForm(j.event)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func (j *AnalyticsJob) GetData() []byte {
+	raw, err := json.Marshal(j.event)
+	if err != nil {
+		logger.Errorf("[AnalyticsJob][GetData] Error: %v", err)
+		return nil
+	}
+
+	return raw
+}
+
+func (j *AnalyticsJob) GetName() string {
+	return "Analytics"
+}
+
+func (j *AnalyticsJob) Duration() float64 {
+	elapsed := time.Since(j.start)
+	return float64(elapsed.Nanoseconds()) / 1e6
 }
 
 func toMap(v any) (map[string]any, error) {

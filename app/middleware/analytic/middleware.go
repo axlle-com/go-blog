@@ -1,23 +1,29 @@
 package analytic
 
 import (
-	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/analytic/provider"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/mssola/user_agent"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func NewAnalytic(queue contracts.Queue) *Analytic {
+func NewAnalytic(
+	queue contracts.Queue,
+	analyticProvider provider.AnalyticProvider,
+) *Analytic {
 	return &Analytic{
-		queue: queue,
+		queue:            queue,
+		analyticProvider: analyticProvider,
 	}
 }
 
 type Analytic struct {
-	queue contracts.Queue
+	queue            contracts.Queue
+	analyticProvider provider.AnalyticProvider
 }
 
 func (a *Analytic) Handler() gin.HandlerFunc {
@@ -29,7 +35,7 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 		c.Set("device", detectDeviceType(c.GetHeader("User-Agent")))
 		c.Set("browser", browserName)
 		c.Set("os", ua.OS())
-		c.Set("user_uuid", "")
+		c.Set("request_uuid", uuid.New().String())
 
 		if res, err := c.Cookie("resolution"); err == nil {
 			if p := strings.Split(res, ";"); len(p) == 2 {
@@ -44,16 +50,27 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 
 		c.Next()
 
+		host := c.GetHeader("X-Forwarded-Host")
+		if host == "" {
+			host = c.Request.Host
+		}
+
 		referer := c.GetHeader("Referer")
 		if referer == "" {
 			referer = c.GetHeader("Origin")
 		}
 
+		userUUID := c.GetString("user_uuid")
+		if userUUID == "" {
+			userUUID = c.GetString("guest_uuid")
+		}
+
 		evt := AnalyticsEvent{
-			RequestID:        c.GetString("request_id"),
-			UserUUID:         c.GetString("user_uuid"),
+			RequestUUID:      c.GetString("request_uuid"),
+			UserUUID:         userUUID,
 			Timestamp:        time.Now().UTC(),
 			Method:           c.Request.Method,
+			Host:             host,
 			Path:             c.FullPath(),
 			Query:            c.Request.URL.RawQuery,
 			Status:           c.Writer.Status(),
@@ -73,9 +90,7 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 			UTMMedium:        c.Query("utm_medium"),
 		}
 
-		a.queue.Enqueue(NewAnalyticsJob(evt), 0)
-
-		logger.Debugf("Total time: %v", time.Since(start))
+		a.queue.Enqueue(NewAnalyticsJob(evt, a.analyticProvider), 0)
 	}
 }
 

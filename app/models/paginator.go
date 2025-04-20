@@ -25,7 +25,7 @@ func PaginatorFromQuery(query url.Values) contracts.Paginator {
 	}
 	p.SetPage()
 	p.SetPageSize()
-	p.seQueryString()
+	p.setQueryString()
 
 	return p
 }
@@ -86,7 +86,7 @@ func (p *paginator) GetPage() int {
 	return p.Page
 }
 
-func (p *paginator) seQueryString() {
+func (p *paginator) setQueryString() {
 	if p.Query == nil {
 		return
 	}

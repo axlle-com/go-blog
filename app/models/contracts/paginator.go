@@ -11,6 +11,7 @@ type Paginator interface {
 	GetPage() int
 	SetPageSize()
 	GetPageSize() int
+	PrintFullQuery() template.URL
 	SetTotal(int)
 	GetTotal() int
 	PageNumbers() []interface{}

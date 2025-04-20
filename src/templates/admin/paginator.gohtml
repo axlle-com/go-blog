@@ -2,12 +2,14 @@
     <ul class="pagination pagination-sm mb-0 ml-sm-auto mt-1 mt-sm-0">
         {{ if gt .GetPage 1 }}
             <li class="page-item">
-                <a class="page-link" href="{{ .GetURL }}?page={{ sub .GetPage 1 }}&{{ .GetQuery}}">
+                <a class="page-link" href="{{ .GetURL }}?page={{ sub .GetPage 1 }}&{{ .GetQuery }}">
                     <i data-feather="chevron-left"></i>
                 </a>
             </li>
         {{ else }}
-            <li class="disabled" aria-disabled="true"><span class="page-link"><i data-feather="chevron-left"></i></span></li>
+            <li class="disabled" aria-disabled="true">
+                <span class="page-link"><i data-feather="chevron-left"></i></span>
+            </li>
         {{ end }}
 
         {{ range .PageNumbers }}
@@ -17,19 +19,25 @@
                 {{ if eq $.GetPage . }}
                     <li class="page-item active"><span class="page-link">{{.}}</span></li>
                 {{ else }}
-                    <li class="page-item"><a class="page-link" href="{{ $.GetURL }}?page={{.}}&{{ $.GetQuery}}">{{.}}</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ $.GetURL }}?page={{.}}{{ if $.GetQuery }}&{{ $.GetQuery }}{{ end }}">
+                            {{.}}
+                        </a>
+                    </li>
                 {{ end }}
             {{ end }}
         {{ end }}
 
         {{ if lt (mul .GetPage .GetPageSize) .GetTotal }}
             <li class="page-item">
-                <a class="page-link" href="{{ .GetURL }}?page={{ add .GetPage 1 }}{{ .GetQuery}}">
+                <a class="page-link" href="{{ .GetURL }}?page={{ add .GetPage 1 }}{{ .GetQuery }}">
                     <i data-feather="chevron-right"></i>
                 </a>
             </li>
         {{ else }}
-            <li class="disabled" aria-disabled="true"><span class="page-link"><i data-feather="chevron-right"></i></span></li>
+            <li class="disabled" aria-disabled="true">
+                <span class="page-link"><i data-feather="chevron-right"></i></span>
+            </li>
         {{ end }}
     </ul>
 {{ end}}

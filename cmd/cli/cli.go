@@ -6,6 +6,8 @@ import (
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	db2 "github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models"
+	migrate2 "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	"github.com/axlle-com/blog/pkg/message/db"
 	"os"
 
@@ -47,7 +49,6 @@ var Commands = map[string]func(){
 		migrate()
 	},
 	"refill": func() {
-		db2.NewCache().ResetUsersSession()
 		rollback()
 		migrate()
 		seedTest()
@@ -69,15 +70,18 @@ func migrate() {
 	mGallery.NewMigrator().Migrate()
 	mInfoBlock.NewMigrator().Migrate()
 	mMessage.NewMigrator().Migrate()
+	migrate2.NewMigrator().Migrate()
 }
 
 func rollback() {
+	models.NewCache().ResetUsersSession()
 	mUser.NewMigrator().Rollback()
 	postMigrate.NewMigrator().Rollback()
 	mTemplate.NewMigrator().Rollback()
 	mGallery.NewMigrator().Rollback()
 	mInfoBlock.NewMigrator().Rollback()
 	mMessage.NewMigrator().Rollback()
+	migrate2.NewMigrator().Rollback()
 }
 
 func seedTest() {

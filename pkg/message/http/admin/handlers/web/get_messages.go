@@ -36,15 +36,21 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 
 	temp, err := c.messageCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Error(err)
+		logger.Errorf("[GetMessages] Error: %v", err)
 	}
-	templates := c.messageCollectionService.Aggregates(temp)
+	messages := c.messageCollectionService.Aggregates(temp)
+
+	cnt, err := c.messageCollectionService.CountByField("viewed", false)
+	if err != nil {
+		logger.Errorf("[GetMessages] Error: %v", err)
+	}
 
 	ctx.HTML(http.StatusOK, "admin.messages", gin.H{
 		"title":     "Страница сообщений",
 		"user":      user,
 		"message":   empty,
-		"templates": templates,
+		"messages":  messages,
+		"unviewed":  cnt,
 		"users":     users,
 		"paginator": paginator,
 		"filter":    filter,

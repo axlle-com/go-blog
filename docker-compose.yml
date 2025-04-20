@@ -9,7 +9,7 @@ services:
     networks:
       - projects_network
     ports:
-      - "8080:3000"
+      - "8077:3000"
     volumes:
       - ./docker/.env:/app/.env
       - ./docker/.env:/.env

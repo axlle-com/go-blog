@@ -2,9 +2,14 @@ package app
 
 import (
 	"context"
+	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
+	provider2 "github.com/axlle-com/blog/pkg/analytic/provider"
+	repository4 "github.com/axlle-com/blog/pkg/analytic/repository"
+	service6 "github.com/axlle-com/blog/pkg/analytic/service"
 	"github.com/axlle-com/blog/pkg/file"
+	"github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
 	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
@@ -15,7 +20,11 @@ import (
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
 	service2 "github.com/axlle-com/blog/pkg/info_block/service"
+	"github.com/axlle-com/blog/pkg/mailer"
+	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
+	web6 "github.com/axlle-com/blog/pkg/message/http/admin/handlers/ajax"
 	web5 "github.com/axlle-com/blog/pkg/message/http/admin/handlers/web"
+	web7 "github.com/axlle-com/blog/pkg/message/http/front/handlers/ajax"
 	repository3 "github.com/axlle-com/blog/pkg/message/repository"
 	service5 "github.com/axlle-com/blog/pkg/message/service"
 	ajax2 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
@@ -30,6 +39,7 @@ import (
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 	service4 "github.com/axlle-com/blog/pkg/template/service"
+	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	service3 "github.com/axlle-com/blog/pkg/user/service"
@@ -37,6 +47,7 @@ import (
 
 type Container struct {
 	Queue contracts.Queue
+	Cache contracts.Cache
 
 	FileService  *file.Service
 	FileProvider fileProvider.FileProvider
@@ -65,12 +76,10 @@ type Container struct {
 	TemplateService           *service4.TemplateService
 	TemplateCollectionService *service4.TemplateCollectionService
 
-	UserRepo          userRepository.UserRepository
-	UserGuest         userRepository.UserGuestRepository
-	UserProvider      userProvider.UserProvider
-	UserGuestProvider userProvider.UserGuestProvider
-	UserService       *service3.UserService
-	UserAuthService   *service3.AuthService
+	UserRepo        userRepository.UserRepository
+	UserProvider    userProvider.UserProvider
+	UserService     *service3.UserService
+	UserAuthService *service3.AuthService
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
@@ -85,14 +94,24 @@ type Container struct {
 	PostTagResourceRepo repository.PostTagResourceRepository
 	PostTagService      *service.PostTagService
 
-	MessageRep               repository3.MessageRepository
+	MessageRep               contracts2.MessageRepository
 	MessageService           *service5.MessageService
 	MessageCollectionService *service5.MessageCollectionService
+	MailService              *service5.MailService
+
+	AnalyticRepo              repository4.AnalyticRepository
+	AnalyticService           *service6.AnalyticService
+	AnalyticCollectionService *service6.AnalyticCollectionService
+	AnalyticProvider          provider2.AnalyticProvider
 }
 
 func New(ctx context.Context) *Container {
 	newQueue := queue.NewQueue()
 	newQueue.StartWorkers(ctx, 4)
+
+	cache := models.NewCache()
+
+	mailerInterface := mailer.NewMailer(newQueue)
 
 	fileService := file.NewService()
 	fileProv := fileProvider.NewProvider(fileService)
@@ -110,11 +129,9 @@ func New(ctx context.Context) *Container {
 	gProvider := galleryProvider.NewProvider(gRepo, gService)
 
 	uRepo := userRepository.NewUserRepo()
-	ugRepo := userRepository.NewUserGuestRepo()
-	uProvider := userProvider.NewProvider(uRepo)
-	ugProvider := userProvider.NewGuestProvider(ugRepo)
 	uService := service3.NewUserService(uRepo)
 	uaService := service3.NewAuthService(uService)
+	uProvider := userProvider.NewProvider(uRepo, uService)
 
 	tRepo := templateRepository.NewTemplateRepo()
 	tProvider := templateProvider.NewProvider(tRepo)
@@ -122,8 +139,9 @@ func New(ctx context.Context) *Container {
 	tCollectionService := service4.NewTemplateCollectionService(tService, tRepo, uProvider)
 
 	mRepo := repository3.NewMessageRepo()
-	mService := service5.NewMessageService(mRepo, uProvider, ugProvider)
-	mcService := service5.NewMessageCollectionService(mRepo, mService, uProvider, ugProvider)
+	mService := service5.NewMessageService(mRepo, uProvider)
+	mcService := service5.NewMessageCollectionService(mRepo, mService, uProvider)
+	mailService := service5.NewMailService(mService, mcService, uProvider, mailerInterface, newQueue)
 
 	aRepo := alias.NewAliasRepo()
 	aProvider := alias.NewProvider(aRepo)
@@ -149,8 +167,14 @@ func New(ctx context.Context) *Container {
 	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider, ibProvider)
 	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider, ibProvider)
 
+	analyticRepo := repository4.NewAnalyticRepo()
+	analyticService := service6.NewAnalyticService(analyticRepo, uProvider)
+	analyticCollectionService := service6.NewAnalyticCollectionService(analyticRepo, analyticService, uProvider)
+	analyticProvider := provider2.NewAnalyticProvider(analyticService, analyticCollectionService)
+
 	return &Container{
 		Queue: newQueue,
+		Cache: cache,
 
 		FileService:  fileService,
 		FileProvider: fileProv,
@@ -179,12 +203,10 @@ func New(ctx context.Context) *Container {
 		TemplateService:           tService,
 		TemplateCollectionService: tCollectionService,
 
-		UserRepo:          uRepo,
-		UserGuest:         ugRepo,
-		UserProvider:      uProvider,
-		UserGuestProvider: ugProvider,
-		UserService:       uService,
-		UserAuthService:   uaService,
+		UserRepo:        uRepo,
+		UserProvider:    uProvider,
+		UserService:     uService,
+		UserAuthService: uaService,
 
 		AliasRepo:     aRepo,
 		AliasProvider: aProvider,
@@ -202,6 +224,12 @@ func New(ctx context.Context) *Container {
 		MessageRep:               mRepo,
 		MessageService:           mService,
 		MessageCollectionService: mcService,
+		MailService:              mailService,
+
+		AnalyticRepo:              analyticRepo,
+		AnalyticService:           analyticService,
+		AnalyticCollectionService: analyticCollectionService,
+		AnalyticProvider:          analyticProvider,
 	}
 }
 
@@ -322,5 +350,33 @@ func (c *Container) MessageController() web5.MessageWebController {
 		c.MessageService,
 		c.MessageCollectionService,
 		c.UserProvider,
+	)
+}
+
+func (c *Container) MessageAjaxController() web6.MessageController {
+	return web6.NewMessageController(
+		c.MessageService,
+		c.MessageCollectionService,
+		c.UserProvider,
+	)
+}
+
+func (c *Container) MessageFrontController() web7.MessageController {
+	return web7.NewMessageController(
+		c.MailService,
+	)
+}
+
+func (c *Container) UserFrontController() user.Controller {
+	return user.NewUserWebController(
+		c.UserService,
+		c.UserAuthService,
+		c.Cache,
+	)
+}
+
+func (c *Container) FileController() http.Controller {
+	return http.NewFileController(
+		c.FileService,
 	)
 }

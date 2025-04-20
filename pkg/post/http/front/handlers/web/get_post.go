@@ -18,7 +18,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 
 	post, err := c.postService.GetByParam("alias", alias)
 	if err != nil || post == nil {
-		logger.Error(err)
+		logger.Debugf("[PostController][GetPost] Error: %v", err)
 		post = &models.Post{}
 	}
 

@@ -1,22 +1,30 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/google/uuid"
 	"net/http"
 )
 
 func (c *controller) Logout(ctx *gin.Context) {
 	session := sessions.Default(ctx)
+	guestUUID := session.Get("guest_uuid")
+	if guestUUID == nil || guestUUID == "" {
+		guestUUID = uuid.New().String()
+	}
+
 	session.Clear()
+
+	session.Set("guest_uuid", guestUUID)
 	session.Options(sessions.Options{
-		MaxAge: -1,
-		Path:   "/",
+		Path:     "/",
+		MaxAge:   7 * 24 * 3600, // 7 дней
+		HttpOnly: true,
 	})
 	if err := session.Save(); err != nil {
-		log.Fatalln("Failed to log out")
-		return
+		logger.Error("Failed to log out")
 	}
 	ctx.Redirect(http.StatusFound, "/")
 	ctx.Abort()

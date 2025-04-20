@@ -3,10 +3,11 @@ package analytic
 import "time"
 
 type AnalyticsEvent struct {
-	RequestID        string        `json:"request_id"`
+	RequestUUID      string        `json:"request_uuid"`
 	UserUUID         string        `json:"user_uuid"`
-	Timestamp        time.Time     `json:"ts"`
+	Timestamp        time.Time     `json:"timestamp"`
 	Method           string        `json:"method"`
+	Host             string        `json:"host"`
 	Path             string        `json:"path"`
 	Query            string        `json:"query,omitempty"`
 	Status           int           `json:"status"`
@@ -19,8 +20,8 @@ type AnalyticsEvent struct {
 	OS               string        `json:"os,omitempty"`
 	Language         string        `json:"lang,omitempty"`
 	Referrer         string        `json:"referrer,omitempty"`
-	ResolutionWidth  int           `json:"res_w,omitempty"`
-	ResolutionHeight int           `json:"res_h,omitempty"`
+	ResolutionWidth  int           `json:"resolution_width,omitempty"`
+	ResolutionHeight int           `json:"resolution_height,omitempty"`
 	RequestSize      int64         `json:"req_size,omitempty"`
 	ResponseSize     int64         `json:"resp_size,omitempty"`
 	UTMCampaign      string        `json:"utm_campaign,omitempty"`

@@ -5,35 +5,23 @@ import (
 	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"gorm.io/gorm"
 	"log"
 )
-
-type MessageRepository interface {
-	WithTx(tx *gorm.DB) MessageRepository
-	Create(message *models.Message) error
-	GetByID(id uint) (*models.Message, error)
-	GetByIDs(ids []uint) ([]*models.Message, error)
-	Update(message *models.Message) error
-	Delete(*models.Message) error
-	DeleteByIDs(ids []uint) (err error)
-	GetAll() ([]*models.Message, error)
-	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts2.Paginator, filter *models.MessageFilter) ([]*models.Message, error)
-}
 
 type repository struct {
 	db *gorm.DB
 	*app.Paginate
 }
 
-func NewMessageRepo() MessageRepository {
+func NewMessageRepo() contracts.MessageRepository {
 	r := &repository{db: db.GetDB()}
 	return r
 }
 
-func (r *repository) WithTx(tx *gorm.DB) MessageRepository {
+func (r *repository) WithTx(tx *gorm.DB) contracts.MessageRepository {
 	newR := &repository{db: tx}
 	return newR
 }
@@ -56,6 +44,33 @@ func (r *repository) GetByIDs(ids []uint) ([]*models.Message, error) {
 		return nil, err
 	}
 	return messages, nil
+}
+
+func (r *repository) CountByField(field string, value any) (int64, error) {
+	allowed := map[string]bool{
+		"id":         true,
+		"user_uuid":  true,
+		"from":       true,
+		"to":         true,
+		"subject":    true,
+		"body":       true,
+		"attachment": true,
+		"viewed":     true,
+		"created_at": true,
+		"updated_at": true,
+		"deleted_at": true,
+	}
+	if !allowed[field] {
+		return 0, fmt.Errorf("invalid field: %q", field)
+	}
+
+	var cnt int64
+	err := r.db.
+		Model(&models.Message{}).
+		Where(fmt.Sprintf("%s = ?", field), value).
+		Count(&cnt).
+		Error
+	return cnt, err
 }
 
 func (r *repository) Update(message *models.Message) error {
@@ -107,7 +122,7 @@ func (r *repository) WithPaginate(p contracts2.Paginator, filter *models.Message
 	query.Count(&total)
 
 	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
-		Order(fmt.Sprintf("%s.id ASC", message.GetTable())).
+		Order(fmt.Sprintf("%s.created_at DESC", message.GetTable())).
 		Find(&messages).Error
 	if err != nil {
 		return nil, err
@@ -115,4 +130,29 @@ func (r *repository) WithPaginate(p contracts2.Paginator, filter *models.Message
 
 	p.SetTotal(int(total))
 	return messages, nil
+}
+
+func (r *repository) Paginator(paginator contracts2.Paginator, filter *models.MessageFilter) (contracts2.Paginator, error) {
+	var total int64
+
+	message := models.Message{}
+	table := message.GetTable()
+
+	query := r.db.Model(&message)
+
+	if filter != nil {
+		// TODO WHERE IN; LIKE
+		for col, val := range filter.GetMap() {
+			if col == "title" {
+				query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
+				continue
+			}
+			query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
+		}
+	}
+
+	query.Count(&total)
+	paginator.SetTotal(int(total))
+
+	return paginator, nil
 }

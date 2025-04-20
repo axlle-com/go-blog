@@ -1,28 +1,27 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
+	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
-	"github.com/axlle-com/blog/pkg/message/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
+	"github.com/google/uuid"
 )
 
 type MessageService struct {
-	messageRepo       repository.MessageRepository
-	userProvider      userProvider.UserProvider
-	userGuestProvider userProvider.UserGuestProvider
+	messageRepo  contracts2.MessageRepository
+	userProvider userProvider.UserProvider
 }
 
 func NewMessageService(
-	messageRepository repository.MessageRepository,
+	messageRepository contracts2.MessageRepository,
 	userProvider userProvider.UserProvider,
-	userGuestProvider userProvider.UserGuestProvider,
 ) *MessageService {
 	return &MessageService{
-		messageRepo:       messageRepository,
-		userProvider:      userProvider,
-		userGuestProvider: userGuestProvider,
+		messageRepo:  messageRepository,
+		userProvider: userProvider,
 	}
 }
 
@@ -31,12 +30,28 @@ func (s *MessageService) GetByID(id uint) (*models.Message, error) {
 }
 
 func (s *MessageService) Aggregate(message *models.Message) *models.Message {
+	var user contracts.User
+
+	if message.UserUUID != uuid.Nil {
+		var err error
+		user, err = s.userProvider.GetByUUID(message.UserUUID)
+		if err != nil {
+			logger.Errorf("[MessageService][Aggregates] Error: %v", err)
+		}
+	}
+
+	message.User = user
+
 	return message
 }
 
-func (s *MessageService) Create(message *models.Message, user contracts.User) (*models.Message, error) {
-	if user != nil {
-		message.UserUUID = user.GetUUID()
+func (s *MessageService) Create(message *models.Message, userUuid string) (*models.Message, error) {
+	if userUuid != "" {
+		newUUID, err := uuid.Parse(userUuid)
+		if err != nil {
+			logger.Errorf("Invalid UUID: %v", err)
+		}
+		message.UserUUID = newUUID
 	}
 	if err := s.messageRepo.Create(message); err != nil {
 		return nil, err
@@ -60,7 +75,7 @@ func (s *MessageService) SaveFromRequest(form *models.MessageRequest, found *mod
 	templateForm := app.LoadStruct(&models.Message{}, form).(*models.Message)
 
 	if found == nil {
-		message, err = s.Create(templateForm, user)
+		message, err = s.Create(templateForm, user.GetUUID().String())
 	} else {
 		templateForm.ID = found.ID
 		message, err = s.Update(templateForm)

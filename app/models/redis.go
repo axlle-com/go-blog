@@ -6,26 +6,18 @@ import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/redis"
 	client "github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"
 )
 
-func Store(address string, password string, keyPairs []byte) redis.Store {
-	store, err := redis.NewStore(10, "tcp", address, password, keyPairs)
-	if err != nil {
-		panic(err)
-	}
-	store.Options(sessions.Options{
-		MaxAge: 86400 * 7,
-		Path:   "/",
-	})
-	return store
-}
+func NewCache() contracts.Cache {
+	cfg := config.Config()
 
-func NewRedisCache() contracts.Cache {
-	c := &redisClient{}
+	if cfg.IsTest() || !cfg.StoreIsRedis() {
+		return NewInMemoryCache(cfg)
+	}
+
+	c := &redisClient{config: cfg}
 	c.client = client.NewClient(&client.Options{
 		Addr: config.Config().RedisHost(),
 	})
@@ -35,24 +27,25 @@ func NewRedisCache() contracts.Cache {
 
 type redisClient struct {
 	client *client.Client
+	config contracts.Config
 }
 
 func (r *redisClient) AddCache(key, value string) {
 	err := r.client.Set(context.Background(), key, value, 0).Err()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalf("[RedisClient][AddCache] Error: %v", err)
 	}
 }
 
 func (r *redisClient) DeleteCache(key string) {
 	err := r.client.Del(context.Background(), key).Err()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalf("[RedisClient][DeleteCache] Error: %v", err)
 	}
 }
 
 func (r *redisClient) GetUserKey(id uint) string {
-	return fmt.Sprintf(config.Config().UserSessionKey("%d"), id)
+	return fmt.Sprintf(r.config.UserSessionKey("%d"), id)
 }
 
 func (r *redisClient) AddUserSession(id uint, sessionID string) {
@@ -82,9 +75,9 @@ func (r *redisClient) ResetUsersSession() {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, config.Config().UserSessionKey("*"), 1000).Result()
+		keys, cursor, err = r.client.Scan(context.Background(), cursor, r.config.UserSessionKey("*"), 1000).Result()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Fatalf("[RedisClient][ResetUsersSession] Error: %v", err)
 		}
 
 		if len(keys) == 0 {
@@ -98,9 +91,9 @@ func (r *redisClient) ResetUsersSession() {
 	for {
 		var keys []string
 		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, config.Config().SessionKey("*"), 1000).Result()
+		keys, cursor, err = r.client.Scan(context.Background(), cursor, r.config.SessionKey("*"), 1000).Result()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Fatalf("[RedisClient][ResetUsersSession] Error: %v", err)
 		}
 
 		if len(keys) == 0 {

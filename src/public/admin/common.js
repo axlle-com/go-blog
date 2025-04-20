@@ -435,6 +435,45 @@ const _template = {
         this.add();
     }
 };
+const _message = {
+    _selector: '.js-message-content',
+    _selectorList: '.js-message-list',
+    _unviewed: '.js-message-unviewed',
+    read: function () {
+        const _this = this;
+        $('body').on('click', '.mail-item', function (e) {
+            const $this = $(this);
+            const action = $this.data('jsMessageAction');
+            if (action) {
+                $(_this._selector).html('')
+                const request = new _glob.request({action});
+                request.setMethod('GET').send((response) => {
+                    $(_this._selector).html(response.data.view)
+                    $(_this._selectorList).html(response.data.list)
+                    $(_this._unviewed).html(response.data.unviewed)
+                });
+            }
+        });
+    },
+    delete: function () {
+        const _this = this;
+        $('body').on('click', '.js-message-content-delete', function (e) {
+            const $this = $(this);
+            const action = $this.data('jsMessageAction');
+            if (action) {
+                $(_this._selector).html('')
+                const request = new _glob.request({action});
+                request.setMethod('DELETE').send((response) => {
+                    $(_this._selectorList).html(response.data.view)
+                });
+            }
+        });
+    },
+    run: function () {
+        this.read();
+        this.delete();
+    }
+};
 const _config = {
     sort: function () {
         let block = document.querySelectorAll('.sortable');
@@ -574,4 +613,5 @@ $(document).ready(function () {
     _auth.run();
     _post.run();
     _template.run();
+    _message.run();
 })

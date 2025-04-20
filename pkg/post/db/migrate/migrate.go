@@ -32,6 +32,9 @@ func (m *migrator) Migrate() {
 	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_post_categories_alias ON post_categories USING hash (alias);`)
 	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_post_categories_url ON post_categories USING hash (url);`)
 
+	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_post_tags_alias ON post_tags USING hash (alias);`)
+	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_post_tags_url ON post_tags USING hash (url);`)
+
 	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_post_tag_has_resources_resource_uuid ON post_tag_has_resources USING hash (resource_uuid);`)
 
 	if err != nil {

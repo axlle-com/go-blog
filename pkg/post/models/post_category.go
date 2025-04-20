@@ -18,16 +18,16 @@ type PostCategory struct {
 	MetaDescription    *string    `gorm:"size:200" json:"meta_description,omitempty"`
 	Alias              string     `gorm:"size:255;unique" json:"alias"`
 	URL                string     `gorm:"size:1000;unique" json:"url"`
-	IsPublished        *bool      `gorm:"default:true" json:"is_published,omitempty"`
+	IsPublished        *bool      `gorm:"index;default:true" json:"is_published,omitempty"`
 	IsFavourites       *bool      `gorm:"default:false" json:"is_favourites,omitempty"`
-	InSitemap          *bool      `gorm:"default:true" json:"in_sitemap,omitempty"`
+	InSitemap          *bool      `gorm:"index;default:true" json:"in_sitemap,omitempty"`
 	Image              *string    `gorm:"size:255" json:"image,omitempty"`
 	ShowImage          *bool      `gorm:"default:true" json:"show_image,omitempty"`
 	Title              string     `gorm:"size:255;not null" json:"title"`
 	TitleShort         *string    `gorm:"size:150" json:"title_short,omitempty"`
 	Description        *string    `gorm:"type:text" json:"description,omitempty"`
 	DescriptionPreview *string    `gorm:"type:text" json:"description_preview,omitempty"`
-	Sort               *uint      `gorm:"default:0" json:"sort,omitempty"`
+	Sort               *uint      `gorm:"index;default:0" json:"sort,omitempty"`
 	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`

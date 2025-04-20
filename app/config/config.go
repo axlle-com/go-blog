@@ -18,8 +18,10 @@ type config struct {
 	port     string
 	logLevel int
 
-	redisHost string
-	redisPort string
+	store         string
+	redisHost     string
+	redisPort     string
+	redisPassword string
 
 	dialector      string
 	dbHost         string
@@ -36,6 +38,14 @@ type config struct {
 
 	uploadsPath string
 	srcFolder   string
+
+	runtimeFolder string
+
+	smtpActive   bool
+	smtpHost     string
+	smtpPort     int
+	smtpUsername string
+	smtpPassword string
 }
 
 var (
@@ -72,8 +82,10 @@ func LoadConfig() (err error) {
 		instance.keyJWT = getEnv("KEY_JWT", "")
 		instance.keyCookie = getEnv("KEY_COOKIE", "")
 
+		instance.store = getEnv("CASH_STORE", "")
 		instance.redisHost = getEnv("REDIS_HOST", "127.0.0.1")
 		instance.redisPort = getEnv("REDIS_PORT", "6380")
+		instance.redisPassword = getEnv("REDIS_PASSWORD", "")
 
 		instance.dialector = getEnv("DIALECTOR", "postgres")
 
@@ -89,6 +101,24 @@ func LoadConfig() (err error) {
 
 		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/public/uploads/")
 		instance.srcFolder = getEnv("FILE_SRC_FOLDER", "src")
+
+		instance.runtimeFolder = getEnv("RUNTIME_FOLDER", "runtime")
+
+		instance.smtpHost = getEnv("SMTP_HOST", "")
+		smtpPort := getEnv("SMTP_PORT", "2525")
+		instance.smtpPort, err = strconv.Atoi(smtpPort)
+		if err != nil {
+			instance.smtpPort = 6
+		}
+		instance.smtpUsername = getEnv("SMTP_USERNAME", "")
+		instance.smtpPassword = getEnv("SMTP_PASSWORD", "")
+
+		smtpActiveTemp := getEnv("SMTP_ACTIVE", "0")
+		smtpActive, err := strconv.Atoi(smtpActiveTemp)
+		if err != nil {
+			instance.smtpActive = false
+		}
+		instance.smtpActive = smtpActive == 1
 	})
 	return
 }
@@ -148,6 +178,14 @@ func (c *config) RedisHost() string {
 	return s
 }
 
+func (c *config) RedisPassword() string {
+	return c.redisPassword
+}
+
+func (c *config) StoreIsRedis() bool {
+	return c.store == "redis"
+}
+
 func (c *config) KeyCookie() []byte {
 	if c.IsTest() {
 		s := []byte(c.keyCookie)
@@ -189,6 +227,13 @@ func (c *config) UploadPath() string {
 	return c.uploadsPath
 }
 
+func (c *config) RuntimeFolder(s string) string {
+	if s != "" {
+		return c.runtimeFolder + "/" + strings.Trim(s, " /")
+	}
+	return c.runtimeFolder
+}
+
 func (c *config) SrcFolder() string {
 	if c.IsTest() {
 		root, err := c.root()
@@ -218,6 +263,26 @@ func (c *config) SessionKey(s string) string {
 
 func (c *config) LogLevel() int {
 	return c.logLevel
+}
+
+func (c *config) SMTPActive() bool {
+	return c.smtpActive
+}
+
+func (c *config) SMTPPort() int {
+	return c.smtpPort
+}
+
+func (c *config) SMTPHost() string {
+	return c.smtpHost
+}
+
+func (c *config) SMTPUsername() string {
+	return c.smtpUsername
+}
+
+func (c *config) SMTPPassword() string {
+	return c.smtpPassword
 }
 
 func getEnv(key string, defaultValue string) string {

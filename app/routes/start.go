@@ -83,13 +83,13 @@ func SetupTestRouter(ctx context.Context) *gin.Engine {
 
 		router = gin.New()
 
-		store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
+		store := models.Store(cfg)
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
 		web.NewTemplate(router)
 		InitializeApiRoutes(router, container)
 		InitializeWebRoutes(router, container)
-		db2.NewCache().ResetUsersSession()
+		models.NewCache().ResetUsersSession()
 	}
 	return router
 }

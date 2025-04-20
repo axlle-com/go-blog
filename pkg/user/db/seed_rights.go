@@ -2,13 +2,13 @@ package db
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	. "github.com/axlle-com/blog/pkg/user/models"
+	"github.com/axlle-com/blog/pkg/user/models"
 )
 
 func (s *seeder) seedPermissions() {
 	permissions := []string{"create", "update", "delete", "read"}
 	for _, name := range permissions {
-		permission := Permission{
+		permission := models.Permission{
 			Name: name,
 		}
 		err := s.permission.Create(&permission)
@@ -23,7 +23,7 @@ func (s *seeder) seedPermissions() {
 func (s *seeder) seedRoles() {
 	roles := []string{"admin", "employee"}
 	for _, name := range roles {
-		role := Role{
+		role := models.Role{
 			Name: name,
 		}
 		err := s.role.Create(&role)

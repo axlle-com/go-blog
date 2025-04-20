@@ -4,7 +4,99 @@
         {{/*        {{ Breadcrumbs::render($breadcrumbsName, $model ?? null) }}*/}}
         <h5>{{ .Title }}</h5>
         <div class="a-block-inner">
-            {{ template "admin.messages_inner" . }}
+            <div class="inner-wrapper">
+                <!-- Inner sidebar -->
+                <div class="inner-sidebar">
+                    <!-- Inner sidebar header -->
+                    <div class="inner-sidebar-header justify-content-center">
+                        <button class="btn btn-warning has-icon btn-block" type="button" data-toggle="modal"
+                                data-target="#composeModal">
+                            <i data-feather="plus" class="mr-2"></i> Compose
+                        </button>
+                    </div>
+                    <!-- /Inner sidebar header -->
+                    <!-- Inner sidebar body -->
+                    <div class="inner-sidebar-body p-0">
+                        <div class="p-3 h-100" data-simplebar>
+                            <div class="list-group list-group-sm list-g list-group-borderless list-group-flush">
+                                <a type="button" href="/admin/messages" class="list-group-item list-group-item-action has-icon active">
+                                    <i class="mr-2" data-feather="inbox"></i>Inbox
+                                    <span class="badge badge-pill badge-primary ml-auto js-message-unviewed">{{ .unviewed }}</span>
+                                </a>
+                                <a type="button" href="/admin/messages?delete=1" class="list-group-item list-group-item-action has-icon">
+                                    <i class="mr-2" data-feather="send"></i>Sent
+                                </a>
+                                <a type="button" href="/admin/messages?delete=1" class="list-group-item list-group-item-action has-icon">
+                                    <i class="mr-2" data-feather="trash"></i>Trash
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /Inner sidebar body -->
+                </div>
+                <!-- /Inner sidebar -->
+                <!-- Inner main -->
+                <div class="inner-main collapse transition-none mail-content show">
+                    <!-- Inner main header -->
+                    <div class="inner-main-header">
+                        <a class="nav-link nav-icon rounded-circle nav-link-faded mr-3 d-md-none" href="#"
+                           data-toggle="inner-sidebar"><i class="material-icons">arrow_forward_ios</i></a>
+                        <div class="text-nowrap mr-2">
+                            <h5 class="mb-0">Inbox</h5>
+                            <span class="font-size-sm text-muted d-none d-sm-block">{{ .unviewed }} unread messages</span>
+                        </div>
+                        <span class="input-icon input-icon-sm ml-auto w-auto">
+              <i class="material-icons">search</i>
+              <input type="text"
+                     class="form-control form-control-sm bg-gray-200 border-gray-200"
+                     placeholder="Search mail">
+            </span>
+                    </div>
+                    <!-- /Inner main header -->
+                    <!-- Inner main body -->
+                    <div class="inner-main-body p-0 bg-white js-message-list">
+                        {{ template "admin.messages_inner" . }}
+                    </div>
+                    <!-- /Inner main body -->
+                </div>
+                <!-- /Inner main -->
+                <!-- Inner main -->
+                <div class="inner-main collapse transition-none mail-content js-message-content"></div>
+                <!-- /Inner main -->
+            </div>
+            <div class="modal fade" id="composeModal" tabindex="-1" role="dialog" aria-labelledby="composeModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex align-items-center">
+                            <h6 class="modal-title mb-0" id="composeModalLabel">New Message</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="mailTo">To</label>
+                                <input type="email" class="form-control" id="mailTo"
+                                       placeholder="Enter recipient's email address" autofocus>
+                            </div>
+                            <div class="form-group">
+                                <label for="mailSubject">Subject</label>
+                                <input type="text" class="form-control" id="mailSubject" placeholder="Enter subject">
+                            </div>
+                            <textarea class="form-control summernote"></textarea>
+                            <div class="custom-file form-control-sm mt-3" style="max-width: 300px">
+                                <input type="file" class="custom-file-input" id="customFile" multiple>
+                                <label class="custom-file-label" for="customFile">Attachment</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {{ template "admin.footer" . }}

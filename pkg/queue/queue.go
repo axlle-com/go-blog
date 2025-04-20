@@ -119,7 +119,8 @@ func (q *Queue) worker(ctx context.Context) {
 		q.mu.Unlock()
 
 		if err := it.job.Run(ctx); err != nil {
-			logger.Errorf("async job error: %v", err)
+			logger.Errorf("[Queue][%s] Error: %v, Data: %s", it.job.GetName(), err, string(it.job.GetData()))
 		}
+		logger.Debugf("[Queue][%s] Duration: %.2fms", it.job.GetName(), it.job.Duration())
 	}
 }

@@ -1,19 +1,14 @@
 package routes
 
 import (
-	"github.com/axlle-com/blog/app"
-	middleware2 "github.com/axlle-com/blog/app/middleware"
-	middleware1 "github.com/axlle-com/blog/app/middleware/analytic"
-	"github.com/axlle-com/blog/app/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
-	file "github.com/axlle-com/blog/pkg/file/http"
+	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/middleware"
+	analyticMiddleware "github.com/axlle-com/blog/app/middleware/analytic"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
-	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 )
 
 func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
@@ -24,14 +19,9 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	postCategoryController := container.CategoryController()
 	galleryController := container.GalleryAjaxController()
 
-	fileController := file.NewFileController(
-		container.FileService,
-	)
+	fileController := container.FileController()
 
-	userController := user.NewUserWebController(
-		container.UserService,
-		container.UserAuthService,
-	)
+	userController := container.UserFrontController()
 
 	infoBlockController := container.InfoBlockWebController()
 	infoBlockAjaxController := container.InfoBlockController()
@@ -40,19 +30,20 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	templateAjaxController := container.TemplateController()
 
 	messageController := container.MessageController()
+	messageAjaxController := container.MessageAjaxController()
+	messageFrontController := container.MessageFrontController()
 
-	analytic := middleware1.NewAnalytic(container.Queue)
-	r.Use(middleware2.Error())
+	analytic := analyticMiddleware.NewAnalytic(container.Queue, container.AnalyticProvider)
+	r.Use(middleware.Main())
+	r.Use(middleware.Error())
 	r.Use(analytic.Handler())
 	r.GET("/", postFrontWebController.GetHome)
-	r.GET("/test", ShowIndexPageTest)
-	r.POST("/test", SavePageTest2)
 	r.GET("/login", userController.Login)
 	r.POST("/auth", userController.Auth)
 	r.POST("/user", userController.CreateUser)
 
 	protected := r.Group("/admin")
-	protected.Use(middleware2.AuthRequired())
+	protected.Use(middleware.AuthRequired())
 	{
 		protected.GET("", userController.Index)
 		protected.GET("/logout", userController.Logout)
@@ -103,10 +94,15 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 
 		protected.GET("/messages", messageController.GetMessages)
 		protected.GET("/messages/:id", messageController.GetMessage)
+		protected.GET("/ajax/messages", messageAjaxController.GetMessages)
+		protected.GET("/ajax/messages/:id", messageAjaxController.GetMessage)
+		protected.DELETE("/ajax/messages/:id", messageAjaxController.DeleteMessage)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
 	}
+
 	r.GET("/:alias", postFrontWebController.GetPost)
+	r.POST("/messages", messageFrontController.CreateMessage)
 
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
@@ -122,56 +118,4 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 			})
 		}
 	})
-}
-
-func ShowIndexPageTest(c *gin.Context) {
-	fileName := filepath.Base("index.gohtml")
-	templatePath := filepath.Join("src/templates", fileName)
-	data, err := os.ReadFile(templatePath)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Ошибка чтения файла: %s", err.Error())
-		return
-	}
-
-	c.HTML(
-		http.StatusOK,
-		"test",
-		gin.H{
-			"title":   "Home Page",
-			"payload": string(data),
-		},
-	)
-}
-
-func SavePageTest(c *gin.Context) {
-	code := c.PostForm("code")
-	if code == "" {
-		c.String(http.StatusBadRequest, "Не передано содержимое шаблона (code)")
-		return
-	}
-
-	fileName := filepath.Base("index.gohtml")
-	templatePath := filepath.Join("src/templates", fileName)
-
-	err := os.WriteFile(templatePath, []byte(code), 0644)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Ошибка записи файла: %s", err.Error())
-		return
-	}
-	web.NewTemplate(nil).ReLoad()
-	c.String(http.StatusOK, "Файл успешно сохранён")
-}
-
-func SavePageTest2(c *gin.Context) {
-	code := c.PostForm("code")
-	if code == "" {
-		c.String(http.StatusBadRequest, "Не передано содержимое шаблона (code)")
-		return
-	}
-
-	err := web.NewTemplate(nil).AddTemplateFromString("index", code)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-	}
-	c.String(http.StatusOK, "Файл успешно сохранён")
 }

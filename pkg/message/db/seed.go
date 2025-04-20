@@ -36,13 +36,17 @@ func (s *seeder) SeedTest(n int) {
 		randomUser := idsUser[rand.Intn(len(idsUser))]
 
 		message := &models.Message{}
+
 		now := time.Now()
 		message.Subject = db.StrPtr("Subject #" + strconv.Itoa(i))
-		message.Body = faker.Username()
+		message.To = db.StrPtr(strconv.Itoa(i) + "_to@mail.com")
+		message.Viewed = false
+		message.From = db.StrPtr(strconv.Itoa(i) + "_from@mail.com")
+		message.Body = faker.Paragraph()
 		message.CreatedAt = &now
 		message.UpdatedAt = &now
 
-		_, err := s.messageService.Create(message, randomUser)
+		_, err := s.messageService.Create(message, randomUser.GetUUID().String())
 		if err != nil {
 			logger.Errorf("Failed to create message %d: %v", i, err.Error())
 		}

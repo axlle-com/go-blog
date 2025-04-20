@@ -1,0 +1,27 @@
+package models
+
+import (
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/redis"
+)
+
+func Store(cfg contracts.Config) redis.Store {
+	var store sessions.Store
+	var err error
+	if cfg.IsTest() || !cfg.StoreIsRedis() {
+		store = memstore.NewStore(cfg.KeyCookie())
+	} else {
+		store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), cfg.RedisPassword(), cfg.KeyCookie())
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	store.Options(sessions.Options{
+		MaxAge: 86400 * 7,
+		Path:   "/",
+	})
+	return store
+}

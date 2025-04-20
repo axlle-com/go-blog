@@ -1,0 +1,60 @@
+{{ define "admin.message_inner" }}
+    <!-- Inner main header -->
+    <div class="inner-main-header">
+        <button class="btn btn-light btn-sm has-icon js-message-content-back"
+                data-js-message-action="/admin/ajax/messages"
+                data-toggle="collapse"
+                data-target=".mail-content">
+            <i data-feather="chevron-left"></i>Входящие
+        </button>
+        <div class="btn-group btn-group-sm ml-2" role="group">
+            <button type="button" class="btn has-icon text-danger js-message-content-delete"
+                    data-js-message-action="/admin/ajax/messages/{{ .message.ID }}"
+                    data-toggle="collapse"
+                    data-target=".mail-content"
+                    title="Delete"><i data-feather="trash"></i>
+            </button>
+        </div>
+    </div>
+    <div class="ml-auto flex-center">
+        {{ if .paginator.HasPages }}
+            {{ template "admin.paginator" .paginator }}
+        {{ end }}
+    </div>
+    </div>
+    <!-- /Inner main header -->
+
+    <!-- Inner main body -->
+    <div class="inner-main-body p-0 bg-white">
+        <div class="card rounded-0">
+            <div class="card-body font-size-sm">
+                <div class="media mb-3 align-items-center">
+                    <img src="/public/img/user.svg" alt="User" class="rounded" width="50" height="50">
+                    <div class="media-body text-muted ml-3">
+                        <h6 class="mb-0 text-dark">{{ .message.UserFullName }}<{{ .message.From }}></h6>
+                        <div class="small">to me</div>
+                        <div class="small">{{ .message.Date }}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn-starred btn btn-icon" data-toggle="button"
+                                aria-pressed="false">
+                            <i class="fa fa-star"></i>
+                        </button>
+                        <buton type="button" class="btn btn-icon"><i class="fa fa-reply"></i></buton>
+                    </div>
+                </div>
+                <h5>{{ .message.Subject }}</h5>
+                <hr>
+                <p>{{ .message.Body }}</p>
+                <div class="btn-group-sm pt-3">
+                    <button class="btn btn-light has-icon justify-content-center" type="button">
+                        <i class="fa mr-2 fa-reply"></i>Reply
+                    </button>
+                    <button class="btn btn-light has-icon justify-content-center" type="button">
+                        <i class="fa mr-2 fa-forward"></i>Forward
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}

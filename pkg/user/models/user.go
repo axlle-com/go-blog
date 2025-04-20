@@ -3,36 +3,40 @@ package models
 import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"regexp"
+	"strings"
 	"time"
 )
 
 type User struct {
-	ID                 uint         `gorm:"primaryKey" json:"id"`
-	UUID               uuid.UUID    `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
-	FirstName          string       `gorm:"size:255;not null;default:'Undefined'" json:"first_name"`
-	LastName           string       `gorm:"size:255;not null;default:'Undefined'" json:"last_name"`
-	Patronymic         *string      `gorm:"size:255" json:"patronymic,omitempty"`
-	Phone              *string      `gorm:"size:255;unique" json:"phone,omitempty"`
-	Email              string       `gorm:"size:255;unique;not null" json:"email"`
-	IsEmail            *bool        `gorm:"default:false" json:"is_email,omitempty"`
-	IsPhone            *bool        `gorm:"default:false" json:"is_phone,omitempty"`
-	Status             int8         `gorm:"default:0" json:"status"`
-	Avatar             *string      `gorm:"size:255" json:"avatar,omitempty"`
-	Password           string       `gorm:"-" json:"-"`
-	PasswordHash       string       `gorm:"size:255;not null" json:"-"`
-	RememberToken      *string      `gorm:"size:500;default:null;index" json:"-"`
-	AuthToken          *string      `gorm:"size:500;default:null;index" json:"-"`
-	AuthKey            *string      `gorm:"size:32;default:null;" json:"-"`
-	PasswordResetToken *string      `gorm:"size:255;unique" json:"-"`
-	CreatedAt          *time.Time   `gorm:"index" json:"created_at,omitempty"`
-	UpdatedAt          *time.Time   `json:"updated_at,omitempty"`
-	DeletedAt          *time.Time   `gorm:"index" json:"-"`
-	Roles              []Role       `gorm:"many2many:user_has_role;" json:"roles,omitempty"`
-	Permissions        []Permission `gorm:"many2many:user_has_permission;" json:"permissions,omitempty"`
+	ID                 uint           `gorm:"primaryKey" json:"id"`
+	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
+	FirstName          string         `gorm:"size:255;not null;default:'Undefined'" json:"first_name"`
+	LastName           string         `gorm:"size:255;not null;default:'Undefined'" json:"last_name"`
+	Patronymic         *string        `gorm:"size:255" json:"patronymic,omitempty"`
+	Phone              *string        `gorm:"size:255;unique" json:"phone,omitempty"`
+	Email              string         `gorm:"size:255;unique;not null" json:"email"`
+	IsEmail            *bool          `gorm:"default:false" json:"is_email,omitempty"`
+	IsPhone            *bool          `gorm:"default:false" json:"is_phone,omitempty"`
+	Status             int8           `gorm:"index;not null;default:0" json:"status"`
+	Avatar             *string        `gorm:"size:255" json:"avatar,omitempty"`
+	Password           string         `gorm:"-" json:"-"`
+	PasswordHash       *string        `gorm:"size:255" json:"-"`
+	RememberToken      *string        `gorm:"size:500;default:null;index" json:"-"`
+	AuthToken          *string        `gorm:"size:500;default:null;index" json:"-"`
+	AuthKey            *string        `gorm:"size:32;default:null;" json:"-"`
+	PasswordResetToken *string        `gorm:"size:255;unique" json:"-"`
+	CreatedAt          *time.Time     `gorm:"index" json:"created_at,omitempty"`
+	UpdatedAt          *time.Time     `json:"updated_at,omitempty"`
+	DeletedAt          gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"omitempty"`
+
+	Roles       []Role       `gorm:"many2many:user_has_role;" json:"roles,omitempty"`
+	Permissions []Permission `gorm:"many2many:user_has_permission;" json:"permissions,omitempty"`
 }
 
 func (u *User) Fields() []string {
@@ -78,7 +82,12 @@ func (u *User) SetPasswordHash() {
 	if err != nil {
 		logger.Error(err)
 	}
-	u.PasswordHash = string(passwordHash)
+
+	str := string(passwordHash)
+	if str == "" {
+		u.PasswordHash = nil
+	}
+	u.PasswordHash = &str
 }
 
 func (u *User) SetAuthToken() (token string, err error) {
@@ -143,11 +152,35 @@ func (u *User) GetLastName() string {
 }
 
 func (u *User) GetPatronymic() string {
-	return *u.Patronymic
+	if u.Patronymic != nil {
+		return *u.Patronymic
+	}
+	return ""
+}
+
+func (u *User) GetFullName() string {
+	var parts []string
+
+	if s := strings.TrimSpace(u.FirstName); s != "" {
+		parts = append(parts, s)
+	}
+	if s := strings.TrimSpace(u.LastName); s != "" {
+		parts = append(parts, s)
+	}
+	if u.Patronymic != nil {
+		if s := strings.TrimSpace(*u.Patronymic); s != "" {
+			parts = append(parts, s)
+		}
+	}
+
+	return strings.Join(parts, " ")
 }
 
 func (u *User) GetPhone() string {
-	return *u.Phone
+	if u.Phone != nil {
+		return *u.Phone
+	}
+	return ""
 }
 
 func (u *User) GetEmail() string {
@@ -168,4 +201,25 @@ func (u *User) GetPermissions() []string {
 
 func (u *User) GetUUID() uuid.UUID {
 	return u.UUID
+}
+
+func (u *User) FromInterface(user contracts.User) {
+	u.FirstName = user.GetFirstName()
+	u.LastName = user.GetLastName()
+	u.Email = user.GetEmail()
+	u.UUID = user.GetUUID()
+
+	patronymic := user.GetPatronymic()
+	if patronymic == "" {
+		u.Patronymic = nil
+	} else {
+		u.Patronymic = &patronymic
+	}
+
+	phone := user.GetPhone()
+	if phone == "" {
+		u.Phone = nil
+	} else {
+		u.Phone = &phone
+	}
 }

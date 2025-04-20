@@ -1,7 +1,6 @@
 package web
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	. "github.com/axlle-com/blog/app/errors"
 	"github.com/axlle-com/blog/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
@@ -48,9 +47,8 @@ func (c *controller) Auth(ctx *gin.Context) {
 	session.Set("user_id", userFound.ID)
 	session.Set("user_uuid", userFound.UUID.String())
 	session.Set("user", userFound)
-	sessionID := session.ID()
-	cache := db.NewCache()
-	cache.AddUserSession(userFound.ID, sessionID)
+
+	c.cache.AddUserSession(userFound.ID, session.ID())
 
 	if err := session.Save(); err != nil {
 		logger.Error(err)

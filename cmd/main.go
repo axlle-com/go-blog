@@ -39,20 +39,20 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatalf("server listen: %v", err)
+			logger.Fatalf("[Main] server listen: %v", err)
 		}
 	}()
 
-	// 5) ждём сигнал остановки
+	// ждём сигнал остановки
 	<-appCtx.Done()
-	logger.Infof("shutdown signal caught")
+	logger.Info("[Main] Shutdown signal caught")
 
 	// даём 5 секунд на корректное завершение активных запросов
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Errorf("HTTP shutdown: %v", err)
+		logger.Errorf("[Main] HTTP shutdown: %v", err)
 	}
 
 	container.Queue.Close()
@@ -62,7 +62,7 @@ func main() {
 	//	logger.Errorf("DB close: %v", err)
 	//}
 
-	logger.Info("graceful shutdown complete")
+	logger.Info("[Main] Graceful shutdown complete")
 }
 
 func Init(cfg contracts.Config, container *app.Container) *gin.Engine {
@@ -74,7 +74,7 @@ func Init(cfg contracts.Config, container *app.Container) *gin.Engine {
 		panic(err.Error())
 	}
 
-	store := models.Store(cfg.RedisHost(), "", cfg.KeyCookie())
+	store := models.Store(cfg)
 	router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
 	db.Init(cfg.DBUrl())

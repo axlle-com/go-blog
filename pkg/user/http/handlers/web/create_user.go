@@ -10,7 +10,6 @@ import (
 )
 
 func (c *controller) CreateUser(ctx *gin.Context) {
-
 	var authInput AuthInput
 
 	if err := ctx.ShouldBindJSON(&authInput); err != nil {

@@ -260,7 +260,19 @@ func strToPtr(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTag
 	}
 	srcStr := strings.TrimSpace(src.String())
 	destElemType := dest.Type().Elem() // Тип значения, на которое указывает указатель
+
 	switch destElemType.Kind() {
+	case reflect.Array:
+		if destElemType == reflect.TypeOf(uuid.UUID{}) {
+			if parsed, err := uuid.Parse(srcStr); err == nil {
+				newVal := reflect.New(destElemType).Elem()
+				newVal.Set(reflect.ValueOf(parsed))
+				dest.Set(newVal.Addr())
+			} else {
+				logger.Errorf("Ошибка парсинга UUID '%s': %v", srcStr, err)
+			}
+			return
+		}
 	case reflect.String:
 		newVal := reflect.New(destElemType).Elem()
 		newVal.SetString(srcStr)
@@ -301,17 +313,9 @@ func strToPtr(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTag
 				dest.Set(newVal.Addr())
 			}
 		}
-	case reflect.Array:
-		if dest.Type() == reflect.TypeOf(uuid.UUID{}) {
-			trimmed := strings.TrimSpace(src.String())
-			if val, err := uuid.Parse(trimmed); err == nil {
-				dest.Set(reflect.ValueOf(val))
-			} else {
-				logger.Errorf("Ошибка парсинга UUID '%s': %v", srcStr, err)
-			}
-		}
+	default:
+		panic("unhandled default case")
 	}
-
 }
 
 func typeToPtr(src *reflect.Value, dest *reflect.Value) {

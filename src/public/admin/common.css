@@ -490,6 +490,15 @@ form.delete-button {
 
 /********** //info-block **********/
 
+/********** message **********/
+.truncate {
+    width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/********** //message **********/
+
 /********** loader **********/
 .relative {
     position: relative;

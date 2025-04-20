@@ -27,7 +27,7 @@ func (s *AuthService) Auth(authInput AuthInput) (user *user.User, err error) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(authInput.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(*user.PasswordHash), []byte(authInput.Password)); err != nil {
 		return nil, errors.New("invalid password or login")
 	}
 

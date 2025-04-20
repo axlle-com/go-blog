@@ -13,7 +13,7 @@ type Template struct {
 	IsMain       bool       `gorm:"index;not null;default:false" json:"is_main" form:"is_main" binding:"omitempty"`
 	Name         string     `gorm:"size:45;not null;unique" json:"name"`
 	ResourceName *string    `gorm:"size:255" json:"resource_name,omitempty"`
-	HTML         string     `gorm:"type:text" json:"html" binding:"required"`
+	HTML         *string    `gorm:"type:text" json:"html" binding:"omitempty"`
 	JS           *string    `gorm:"type:text" json:"js,omitempty"`
 	CSS          *string    `gorm:"type:text" json:"css,omitempty"`
 	CreatedAt    *time.Time `gorm:"index" json:"created_at,omitempty"`

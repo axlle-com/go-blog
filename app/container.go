@@ -2,7 +2,8 @@ package app
 
 import (
 	"context"
-	"github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
 	provider2 "github.com/axlle-com/blog/pkg/analytic/provider"
@@ -43,26 +44,27 @@ import (
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	service3 "github.com/axlle-com/blog/pkg/user/service"
+	"github.com/axlle-com/blog/pkg/view"
 )
 
 type Container struct {
 	Queue contracts.Queue
 	Cache contracts.Cache
+	View  contracts.View
 
 	FileService  *file.Service
 	FileProvider fileProvider.FileProvider
-
-	GalleryResourceRepo galleryRepo.GalleryResourceRepository
 
 	ImageRepo     galleryRepo.GalleryImageRepository
 	ImageEvent    *galleryService.ImageEvent
 	ImageService  *galleryService.ImageService
 	ImageProvider galleryProvider.ImageProvider
 
-	GalleryRepo     galleryRepo.GalleryRepository
-	GalleryEvent    *galleryService.GalleryEvent
-	GalleryService  *service.PostService
-	GalleryProvider galleryProvider.GalleryProvider
+	GalleryRepo         galleryRepo.GalleryRepository
+	GalleryEvent        *galleryService.GalleryEvent
+	GalleryService      *service.PostService
+	GalleryProvider     galleryProvider.GalleryProvider
+	GalleryResourceRepo galleryRepo.GalleryResourceRepository
 
 	PostRepo          repository.PostRepository
 	PostService       *service.PostService
@@ -94,7 +96,7 @@ type Container struct {
 	PostTagResourceRepo repository.PostTagResourceRepository
 	PostTagService      *service.PostTagService
 
-	MessageRep               contracts2.MessageRepository
+	MessageRepo              contracts2.MessageRepository
 	MessageService           *service5.MessageService
 	MessageCollectionService *service5.MessageCollectionService
 	MailService              *service5.MailService
@@ -109,7 +111,8 @@ func New(ctx context.Context) *Container {
 	newQueue := queue.NewQueue()
 	newQueue.StartWorkers(ctx, 4)
 
-	cache := models.NewCache()
+	newCache := cache.NewCache()
+	newView := view.NewView(config.Config())
 
 	mailerInterface := mailer.NewMailer(newQueue)
 
@@ -174,7 +177,8 @@ func New(ctx context.Context) *Container {
 
 	return &Container{
 		Queue: newQueue,
-		Cache: cache,
+		Cache: newCache,
+		View:  newView,
 
 		FileService:  fileService,
 		FileProvider: fileProv,
@@ -221,7 +225,7 @@ func New(ctx context.Context) *Container {
 		PostTagResourceRepo: ptrRepo,
 		PostTagService:      ptService,
 
-		MessageRep:               mRepo,
+		MessageRepo:              mRepo,
 		MessageService:           mService,
 		MessageCollectionService: mcService,
 		MailService:              mailService,
@@ -319,6 +323,7 @@ func (c *Container) InfoBlockWebController() web.InfoBlockWebController {
 
 func (c *Container) PostFrontWebController() web2.PostController {
 	return web2.NewFrontWebController(
+		c.View,
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,

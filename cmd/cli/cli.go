@@ -6,7 +6,7 @@ import (
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	db2 "github.com/axlle-com/blog/app/db"
-	"github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/cache"
 	migrate2 "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	"github.com/axlle-com/blog/pkg/message/db"
 	"os"
@@ -26,7 +26,7 @@ import (
 
 func main() {
 	var command string
-	db2.Init(config.Config().DBUrl())
+	db2.InitDB(config.Config().DBUrl())
 	flag.StringVar(&command, "command", "", "Command to execute")
 	flag.Parse()
 
@@ -74,7 +74,7 @@ func migrate() {
 }
 
 func rollback() {
-	models.NewCache().ResetUsersSession()
+	cache.NewCache().ResetUsersSession()
 	mUser.NewMigrator().Rollback()
 	postMigrate.NewMigrator().Rollback()
 	mTemplate.NewMigrator().Rollback()

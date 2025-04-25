@@ -2,6 +2,7 @@ package web
 
 import (
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/post/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -15,6 +16,7 @@ type PostController interface {
 }
 
 func NewFrontWebController(
+	view contracts.View,
 	service *service.PostService,
 	services *service.PostsService,
 	category *service.CategoryService,
@@ -24,6 +26,7 @@ func NewFrontWebController(
 	gallery gallery.GalleryProvider,
 ) PostController {
 	return &postController{
+		view:              view,
 		postService:       service,
 		postsService:      services,
 		categoryService:   category,
@@ -37,6 +40,7 @@ func NewFrontWebController(
 type postController struct {
 	*app.BaseAjax
 
+	view              contracts.View
 	postService       *service.PostService
 	postsService      *service.PostsService
 	categoryService   *service.CategoryService

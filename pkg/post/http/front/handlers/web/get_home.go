@@ -17,7 +17,7 @@ func (c *postController) GetHome(ctx *gin.Context) {
 
 	ctx.HTML(
 		http.StatusOK,
-		"index",
+		c.view.View(nil),
 		gin.H{
 			"title": "Home Page",
 			"post":  post,

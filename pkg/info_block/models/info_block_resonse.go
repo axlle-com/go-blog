@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/axlle-com/blog/app/db"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
@@ -31,6 +32,16 @@ func (i *InfoBlockResponse) GetUUID() uuid.UUID {
 
 func (i *InfoBlockResponse) GetName() string {
 	return (&InfoBlock{}).GetTable()
+}
+
+func (i *InfoBlockResponse) GetTemplateName() string {
+	if i.Template != nil {
+		if i.Template.GetName() == "" {
+			return fmt.Sprintf("%s.default", i.GetName())
+		}
+		return fmt.Sprintf("%s.%s", i.GetName(), i.Template.GetName())
+	}
+	return fmt.Sprintf("%s.default", i.GetName())
 }
 
 func (i *InfoBlockResponse) GetPosition() string {

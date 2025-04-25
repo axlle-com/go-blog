@@ -8,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/app/config"
 	db2 "github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/web"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
@@ -64,7 +65,7 @@ func SetupTestRouter(ctx context.Context) *gin.Engine {
 		cfg := config.Config()
 		cfg.SetTestENV()
 
-		db2.Init(cfg.DBUrlTest())
+		db2.InitDB(cfg.DBUrlTest())
 
 		container := app.New(ctx)
 
@@ -89,7 +90,7 @@ func SetupTestRouter(ctx context.Context) *gin.Engine {
 		web.NewTemplate(router)
 		InitializeApiRoutes(router, container)
 		InitializeWebRoutes(router, container)
-		models.NewCache().ResetUsersSession()
+		cache.NewCache().ResetUsersSession()
 	}
 	return router
 }

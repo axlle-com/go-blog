@@ -1,0 +1,6 @@
+{{ define "default.posts.default" }}
+    {{ template "default.header" .}}
+    <h1>{{ .title }}</h1>
+    <p>{{ .post.Description }}</p>
+    {{ template "default.footer" . }}
+{{ end }}

@@ -5,6 +5,7 @@ type Config interface {
 	LogLevel() int
 	SetTestENV()
 	IsTest() bool
+	IsLocal() bool
 
 	DBUrl() string
 	DBUrlTest() string
@@ -23,6 +24,7 @@ type Config interface {
 	RuntimeFolder(s string) string
 	SrcFolder() string
 	SrcFolderBuilder(string) string
+	Layout() string
 
 	SMTPActive() bool
 	SMTPPort() int

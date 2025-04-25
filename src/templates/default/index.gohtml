@@ -1,11 +1,12 @@
-{{ define "index" }}
-    {{ template "header" . }}
+{{ define "default.index" }}
+    {{ template "default.header" . }}
 
     <!-- About Section -->
     <section id="about" class="py-5 bg-light">
         <div class="container">
             <h2 class="text-center">О себе</h2>
-            <p class="text-center">Я опытный разработчик веб-приложений с многолетним опытом работы в различных областях. Мои навыки включают создание эффективных решений и высококачественный дизайн.</p>
+            <p class="text-center">Я опытный разработчик веб-приложений с многолетним опытом работы в различных
+                областях. Мои навыки включают создание эффективных решений и высококачественный дизайн.</p>
         </div>
     </section>
 
@@ -18,7 +19,8 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Услуга 1</h5>
-                            <p class="card-text">Описание первой услуги. Является отличным выбором для вашей компании.</p>
+                            <p class="card-text">Описание первой услуги. Является отличным выбором для вашей
+                                компании.</p>
                         </div>
                     </div>
                 </div>
@@ -26,7 +28,8 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Услуга 2</h5>
-                            <p class="card-text">Описание второй услуги. Мы предлагаем высокое качество и надежность.</p>
+                            <p class="card-text">Описание второй услуги. Мы предлагаем высокое качество и
+                                надежность.</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +37,8 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Услуга 3</h5>
-                            <p class="card-text">Описание третьей услуги. Идеально подходит для ваших нужд и требований.</p>
+                            <p class="card-text">Описание третьей услуги. Идеально подходит для ваших нужд и
+                                требований.</p>
                         </div>
                     </div>
                 </div>
@@ -72,5 +76,5 @@
             </div>
         </div>
     </section>
-    {{ template "footer" . }}
+    {{ template "default.footer" . }}
 {{end}}

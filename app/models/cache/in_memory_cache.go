@@ -1,7 +1,8 @@
-package models
+package cache
 
 import (
 	"fmt"
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"strings"
 	"sync"
@@ -14,6 +15,7 @@ type inMemoryCache struct {
 }
 
 func NewInMemoryCache(cfg contracts.Config) contracts.Cache {
+	logger.Info("[Cache] Using inMemoryCache")
 	return &inMemoryCache{
 		data:   make(map[string]string),
 		config: cfg,

@@ -43,7 +43,7 @@ func (t *Template) GetTitle() string {
 }
 
 func (t *Template) GetName() string {
-	return t.Title
+	return t.Name
 }
 
 func (t *Template) GetTabular() string {

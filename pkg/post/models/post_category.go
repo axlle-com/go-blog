@@ -54,6 +54,16 @@ func (c *PostCategory) GetName() string {
 	return c.GetTable()
 }
 
+func (c *PostCategory) GetTemplateName() string {
+	if c.Template != nil {
+		if c.Template.GetName() == "" {
+			return fmt.Sprintf("%s.default", c.GetTable())
+		}
+		return fmt.Sprintf("%s.%s", c.GetTable(), c.Template.GetName())
+	}
+	return fmt.Sprintf("%s.default", c.GetTable())
+}
+
 func (c *PostCategory) SetUUID() {
 	if c.UUID == uuid.Nil {
 		c.UUID = uuid.New()

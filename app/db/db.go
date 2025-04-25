@@ -17,7 +17,7 @@ var (
 	instanceTestMu sync.Mutex
 )
 
-func Init(url string) {
+func InitDB(url string) {
 	instanceMu.Lock()
 	defer instanceMu.Unlock()
 
@@ -29,7 +29,9 @@ func Init(url string) {
 }
 
 func GetDB() *gorm.DB {
-	if config.Config().IsTest() {
+	cfg := config.Config()
+
+	if cfg.IsTest() {
 		return GetDBTest()
 	}
 
@@ -38,9 +40,9 @@ func GetDB() *gorm.DB {
 
 	if instance == nil {
 		var err error
-		instance, err = gorm.Open(postgres.Open(config.Config().DBUrl()), &gorm.Config{})
+		instance, err = gorm.Open(postgres.Open(cfg.DBUrl()), &gorm.Config{})
 		if err != nil {
-			logger.Fatal(err)
+			logger.Fatalf("[DB][GetDB] Error: %v", err)
 		}
 	}
 	return instance //.Debug()
@@ -54,7 +56,7 @@ func GetDBTest() *gorm.DB {
 		var err error
 		instanceTest, err = gorm.Open(postgres.Open(config.Config().DBUrlTest()), &gorm.Config{})
 		if err != nil {
-			log.Fatalln(err)
+			logger.Fatalf("[DB][GetDBTest] Error: %v", err)
 		}
 	}
 	return instanceTest //.Debug()

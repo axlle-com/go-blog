@@ -2,6 +2,8 @@ package web
 
 import (
 	"bytes"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
@@ -10,7 +12,20 @@ import (
 	"os"
 )
 
-func InitMinify() {
+func Minify(config contracts.Config) {
+	if !config.IsLocal() {
+		logger.Info("[Minify] Запуск на стенде, файлы для HTML не собираем")
+		return
+	}
+
+	m := minify.New()
+	m.AddFunc("text/css", css.Minify)
+	m.AddFunc("application/javascript", js.Minify)
+	minifyAdmin(m)
+	minifyFront(m)
+}
+
+func minifyAdmin(minify *minify.M) {
 	adminCSS := []string{
 		"src/resources/font/inter/inter.min.css",
 		"src/resources/font/play/play.css",
@@ -47,6 +62,11 @@ func InitMinify() {
 		"src/resources/plugins/npm/codemirror-bundle.js",
 	}
 
+	mergeAndMinifyFiles(minify, "text/css", adminCSS, "src/public/admin/app.css")
+	mergeAndMinifyFiles(minify, "application/javascript", adminJS, "src/public/admin/app.js")
+}
+
+func minifyFront(minify *minify.M) {
 	CSS := []string{
 		"src/resources/plugins/bootstrap-5.0.2-dist/css/bootstrap.min.css",
 	}
@@ -56,32 +76,8 @@ func InitMinify() {
 		"src/public/admin/glob.js",
 	}
 
-	m := minify.New()
-	m.AddFunc("text/css", css.Minify)
-	m.AddFunc("application/javascript", js.Minify)
-	mergeAndMinifyFiles(m, "text/css", adminCSS, "src/public/admin/app.css")
-	mergeAndMinifyFiles(m, "application/javascript", adminJS, "src/public/admin/app.js")
-
-	mergeAndMinifyFiles(m, "text/css", CSS, "src/public/app.css")
-	mergeAndMinifyFiles(m, "application/javascript", JS, "src/public/app.js")
-}
-
-func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
-	input, err := os.Open(inputPath)
-	if err != nil {
-		log.Fatalf("Ошибка открытия файла %s: %v", inputPath, err)
-	}
-	defer input.Close()
-
-	output, err := os.Create(outputPath)
-	if err != nil {
-		log.Fatalf("Ошибка создания файла %s: %v", outputPath, err)
-	}
-	defer output.Close()
-
-	if err := m.Minify(mediaType, output, input); err != nil {
-		log.Fatalf("Ошибка минификации файла %s: %v", inputPath, err)
-	}
+	mergeAndMinifyFiles(minify, "text/css", CSS, "src/public/app.css")
+	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/app.js")
 }
 
 func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, outputPath string) {
@@ -90,7 +86,7 @@ func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, out
 	for _, inputPath := range inputPaths {
 		input, err := ioutil.ReadFile(inputPath)
 		if err != nil {
-			log.Fatalf("Ошибка чтения файла %s: %v", inputPath, err)
+			logger.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка чтения файла %s: %v", inputPath, err)
 		}
 		buffer.Write(input)
 		buffer.WriteString("\n")
@@ -98,11 +94,44 @@ func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, out
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		log.Fatalf("Ошибка создания файла %s: %v", outputPath, err)
+		log.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка создания файла %s: %v", outputPath, err)
 	}
-	defer output.Close()
+	defer func(output *os.File) {
+		err := output.Close()
+		if err != nil {
+			logger.Errorf("[Minify][mergeAndMinifyFiles] Error: %v", err)
+		}
+	}(output)
 
 	if err := m.Minify(mediaType, output, &buffer); err != nil {
-		log.Fatalf("Ошибка минификации файла %s: %v", outputPath, err)
+		logger.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка минификации файла %s: %v", outputPath, err)
+	}
+}
+
+func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
+	input, err := os.Open(inputPath)
+	if err != nil {
+		logger.Fatalf("[Minify][minifyFile] Ошибка открытия файла %s: %v", inputPath, err)
+	}
+	defer func(input *os.File) {
+		err := input.Close()
+		if err != nil {
+			logger.Errorf("[Minify][minifyFile] Error: %v", err)
+		}
+	}(input)
+
+	output, err := os.Create(outputPath)
+	if err != nil {
+		log.Fatalf("Ошибка создания файла %s: %v", outputPath, err)
+	}
+	defer func(output *os.File) {
+		err := output.Close()
+		if err != nil {
+			logger.Errorf("[Minify][minifyFile] Error: %v", err)
+		}
+	}(output)
+
+	if err := m.Minify(mediaType, output, input); err != nil {
+		logger.Fatalf("[Minify][minifyFile] Ошибка минификации файла %s: %v", inputPath, err)
 	}
 }

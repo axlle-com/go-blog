@@ -40,7 +40,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	r.GET("/", postFrontWebController.GetHome)
 	r.GET("/login", userController.Login)
 	r.POST("/auth", userController.Auth)
-	r.POST("/user", userController.CreateUser)
+	r.POST("/messages", messageFrontController.CreateMessage)
 
 	protected := r.Group("/admin")
 	protected.Use(middleware.AuthRequired())
@@ -102,7 +102,6 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	}
 
 	r.GET("/:alias", postFrontWebController.GetPost)
-	r.POST("/messages", messageFrontController.CreateMessage)
 
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
@@ -12,13 +13,18 @@ func Store(cfg contracts.Config) redis.Store {
 	var err error
 	if cfg.IsTest() || !cfg.StoreIsRedis() {
 		store = memstore.NewStore(cfg.KeyCookie())
+		logger.Info("[Store] Using memstore")
+		return store
 	} else {
 		store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), cfg.RedisPassword(), cfg.KeyCookie())
 		if err != nil {
-			panic(err)
+			logger.Errorf("[Store] Error: %v, Started memstore", err)
+			store = memstore.NewStore(cfg.KeyCookie())
+			return store
 		}
 	}
 
+	logger.Info("[Store] Using redis")
 	store.Options(sessions.Options{
 		MaxAge: 86400 * 7,
 		Path:   "/",

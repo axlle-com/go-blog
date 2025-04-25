@@ -38,6 +38,7 @@ type config struct {
 
 	uploadsPath string
 	srcFolder   string
+	layout      string
 
 	runtimeFolder string
 
@@ -70,7 +71,7 @@ func LoadConfig() (err error) {
 			return
 		}
 
-		instance.env = getEnv("ENV", "dev")
+		instance.env = getEnv("ENV", "local")
 		instance.port = getEnv("PORT", "3000")
 
 		logLevel := getEnv("LOG_LEVEL", "6")
@@ -82,7 +83,7 @@ func LoadConfig() (err error) {
 		instance.keyJWT = getEnv("KEY_JWT", "")
 		instance.keyCookie = getEnv("KEY_COOKIE", "")
 
-		instance.store = getEnv("CASH_STORE", "")
+		instance.store = getEnv("CASH_STORE", "redis")
 		instance.redisHost = getEnv("REDIS_HOST", "127.0.0.1")
 		instance.redisPort = getEnv("REDIS_PORT", "6380")
 		instance.redisPassword = getEnv("REDIS_PASSWORD", "")
@@ -101,6 +102,7 @@ func LoadConfig() (err error) {
 
 		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/public/uploads/")
 		instance.srcFolder = getEnv("FILE_SRC_FOLDER", "src")
+		instance.layout = getEnv("LAYOUT", "")
 
 		instance.runtimeFolder = getEnv("RUNTIME_FOLDER", "runtime")
 
@@ -141,6 +143,10 @@ func (c *config) SetTestENV() {
 
 func (c *config) IsTest() bool {
 	return c.env == "test"
+}
+
+func (c *config) IsLocal() bool {
+	return c.env != "prod" && c.env != "dev"
 }
 
 func (c *config) DBUrl() string {
@@ -243,6 +249,13 @@ func (c *config) SrcFolder() string {
 		return root + "/" + c.srcFolder
 	}
 	return c.srcFolder
+}
+
+func (c *config) Layout() string {
+	if c.layout == "" {
+		return "default"
+	}
+	return c.layout
 }
 
 func (c *config) SrcFolderBuilder(s string) string {

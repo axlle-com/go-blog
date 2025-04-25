@@ -63,6 +63,16 @@ func (p *Post) GetName() string {
 	return p.GetTable()
 }
 
+func (p *Post) GetTemplateName() string {
+	if p.Template != nil {
+		if p.Template.GetName() == "" {
+			return fmt.Sprintf("%s.default", p.GetTable())
+		}
+		return fmt.Sprintf("%s.%s", p.GetTable(), p.Template.GetName())
+	}
+	return fmt.Sprintf("%s.default", p.GetTable())
+}
+
 func (p *Post) SetUUID() {
 	if p.UUID == uuid.Nil {
 		p.UUID = uuid.New()

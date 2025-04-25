@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/gob"
-	"errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -38,9 +37,10 @@ func main() {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatalf("[Main] server listen: %v", err)
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Fatalf("[Main] server error: %v", err)
 		}
+		logger.Infof("[Main] starting HTTP on %s", cfg.Port())
 	}()
 
 	// ждём сигнал остановки
@@ -65,7 +65,7 @@ func main() {
 	logger.Info("[Main] Graceful shutdown complete")
 }
 
-func Init(cfg contracts.Config, container *app.Container) *gin.Engine {
+func Init(config contracts.Config, container *app.Container) *gin.Engine {
 	gob.Register(user.User{})
 
 	router := gin.Default()
@@ -74,12 +74,12 @@ func Init(cfg contracts.Config, container *app.Container) *gin.Engine {
 		panic(err.Error())
 	}
 
-	store := models.Store(cfg)
-	router.Use(sessions.Sessions(cfg.SessionsName(), store))
+	store := models.Store(config)
+	router.Use(sessions.Sessions(config.SessionsName(), store))
 
-	db.Init(cfg.DBUrl())
+	db.InitDB(config.DBUrl())
 
-	web.InitMinify()
+	web.Minify(config)
 	web.NewTemplate(router)
 	routes.InitializeApiRoutes(router, container)
 	routes.InitializeWebRoutes(router, container)

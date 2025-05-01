@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -39,15 +40,18 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 		"admin.category",
 		gin.H{
 			"title":      "Страница категории",
-			"user":       user,
 			"categories": categories,
 			"templates":  templates,
-			"menu":       models.NewMenu(ctx.FullPath()),
 			"category":   category,
 			"collection": gin.H{
 				"infoBlocks":         infoBlocks,
 				"ifoBlockCollection": category.InfoBlocks,
 				"relationURL":        category.AdminURL(),
+			},
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+				"user":      user,
+				"menu":      models.NewMenu(ctx.FullPath()),
 			},
 		},
 	)

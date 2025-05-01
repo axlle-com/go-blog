@@ -75,7 +75,7 @@ const _glob = {
         }
 
         setPreloader(element, top = 10) {
-            const self = this;
+            const _this = this;
             const block = $(element);
             if (block && block.length) {
                 const head = $('head');
@@ -83,7 +83,7 @@ const _glob = {
                 if (!style.length) {
                     head.append(_glob.preloader.style);
                 }
-                self.preloader = $(_glob.preloader.block);
+                _this.preloader = $(_glob.preloader.block);
                 block.addClass('relative');
                 if (top !== 10) {
                     const ldsSpinner = `<style id="lds-spinner">.lds-spinner{top:${top}%}</style>`;
@@ -94,9 +94,9 @@ const _glob = {
                         styleSpinner.html(`.lds-spinner{top: ${top}%;}`);
                     }
                 }
-                block.prepend(self.preloader);
+                block.prepend(_this.preloader);
             }
-            return self;
+            return _this;
         }
 
         fillFormData(formData, object, cnt = 0) {
@@ -201,7 +201,7 @@ const _glob = {
             let keys = path.split('[').map(function (key) {
                 return key.replace(']', '');
             });
-            // _cl_(keys)
+
             keys.reduce(function (acc, key, i) {
                 if (i === keys.length - 1) {
                     if (
@@ -243,6 +243,7 @@ const _glob = {
             this.hasSend = true;
             let formObject = {};
             const csrf = $('meta[name="csrf-token"]').attr('content');
+            this.payload.append('_csrf', csrf);
 
             // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
@@ -254,7 +255,8 @@ const _glob = {
                 headers: {'X-CSRF-TOKEN': csrf},
                 type: _this.method,
                 dataType: 'json',
-                beforeSend: function () {},
+                beforeSend: function () {
+                },
                 success: function (response) {
                     _this.setData(response).defaultBehavior();
                     if (callback) {
@@ -301,6 +303,7 @@ const _glob = {
             this.hasSend = true;
             // this.appendImages();
             const csrf = $('meta[name="csrf-token"]').attr('content');
+            this.payload.append('_csrf', csrf);
             $.ajax({
                 url: _this.action,
                 headers: {'X-CSRF-TOKEN': csrf},
@@ -375,7 +378,20 @@ const _glob = {
                 }
                 error = json.error;
             }
-            if (response.status === 400 || response.status_code === 400 || response.status === 419) {
+
+            if (!message && response.responseText) {
+                try {
+                    message = JSON.parse(response.responseText).message;
+                } catch (e) {
+                    _glob.console.error(e)
+                }
+            }
+
+            if (
+                response.status === 400
+                || response.status === 419
+                || response.status === 422
+            ) {
                 if (error && Object.keys(error).length) {
                     for (let key in error) {
                         let selector = `[data-validator="${key}"]`;
@@ -399,9 +415,9 @@ const _glob = {
             } else if (response.status === 406) {
                 _glob.noty.error(message ? message : _glob.ERROR_MESSAGE);
             } else if (response.status === 500) {
-                _glob.noty.error(response.statusText ? response.statusText : _glob.ERROR_MESSAGE);
+                _glob.noty.error(message ? message : response.statusText);
             } else {
-                _glob.noty.error(response.statusText ? response.statusText : _glob.ERROR_MESSAGE);
+                _glob.noty.error(message ? message : response.statusText);
             }
         }
 

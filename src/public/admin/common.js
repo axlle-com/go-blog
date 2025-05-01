@@ -126,8 +126,14 @@ const _image = {
             if (!file) {
                 return
             }
+            const resource = $('body').find('[name="resource"]');
             let formData = new FormData();
             formData.append('file', file);
+
+            if (resource[0] && $(resource[0]).val()) {
+                formData.append('resource', $(resource[0]).val());
+            }
+
             const request = new _glob.request(formData)
                 .setPreloader('.js-product')
                 .setAction(action);
@@ -158,7 +164,7 @@ const _image = {
                             <button 
                             type="button" 
                             class="btn btn-link btn-icon text-danger" 
-                            data-action="/admin/file/image${image}"
+                            data-js-image-href="/admin/file/image${image}"
                             data-js-image-delete>
                                 <i class="material-icons">delete</i>
                             </button>
@@ -207,6 +213,7 @@ const _image = {
             for (let i = 0; i < files.length; i++) {
                 formData.append('files', files[i]);
             }
+            formData.append('resource', 'galleries');
             new _glob.request(formData).setAction(action).sendForm((response) => {
                 if (response.data.images) {
                     let idGallery = input.attr('data-gallery-number');
@@ -246,7 +253,10 @@ const _image = {
                                                     <i class="material-icons">zoom_in</i>
                                                 </button>
                                             </a>
-                                            <button type="button" class="btn btn-link btn-icon text-danger" data-js-image-array-id="${idGallery}.${i}">
+                                            <button type="button" 
+                                                class="btn btn-link btn-icon text-danger" 
+                                                data-js-gallery-image-href="/admin/file/image${url}"
+                                                data-js-gallery-image-delete>
                                                 <i class="material-icons">delete</i>
                                             </button>
                                         </div>
@@ -274,6 +284,24 @@ const _image = {
         }
         _config.fancybox();
         _config.sort();
+    },
+    deleteInGallery: function () {
+        const _this = this;
+        $('body').on('click', '[data-js-gallery-image-delete]', function (evt) {
+            let image = $(this).closest('.js-gallery-item');
+            const action = $(this).attr('data-js-gallery-image-href');
+            const request = new _glob.request({action: action})
+                .setMethod('delete')
+                .setPreloader('.js-product');
+            request.sendForm((response) => {
+                if (response.message) {
+                    _glob.noty.success(response.message);
+                } else {
+                    _glob.noty.success('Изображение удалено');
+                }
+            });
+            image.remove();
+        });
     },
     deleteArray: function () {
         const _this = this;
@@ -328,6 +356,7 @@ const _image = {
         this.deleteArray();
         this.addArray();
         this.gallerySort();
+        this.deleteInGallery();
     }
 };
 const _post = {
@@ -375,7 +404,7 @@ const _infoBlock = {
         const _this = this;
         $('body').on('click', '.js-info-block-item-delete', function (evt) {
             const id = $(this).attr('data-id');
-            const action = $(this).attr('data-href');
+            const action = $(this).attr('data-action');
             const block = $(this).closest('.js-info-block-item');
             if (id && action) {
                 const request = new _glob.request({action});

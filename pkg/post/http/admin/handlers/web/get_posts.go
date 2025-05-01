@@ -6,6 +6,7 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -45,7 +46,6 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
 		"title":      "Страница постов",
-		"user":       user,
 		"post":       &Post{},
 		"posts":      posts,
 		"categories": categories,
@@ -53,6 +53,10 @@ func (c *controller) GetPosts(ctx *gin.Context) {
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,
-		"menu":       models2.NewMenu(ctx.FullPath()),
+		"settings": gin.H{
+			"csrfToken": csrf.GetToken(ctx),
+			"user":      user,
+			"menu":      models2.NewMenu(ctx.FullPath()),
+		},
 	})
 }

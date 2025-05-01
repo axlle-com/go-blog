@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/config"
 	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
 	"github.com/stretchr/testify/assert"
@@ -49,7 +50,7 @@ func TestSuccessfulDeletePost(t *testing.T) {
 	mPost.NewMigrator().Rollback()
 	mPost.NewMigrator().Migrate()
 
-	container := app.New()
+	container := app.NewContainer(config.Config(), nil)
 	iProvider := container.ImageProvider
 	gProvider := container.GalleryProvider
 	pRepo := container.PostRepo

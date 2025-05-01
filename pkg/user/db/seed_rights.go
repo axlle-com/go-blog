@@ -5,32 +5,44 @@ import (
 	"github.com/axlle-com/blog/pkg/user/models"
 )
 
-func (s *seeder) seedPermissions() {
+func (s *seeder) seedPermissions() error {
 	permissions := []string{"create", "update", "delete", "read"}
 	for _, name := range permissions {
+		model, _ := s.permission.GetByName(name)
+		if model != nil {
+			continue
+		}
+
 		permission := models.Permission{
 			Name: name,
 		}
 		err := s.permission.Create(&permission)
 		if err != nil {
-			logger.Errorf("Failed to create permission %v", err.Error())
+			return err
 		}
 	}
 
 	logger.Info("Database seeded Permission successfully!")
+	return nil
 }
 
-func (s *seeder) seedRoles() {
-	roles := []string{"admin", "employee"}
+func (s *seeder) seedRoles() error {
+	roles := []string{"superadmin", "admin", "employee"}
 	for _, name := range roles {
+		model, _ := s.role.GetByName(name)
+		if model != nil {
+			continue
+		}
+
 		role := models.Role{
 			Name: name,
 		}
 		err := s.role.Create(&role)
 		if err != nil {
-			logger.Errorf("Failed to create role %v", err.Error())
+			return err
 		}
 	}
 
 	logger.Info("Database seeded Role successfully!")
+	return nil
 }

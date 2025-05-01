@@ -19,7 +19,6 @@ func (c *controller) DeletePostImage(ctx *gin.Context) {
 		return
 	}
 
-	post.SetOriginal(post)
 	err = c.postService.DeleteImageFile(post)
 	if err != nil {
 		logger.Error(err)

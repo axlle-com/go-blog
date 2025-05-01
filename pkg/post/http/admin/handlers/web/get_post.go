@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -38,15 +39,18 @@ func (c *controller) GetPost(ctx *gin.Context) {
 		"admin.post",
 		gin.H{
 			"title":      "Страница поста",
-			"user":       user,
 			"categories": categories,
 			"templates":  templates,
-			"menu":       models.NewMenu(ctx.FullPath()),
 			"post":       post,
 			"collection": gin.H{
 				"infoBlocks":         infoBlocks,
 				"ifoBlockCollection": post.InfoBlocks,
 				"relationURL":        post.AdminURL(),
+			},
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+				"user":      user,
+				"menu":      models.NewMenu(ctx.FullPath()),
 			},
 		},
 	)

@@ -5,6 +5,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
+	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
@@ -21,6 +22,7 @@ type InfoBlockService struct {
 	galleryProvider     provider.GalleryProvider
 	templateProvider    tProvider.TemplateProvider
 	userProvider        provider2.UserProvider
+	fileProvider        fileProvider.FileProvider
 }
 
 func NewInfoBlockService(
@@ -30,6 +32,7 @@ func NewInfoBlockService(
 	galleryProvider provider.GalleryProvider,
 	templateProvider tProvider.TemplateProvider,
 	userProvider provider2.UserProvider,
+	fileProvider fileProvider.FileProvider,
 ) *InfoBlockService {
 	return &InfoBlockService{
 		infoBlockRepo:       infoBlockRepo,
@@ -38,6 +41,7 @@ func NewInfoBlockService(
 		galleryProvider:     galleryProvider,
 		templateProvider:    templateProvider,
 		userProvider:        userProvider,
+		fileProvider:        fileProvider,
 	}
 }
 
@@ -202,4 +206,16 @@ func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock,
 		infoBlock.Galleries = slice
 	}
 	return
+}
+
+func (s *InfoBlockService) DeleteImageFile(block *InfoBlock) error {
+	if block.Image == nil {
+		return errors.New("image is nil")
+	}
+	err := s.fileProvider.DeleteFile(*block.Image)
+	if err != nil {
+		return err
+	}
+	block.Image = nil
+	return nil
 }

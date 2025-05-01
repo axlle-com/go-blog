@@ -43,7 +43,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	r.POST("/messages", messageFrontController.CreateMessage)
 
 	protected := r.Group("/admin")
-	protected.Use(middleware.AuthRequired())
+	protected.Use(middleware.Admin())
 	{
 		protected.GET("", userController.Index)
 		protected.GET("/logout", userController.Logout)
@@ -78,6 +78,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.POST("/info-blocks", infoBlockAjaxController.CreateInfoBlock)
 		protected.PUT("/info-blocks/:id", infoBlockAjaxController.UpdateInfoBlock)
 		protected.DELETE("/info-blocks/:id", infoBlockAjaxController.DeleteInfoBlock)
+		protected.DELETE("/info-blocks/:id/image", infoBlockAjaxController.DeleteBlockImage)
 		protected.GET("/info-blocks/filter", infoBlockAjaxController.FilterInfoBlock)
 		protected.GET("/ajax/info-blocks/:id", infoBlockAjaxController.GetInfoBlock)
 		protected.GET("/ajax/info-blocks/:id/card", infoBlockAjaxController.GetInfoBlockCard)

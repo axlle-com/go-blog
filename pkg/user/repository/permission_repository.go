@@ -11,6 +11,7 @@ type PermissionRepository interface {
 	WithTx(tx *gorm.DB) PermissionRepository
 	Create(post *models.Permission) error
 	GetByID(id uint) (*models.Permission, error)
+	GetByName(name string) (*models.Permission, error)
 	Update(post *models.Permission) error
 	Delete(id uint) error
 	GetAll() ([]models.Permission, error)
@@ -38,6 +39,14 @@ func (r *permissionRepository) Create(post *models.Permission) error {
 func (r *permissionRepository) GetByID(id uint) (*models.Permission, error) {
 	var model models.Permission
 	if err := r.db.First(&model, id).Error; err != nil {
+		return nil, err
+	}
+	return &model, nil
+}
+
+func (r *permissionRepository) GetByName(name string) (*models.Permission, error) {
+	var model models.Permission
+	if err := r.db.Where("name = ?", name).First(&model).Error; err != nil {
 		return nil, err
 	}
 	return &model, nil

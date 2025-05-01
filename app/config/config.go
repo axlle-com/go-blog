@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -32,6 +33,7 @@ type config struct {
 	dbNameTest     string
 	dbUserTest     string
 	dbPasswordTest string
+	dbGORM         *gorm.DB
 
 	keyJWT    string
 	keyCookie string
@@ -150,6 +152,10 @@ func (c *config) IsLocal() bool {
 }
 
 func (c *config) DBUrl() string {
+	if c.IsTest() {
+		return c.DBUrlTest()
+	}
+
 	var dsn string
 	if c.dialector == "postgres" {
 		dsn = "host=" + c.dbHost +
@@ -173,6 +179,17 @@ func (c *config) DBUrlTest() string {
 			" sslmode=disable TimeZone=Europe/Moscow"
 	}
 	return dsn
+}
+
+func (c *config) SetGORM(db *gorm.DB) {
+	c.Lock()
+	defer c.Unlock()
+
+	c.dbGORM = db
+}
+
+func (c *config) GetGORM() *gorm.DB {
+	return c.dbGORM
 }
 
 func (c *config) RedisHost() string {

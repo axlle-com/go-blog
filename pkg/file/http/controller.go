@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/pkg/file"
+	"github.com/axlle-com/blog/pkg/file/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,15 +13,18 @@ type Controller interface {
 }
 
 func NewFileController(
-	service *file.Service,
+	uploadService *service.UploadService,
+	fileService *service.Service,
 ) Controller {
 	return &controller{
-		service: service,
+		uploadService: uploadService,
+		fileService:   fileService,
 	}
 }
 
 type controller struct {
 	*models.BaseAjax
 
-	service *file.Service
+	uploadService *service.UploadService
+	fileService   *service.Service
 }

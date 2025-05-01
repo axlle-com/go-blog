@@ -6,6 +6,7 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	. "github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -42,13 +43,16 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "admin.templates", gin.H{
 		"title":         "Страница шаблонов",
-		"user":          user,
 		"templateModel": empty,
 		"resources":     mApp.NewResource().Resources(),
 		"templates":     templates,
 		"users":         users,
 		"paginator":     paginator,
 		"filter":        filter,
-		"menu":          models2.NewMenu(ctx.FullPath()),
+		"settings": gin.H{
+			"csrfToken": csrf.GetToken(ctx),
+			"user":      user,
+			"menu":      models2.NewMenu(ctx.FullPath()),
+		},
 	})
 }

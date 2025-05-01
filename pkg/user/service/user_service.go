@@ -2,21 +2,28 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
-
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
-	userRepo repository.UserRepository
+	userRepo       repository.UserRepository
+	roleRepo       repository.RoleRepository
+	permissionRepo repository.PermissionRepository
 }
 
 func NewUserService(
 	userRepo repository.UserRepository,
+	roleRepo repository.RoleRepository,
+	permissionRepo repository.PermissionRepository,
 ) *UserService {
-	return &UserService{userRepo: userRepo}
+	return &UserService{
+		userRepo:       userRepo,
+		roleRepo:       roleRepo,
+		permissionRepo: permissionRepo,
+	}
 }
 
 func (s *UserService) GetByEmail(email string) (user *models.User, err error) {

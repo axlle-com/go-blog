@@ -2,49 +2,73 @@ package app
 
 import (
 	"context"
+
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
-	provider2 "github.com/axlle-com/blog/pkg/analytic/provider"
-	repository4 "github.com/axlle-com/blog/pkg/analytic/repository"
-	service6 "github.com/axlle-com/blog/pkg/analytic/service"
-	"github.com/axlle-com/blog/pkg/file"
-	"github.com/axlle-com/blog/pkg/file/http"
+	"github.com/axlle-com/blog/pkg/mailer"
+	"github.com/axlle-com/blog/pkg/migrate"
+	"github.com/axlle-com/blog/pkg/queue"
+	"github.com/axlle-com/blog/pkg/view"
+
+	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
+	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
+	analyticRepo "github.com/axlle-com/blog/pkg/analytic/repository"
+	analyticService "github.com/axlle-com/blog/pkg/analytic/service"
+
+	fileMigrate "github.com/axlle-com/blog/pkg/file/db/migrate"
+	fileAdminWeb "github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
+	fileRepo "github.com/axlle-com/blog/pkg/file/repository"
+	fileService "github.com/axlle-com/blog/pkg/file/service"
+
+	galleryMigrate "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
 	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
 	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
 	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
-	"github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/ajax"
-	"github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/web"
-	"github.com/axlle-com/blog/pkg/info_block/provider"
-	repository2 "github.com/axlle-com/blog/pkg/info_block/repository"
-	service2 "github.com/axlle-com/blog/pkg/info_block/service"
-	"github.com/axlle-com/blog/pkg/mailer"
-	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
-	web6 "github.com/axlle-com/blog/pkg/message/http/admin/handlers/ajax"
-	web5 "github.com/axlle-com/blog/pkg/message/http/admin/handlers/web"
-	web7 "github.com/axlle-com/blog/pkg/message/http/front/handlers/ajax"
-	repository3 "github.com/axlle-com/blog/pkg/message/repository"
-	service5 "github.com/axlle-com/blog/pkg/message/service"
-	ajax2 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
+
+	infoBlockDB "github.com/axlle-com/blog/pkg/info_block/db"
+	infoBlockMigrate "github.com/axlle-com/blog/pkg/info_block/db/migrate"
+	infoBlockAdminAjax "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/ajax"
+	infoBlockAdminWeb "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/web"
+	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
+	infoBlockRepo "github.com/axlle-com/blog/pkg/info_block/repository"
+	infoBlockService "github.com/axlle-com/blog/pkg/info_block/service"
+
+	messageContracts "github.com/axlle-com/blog/pkg/message/contracts"
+	messageDB "github.com/axlle-com/blog/pkg/message/db"
+	messageMigrate "github.com/axlle-com/blog/pkg/message/db/migrate"
+	messageAdminAjax "github.com/axlle-com/blog/pkg/message/http/admin/handlers/ajax"
+	messageAdminWeb "github.com/axlle-com/blog/pkg/message/http/admin/handlers/web"
+	messageFrontWeb "github.com/axlle-com/blog/pkg/message/http/front/handlers/ajax"
+	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
+	messageService "github.com/axlle-com/blog/pkg/message/service"
+
+	postDB "github.com/axlle-com/blog/pkg/post/db"
+	postMigrate "github.com/axlle-com/blog/pkg/post/db/migrate"
+	postAjax "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
 	postApi "github.com/axlle-com/blog/pkg/post/http/admin/handlers/api"
-	web3 "github.com/axlle-com/blog/pkg/post/http/admin/handlers/web"
-	web2 "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
-	"github.com/axlle-com/blog/pkg/post/repository"
-	"github.com/axlle-com/blog/pkg/post/service"
-	"github.com/axlle-com/blog/pkg/queue"
-	ajax3 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
-	web4 "github.com/axlle-com/blog/pkg/template/http/admin/handlers/web"
+	postAdminWeb "github.com/axlle-com/blog/pkg/post/http/admin/handlers/web"
+	postFrontWeb "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
+	postRepo "github.com/axlle-com/blog/pkg/post/repository"
+	postService "github.com/axlle-com/blog/pkg/post/service"
+
+	templateDB "github.com/axlle-com/blog/pkg/template/db"
+	templateMigrate "github.com/axlle-com/blog/pkg/template/db/migrate"
+	templateAdminAjax "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
+	templateAdminWeb "github.com/axlle-com/blog/pkg/template/http/admin/handlers/web"
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
-	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
-	service4 "github.com/axlle-com/blog/pkg/template/service"
-	user "github.com/axlle-com/blog/pkg/user/http/handlers/web"
+	templateRepo "github.com/axlle-com/blog/pkg/template/repository"
+	templateService "github.com/axlle-com/blog/pkg/template/service"
+
+	userDB "github.com/axlle-com/blog/pkg/user/db"
+	userMigrate "github.com/axlle-com/blog/pkg/user/db/migrate"
+	userFrontWeb "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
-	service3 "github.com/axlle-com/blog/pkg/user/service"
-	"github.com/axlle-com/blog/pkg/view"
+	usersService "github.com/axlle-com/blog/pkg/user/service"
 )
 
 type Container struct {
@@ -52,8 +76,10 @@ type Container struct {
 	Cache contracts.Cache
 	View  contracts.View
 
-	FileService  *file.Service
-	FileProvider fileProvider.FileProvider
+	FileUploadService     *fileService.UploadService
+	FileService           *fileService.Service
+	FileCollectionService *fileService.CollectionService
+	FileProvider          fileProvider.FileProvider
 
 	ImageRepo     galleryRepo.GalleryImageRepository
 	ImageEvent    *galleryService.ImageEvent
@@ -62,52 +88,58 @@ type Container struct {
 
 	GalleryRepo         galleryRepo.GalleryRepository
 	GalleryEvent        *galleryService.GalleryEvent
-	GalleryService      *service.PostService
+	GalleryService      *galleryService.GalleryService
 	GalleryProvider     galleryProvider.GalleryProvider
 	GalleryResourceRepo galleryRepo.GalleryResourceRepository
 
-	PostRepo          repository.PostRepository
-	PostService       *service.PostService
-	PostsService      *service.PostsService
-	CategoryRepo      repository.CategoryRepository
-	CategoriesService *service.CategoriesService
-	CategoryService   *service.CategoryService
+	PostRepo          postRepo.PostRepository
+	PostService       *postService.PostService
+	PostsService      *postService.PostsService
+	CategoryRepo      postRepo.CategoryRepository
+	CategoriesService *postService.CategoriesService
+	CategoryService   *postService.CategoryService
 
 	TemplateProvider          templateProvider.TemplateProvider
-	TemplateRepo              templateRepository.TemplateRepository
-	TemplateService           *service4.TemplateService
-	TemplateCollectionService *service4.TemplateCollectionService
+	TemplateRepo              templateRepo.TemplateRepository
+	TemplateService           *templateService.TemplateService
+	TemplateCollectionService *templateService.TemplateCollectionService
 
 	UserRepo        userRepository.UserRepository
 	UserProvider    userProvider.UserProvider
-	UserService     *service3.UserService
-	UserAuthService *service3.AuthService
+	UserService     *usersService.UserService
+	UserAuthService *usersService.AuthService
+
+	UserRoleRepo       userRepository.RoleRepository
+	UserPermissionRepo userRepository.PermissionRepository
 
 	AliasRepo     alias.AliasRepository
 	AliasProvider alias.AliasProvider
 
-	InfoBlockHasResourceRepo   repository2.InfoBlockHasResourceRepository
-	InfoBlockRepo              repository2.InfoBlockRepository
-	InfoBlockService           *service2.InfoBlockService
-	InfoBlockCollectionService *service2.InfoBlockCollectionService
-	InfoBlockProvider          provider.InfoBlockProvider
+	InfoBlockHasResourceRepo   infoBlockRepo.InfoBlockHasResourceRepository
+	InfoBlockRepo              infoBlockRepo.InfoBlockRepository
+	InfoBlockService           *infoBlockService.InfoBlockService
+	InfoBlockCollectionService *infoBlockService.InfoBlockCollectionService
+	InfoBlockProvider          infoBlockProvider.InfoBlockProvider
 
-	PostTagRepo         repository.PostTagRepository
-	PostTagResourceRepo repository.PostTagResourceRepository
-	PostTagService      *service.PostTagService
+	PostTagRepo         postRepo.PostTagRepository
+	PostTagResourceRepo postRepo.PostTagResourceRepository
+	PostTagService      *postService.PostTagService
 
-	MessageRepo              contracts2.MessageRepository
-	MessageService           *service5.MessageService
-	MessageCollectionService *service5.MessageCollectionService
-	MailService              *service5.MailService
+	MessageRepo              messageContracts.MessageRepository
+	MessageService           *messageService.MessageService
+	MessageCollectionService *messageService.MessageCollectionService
+	MailService              *messageService.MailService
 
-	AnalyticRepo              repository4.AnalyticRepository
-	AnalyticService           *service6.AnalyticService
-	AnalyticCollectionService *service6.AnalyticCollectionService
-	AnalyticProvider          provider2.AnalyticProvider
+	AnalyticRepo              analyticRepo.AnalyticRepository
+	AnalyticService           *analyticService.AnalyticService
+	AnalyticCollectionService *analyticService.AnalyticCollectionService
+	AnalyticProvider          analyticProvider.AnalyticProvider
+
+	Migrator contracts.Migrator
+	Seeder   contracts.Seeder
 }
 
-func New(ctx context.Context) *Container {
+func NewContainer(cfg contracts.Config, ctx context.Context) *Container {
 	newQueue := queue.NewQueue()
 	newQueue.StartWorkers(ctx, 4)
 
@@ -116,124 +148,164 @@ func New(ctx context.Context) *Container {
 
 	mailerInterface := mailer.NewMailer(newQueue)
 
-	fileService := file.NewService()
-	fileProv := fileProvider.NewProvider(fileService)
+	newFileRepo := fileRepo.NewFileRepo()
+	newFileService := fileService.NewService(newFileRepo)
+	fileCollectionService := fileService.NewCollectionService(newFileRepo)
+	uploadService := fileService.NewUploadService(newFileService)
+	fileProv := fileProvider.NewProvider(uploadService, newFileService, fileCollectionService)
 
-	iRepo := galleryRepo.NewImageRepo()
-	iEvent := galleryService.NewImageEvent(fileProv)
-	iService := galleryService.NewImageService(iRepo, iEvent)
-	iProvider := galleryProvider.NewImageProvider(iRepo)
+	newImageRepo := galleryRepo.NewImageRepo()
+	newImageEvent := galleryService.NewImageEvent(fileProv)
+	newImageService := galleryService.NewImageService(newImageRepo, newImageEvent, fileProv)
+	newImageProvider := galleryProvider.NewImageProvider(newImageRepo)
 
-	rRepo := galleryRepo.NewResourceRepo()
+	newResourceRepo := galleryRepo.NewResourceRepo()
 
-	gRepo := galleryRepo.NewGalleryRepo()
-	gEvent := galleryService.NewGalleryEvent(iService, rRepo)
-	gService := galleryService.NewGalleryService(gRepo, gEvent, iService, rRepo)
-	gProvider := galleryProvider.NewProvider(gRepo, gService)
+	newGalleryRepo := galleryRepo.NewGalleryRepo()
+	newGalleryEvent := galleryService.NewGalleryEvent(newImageService, newResourceRepo)
+	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, fileProv)
+	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
 
-	uRepo := userRepository.NewUserRepo()
-	uService := service3.NewUserService(uRepo)
-	uaService := service3.NewAuthService(uService)
-	uProvider := userProvider.NewProvider(uRepo, uService)
+	newUserRepo := userRepository.NewUserRepo()
+	newRoleRepo := userRepository.NewRoleRepo()
+	newPermissionRepo := userRepository.NewPermissionRepo()
+	newUserService := usersService.NewUserService(newUserRepo, newRoleRepo, newPermissionRepo)
+	newAuthService := usersService.NewAuthService(newUserService)
+	newUserProvider := userProvider.NewProvider(newUserRepo, newUserService)
 
-	tRepo := templateRepository.NewTemplateRepo()
-	tProvider := templateProvider.NewProvider(tRepo)
-	tService := service4.NewTemplateService(tRepo, uProvider)
-	tCollectionService := service4.NewTemplateCollectionService(tService, tRepo, uProvider)
+	newTemplateRepo := templateRepo.NewTemplateRepo()
+	newTemplateProvider := templateProvider.NewProvider(newTemplateRepo)
+	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newUserProvider)
+	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newUserProvider)
 
-	mRepo := repository3.NewMessageRepo()
-	mService := service5.NewMessageService(mRepo, uProvider)
-	mcService := service5.NewMessageCollectionService(mRepo, mService, uProvider)
-	mailService := service5.NewMailService(mService, mcService, uProvider, mailerInterface, newQueue)
+	newMessageRepo := messageRepo.NewMessageRepo()
+	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
+	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
+	newMailService := messageService.NewMailService(newMessageService, newMessageCollectionService, newUserProvider, mailerInterface, newQueue)
 
-	aRepo := alias.NewAliasRepo()
-	aProvider := alias.NewProvider(aRepo)
+	newAliasRepo := alias.NewAliasRepo()
+	newAliasProvider := alias.NewProvider(newAliasRepo)
 
-	pRepo := repository.NewPostRepo()
+	newPostRepo := postRepo.NewPostRepo()
+	newCategoryRepo := postRepo.NewCategoryRepo()
 
-	cRepo := repository.NewCategoryRepo()
+	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo()
+	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo()
 
-	ibhrRepo := repository2.NewResourceRepo()
-	ibRepo := repository2.NewInfoBlockRepo()
+	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider)
+	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
+	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
-	ibcService := service2.NewInfoBlockCollectionService(ibRepo, ibhrRepo, gProvider, tProvider, uProvider)
-	ibService := service2.NewInfoBlockService(ibRepo, ibcService, ibhrRepo, gProvider, tProvider, uProvider)
-	ibProvider := provider.NewProvider(ibService, ibcService)
+	ptRepo := postRepo.NewPostTagRepo()
+	ptrRepo := postRepo.NewResourceRepo()
+	ptService := postService.NewPostTagService(ptRepo, ptrRepo)
 
-	ptRepo := repository.NewPostTagRepo()
-	ptrRepo := repository.NewResourceRepo()
-	ptService := service.NewPostTagService(ptRepo, ptrRepo)
+	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
+	cService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	csService := service.NewCategoriesService(cRepo, aProvider, gProvider, tProvider, uProvider)
-	cService := service.NewCategoryService(cRepo, aProvider, gProvider, fileProv, ibProvider)
+	pService := postService.NewPostService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	psService := postService.NewPostsService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
 
-	pService := service.NewPostService(pRepo, csService, cService, gProvider, fileProv, aProvider, ibProvider)
-	psService := service.NewPostsService(pRepo, csService, cService, gProvider, fileProv, aProvider, uProvider, tProvider, ibProvider)
+	newAnalyticRepo := analyticRepo.NewAnalyticRepo()
+	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
+	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
+	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
-	analyticRepo := repository4.NewAnalyticRepo()
-	analyticService := service6.NewAnalyticService(analyticRepo, uProvider)
-	analyticCollectionService := service6.NewAnalyticCollectionService(analyticRepo, analyticService, uProvider)
-	analyticProvider := provider2.NewAnalyticProvider(analyticService, analyticCollectionService)
+	mUser := userMigrate.NewMigrator(cfg.GetGORM())
+	mPost := postMigrate.NewMigrator(cfg.GetGORM())
+	mInfoBlock := infoBlockMigrate.NewMigrator(cfg.GetGORM())
+	mGallery := galleryMigrate.NewMigrator(cfg.GetGORM())
+	mTemplate := templateMigrate.NewMigrator(cfg.GetGORM())
+	mAnalytic := analyticMigrate.NewMigrator(cfg.GetGORM())
+	mMessage := messageMigrate.NewMigrator(cfg.GetGORM())
+	mFile := fileMigrate.NewMigrator(cfg.GetGORM())
+
+	sUser := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
+	sPost := postDB.NewSeeder(newPostRepo, pService, newCategoryRepo, newUserProvider, newTemplateProvider)
+	sTempl := templateDB.NewSeeder(newTemplateRepo)
+	sInfo := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider)
+	sMsg := messageDB.NewMessageSeeder(newMessageService, newUserProvider)
+
+	seeder := migrate.NewSeeder(sUser, sTempl, sPost, sInfo, sMsg)
+
+	newMigrator := migrate.NewMigrator(
+		cfg.GetGORM(),
+		mUser,
+		mPost,
+		mInfoBlock,
+		mGallery,
+		mTemplate,
+		mAnalytic,
+		mMessage,
+		mFile,
+	)
 
 	return &Container{
 		Queue: newQueue,
 		Cache: newCache,
 		View:  newView,
 
-		FileService:  fileService,
-		FileProvider: fileProv,
+		FileUploadService:     uploadService,
+		FileCollectionService: fileCollectionService,
+		FileService:           newFileService,
+		FileProvider:          fileProv,
 
-		GalleryResourceRepo: rRepo,
+		GalleryResourceRepo: newResourceRepo,
 
-		ImageRepo:     iRepo,
-		ImageEvent:    iEvent,
-		ImageService:  iService,
-		ImageProvider: iProvider,
+		ImageRepo:     newImageRepo,
+		ImageEvent:    newImageEvent,
+		ImageService:  newImageService,
+		ImageProvider: newImageProvider,
 
-		GalleryProvider: gProvider,
-		GalleryRepo:     gRepo,
-		GalleryService:  pService,
-		GalleryEvent:    gEvent,
+		GalleryProvider: newGalleryProvider,
+		GalleryRepo:     newGalleryRepo,
+		GalleryService:  newGalleryService,
+		GalleryEvent:    newGalleryEvent,
 
-		PostRepo:          pRepo,
+		PostRepo:          newPostRepo,
 		PostService:       pService,
 		PostsService:      psService,
-		CategoryRepo:      cRepo,
+		CategoryRepo:      newCategoryRepo,
 		CategoriesService: csService,
 		CategoryService:   cService,
 
-		TemplateProvider:          tProvider,
-		TemplateRepo:              tRepo,
-		TemplateService:           tService,
-		TemplateCollectionService: tCollectionService,
+		TemplateProvider:          newTemplateProvider,
+		TemplateRepo:              newTemplateRepo,
+		TemplateService:           newTemplateService,
+		TemplateCollectionService: newTemplateCollectionService,
 
-		UserRepo:        uRepo,
-		UserProvider:    uProvider,
-		UserService:     uService,
-		UserAuthService: uaService,
+		UserRepo:           newUserRepo,
+		UserProvider:       newUserProvider,
+		UserService:        newUserService,
+		UserAuthService:    newAuthService,
+		UserRoleRepo:       newRoleRepo,
+		UserPermissionRepo: newPermissionRepo,
 
-		AliasRepo:     aRepo,
-		AliasProvider: aProvider,
+		AliasRepo:     newAliasRepo,
+		AliasProvider: newAliasProvider,
 
-		InfoBlockHasResourceRepo:   ibhrRepo,
-		InfoBlockRepo:              ibRepo,
-		InfoBlockService:           ibService,
-		InfoBlockCollectionService: ibcService,
-		InfoBlockProvider:          ibProvider,
+		InfoBlockHasResourceRepo:   newInfoBlockHasResourceRepo,
+		InfoBlockRepo:              newInfoBlockRepo,
+		InfoBlockService:           newBlockService,
+		InfoBlockCollectionService: newBlockCollectionService,
+		InfoBlockProvider:          newBlockProvider,
 
 		PostTagRepo:         ptRepo,
 		PostTagResourceRepo: ptrRepo,
 		PostTagService:      ptService,
 
-		MessageRepo:              mRepo,
-		MessageService:           mService,
-		MessageCollectionService: mcService,
-		MailService:              mailService,
+		MessageRepo:              newMessageRepo,
+		MessageService:           newMessageService,
+		MessageCollectionService: newMessageCollectionService,
+		MailService:              newMailService,
 
-		AnalyticRepo:              analyticRepo,
-		AnalyticService:           analyticService,
+		AnalyticRepo:              newAnalyticRepo,
+		AnalyticService:           newAnalyticService,
 		AnalyticCollectionService: analyticCollectionService,
-		AnalyticProvider:          analyticProvider,
+		AnalyticProvider:          newAnalyticProvider,
+
+		Migrator: newMigrator,
+		Seeder:   seeder,
 	}
 }
 
@@ -248,8 +320,8 @@ func (c *Container) PostApiController() postApi.Controller {
 	)
 }
 
-func (c *Container) PostController() ajax2.Controller {
-	return ajax2.New(
+func (c *Container) PostController() postAjax.Controller {
+	return postAjax.New(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
@@ -260,8 +332,8 @@ func (c *Container) PostController() ajax2.Controller {
 	)
 }
 
-func (c *Container) PostWebController() web3.Controller {
-	return web3.NewWebController(
+func (c *Container) PostWebController() postAdminWeb.Controller {
+	return postAdminWeb.NewWebController(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
@@ -273,8 +345,8 @@ func (c *Container) PostWebController() web3.Controller {
 	)
 }
 
-func (c *Container) CategoryWebController() web3.ControllerCategory {
-	return web3.NewWebControllerCategory(
+func (c *Container) CategoryWebController() postAdminWeb.ControllerCategory {
+	return postAdminWeb.NewWebControllerCategory(
 		c.CategoriesService,
 		c.CategoryService,
 		c.TemplateProvider,
@@ -284,8 +356,8 @@ func (c *Container) CategoryWebController() web3.ControllerCategory {
 	)
 }
 
-func (c *Container) CategoryController() ajax2.CategoryController {
-	return ajax2.NewCategoryController(
+func (c *Container) CategoryController() postAjax.CategoryController {
+	return postAjax.NewCategoryController(
 		c.CategoriesService,
 		c.CategoryService,
 		c.TemplateProvider,
@@ -302,8 +374,8 @@ func (c *Container) GalleryAjaxController() galleryAjax.Controller {
 	)
 }
 
-func (c *Container) InfoBlockController() ajax.InfoBlockController {
-	return ajax.NewInfoBlockController(
+func (c *Container) InfoBlockController() infoBlockAdminAjax.InfoBlockController {
+	return infoBlockAdminAjax.NewInfoBlockController(
 		c.InfoBlockService,
 		c.InfoBlockCollectionService,
 		c.TemplateProvider,
@@ -311,8 +383,8 @@ func (c *Container) InfoBlockController() ajax.InfoBlockController {
 	)
 }
 
-func (c *Container) InfoBlockWebController() web.InfoBlockWebController {
-	return web.NewInfoBlockWebController(
+func (c *Container) InfoBlockWebController() infoBlockAdminWeb.InfoBlockWebController {
+	return infoBlockAdminWeb.NewInfoBlockWebController(
 		c.InfoBlockService,
 		c.InfoBlockCollectionService,
 		c.TemplateProvider,
@@ -321,8 +393,8 @@ func (c *Container) InfoBlockWebController() web.InfoBlockWebController {
 	)
 }
 
-func (c *Container) PostFrontWebController() web2.PostController {
-	return web2.NewFrontWebController(
+func (c *Container) PostFrontWebController() postFrontWeb.PostController {
+	return postFrontWeb.NewFrontWebController(
 		c.View,
 		c.PostService,
 		c.PostsService,
@@ -334,54 +406,55 @@ func (c *Container) PostFrontWebController() web2.PostController {
 	)
 }
 
-func (c *Container) TemplateWebController() web4.TemplateWebController {
-	return web4.NewTemplateWebController(
+func (c *Container) TemplateWebController() templateAdminWeb.TemplateWebController {
+	return templateAdminWeb.NewTemplateWebController(
 		c.TemplateService,
 		c.TemplateCollectionService,
 		c.UserProvider,
 	)
 }
 
-func (c *Container) TemplateController() ajax3.TemplateController {
-	return ajax3.NewTemplateController(
+func (c *Container) TemplateController() templateAdminAjax.TemplateController {
+	return templateAdminAjax.NewTemplateController(
 		c.TemplateService,
 		c.TemplateCollectionService,
 		c.UserProvider,
 	)
 }
 
-func (c *Container) MessageController() web5.MessageWebController {
-	return web5.NewMessageWebController(
+func (c *Container) MessageController() messageAdminWeb.MessageWebController {
+	return messageAdminWeb.NewMessageWebController(
 		c.MessageService,
 		c.MessageCollectionService,
 		c.UserProvider,
 	)
 }
 
-func (c *Container) MessageAjaxController() web6.MessageController {
-	return web6.NewMessageController(
+func (c *Container) MessageAjaxController() messageAdminAjax.MessageController {
+	return messageAdminAjax.NewMessageController(
 		c.MessageService,
 		c.MessageCollectionService,
 		c.UserProvider,
 	)
 }
 
-func (c *Container) MessageFrontController() web7.MessageController {
-	return web7.NewMessageController(
+func (c *Container) MessageFrontController() messageFrontWeb.MessageController {
+	return messageFrontWeb.NewMessageController(
 		c.MailService,
 	)
 }
 
-func (c *Container) UserFrontController() user.Controller {
-	return user.NewUserWebController(
+func (c *Container) UserFrontController() userFrontWeb.Controller {
+	return userFrontWeb.NewUserWebController(
 		c.UserService,
 		c.UserAuthService,
 		c.Cache,
 	)
 }
 
-func (c *Container) FileController() http.Controller {
-	return http.NewFileController(
+func (c *Container) FileController() fileAdminWeb.Controller {
+	return fileAdminWeb.NewFileController(
+		c.FileUploadService,
 		c.FileService,
 	)
 }

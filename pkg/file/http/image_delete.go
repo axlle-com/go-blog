@@ -11,11 +11,25 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 	if len(filePath) > 0 {
 		filePath = filePath[1:]
 	} else {
-		logger.Error("Не известный путь")
+		logger.Error("[Controller][DeleteImage] Не известный путь")
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	// TODO
+
+	err := c.fileService.Delete(filePath)
+	if err != nil {
+		logger.Errorf("[Controller][Delete] Error: %v", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = c.uploadService.DestroyFile(filePath)
+	if err != nil {
+		logger.Errorf("[Controller][DestroyFile] Error: %v", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	ctx.JSON(200, gin.H{
 		"message": "Файл успешно удален",
 	})

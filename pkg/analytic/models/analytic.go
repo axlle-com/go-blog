@@ -11,21 +11,21 @@ type Analytic struct {
 	RequestUUID      *uuid.UUID    `gorm:"index" json:"request_uuid"`
 	UserUUID         *uuid.UUID    `gorm:"index" json:"user_uuid"`
 	Timestamp        time.Time     `gorm:"index" json:"timestamp"`
-	Method           string        `json:"method"`
-	Host             string        `json:"host"`
-	Path             string        `json:"path"`
+	Method           string        `gorm:"index" json:"method"`
+	Host             string        `gorm:"index" json:"host"`
+	Path             string        `gorm:"index" json:"path"`
 	Query            string        `json:"query,omitempty"`
-	Status           int           `json:"status"`
+	Status           int           `gorm:"index" json:"status"`
 	Latency          time.Duration `json:"latency"`
-	IP               string        `json:"ip"`
-	Country          *string       `json:"country,omitempty"`
-	City             *string       `json:"city,omitempty"`
-	Browser          string        `json:"browser,omitempty"`
-	Device           string        `json:"device,omitempty"`
-	OS               string        `json:"os,omitempty"`
-	Language         string        `json:"lang,omitempty"`
-	Referrer         string        `json:"referrer,omitempty"`
-	ResolutionWidth  *int          `json:"resolution_width,omitempty"`
+	IP               string        `gorm:"index" json:"ip"`
+	Country          *string       `gorm:"index" json:"country,omitempty"`
+	City             *string       `gorm:"index" json:"city,omitempty"`
+	Browser          string        `gorm:"index" json:"browser,omitempty"`
+	Device           string        `gorm:"index" json:"device,omitempty"`
+	OS               string        `gorm:"index" json:"os,omitempty"`
+	Language         string        `gorm:"index" json:"lang,omitempty"`
+	Referrer         string        `gorm:"index" json:"referrer,omitempty"`
+	ResolutionWidth  *int          `gorm:"index" json:"resolution_width,omitempty"`
 	ResolutionHeight *int          `json:"resolution_height,omitempty"`
 	RequestSize      int64         `json:"req_size,omitempty"`
 	ResponseSize     int64         `json:"resp_size,omitempty"`

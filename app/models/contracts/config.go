@@ -1,5 +1,7 @@
 package contracts
 
+import "gorm.io/gorm"
+
 type Config interface {
 	Port() string
 	LogLevel() int
@@ -9,6 +11,8 @@ type Config interface {
 
 	DBUrl() string
 	DBUrlTest() string
+	SetGORM(*gorm.DB)
+	GetGORM() *gorm.DB
 
 	RedisHost() string
 	RedisPassword() string

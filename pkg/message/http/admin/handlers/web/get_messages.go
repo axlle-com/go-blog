@@ -6,6 +6,7 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -47,13 +48,16 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "admin.messages", gin.H{
 		"title":     "Страница сообщений",
-		"user":      user,
 		"message":   empty,
 		"messages":  messages,
 		"unviewed":  cnt,
 		"users":     users,
 		"paginator": paginator,
 		"filter":    filter,
-		"menu":      models2.NewMenu(ctx.FullPath()),
+		"settings": gin.H{
+			"csrfToken": csrf.GetToken(ctx),
+			"user":      user,
+			"menu":      models2.NewMenu(ctx.FullPath()),
+		},
 	})
 }

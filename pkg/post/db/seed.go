@@ -40,14 +40,20 @@ func NewSeeder(
 	}
 }
 
-func (s *seeder) Seed() {}
-
-func (s *seeder) SeedTest(n int) {
-	s.categories(n)
-	s.posts(n)
+func (s *seeder) Seed() error {
+	return nil
 }
 
-func (s *seeder) posts(n int) {
+func (s *seeder) SeedTest(n int) error {
+	err := s.categories(n)
+	if err != nil {
+		return err
+	}
+
+	return s.posts(n)
+}
+
+func (s *seeder) posts(n int) error {
 	ids := s.templateProvider.GetAllIds()
 	idsCategory, _ := s.categoryRepo.GetAllIds()
 	idsUser := s.userProvider.GetAllIds()
@@ -88,13 +94,14 @@ func (s *seeder) posts(n int) {
 		userF, _ := s.userProvider.GetByID(randomUserID)
 		_, err := s.postService.Save(&post, userF)
 		if err != nil {
-			logger.Errorf("Failed to create userProvider %d: %v", i, err.Error())
+			return err
 		}
 	}
 	logger.Info("Database seeded Post successfully!")
+	return nil
 }
 
-func (s *seeder) categories(n int) {
+func (s *seeder) categories(n int) error {
 	rand.Seed(time.Now().UnixNano())
 	ids := s.templateProvider.GetAllIds()
 	idsUser := s.userProvider.GetAllIds()
@@ -136,8 +143,9 @@ func (s *seeder) categories(n int) {
 
 		err := s.categoryRepo.Create(&postCategory)
 		if err != nil {
-			logger.Errorf("Failed to create postCategory %d: %v", i, err.Error())
+			return err
 		}
 	}
 	logger.Info("Database seeded Post successfully!")
+	return nil
 }

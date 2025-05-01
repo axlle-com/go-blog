@@ -23,9 +23,11 @@ func NewSeeder(
 	}
 }
 
-func (s *seeder) Seed() {}
+func (s *seeder) Seed() error {
+	return nil
+}
 
-func (s *seeder) SeedTest(n int) {
+func (s *seeder) SeedTest(n int) error {
 	for i := 1; i <= n; i++ {
 		template := Template{}
 
@@ -38,13 +40,10 @@ func (s *seeder) SeedTest(n int) {
 
 		err := s.template.Create(&template)
 		if err != nil {
-			logger.Errorf("Failed to create template %d: %v", i, err.Error())
+			return err
 		}
 	}
 
 	logger.Info("Database seeded Template successfully!")
-}
-
-func SeedTemplate(n int) {
-
+	return nil
 }

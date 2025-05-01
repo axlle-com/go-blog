@@ -12,7 +12,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts2.Us
 	postForm := app.LoadStruct(&models.Post{}, form).(*models.Post)
 	model, err := s.Save(postForm, user)
 	if err != nil {
-		return nil, err
+		return model, err
 	}
 
 	if len(form.Galleries) > 0 {
@@ -62,6 +62,13 @@ func (s *PostService) Save(post *models.Post, user contracts2.User) (*models.Pos
 	} else {
 		if err := s.postRepo.Update(post); err != nil {
 			return nil, err
+		}
+	}
+
+	if post.Image != nil && *post.Image != "" {
+		err := s.fileProvider.Received([]string{*post.Image})
+		if err != nil {
+			return post, err
 		}
 	}
 

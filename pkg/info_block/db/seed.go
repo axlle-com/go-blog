@@ -32,13 +32,15 @@ func NewSeeder(
 	}
 }
 
-func (s *seeder) Seed() {}
-
-func (s *seeder) SeedTest(n int) {
-	s.infoBlocks(n)
+func (s *seeder) Seed() error {
+	return nil
 }
 
-func (s *seeder) infoBlocks(n int) {
+func (s *seeder) SeedTest(n int) error {
+	return s.infoBlocks(n)
+}
+
+func (s *seeder) infoBlocks(n int) error {
 	idsUser := s.userProvider.GetAllIds()
 	ids := s.templateProvider.GetAllIds()
 	rand.Seed(time.Now().UnixNano())
@@ -61,8 +63,9 @@ func (s *seeder) infoBlocks(n int) {
 
 		_, err := s.infoBlockService.Create(&infoBlock, nil)
 		if err != nil {
-			logger.Errorf("Failed to create infoBlock %d: %v", i, err.Error())
+			return err
 		}
 	}
 	logger.Info("Database seeded infoBlock successfully!")
+	return nil
 }

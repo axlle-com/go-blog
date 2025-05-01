@@ -1,7 +1,7 @@
 # Имя сети и файл docker-compose
 NETWORK?=projects_network
 COMPOSE_FILE?=docker-compose.yml
-SERVICES?=app postgres redis
+SERVICES?=postgres redis
 # elasticsearch app cli
 
 all: network up
@@ -22,13 +22,16 @@ down:
 
 dev-file=docker-compose.dev.yml
 
-up-dev: COMPOSE_FILE = $(dev-file)
+up-dev: COMPOSE_FILE = docker-compose.dev.yml
+up-dev: SERVICES = app postgres redis
 up-dev: up
 
-rebuild-dev: COMPOSE_FILE = $(dev-file)
+rebuild-dev: COMPOSE_FILE = docker-compose.dev.yml
+rebuild-dev: SERVICES = app postgres redis
 rebuild-dev: rebuild
 
-down-dev: COMPOSE_FILE = $(dev-file)
+down-dev: COMPOSE_FILE = docker-compose.dev.yml
+down-dev: SERVICES = app postgres redis
 down-dev: down
 
 network:

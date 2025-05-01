@@ -13,6 +13,7 @@ type InfoBlockController interface {
 	UpdateInfoBlock(*gin.Context)
 	CreateInfoBlock(*gin.Context)
 	DeleteInfoBlock(*gin.Context)
+	DeleteBlockImage(*gin.Context)
 	FilterInfoBlock(*gin.Context)
 	GetInfoBlockCard(*gin.Context)
 	DetachInfoBlock(*gin.Context)

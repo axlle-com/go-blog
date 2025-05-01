@@ -10,13 +10,7 @@ import (
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/web"
-	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
-	mTemplate "github.com/axlle-com/blog/pkg/template/db/migrate"
-	dbUser "github.com/axlle-com/blog/pkg/user/db"
-	mUser "github.com/axlle-com/blog/pkg/user/db/migrate"
 	user "github.com/axlle-com/blog/pkg/user/models"
-	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -65,20 +59,19 @@ func SetupTestRouter(ctx context.Context) *gin.Engine {
 		cfg := config.Config()
 		cfg.SetTestENV()
 
-		db2.InitDB(cfg.DBUrlTest())
+		db2.InitDB(cfg)
 
-		container := app.New(ctx)
+		container := app.NewContainer(cfg, ctx)
 
-		mUser.NewMigrator().Migrate()
-		mTemplate.NewMigrator().Migrate()
-		mPost.NewMigrator().Migrate()
-		mGallery.NewMigrator().Migrate()
+		err := container.Migrator.Migrate()
+		if err != nil {
+			return nil
+		}
 
-		dbUser.NewSeeder(
-			container.UserRepo,
-			userRepository.NewRoleRepo(),
-			userRepository.NewPermissionRepo(),
-		).Seed()
+		err = container.Seeder.Seed()
+		if err != nil {
+			return nil
+		}
 
 		gob.Register(user.User{})
 

@@ -4,6 +4,7 @@ import (
 	. "github.com/axlle-com/blog/app/errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"log"
 	"net/http"
 )
@@ -29,6 +30,9 @@ func (c *controller) Login(ctx *gin.Context) {
 		gin.H{
 			"Title":  "Авторизация",
 			"Errors": errorMessages,
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+			},
 		},
 	)
 }

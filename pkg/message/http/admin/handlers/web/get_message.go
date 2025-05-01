@@ -4,6 +4,7 @@ import (
 	mApp "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -30,10 +31,13 @@ func (c *messageController) GetMessage(ctx *gin.Context) {
 		"admin.template",
 		gin.H{
 			"title":         "Страница шаблона",
-			"user":          user,
 			"templateModel": template,
 			"resources":     mApp.NewResource().Resources(),
-			"menu":          models.NewMenu(ctx.FullPath()),
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+				"user":      user,
+				"menu":      models.NewMenu(ctx.FullPath()),
+			},
 		},
 	)
 }

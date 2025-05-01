@@ -28,9 +28,11 @@ func NewMessageSeeder(
 	}
 }
 
-func (s *seeder) Seed() {}
+func (s *seeder) Seed() error {
+	return nil
+}
 
-func (s *seeder) SeedTest(n int) {
+func (s *seeder) SeedTest(n int) error {
 	idsUser := s.userProvider.GetAll()
 	for i := 1; i <= n; i++ {
 		randomUser := idsUser[rand.Intn(len(idsUser))]
@@ -48,9 +50,10 @@ func (s *seeder) SeedTest(n int) {
 
 		_, err := s.messageService.Create(message, randomUser.GetUUID().String())
 		if err != nil {
-			logger.Errorf("Failed to create message %d: %v", i, err.Error())
+			return err
 		}
 	}
 
 	logger.Info("Database seeded Message successfully!")
+	return nil
 }

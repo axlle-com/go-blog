@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/gob"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 	"os/signal"
 	"syscall"
@@ -22,25 +24,28 @@ import (
 )
 
 func main() {
-	appCtx, stop := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+	appCtx, stop := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT,
+	)
 	defer stop()
 
-	container := app.New(appCtx)
-
 	cfg := config.Config()
+	db.InitDB(cfg)
+
+	container := app.NewContainer(cfg, appCtx)
 	router := Init(cfg, container)
 
 	srv := &http.Server{
-		Addr:    cfg.Port(),
+		Addr:    "0.0.0.0" + cfg.Port(),
 		Handler: router,
 	}
 
 	go func() {
+		logger.Infof("[Main] Listening on %s and on [::]%s", "0.0.0.0"+cfg.Port(), cfg.Port())
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Fatalf("[Main] server error: %v", err)
+			logger.Debugf("[Main] server error: %v", err)
 		}
-		logger.Infof("[Main] starting HTTP on %s", cfg.Port())
 	}()
 
 	// ждём сигнал остановки
@@ -57,7 +62,6 @@ func main() {
 
 	container.Queue.Close()
 
-	// закрываем соединения БД, если у вас есть db.Close()
 	//if err := db.Close(); err != nil {
 	//	logger.Errorf("DB close: %v", err)
 	//}
@@ -76,8 +80,24 @@ func Init(config contracts.Config, container *app.Container) *gin.Engine {
 
 	store := models.Store(config)
 	router.Use(sessions.Sessions(config.SessionsName(), store))
+	router.Use(gzip.Gzip(gzip.BestSpeed))
+	router.Use(csrf.Middleware(csrf.Options{
+		Secret: string(config.KeyCookie()),
+		ErrorFunc: func(c *gin.Context) {
+			c.String(http.StatusForbidden, "CSRF token mismatch")
+			c.Abort()
+		},
+	}))
 
-	db.InitDB(config.DBUrl())
+	err = container.Migrator.Migrate()
+	if err != nil {
+		logger.Errorf("[Main][Init] Migrate error: %v", err)
+	}
+
+	err = container.Seeder.Seed()
+	if err != nil {
+		logger.Errorf("[Main][Init] Seed error: %v", err)
+	}
 
 	web.Minify(config)
 	web.NewTemplate(router)

@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -17,15 +18,17 @@ var (
 	instanceTestMu sync.Mutex
 )
 
-func InitDB(url string) {
+func InitDB(config contracts.Config) {
 	instanceMu.Lock()
 	defer instanceMu.Unlock()
 
 	var err error
-	instance, err = gorm.Open(postgres.Open(url), &gorm.Config{})
+	instance, err = gorm.Open(postgres.Open(config.DBUrl()), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	config.SetGORM(instance)
 }
 
 func GetDB() *gorm.DB {
@@ -44,11 +47,15 @@ func GetDB() *gorm.DB {
 		if err != nil {
 			logger.Fatalf("[DB][GetDB] Error: %v", err)
 		}
+
+		cfg.SetGORM(instance)
 	}
 	return instance //.Debug()
 }
 
 func GetDBTest() *gorm.DB {
+	cfg := config.Config()
+
 	instanceTestMu.Lock()
 	defer instanceTestMu.Unlock()
 
@@ -58,6 +65,8 @@ func GetDBTest() *gorm.DB {
 		if err != nil {
 			logger.Fatalf("[DB][GetDBTest] Error: %v", err)
 		}
+
+		cfg.SetGORM(instance)
 	}
 	return instanceTest //.Debug()
 }

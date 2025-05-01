@@ -223,3 +223,12 @@ func (u *User) FromInterface(user contracts.User) {
 		u.Phone = &phone
 	}
 }
+
+func (u *User) CanAdmin() bool {
+	for _, role := range u.Roles {
+		if role.Name == "employee" || role.Name == "superadmin" || role.Name == "admin" {
+			return true
+		}
+	}
+	return false
+}

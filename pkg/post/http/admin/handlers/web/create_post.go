@@ -5,6 +5,7 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -26,11 +27,14 @@ func (c *controller) CreatePost(ctx *gin.Context) {
 		"admin.post",
 		gin.H{
 			"title":      "Страница поста",
-			"user":       user,
 			"categories": categories,
 			"templates":  templates,
-			"menu":       models2.NewMenu(ctx.FullPath()),
 			"post":       post,
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+				"user":      user,
+				"menu":      models2.NewMenu(ctx.FullPath()),
+			},
 		},
 	)
 }

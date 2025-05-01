@@ -5,6 +5,7 @@ import (
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/post/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 )
 
@@ -26,11 +27,14 @@ func (c *controllerCategory) CreateCategory(ctx *gin.Context) {
 		"admin.category",
 		gin.H{
 			"title":      "Страница категории",
-			"user":       user,
 			"categories": categories,
 			"templates":  templates,
-			"menu":       models2.NewMenu(ctx.FullPath()),
 			"category":   category,
+			"settings": gin.H{
+				"csrfToken": csrf.GetToken(ctx),
+				"user":      user,
+				"menu":      models2.NewMenu(ctx.FullPath()),
+			},
 		},
 	)
 }

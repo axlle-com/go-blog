@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/app/service"
@@ -106,7 +107,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 	mPost.NewMigrator().Rollback()
 	mPost.NewMigrator().Migrate()
 
-	container := app.New()
+	container := app.NewContainer(config.Config(), nil)
 	iProvider := container.ImageProvider
 	gProvider := container.GalleryProvider
 	pRepo := container.PostRepo
@@ -317,7 +318,7 @@ func TestSuccessfulUpdatePostAlias(t *testing.T) {
 	mPost.NewMigrator().Rollback()
 	mPost.NewMigrator().Migrate()
 
-	container := app.New()
+	container := app.NewContainer(config.Config(), nil)
 
 	sliceCreate := []map[string]string{
 		{

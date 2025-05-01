@@ -2,7 +2,9 @@ package service
 
 import (
 	"errors"
+	"github.com/axlle-com/blog/app/logger"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/google/uuid"
@@ -14,6 +16,7 @@ type GalleryService struct {
 	galleryEvent *GalleryEvent
 	imageService *ImageService
 	resourceRepo repository.GalleryResourceRepository
+	fileProvider fileProvider.FileProvider
 }
 
 func NewGalleryService(
@@ -21,12 +24,14 @@ func NewGalleryService(
 	galleryEvent *GalleryEvent,
 	imageService *ImageService,
 	resourceRepo repository.GalleryResourceRepository,
+	fileProvider fileProvider.FileProvider,
 ) *GalleryService {
 	return &GalleryService{
 		galleryRepo:  galleryRepo,
 		galleryEvent: galleryEvent,
 		imageService: imageService,
 		resourceRepo: resourceRepo,
+		fileProvider: fileProvider,
 	}
 }
 
@@ -137,31 +142,56 @@ func (s *GalleryService) DeleteGalleries(galleries []*models.Gallery) (err error
 }
 
 func (s *GalleryService) galleryImageUpdate(gallery *models.Gallery) error {
-	var err error
-	if len(gallery.Images) > 0 {
-		slice := make([]*models.Image, 0)
-		var eSlice []error
-		for _, item := range gallery.Images {
-			if item == nil {
-				continue
-			}
-			item.GalleryID = gallery.ID
-			image, e := s.imageService.SaveImage(item)
-			if e != nil {
-				eSlice = append(eSlice, e)
-				continue
-			}
-			if image == nil {
-				continue
-			}
-
-			slice = append(slice, image)
-		}
-		if len(eSlice) > 0 {
-			err = errors.New("были ошибки при сохранении изображения")
-		}
-		gallery.Images = slice
+	if len(gallery.Images) == 0 {
+		return nil
 	}
+
+	var err error
+	var file string
+	var errSlice []error
+	slice := make([]*models.Image, 0)
+	sliceFiles := make([]string, 0)
+
+	for _, item := range gallery.Images {
+		if item == nil {
+			continue
+		}
+
+		if item.ID == 0 {
+			file = item.File
+		}
+
+		item.GalleryID = gallery.ID
+		image, err := s.imageService.SaveImage(item)
+		if err != nil {
+			logger.Errorf("[GalleryService][galleryImageUpdate] Error: %v", err)
+			errSlice = append(errSlice, err)
+			continue
+		}
+		if image == nil {
+			continue
+		}
+
+		slice = append(slice, image)
+
+		if file != "" {
+			sliceFiles = append(sliceFiles, file)
+		}
+	}
+
+	if len(sliceFiles) > 0 {
+		err = s.fileProvider.Received(sliceFiles)
+		if err != nil {
+			logger.Errorf("[GalleryService][galleryImageUpdate] Error: %v", err)
+			errSlice = append(errSlice, err)
+		}
+	}
+
+	if len(errSlice) > 0 {
+		err = errors.New("были ошибки при сохранении изображения")
+	}
+
+	gallery.Images = slice
 
 	return err
 }

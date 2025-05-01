@@ -1,11 +1,11 @@
 package contracts
 
 type Seeder interface {
-	Seed()
-	SeedTest(n int)
+	Seed() error
+	SeedTest(n int) error
 }
 
 type Migrator interface {
-	Migrate()
-	Rollback()
+	Migrate() error
+	Rollback() error
 }

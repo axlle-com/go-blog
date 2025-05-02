@@ -16,25 +16,31 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
     labels:
       - "traefik.enable=true"
 
-      # HTTP → HTTPS redirect
-      - "traefik.http.routers.app-http.rule=Host(`${APP_HOST}`)"
+      # HTTP → HTTPS редирект
+      - "traefik.http.routers.app-http.rule=Host(`test.ax-box.ru`)"
       - "traefik.http.routers.app-http.entrypoints=web"
       - "traefik.http.routers.app-http.middlewares=redirect-to-https"
 
-      # HTTPS‑роутер
-      - "traefik.http.routers.app.rule=Host(`${APP_HOST}`)"
-      - "traefik.http.routers.app.entrypoints=websecure"
-      - "traefik.http.routers.app.tls=true"
-      - "traefik.http.routers.app.tls.certresolver=le"
+      # HTTPS-доступ к сервису
+      - "traefik.http.routers.app-https.rule=Host(`test.ax-box.ru`)"
+      - "traefik.http.routers.app-https.entrypoints=websecure"
+      - "traefik.http.routers.app-https.tls=true"
+      - "traefik.http.routers.app-https.tls.certresolver=le"
 
       # Внутренний порт приложения
       - "traefik.http.services.app.loadbalancer.server.port=3000"
 
-      # middleware редиректа
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # Traefik не будет проксировать, пока контейнер не считается healthy
+      - "traefik.http.services.app.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.app.loadbalancer.healthcheck.interval=10s"
 
   cli:
     build:

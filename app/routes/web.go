@@ -34,6 +34,10 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 	messageFrontController := container.MessageFrontController()
 
 	analytic := analyticMiddleware.NewAnalytic(container.Queue, container.AnalyticProvider)
+
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
 	r.Use(middleware.Main())
 	r.Use(middleware.Error())
 	r.Use(analytic.Handler())

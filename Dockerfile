@@ -12,10 +12,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go-app -ldflags="-s -w" c
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go-cli -ldflags="-s -w" cmd/cli/cli.go
 
 # Используем минимальный образ для запуска
-FROM alpine:3.20 AS app
+FROM alpine:latest AS app
 
 # Устанавливаем сертификаты для Sentry
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates curl
 
 # Создаем директорию для логов
 RUN mkdir -p /var/log/app
@@ -26,12 +26,13 @@ COPY --from=builder /go-app /go-app
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
+EXPOSE 3000
 
 # Запуск приложения
-CMD ["/go-app"]
+ENTRYPOINT ["/go-app"]
 
 # Образ для CLI
-FROM alpine:3.20 AS cli
+FROM alpine:latest AS cli
 
 # Устанавливаем сертификаты для Sentry
 RUN apk --no-cache add ca-certificates

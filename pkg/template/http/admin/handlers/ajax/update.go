@@ -42,7 +42,7 @@ func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 
 	data := gin.H{
 		"templateModel": template,
-		"resources":     mApp.NewResource().Resources(),
+		"resources":     mApp.NewResources().Resources(),
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

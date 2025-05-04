@@ -3,13 +3,13 @@ package mailer
 import (
 	"context"
 	"github.com/axlle-com/blog/app/models/contracts"
-	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
+	messageContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
 	"time"
 )
 
 func NewCreateMessageJob(
-	messageService contracts2.MessageService,
+	messageService messageContracts.MessageService,
 	form form.Form,
 ) contracts.Job {
 	return &CreateMessageJob{
@@ -20,7 +20,7 @@ func NewCreateMessageJob(
 }
 
 type CreateMessageJob struct {
-	messageService contracts2.MessageService
+	messageService messageContracts.MessageService
 	form           form.Form
 	start          time.Time
 }

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/models"
@@ -27,8 +26,8 @@ type galleryResourceRepository struct {
 	*app.Paginate
 }
 
-func NewResourceRepo() GalleryResourceRepository {
-	r := &galleryResourceRepository{db: db.GetDB()}
+func NewResourceRepo(db contracts.DB) GalleryResourceRepository {
+	r := &galleryResourceRepository{db: db.GORM()}
 	return r
 }
 

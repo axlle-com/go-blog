@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/post/models"
@@ -29,8 +28,8 @@ type postRepository struct {
 	*app.Paginate
 }
 
-func NewPostRepo() PostRepository {
-	r := &postRepository{db: db.GetDB()}
+func NewPostRepo(db contracts.DB) PostRepository {
+	r := &postRepository{db: db.GORM()}
 	return r
 }
 

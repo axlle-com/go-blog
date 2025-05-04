@@ -1,6 +1,10 @@
 package alias
 
-import "testing"
+import (
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/db"
+	"testing"
+)
 
 func TestCreate(t *testing.T) {
 	type args struct {
@@ -57,9 +61,10 @@ func TestCreate(t *testing.T) {
 			want: "123-alias",
 		},
 	}
+	newDB, _ := db.SetupDB(config.Config())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewProvider(NewAliasRepo()).Create(tt.args.title); got != tt.want {
+			if got := NewAliasProvider(NewAliasRepo(newDB)).Create(tt.args.title); got != tt.want {
 				t.Errorf("Create() = %v, want %v", got, tt.want)
 			}
 		})
@@ -126,9 +131,10 @@ func TestTransliterate(t *testing.T) {
 			want: "~+>)]@>_:^^\\$@–_{@&\\).[\\:[}@_",
 		},
 	}
+	newDB, _ := db.SetupDB(config.Config())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewProvider(NewAliasRepo()).transliterate(tt.args.input); got != tt.want {
+			if got := NewAliasProvider(NewAliasRepo(newDB)).transliterate(tt.args.input); got != tt.want {
 				t.Errorf("transliterate() = %v, want %v", got, tt.want)
 			}
 		})

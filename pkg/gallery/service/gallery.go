@@ -161,6 +161,12 @@ func (s *GalleryService) galleryImageUpdate(gallery *models.Gallery) error {
 			file = item.File
 		}
 
+		exist := s.fileProvider.Exist(file)
+		if !exist {
+			logger.Errorf("[GalleryService][galleryImageUpdate] File: %s not found", file)
+			continue
+		}
+
 		item.GalleryID = gallery.ID
 		image, err := s.imageService.SaveImage(item)
 		if err != nil {

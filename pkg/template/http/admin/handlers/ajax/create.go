@@ -35,7 +35,7 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 
 	data := response.Body{
 		"templateModel": template,
-		"resources":     mApp.NewResource().Resources(),
+		"resources":     mApp.NewResources().Resources(),
 	}
 	ctx.JSON(
 		http.StatusCreated,

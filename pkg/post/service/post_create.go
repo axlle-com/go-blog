@@ -66,6 +66,13 @@ func (s *PostService) Save(post *models.Post, user contracts2.User) (*models.Pos
 	}
 
 	if post.Image != nil && *post.Image != "" {
+		exist := s.fileProvider.Exist(*post.Image)
+		if !exist {
+			post.Image = nil
+		}
+	}
+
+	if post.Image != nil && *post.Image != "" {
 		err := s.fileProvider.Received([]string{*post.Image})
 		if err != nil {
 			return post, err

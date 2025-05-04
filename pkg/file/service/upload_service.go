@@ -98,6 +98,29 @@ func (s *UploadService) DestroyFile(file string) error {
 	return os.Remove(absPath)
 }
 
+func (s *UploadService) Exist(file string) bool {
+	if strings.HasPrefix(file, staticPath) {
+		return true
+	}
+
+	absPath, err := filepath.Abs(s.realPath(file))
+	if err != nil {
+		// на всякий случай, если не получилось построить путь — говорим, что нет
+		return false
+	}
+
+	if info, err := os.Stat(absPath); err == nil {
+		// Убедимся, что это не директория (если нужно только файлы)
+		return !info.IsDir()
+	} else if os.IsNotExist(err) {
+		// Файл точно отсутствует
+		return false
+	} else {
+		// Какая-то другая ошибка (например, прав доступа) — можно трактовать как “нет”
+		return false
+	}
+}
+
 func (s *UploadService) save(file *multipart.FileHeader, dst, newUUID string) (string, error) {
 	name := s.newName(dst, filepath.Ext(file.Filename), newUUID)
 	path := s.realPath(name)

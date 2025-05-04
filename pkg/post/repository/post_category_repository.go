@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
@@ -33,8 +32,8 @@ type categoryRepository struct {
 	*app.Paginate
 }
 
-func NewCategoryRepo() CategoryRepository {
-	return &categoryRepository{db: db.GetDB()}
+func NewCategoryRepo(db contracts.DB) CategoryRepository {
+	return &categoryRepository{db: db.GORM()}
 }
 
 func (r *categoryRepository) WithTx(tx *gorm.DB) CategoryRepository {

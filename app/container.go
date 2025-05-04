@@ -1,22 +1,20 @@
 package app
 
 import (
-	"context"
-
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/alias"
-	"github.com/axlle-com/blog/pkg/mailer"
-	"github.com/axlle-com/blog/pkg/migrate"
-	"github.com/axlle-com/blog/pkg/queue"
-	"github.com/axlle-com/blog/pkg/view"
+	"github.com/axlle-com/blog/app/service/mailer"
+	"github.com/axlle-com/blog/app/service/migrate"
+	"github.com/axlle-com/blog/app/service/queue"
+	"github.com/axlle-com/blog/app/service/scheduler"
+	"github.com/axlle-com/blog/app/service/view"
 
+	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
 	analyticRepo "github.com/axlle-com/blog/pkg/analytic/repository"
 	analyticService "github.com/axlle-com/blog/pkg/analytic/service"
-
 	fileMigrate "github.com/axlle-com/blog/pkg/file/db/migrate"
 	fileAdminWeb "github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
@@ -72,9 +70,11 @@ import (
 )
 
 type Container struct {
-	Queue contracts.Queue
-	Cache contracts.Cache
-	View  contracts.View
+	Config    contracts.Config
+	Queue     contracts.Queue
+	Cache     contracts.Cache
+	View      contracts.View
+	Scheduler contracts.Scheduler
 
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.Service
@@ -139,65 +139,62 @@ type Container struct {
 	Seeder   contracts.Seeder
 }
 
-func NewContainer(cfg contracts.Config, ctx context.Context) *Container {
+func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newQueue := queue.NewQueue()
-	newQueue.StartWorkers(ctx, 4)
-
 	newCache := cache.NewCache()
 	newView := view.NewView(config.Config())
+	newMailer := mailer.NewMailer(newQueue)
 
-	mailerInterface := mailer.NewMailer(newQueue)
-
-	newFileRepo := fileRepo.NewFileRepo()
+	newFileRepo := fileRepo.NewFileRepo(db)
 	newFileService := fileService.NewService(newFileRepo)
-	fileCollectionService := fileService.NewCollectionService(newFileRepo)
 	uploadService := fileService.NewUploadService(newFileService)
-	fileProv := fileProvider.NewProvider(uploadService, newFileService, fileCollectionService)
+	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
+	fileProv := fileProvider.NewFileProvider(uploadService, newFileService, fileCollectionService)
 
-	newImageRepo := galleryRepo.NewImageRepo()
+	newImageRepo := galleryRepo.NewImageRepo(db)
 	newImageEvent := galleryService.NewImageEvent(fileProv)
 	newImageService := galleryService.NewImageService(newImageRepo, newImageEvent, fileProv)
 	newImageProvider := galleryProvider.NewImageProvider(newImageRepo)
 
-	newResourceRepo := galleryRepo.NewResourceRepo()
+	newResourceRepo := galleryRepo.NewResourceRepo(db)
 
-	newGalleryRepo := galleryRepo.NewGalleryRepo()
+	newGalleryRepo := galleryRepo.NewGalleryRepo(db)
 	newGalleryEvent := galleryService.NewGalleryEvent(newImageService, newResourceRepo)
 	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, fileProv)
 	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
 
-	newUserRepo := userRepository.NewUserRepo()
-	newRoleRepo := userRepository.NewRoleRepo()
-	newPermissionRepo := userRepository.NewPermissionRepo()
+	newUserRepo := userRepository.NewUserRepo(db)
+	newRoleRepo := userRepository.NewRoleRepo(db)
+	newPermissionRepo := userRepository.NewPermissionRepo(db)
 	newUserService := usersService.NewUserService(newUserRepo, newRoleRepo, newPermissionRepo)
 	newAuthService := usersService.NewAuthService(newUserService)
 	newUserProvider := userProvider.NewProvider(newUserRepo, newUserService)
 
-	newTemplateRepo := templateRepo.NewTemplateRepo()
+	newTemplateRepo := templateRepo.NewTemplateRepo(db)
 	newTemplateProvider := templateProvider.NewProvider(newTemplateRepo)
 	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newUserProvider)
 	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newUserProvider)
 
-	newMessageRepo := messageRepo.NewMessageRepo()
+	newMessageRepo := messageRepo.NewMessageRepo(db)
 	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
 	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
-	newMailService := messageService.NewMailService(newMessageService, newMessageCollectionService, newUserProvider, mailerInterface, newQueue)
+	newMailService := messageService.NewMailService(newMessageService, newMessageCollectionService, newUserProvider, newMailer, newQueue)
 
-	newAliasRepo := alias.NewAliasRepo()
-	newAliasProvider := alias.NewProvider(newAliasRepo)
+	newAliasRepo := alias.NewAliasRepo(db)
+	newAliasProvider := alias.NewAliasProvider(newAliasRepo)
 
-	newPostRepo := postRepo.NewPostRepo()
-	newCategoryRepo := postRepo.NewCategoryRepo()
+	newPostRepo := postRepo.NewPostRepo(db)
+	newCategoryRepo := postRepo.NewCategoryRepo(db)
 
-	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo()
-	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo()
+	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db)
+	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db)
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider)
 	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
-	ptRepo := postRepo.NewPostTagRepo()
-	ptrRepo := postRepo.NewResourceRepo()
+	ptRepo := postRepo.NewPostTagRepo(db)
+	ptrRepo := postRepo.NewResourceRepo(db)
 	ptService := postService.NewPostTagService(ptRepo, ptrRepo)
 
 	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
@@ -206,19 +203,19 @@ func NewContainer(cfg contracts.Config, ctx context.Context) *Container {
 	pService := postService.NewPostService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
 	psService := postService.NewPostsService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
 
-	newAnalyticRepo := analyticRepo.NewAnalyticRepo()
+	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db)
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
-	mUser := userMigrate.NewMigrator(cfg.GetGORM())
-	mPost := postMigrate.NewMigrator(cfg.GetGORM())
-	mInfoBlock := infoBlockMigrate.NewMigrator(cfg.GetGORM())
-	mGallery := galleryMigrate.NewMigrator(cfg.GetGORM())
-	mTemplate := templateMigrate.NewMigrator(cfg.GetGORM())
-	mAnalytic := analyticMigrate.NewMigrator(cfg.GetGORM())
-	mMessage := messageMigrate.NewMigrator(cfg.GetGORM())
-	mFile := fileMigrate.NewMigrator(cfg.GetGORM())
+	mUser := userMigrate.NewMigrator(db.GORM())
+	mPost := postMigrate.NewMigrator(db.GORM())
+	mInfoBlock := infoBlockMigrate.NewMigrator(db.GORM())
+	mGallery := galleryMigrate.NewMigrator(db.GORM())
+	mTemplate := templateMigrate.NewMigrator(db.GORM())
+	mAnalytic := analyticMigrate.NewMigrator(db.GORM())
+	mMessage := messageMigrate.NewMigrator(db.GORM())
+	mFile := fileMigrate.NewMigrator(db.GORM())
 
 	sUser := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
 	sPost := postDB.NewSeeder(newPostRepo, pService, newCategoryRepo, newUserProvider, newTemplateProvider)
@@ -229,7 +226,7 @@ func NewContainer(cfg contracts.Config, ctx context.Context) *Container {
 	seeder := migrate.NewSeeder(sUser, sTempl, sPost, sInfo, sMsg)
 
 	newMigrator := migrate.NewMigrator(
-		cfg.GetGORM(),
+		db.GORM(),
 		mUser,
 		mPost,
 		mInfoBlock,
@@ -240,10 +237,18 @@ func NewContainer(cfg contracts.Config, ctx context.Context) *Container {
 		mFile,
 	)
 
+	newScheduler := scheduler.NewScheduler(
+		cfg,
+		newQueue,
+		fileProv,
+	)
+
 	return &Container{
-		Queue: newQueue,
-		Cache: newCache,
-		View:  newView,
+		Config:    cfg,
+		Queue:     newQueue,
+		Cache:     newCache,
+		View:      newView,
+		Scheduler: newScheduler,
 
 		FileUploadService:     uploadService,
 		FileCollectionService: fileCollectionService,

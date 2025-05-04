@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/google/uuid"
@@ -27,8 +26,8 @@ type infoBlockResource struct {
 	db *gorm.DB
 }
 
-func NewResourceRepo() InfoBlockHasResourceRepository {
-	r := &infoBlockResource{db: db.GetDB()}
+func NewResourceRepo(db contracts.DB) InfoBlockHasResourceRepository {
+	r := &infoBlockResource{db: db.GORM()}
 	return r
 }
 

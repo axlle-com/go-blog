@@ -2,11 +2,10 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/gob"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
-	db2 "github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/web"
@@ -36,8 +35,8 @@ func PerformLogin(router *gin.Engine) ([]*http.Cookie, error) {
 	return cookie, nil
 }
 
-func StartWithLogin(ctx context.Context) (router *gin.Engine, cookie []*http.Cookie, err error) {
-	router = SetupTestRouter(ctx)
+func StartWithLogin() (router *gin.Engine, cookie []*http.Cookie, err error) {
+	router = SetupTestRouter()
 	requestBody := `{"email":"admin@admin.ru","password":"123456"}`
 
 	w := httptest.NewRecorder()
@@ -54,16 +53,19 @@ func StartWithLogin(ctx context.Context) (router *gin.Engine, cookie []*http.Coo
 	return router, cookie, nil
 }
 
-func SetupTestRouter(ctx context.Context) *gin.Engine {
+func SetupTestRouter() *gin.Engine {
 	if router == nil {
 		cfg := config.Config()
 		cfg.SetTestENV()
 
-		db2.InitDB(cfg)
+		newDB, err := db.SetupDB(cfg)
+		if err != nil {
+			panic("db not initialized")
+		}
 
-		container := app.NewContainer(cfg, ctx)
+		container := app.NewContainer(cfg, newDB)
 
-		err := container.Migrator.Migrate()
+		err = container.Migrator.Migrate()
 		if err != nil {
 			return nil
 		}
@@ -81,8 +83,8 @@ func SetupTestRouter(ctx context.Context) *gin.Engine {
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
 
 		web.NewTemplate(router)
-		InitializeApiRoutes(router, container)
-		InitializeWebRoutes(router, container)
+		InitApiRoutes(router, container)
+		InitWebRoutes(router, container)
 		cache.NewCache().ResetUsersSession()
 	}
 	return router

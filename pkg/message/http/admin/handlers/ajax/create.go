@@ -22,7 +22,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 			"title":         "Страница шаблона",
 			"user":          user,
 			"templateModel": template,
-			"resources":     mApp.NewResource().Resources(),
+			"resources":     mApp.NewResources().Resources(),
 			"menu":          models2.NewMenu(ctx.FullPath()),
 		},
 	)

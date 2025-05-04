@@ -11,12 +11,12 @@ import (
 )
 
 type AliasProvider interface {
-	Generate(r contracts.Tabular, s string) string
+	Generate(r contracts.Record, s string) string
 	Create(title string) string
 	transliterate(input string) string
 }
 
-func NewProvider(aliasRepo AliasRepository) AliasProvider {
+func NewAliasProvider(aliasRepo AliasRepository) AliasProvider {
 	return &provider{
 		aliasRepo: aliasRepo,
 	}
@@ -26,7 +26,7 @@ type provider struct {
 	aliasRepo AliasRepository
 }
 
-func (p *provider) Generate(tabular contracts.Tabular, s string) string {
+func (p *provider) Generate(tabular contracts.Record, s string) string {
 	alias := p.Create(s)
 	aliasNew := alias
 	counter := 1

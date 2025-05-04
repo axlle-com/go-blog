@@ -2,16 +2,13 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/app/service"
-	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	modelsGallery "github.com/axlle-com/blog/pkg/gallery/models"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
@@ -115,7 +112,7 @@ type PostResponse struct {
 }
 
 func TestFailedCreatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
+	router, cookies, _ := StartWithLogin()
 	requestBody := `{"email":"axlle@mail","password":"123456"}`
 
 	t.Run("Failed login", func(t *testing.T) {
@@ -161,14 +158,21 @@ func TestFailedCreatePost(t *testing.T) {
 }
 
 func TestSuccessfulCreatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
+	router, cookies, _ := StartWithLogin()
 
-	mGallery.NewMigrator().Rollback()
-	mGallery.NewMigrator().Migrate()
-	mPost.NewMigrator().Rollback()
-	mPost.NewMigrator().Migrate()
+	cfg := config.Config()
+	newDB, _ := db.SetupDB(cfg)
+	container := app.NewContainer(cfg, newDB)
 
-	container := app.NewContainer(config.Config(), nil)
+	err := container.Migrator.Rollback()
+	if err != nil {
+		return
+	}
+	err = container.Migrator.Migrate()
+	if err != nil {
+		return
+	}
+
 	iProvider := container.ImageProvider
 	gProvider := container.GalleryProvider
 	pRepo := container.PostRepo

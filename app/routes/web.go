@@ -11,7 +11,7 @@ import (
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 )
 
-func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
+func InitWebRoutes(r *gin.Engine, container *app.Container) {
 	postFrontWebController := container.PostFrontWebController()
 	postController := container.PostController()
 	postWebController := container.PostWebController()
@@ -78,6 +78,7 @@ func InitializeWebRoutes(r *gin.Engine, container *app.Container) {
 
 		protected.GET("/info-blocks", infoBlockController.GetInfoBlocks)
 		protected.GET("/info-blocks/:id", infoBlockController.GetInfoBlock)
+		protected.GET("/info-blocks/form", infoBlockController.CreateInfoBlock)
 
 		protected.POST("/info-blocks", infoBlockAjaxController.CreateInfoBlock)
 		protected.PUT("/info-blocks/:id", infoBlockAjaxController.UpdateInfoBlock)

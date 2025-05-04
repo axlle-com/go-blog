@@ -1,72 +1,57 @@
 package db
 
 import (
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 	"sync"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 var (
-	instance     *gorm.DB
-	instanceTest *gorm.DB
-
-	instanceMu     sync.Mutex
-	instanceTestMu sync.Mutex
+	instance *db
+	once     sync.Once
 )
 
-func InitDB(config contracts.Config) {
-	instanceMu.Lock()
-	defer instanceMu.Unlock()
+type db struct {
+	gorm *gorm.DB
+}
 
-	var err error
-	instance, err = gorm.Open(postgres.Open(config.DBUrl()), &gorm.Config{})
+func (r *db) GORM() *gorm.DB {
+	return r.gorm
+}
+
+func (r *db) Close() error {
+	sqlDB, err := r.gorm.DB()
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	return sqlDB.Close()
+}
 
-	config.SetGORM(instance)
+func SetupDB(config contracts.Config) (contracts.DB, error) {
+	var initErr error
+	once.Do(func() {
+		url := config.DBUrl()
+
+		if config.IsTest() {
+			url = config.DBUrlTest()
+		}
+
+		dbConn, err := gorm.Open(postgres.Open(url), &gorm.Config{})
+		if err != nil {
+			initErr = fmt.Errorf("failed to open DB: %w", err)
+			return
+		}
+		instance = &db{gorm: dbConn}
+	})
+	return instance, initErr //.Debug()
 }
 
 func GetDB() *gorm.DB {
-	cfg := config.Config()
-
-	if cfg.IsTest() {
-		return GetDBTest()
-	}
-
-	instanceMu.Lock()
-	defer instanceMu.Unlock()
-
 	if instance == nil {
-		var err error
-		instance, err = gorm.Open(postgres.Open(cfg.DBUrl()), &gorm.Config{})
-		if err != nil {
-			logger.Fatalf("[DB][GetDB] Error: %v", err)
-		}
-
-		cfg.SetGORM(instance)
+		panic("db not initialized: call InitDB first")
 	}
-	return instance //.Debug()
-}
-
-func GetDBTest() *gorm.DB {
-	cfg := config.Config()
-
-	instanceTestMu.Lock()
-	defer instanceTestMu.Unlock()
-
-	if instanceTest == nil {
-		var err error
-		instanceTest, err = gorm.Open(postgres.Open(config.Config().DBUrlTest()), &gorm.Config{})
-		if err != nil {
-			logger.Fatalf("[DB][GetDBTest] Error: %v", err)
-		}
-
-		cfg.SetGORM(instance)
-	}
-	return instanceTest //.Debug()
+	return instance.GORM()
 }

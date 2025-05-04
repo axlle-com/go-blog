@@ -1,6 +1,6 @@
 package contracts
 
-type Tabular interface {
+type Record interface {
 	GetID() uint
 	GetTable() string
 }

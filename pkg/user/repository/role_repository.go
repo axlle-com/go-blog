@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
@@ -23,8 +23,8 @@ type roleRepository struct {
 	*app.Paginate
 }
 
-func NewRoleRepo() RoleRepository {
-	return &roleRepository{db: db.GetDB()}
+func NewRoleRepo(db contracts.DB) RoleRepository {
+	return &roleRepository{db: db.GORM()}
 }
 
 func (r *roleRepository) WithTx(tx *gorm.DB) RoleRepository {

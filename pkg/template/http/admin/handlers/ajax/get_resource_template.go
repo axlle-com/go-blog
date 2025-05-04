@@ -15,7 +15,7 @@ func (c *templateController) GetResourceTemplate(ctx *gin.Context) {
 		return
 	}
 
-	template = models.NewResource().ResourceTemplate(template)
+	template = models.NewResources().ResourceTemplate(template)
 	if template == "" {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "404 Not Found"})
 		ctx.Abort()

@@ -2,15 +2,12 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/app/service"
-	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -20,7 +17,7 @@ import (
 )
 
 func TestFailedUpdatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
+	router, cookies, _ := StartWithLogin()
 	requestBody := `{"title":"title"}`
 	var oPost *PostResponse
 
@@ -101,13 +98,21 @@ func TestFailedUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
-	mGallery.NewMigrator().Rollback()
-	mGallery.NewMigrator().Migrate()
-	mPost.NewMigrator().Rollback()
-	mPost.NewMigrator().Migrate()
+	router, cookies, _ := StartWithLogin()
 
-	container := app.NewContainer(config.Config(), nil)
+	cfg := config.Config()
+	newDB, _ := db.SetupDB(cfg)
+	container := app.NewContainer(cfg, newDB)
+
+	err := container.Migrator.Rollback()
+	if err != nil {
+		return
+	}
+	err = container.Migrator.Migrate()
+	if err != nil {
+		return
+	}
+
 	iProvider := container.ImageProvider
 	gProvider := container.GalleryProvider
 	pRepo := container.PostRepo
@@ -314,11 +319,20 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 }
 
 func TestSuccessfulUpdatePostAlias(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
-	mPost.NewMigrator().Rollback()
-	mPost.NewMigrator().Migrate()
+	router, cookies, _ := StartWithLogin()
 
-	container := app.NewContainer(config.Config(), nil)
+	cfg := config.Config()
+	newDB, _ := db.SetupDB(cfg)
+	container := app.NewContainer(cfg, newDB)
+
+	err := container.Migrator.Rollback()
+	if err != nil {
+		return
+	}
+	err = container.Migrator.Migrate()
+	if err != nil {
+		return
+	}
 
 	sliceCreate := []map[string]string{
 		{
@@ -494,6 +508,9 @@ func TestSuccessfulUpdatePostAlias(t *testing.T) {
 			assert.Equal(t, post.DateEnd, db.FormatDate(*model.DateEnd))
 		})
 	}
-	mGallery.NewMigrator().Rollback()
-	mPost.NewMigrator().Rollback()
+
+	err = container.Migrator.Rollback()
+	if err != nil {
+		return
+	}
 }

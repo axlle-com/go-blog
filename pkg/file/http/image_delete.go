@@ -12,14 +12,14 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 		filePath = filePath[1:]
 	} else {
 		logger.Error("[Controller][DeleteImage] Не известный путь")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 
-	err := c.fileService.Delete(filePath)
+	err := c.fileService.Destroy(filePath)
 	if err != nil {
-		logger.Errorf("[Controller][Delete] Error: %v", err)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+		logger.Errorf("[Controller][Destroy] Error: %v", err)
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
 		return
 	}
 

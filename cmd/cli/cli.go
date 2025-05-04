@@ -16,8 +16,14 @@ var container *app.Container
 func main() {
 	var command string
 
-	db.InitDB(config.Config())
-	container = app.NewContainer(config.Config(), nil)
+	cfg := config.Config()
+
+	newDB, err := db.SetupDB(cfg)
+	if err != nil {
+		panic("db not initialized")
+	}
+
+	container = app.NewContainer(cfg, newDB)
 
 	flag.StringVar(&command, "command", "", "Command to execute")
 	flag.Parse()

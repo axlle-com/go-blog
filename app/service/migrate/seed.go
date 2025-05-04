@@ -15,8 +15,8 @@ func NewSeeder(arg ...contracts.Seeder) contracts.Seeder {
 }
 
 func (s *seeder) Seed() error {
-	for _, mig := range s.seeders {
-		if err := mig.Seed(); err != nil {
+	for _, item := range s.seeders {
+		if err := item.Seed(); err != nil {
 			return err
 		}
 	}
@@ -24,8 +24,8 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) SeedTest(n int) error {
-	for _, mig := range s.seeders {
-		if err := mig.SeedTest(n); err != nil {
+	for _, item := range s.seeders {
+		if err := item.SeedTest(n); err != nil {
 			return err
 		}
 	}

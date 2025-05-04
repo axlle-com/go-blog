@@ -9,7 +9,7 @@ type Pagination struct {
 	Pages   int `json:"pages"`
 }
 
-func New(total, page, perPage int) *Pagination {
+func NewPagination(total, page, perPage int) *Pagination {
 	pages := int(math.Ceil(float64(total) / float64(perPage)))
 	return &Pagination{
 		Total:   total,

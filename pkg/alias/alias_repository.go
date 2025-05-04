@@ -1,7 +1,7 @@
 package alias
 
 import (
-	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"gorm.io/gorm"
 )
 
@@ -14,8 +14,8 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewAliasRepo() AliasRepository {
-	return &repository{db: db.GetDB()}
+func NewAliasRepo(db contracts.DB) AliasRepository {
+	return &repository{db: db.GORM()}
 }
 
 func (r *repository) WithTx(tx *gorm.DB) AliasRepository {

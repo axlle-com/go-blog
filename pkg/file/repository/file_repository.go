@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/file/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -12,6 +12,7 @@ type FileRepository interface {
 	WithTx(tx *gorm.DB) FileRepository
 	Create(file *models.File) error
 	GetByID(id uint) (*models.File, error)
+	GetByParams(params map[string]any, includeDeleted bool) ([]*models.File, error)
 	GetByUUID(uuid uuid.UUID) (*models.File, error)
 	GetByFile(string) (*models.File, error)
 	GetByIDs(ids []uint) ([]*models.File, error)
@@ -19,6 +20,7 @@ type FileRepository interface {
 	Update(file *models.File) error
 	Received(file []string) error
 	Delete(id uint) error
+	Destroy(id uint) error
 	GetAll() ([]*models.File, error)
 	GetAllIds() ([]uint, error)
 }
@@ -28,8 +30,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewFileRepo() FileRepository {
-	return &repository{db: db.GetDB()}
+func NewFileRepo(db contracts.DB) FileRepository {
+	return &repository{db: db.GORM()}
 }
 
 func (r *repository) WithTx(tx *gorm.DB) FileRepository {
@@ -81,6 +83,21 @@ func (r *repository) GetByUUIDs(uuids []uuid.UUID) ([]*models.File, error) {
 	return files, nil
 }
 
+func (r *repository) GetByParams(params map[string]any, includeDeleted bool) ([]*models.File, error) {
+	var files []*models.File
+	db := r.db
+
+	if includeDeleted {
+		db = r.db.Unscoped()
+	}
+
+	if err := db.Where(params).Find(&files).Error; err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
 func (r *repository) Update(file *models.File) error {
 	return r.db.Save(file).Error
 }
@@ -99,6 +116,10 @@ func (r *repository) Received(files []string) error {
 
 func (r *repository) Delete(id uint) error {
 	return r.db.Delete(&models.File{}, id).Error
+}
+
+func (r *repository) Destroy(id uint) error {
+	return r.db.Unscoped().Delete(&models.File{}, id).Error
 }
 
 func (r *repository) GetAll() ([]*models.File, error) {

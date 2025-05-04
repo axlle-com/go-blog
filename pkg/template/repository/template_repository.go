@@ -2,9 +2,8 @@ package repository
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
 	"log"
@@ -20,7 +19,7 @@ type TemplateRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Template, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts2.Paginator, filter *models.TemplateFilter) ([]*models.Template, error)
+	WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error)
 }
 
 type repository struct {
@@ -28,8 +27,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewTemplateRepo() TemplateRepository {
-	r := &repository{db: db.GetDB()}
+func NewTemplateRepo(db contracts.DB) TemplateRepository {
+	r := &repository{db: db.GORM()}
 	return r
 }
 
@@ -86,7 +85,7 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(p contracts2.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
+func (r *repository) WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
 	var templates []*models.Template
 	var total int64
 

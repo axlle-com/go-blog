@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"gorm.io/gorm"
 )
@@ -23,8 +23,8 @@ type permissionRepository struct {
 	*app.Paginate
 }
 
-func NewPermissionRepo() PermissionRepository {
-	return &permissionRepository{db: db.GetDB()}
+func NewPermissionRepo(db contracts.DB) PermissionRepository {
+	return &permissionRepository{db: db.GORM()}
 }
 
 func (r *permissionRepository) WithTx(tx *gorm.DB) PermissionRepository {

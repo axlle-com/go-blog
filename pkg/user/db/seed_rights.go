@@ -22,7 +22,7 @@ func (s *seeder) seedPermissions() error {
 		}
 	}
 
-	logger.Info("Database seeded Permission successfully!")
+	logger.Info("[User][seeder][seedPermissions] Database seeded Permission successfully!")
 	return nil
 }
 
@@ -43,6 +43,6 @@ func (s *seeder) seedRoles() error {
 		}
 	}
 
-	logger.Info("Database seeded Role successfully!")
+	logger.Info("[User][seeder][seedRoles] Database seeded Role successfully!")
 	return nil
 }

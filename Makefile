@@ -1,7 +1,7 @@
 # Имя сети и файл docker-compose
 NETWORK?=projects_network
 COMPOSE_FILE?=docker-compose.yml
-SERVICES?=app postgres redis
+SERVICES?=postgres redis
 # elasticsearch app cli
 
 all: network up

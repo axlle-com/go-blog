@@ -53,7 +53,7 @@ func (q *Queue) Enqueue(job contracts.Job, delay time.Duration) {
 	}
 }
 
-func (q *Queue) StartWorkers(ctx context.Context, n int) {
+func (q *Queue) Start(ctx context.Context, n int) {
 	if ctx == nil {
 		return
 	}
@@ -73,6 +73,7 @@ func (q *Queue) Close() {
 	default:
 	}
 	q.mu.Unlock()
+	logger.Info("[Queue] Close")
 }
 
 func (q *Queue) next() (*queueItem, bool) {
@@ -83,6 +84,7 @@ func (q *Queue) next() (*queueItem, bool) {
 }
 
 func (q *Queue) worker(ctx context.Context) {
+	logger.Info("[Queue][worker] Start")
 	for {
 		q.mu.Lock()
 

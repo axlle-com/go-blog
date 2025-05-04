@@ -44,7 +44,7 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "admin.templates", gin.H{
 		"title":         "Страница шаблонов",
 		"templateModel": empty,
-		"resources":     mApp.NewResource().Resources(),
+		"resources":     mApp.NewResources().Resources(),
 		"templates":     templates,
 		"users":         users,
 		"paginator":     paginator,

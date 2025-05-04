@@ -2,34 +2,41 @@ package repository_test
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/db"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
-	"testing"
-
-	"github.com/axlle-com/blog/pkg/post/models"
-	"github.com/axlle-com/blog/pkg/post/repository"
+	"github.com/axlle-com/blog/pkg/post/db/migrate"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/gorm"
+	"testing"
+
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/post/models"
+	"github.com/axlle-com/blog/pkg/post/repository"
 )
 
-func setupTestDB() *gorm.DB {
-	config.Config().SetTestENV()
-	mPost.NewMigrator().Migrate()
-	return db.GetDBTest()
+func setupTestDB() contracts.DB {
+	cnf := config.Config()
+	cnf.SetTestENV()
+	//mPost.NewMigrator().Migrate()
+
+	newDB, err := db.SetupDB(cnf)
+	if err != nil {
+		panic("db not initialized")
+	}
+	migrate.NewMigrator(newDB.GORM()).Migrate()
+	return newDB
 }
 
-func newTestRepo() repository.CategoryRepository {
-	return repository.NewCategoryRepo().WithTx(setupTestDB())
+func newTestRepo(db contracts.DB) repository.CategoryRepository {
+	return repository.NewCategoryRepo(db)
 }
 
 func TestPathNotLikeQuery(t *testing.T) {
 	// Инициализируем тестовую базу и репозиторий.
-	db := setupTestDB()
+	testDB := setupTestDB()
 	// Очищаем таблицу для чистоты теста.
-	db.Exec("DELETE FROM post_categories")
-	repo := newTestRepo()
+	testDB.GORM().Exec("DELETE FROM post_categories")
+	repo := newTestRepo(testDB)
 
 	// Создаем корневую категорию (будет иметь путь вида "/<ID>/")
 	root1 := &models.PostCategory{
@@ -68,7 +75,7 @@ func TestPathNotLikeQuery(t *testing.T) {
 
 	// Выполняем запрос с NOT LIKE.
 	var results []*models.PostCategory
-	err = db.Where("path NOT LIKE ?", likePattern).Find(&results).Error
+	err = testDB.GORM().Where("path NOT LIKE ?", likePattern).Find(&results).Error
 	assert.NoError(t, err)
 
 	// Ожидаем, что в выборке будет только root2,
@@ -78,9 +85,9 @@ func TestPathNotLikeQuery(t *testing.T) {
 }
 
 func TestPathLikeQuery(t *testing.T) {
-	db := setupTestDB()
-	db.Exec("DELETE FROM post_categories")
-	repo := newTestRepo()
+	testDB := setupTestDB()
+	testDB.GORM().Exec("DELETE FROM post_categories")
+	repo := newTestRepo(testDB)
 
 	// Создаем корневую категорию.
 	root := &models.PostCategory{
@@ -106,7 +113,7 @@ func TestPathLikeQuery(t *testing.T) {
 	likePattern := fmt.Sprintf("%s%%", root.Path)
 
 	var results []*models.PostCategory
-	err = db.Where("path LIKE ?", likePattern).Find(&results).Error
+	err = testDB.GORM().Where("path LIKE ?", likePattern).Find(&results).Error
 	assert.NoError(t, err)
 
 	assert.Equal(t, 3, len(results))

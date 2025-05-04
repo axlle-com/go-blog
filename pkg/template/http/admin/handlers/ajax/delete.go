@@ -62,7 +62,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 		"users":         users,
 		"paginator":     paginator,
 		"filter":        filter,
-		"resources":     models.NewResource().Resources(),
+		"resources":     models.NewResources().Resources(),
 	}
 
 	ctx.JSON(

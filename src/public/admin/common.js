@@ -152,34 +152,14 @@ const _image = {
     draw: function (div, image) {
         const _this = this;
         if (div.length && image) {
-            const imageBlock = `
-                    <div class="image-box" style="background-image: url(${image}); background-size: cover;background-position: center;"></div>
-                    <div class="overlay-content text-center justify-content-end">
-                        <div class="btn-group mb-1" role="group">
-                            <a data-fancybox="gallery" href="${image}">
-                                <button type="button" class="btn btn-link btn-icon text-danger">
-                                    <i class="material-icons">zoom_in</i>
-                                </button>
-                            </a>
-                            <button 
-                            type="button" 
-                            class="btn btn-link btn-icon text-danger" 
-                            data-js-image-href="/admin/file/image${image}"
-                            data-js-image-delete>
-                                <i class="material-icons">delete</i>
-                            </button>
-                        </div>
-                        <input type="hidden" name="image" value="${image}">
-                    </div>
-                `;
-            $(div).html(imageBlock);
-            $('.js-image-block-empty').remove();
+            $(div).html(_this.imageBlock(image));
             _config.fancybox();
         }
     },
     delete: function () {
         const _this = this;
         $('body').on('click', '[data-js-image-delete]', function (evt) {
+            let block = $(this).closest('.js-image-block');
             let image = $(this).closest('.js-image-block').find('.image-box');
             let input = $(this).closest('.js-image-block').find('input[name="image"]');
             if (!image.length || !input.length) {
@@ -197,7 +177,7 @@ const _image = {
                 }
             });
             input.val('');
-            image.remove();
+            block.html('');
         });
     },
     addArray: function () {
@@ -330,6 +310,28 @@ const _image = {
         });
     },
     gallerySort: function () {
+    },
+    imageBlock: function (image) {
+        return `
+            <div class="image-box" style="background-image: url(${image}); background-size: cover;background-position: center;"></div>
+            <div class="overlay-content text-center justify-content-end">
+                <div class="btn-group mb-1" role="group">
+                    <a data-fancybox="gallery" href="${image}">
+                        <button type="button" class="btn btn-link btn-icon text-danger">
+                            <i class="material-icons">zoom_in</i>
+                        </button>
+                    </a>
+                    <button 
+                        type="button" 
+                        class="btn btn-link btn-icon text-danger" 
+                        data-js-image-href="/admin/file/image${image}"
+                        data-js-image-delete>
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
+                <input type="hidden" name="image" value="${image}">
+            </div>
+        `;
     },
     imageBlockEmpty: function () {
         return `

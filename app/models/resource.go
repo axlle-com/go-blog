@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 )
 
-type ResourceMap struct {
+type Resources struct {
 	resources map[string]string
 }
 
-func NewResource() *ResourceMap {
-	return &ResourceMap{
+func NewResources() *Resources {
+	return &Resources{
 		resources: map[string]string{
 			"posts":           "index",
 			"post_categories": "post_categories",
@@ -20,11 +20,11 @@ func NewResource() *ResourceMap {
 	}
 }
 
-func (r *ResourceMap) Resources() map[string]string {
+func (r *Resources) Resources() map[string]string {
 	return r.resources
 }
 
-func (r *ResourceMap) ResourceTemplate(name string) string {
+func (r *Resources) ResourceTemplate(name string) string {
 	value, ok := r.resources[name]
 	if !ok {
 		return ""

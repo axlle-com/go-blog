@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/db"
 	app "github.com/axlle-com/blog/app/models"
 	contracts2 "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/message/contracts"
@@ -16,8 +15,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewMessageRepo() contracts.MessageRepository {
-	r := &repository{db: db.GetDB()}
+func NewMessageRepo(db contracts2.DB) contracts.MessageRepository {
+	r := &repository{db: db.GORM()}
 	return r
 }
 

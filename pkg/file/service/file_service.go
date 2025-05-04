@@ -31,6 +31,15 @@ func (s *Service) Delete(file string) error {
 	return s.fileRepo.Delete(model.ID)
 }
 
+func (s *Service) Destroy(file string) error {
+	file = strings.Trim(file, "/")
+	model, err := s.fileRepo.GetByFile("/" + file)
+	if err != nil {
+		return err
+	}
+	return s.fileRepo.Destroy(model.ID)
+}
+
 func (s *Service) Received(file string) error {
 	return s.fileRepo.Received([]string{file})
 }

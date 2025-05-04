@@ -2,12 +2,10 @@ package routes
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
-	mGallery "github.com/axlle-com/blog/pkg/gallery/db/migrate"
-	mPost "github.com/axlle-com/blog/pkg/post/db/migrate"
+	"github.com/axlle-com/blog/app/db"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +14,7 @@ import (
 )
 
 func TestFailedDeletePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
+	router, cookies, _ := StartWithLogin()
 
 	t.Run("Failed delete post", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -44,13 +42,21 @@ func TestFailedDeletePost(t *testing.T) {
 }
 
 func TestSuccessfulDeletePost(t *testing.T) {
-	router, cookies, _ := StartWithLogin(context.Background())
-	mGallery.NewMigrator().Rollback()
-	mGallery.NewMigrator().Migrate()
-	mPost.NewMigrator().Rollback()
-	mPost.NewMigrator().Migrate()
+	router, cookies, _ := StartWithLogin()
 
-	container := app.NewContainer(config.Config(), nil)
+	cfg := config.Config()
+	newDB, _ := db.SetupDB(cfg)
+	container := app.NewContainer(cfg, newDB)
+
+	err := container.Migrator.Rollback()
+	if err != nil {
+		return
+	}
+	err = container.Migrator.Migrate()
+	if err != nil {
+		return
+	}
+
 	iProvider := container.ImageProvider
 	gProvider := container.GalleryProvider
 	pRepo := container.PostRepo

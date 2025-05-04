@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitializeApiRoutes(r *gin.Engine, container *app.Container) {
+func InitApiRoutes(r *gin.Engine, container *app.Container) {
 	controller := container.PostApiController()
 
 	r.POST("/api/posts", controller.CreatePost)

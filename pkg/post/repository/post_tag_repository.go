@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
@@ -29,8 +28,8 @@ type postTagRepository struct {
 	withImages bool
 }
 
-func NewPostTagRepo() PostTagRepository {
-	r := &postTagRepository{db: db.GetDB()}
+func NewPostTagRepo(db contracts.DB) PostTagRepository {
+	r := &postTagRepository{db: db.GORM()}
 	return r
 }
 

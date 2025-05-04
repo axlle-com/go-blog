@@ -22,7 +22,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		gin.H{
 			"title":         "Страница шаблона",
 			"templateModel": template,
-			"resources":     mApp.NewResource().Resources(),
+			"resources":     mApp.NewResources().Resources(),
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

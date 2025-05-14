@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-gonic/gin"
 	"github.com/jc633/rotatelogs"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -33,23 +34,15 @@ func (hook *WriterHook) Levels() []logrus.Level {
 	return hook.LogLevels
 }
 
-type Logger struct {
-	global *logrus.Logger
-}
-
-func (l *Logger) Global() *logrus.Logger {
-	return l.global
-}
-
 var (
 	once         sync.Once
-	globalLogger *Logger
+	logrusLogger *logrus.Logger
 	conf         = config.Config()
 )
 
-func getLogger() *Logger {
+func getLogger() *logrus.Logger {
 	once.Do(func() {
-		logrusLogger := logrus.New()
+		logrusLogger = logrus.New()
 
 		// 1) Настраиваем консольный форматтер (с цветом):
 		consoleFmt := &logrus.TextFormatter{
@@ -88,20 +81,16 @@ func getLogger() *Logger {
 		}
 
 		logrusLogger.SetLevel(logrus.TraceLevel)
-
-		globalLogger = &Logger{
-			global: logrusLogger,
-		}
 	})
 
-	return globalLogger
+	return logrusLogger
 }
 
 func logWithCaller(level logrus.Level, args ...any) {
 	if conf.LogLevel() < int(level) {
 		return
 	}
-	getLogger().Global().Log(level, args...)
+	getLogger().Log(level, args...)
 	return
 	// runtime.Caller(3) - почему 3?
 	//   1) сам logWithCaller
@@ -124,7 +113,7 @@ func logWithCaller(level logrus.Level, args ...any) {
 		"line":     strconv.Itoa(line),
 		"function": fnName,
 	}
-	getLogger().Global().WithFields(fields).Log(level, args...)
+	getLogger().WithFields(fields).Log(level, args...)
 }
 
 func log(level logrus.Level, args ...any) {
@@ -132,7 +121,7 @@ func log(level logrus.Level, args ...any) {
 		return
 	}
 
-	getLogger().Global().Log(level, args...)
+	getLogger().Log(level, args...)
 }
 
 func Error(args ...any) {
@@ -179,10 +168,10 @@ func Debugf(format string, a ...any) {
 	log(logrus.DebugLevel, fmt.Sprintf(format, a...))
 }
 
-//func WithRequest(c *gin.Context) *Logger {
-//	base := getLogger().Global()
-//	fields := logrus.Fields{
-//		"request_uuid": c.GetString("request_uuid"),
-//	}
-//	return base.WithFields(fields)
-//}
+func WithRequest(c *gin.Context) *logrus.Entry {
+	base := getLogger()
+	fields := logrus.Fields{
+		"request_uuid": c.GetString("request_uuid"),
+	}
+	return base.WithFields(fields)
+}

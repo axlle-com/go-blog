@@ -392,16 +392,27 @@
                                     </fieldset>
 
                                     <fieldset class="form-block">
-                                        <legend>Виджеты</legend>
+                                        <legend>Тэги</legend>
                                         <div class="form-group">
                                             <select
                                                     class="form-control select2"
-                                                    name="widgets[]"
-                                                    id="widgets"
-                                                    data-validator="widgets"
+                                                    name="tags[]"
+                                                    id="tags"
+                                                    data-validator="tags"
+                                                    data-tags="true"
                                                     multiple
-                                                    data-placeholder="Выберете виджет">
+                                                    data-placeholder="Выберете тэг">
                                                 <option value=""></option>
+                                                {{ range .tags}}
+                                                    {{ $tag := . }}
+                                                    <option value="{{ $tag.Name }}"
+                                                            {{ range $i, $t := $.post.PostTags }}
+                                                                {{ if eq $t.ID $tag.ID }}selected{{ end }}
+                                                            {{ end }}
+                                                    >
+                                                        {{ $tag.Name }}
+                                                    </option>
+                                                {{ end }}
                                             </select>
                                             <div class="invalid-feedback"></div>
                                         </div>

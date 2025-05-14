@@ -210,11 +210,14 @@ func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock,
 
 func (s *InfoBlockService) DeleteImageFile(block *InfoBlock) error {
 	if block.Image == nil {
-		return errors.New("image is nil")
+		return nil
 	}
 	err := s.fileProvider.DeleteFile(*block.Image)
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		logger.Errorf("[DeleteImageFile] Error: %v", err)
 	}
 	block.Image = nil
 	return nil

@@ -51,7 +51,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 
 	temp, err := c.templateCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 	}
 	templates := c.templateCollectionService.Aggregates(temp)
 

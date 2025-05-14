@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"github.com/axlle-com/blog/app/logger"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
@@ -53,7 +53,7 @@ func (s *GalleryService) UpdateGallery(gallery *models.Gallery) (*models.Gallery
 	return gallery, err
 }
 
-func (s *GalleryService) Attach(resource contracts2.Resource, gallery contracts2.Gallery) error {
+func (s *GalleryService) Attach(resource contracts.Resource, gallery contracts.Gallery) error {
 	hasRepo, err := s.resourceRepo.GetByParams(resource.GetUUID(), gallery.GetID())
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -70,7 +70,7 @@ func (s *GalleryService) Attach(resource contracts2.Resource, gallery contracts2
 	return nil
 }
 
-func (s *GalleryService) DeleteForResource(resource contracts2.Resource) error {
+func (s *GalleryService) DeleteForResource(resource contracts.Resource) error {
 	byResource, err := s.resourceRepo.GetByResource(resource)
 	if err != nil {
 		return err

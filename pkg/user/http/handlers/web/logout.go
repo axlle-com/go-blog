@@ -24,7 +24,7 @@ func (c *controller) Logout(ctx *gin.Context) {
 		HttpOnly: true,
 	})
 	if err := session.Save(); err != nil {
-		logger.Error("Failed to log out")
+		logger.WithRequest(ctx).Error("Failed to log out")
 	}
 	ctx.Redirect(http.StatusFound, "/")
 	ctx.Abort()

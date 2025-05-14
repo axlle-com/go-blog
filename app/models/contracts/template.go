@@ -4,5 +4,5 @@ type Template interface {
 	GetID() uint
 	GetTitle() string
 	GetName() string
-	GetTabular() string
+	GetResourceName() string
 }

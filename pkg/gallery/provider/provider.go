@@ -3,7 +3,7 @@ package provider
 import (
 	"errors"
 	"github.com/axlle-com/blog/app/logger"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
@@ -14,13 +14,13 @@ import (
 )
 
 type GalleryProvider interface {
-	GetForResource(contracts2.Resource) []contracts2.Gallery
-	GetForResources([]contracts2.Resource) []contracts2.Gallery
-	GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery
-	GetAll() []contracts2.Gallery
-	SaveForm(g any, resource contracts2.Resource) (contracts2.Gallery, error)
-	SaveFormBatch(anys []any, resource contracts2.Resource) (galleries []contracts2.Gallery, err error)
-	DetachResource(contracts2.Resource) error
+	GetForResource(contracts.Resource) []contracts.Gallery
+	GetForResources([]contracts.Resource) []contracts.Gallery
+	GetIndexesForResources(resources []contracts.Resource) map[uuid.UUID][]contracts.Gallery
+	GetAll() []contracts.Gallery
+	SaveForm(g any, resource contracts.Resource) (contracts.Gallery, error)
+	SaveFormBatch(anys []any, resource contracts.Resource) (galleries []contracts.Gallery, err error)
+	DetachResource(contracts.Resource) error
 }
 
 func NewProvider(
@@ -38,9 +38,9 @@ type provider struct {
 	service *service.GalleryService
 }
 
-func (p *provider) GetForResource(resource contracts2.Resource) []contracts2.Gallery {
+func (p *provider) GetForResource(resource contracts.Resource) []contracts.Gallery {
 	galleries, err := p.gallery.WithImages().GetForResource(resource.GetUUID())
-	collection := make([]contracts2.Gallery, 0, len(galleries))
+	collection := make([]contracts.Gallery, 0, len(galleries))
 	if err == nil {
 		for _, gallery := range galleries {
 			collection = append(collection, gallery)
@@ -51,14 +51,14 @@ func (p *provider) GetForResource(resource contracts2.Resource) []contracts2.Gal
 	return nil
 }
 
-func (p *provider) GetForResources(resources []contracts2.Resource) []contracts2.Gallery {
+func (p *provider) GetForResources(resources []contracts.Resource) []contracts.Gallery {
 	uuids := make([]uuid.UUID, 0, len(resources))
 	for _, resource := range resources {
 		uuids = append(uuids, resource.GetUUID())
 	}
 
 	galleries, err := p.gallery.WithImages().GetForResources(uuids)
-	collection := make([]contracts2.Gallery, 0, len(galleries))
+	collection := make([]contracts.Gallery, 0, len(galleries))
 	if err == nil {
 		for _, gallery := range galleries {
 			collection = append(collection, gallery)
@@ -69,18 +69,18 @@ func (p *provider) GetForResources(resources []contracts2.Resource) []contracts2
 	return nil
 }
 
-func (p *provider) GetIndexesForResources(resources []contracts2.Resource) map[uuid.UUID][]contracts2.Gallery {
+func (p *provider) GetIndexesForResources(resources []contracts.Resource) map[uuid.UUID][]contracts.Gallery {
 	uuids := make([]uuid.UUID, 0, len(resources))
 	for _, resource := range resources {
 		uuids = append(uuids, resource.GetUUID())
 	}
 
 	galleries, err := p.gallery.WithImages().GetForResources(uuids)
-	collection := make(map[uuid.UUID][]contracts2.Gallery)
+	collection := make(map[uuid.UUID][]contracts.Gallery)
 	if err == nil {
 		for _, gallery := range galleries {
 			if _, ok := collection[gallery.GetResourceUUID()]; !ok {
-				collection[gallery.GetResourceUUID()] = make([]contracts2.Gallery, 0)
+				collection[gallery.GetResourceUUID()] = make([]contracts.Gallery, 0)
 			}
 			collection[gallery.GetResourceUUID()] = append(collection[gallery.GetResourceUUID()], gallery)
 		}
@@ -90,7 +90,7 @@ func (p *provider) GetIndexesForResources(resources []contracts2.Resource) map[u
 	return nil
 }
 
-func (p *provider) DetachResource(resource contracts2.Resource) (err error) {
+func (p *provider) DetachResource(resource contracts.Resource) (err error) {
 	err = p.service.DeleteForResource(resource)
 	if err != nil {
 		return err
@@ -99,8 +99,8 @@ func (p *provider) DetachResource(resource contracts2.Resource) (err error) {
 	return nil
 }
 
-func (p *provider) GetAll() []contracts2.Gallery {
-	var collection []contracts2.Gallery
+func (p *provider) GetAll() []contracts.Gallery {
+	var collection []contracts.Gallery
 	galleries, err := p.gallery.GetAll()
 	if err == nil {
 		for _, gallery := range galleries {
@@ -112,7 +112,7 @@ func (p *provider) GetAll() []contracts2.Gallery {
 	return nil
 }
 
-func (p *provider) SaveForm(g any, resource contracts2.Resource) (gallery contracts2.Gallery, err error) {
+func (p *provider) SaveForm(g any, resource contracts.Resource) (gallery contracts.Gallery, err error) {
 	gal := app.LoadStruct(&models.Gallery{}, g).(*models.Gallery)
 	if gal.ID == 0 {
 		gallery, err = p.service.CreateGallery(gal)
@@ -132,7 +132,7 @@ func (p *provider) SaveForm(g any, resource contracts2.Resource) (gallery contra
 	return gallery, nil
 }
 
-func (p *provider) SaveFormBatch(anys []any, resource contracts2.Resource) (galleries []contracts2.Gallery, err error) {
+func (p *provider) SaveFormBatch(anys []any, resource contracts.Resource) (galleries []contracts.Gallery, err error) {
 	var wg sync.WaitGroup
 
 	// Блокировки для конкурентного доступа к срезам.

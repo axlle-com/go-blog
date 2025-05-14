@@ -33,7 +33,7 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 
 	err = c.imageService.DeleteImage(image)
 	if err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to delete file: " + err.Error(),
 		})

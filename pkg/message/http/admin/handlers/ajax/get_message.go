@@ -55,13 +55,13 @@ func (c *messageController) GetMessage(ctx *gin.Context) {
 
 	temp, err := c.messageCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Errorf("[GetMessages] Error: %v", err)
+		logger.WithRequest(ctx).Errorf("[GetMessages] Error: %v", err)
 	}
 	messages := c.messageCollectionService.Aggregates(temp)
 
 	cnt, err := c.messageCollectionService.CountByField("viewed", false)
 	if err != nil {
-		logger.Errorf("[GetMessages] Error: %v", err)
+		logger.WithRequest(ctx).Errorf("[GetMessages] Error: %v", err)
 	}
 
 	data := response.Body{

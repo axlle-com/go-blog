@@ -37,7 +37,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 	}
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 

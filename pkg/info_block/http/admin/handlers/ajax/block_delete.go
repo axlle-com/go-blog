@@ -23,7 +23,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	}
 
 	if err := c.blockService.Delete(block); err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -51,7 +51,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 	}
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 

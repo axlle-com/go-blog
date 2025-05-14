@@ -19,7 +19,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 			session.AddFlash(FlashErrorString(bindError))
 		}
 		if err := session.Save(); err != nil {
-			logger.Error(err)
+			logger.WithRequest(ctx).Error(err)
 		}
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
@@ -38,7 +38,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 		)
 		err := session.Save()
 		if err != nil {
-			logger.Error(err)
+			logger.WithRequest(ctx).Error(err)
 		}
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
@@ -51,7 +51,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 	c.cache.AddUserSession(userFound.ID, session.ID())
 
 	if err := session.Save(); err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
 		return

@@ -16,6 +16,7 @@ func NewMenu(currentRoute string) []AdminMenu {
 	var routes = []AdminMenu{
 		{Path: "/admin/", Name: "Dashboard", Ico: template.HTML("<i data-feather=\"globe\"></i>")},
 		{Path: "/admin/posts", Name: "Посты", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/post-tags", Name: "Тэги", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 		{Path: "/admin/categories", Name: "Категории", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 		{Path: "/admin/info-blocks", Name: "Инфоблоки", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
 		{Path: "/admin/templates", Name: "Шаблоны", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},

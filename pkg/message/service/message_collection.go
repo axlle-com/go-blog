@@ -2,22 +2,22 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
-	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
+	appContracts "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type MessageCollectionService struct {
-	messageRepo    contracts2.MessageRepository
-	messageService contracts2.MessageService
+	messageRepo    contracts.MessageRepository
+	messageService contracts.MessageService
 	userProvider   userProvider.UserProvider
 }
 
 func NewMessageCollectionService(
-	messageRepo contracts2.MessageRepository,
-	messageService contracts2.MessageService,
+	messageRepo contracts.MessageRepository,
+	messageService contracts.MessageService,
 	userProvider userProvider.UserProvider,
 ) *MessageCollectionService {
 	return &MessageCollectionService{
@@ -57,11 +57,11 @@ func (s *MessageCollectionService) Delete(messages []*models.Message) (err error
 	return err
 }
 
-func (s *MessageCollectionService) WithPaginate(p contracts.Paginator, filter *models.MessageFilter) ([]*models.Message, error) {
+func (s *MessageCollectionService) WithPaginate(p appContracts.Paginator, filter *models.MessageFilter) ([]*models.Message, error) {
 	return s.messageRepo.WithPaginate(p, filter)
 }
 
-func (s *MessageCollectionService) Paginator(p contracts.Paginator, filter *models.MessageFilter) (contracts.Paginator, error) {
+func (s *MessageCollectionService) Paginator(p appContracts.Paginator, filter *models.MessageFilter) (appContracts.Paginator, error) {
 	return s.messageRepo.Paginator(p, filter)
 }
 
@@ -79,7 +79,7 @@ func (s *MessageCollectionService) Aggregates(messages []*models.Message) []*mod
 		}
 	}
 
-	var users map[uuid.UUID]contracts.User
+	var users map[uuid.UUID]appContracts.User
 
 	if len(userUUIDs) > 0 {
 		var err error

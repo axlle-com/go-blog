@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
@@ -54,7 +54,7 @@ func (s *InfoBlockCollectionService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (
 	return err
 }
 
-func (s *InfoBlockCollectionService) WithPaginate(p contracts2.Paginator, filter *InfoBlockFilter) ([]*InfoBlock, error) {
+func (s *InfoBlockCollectionService) WithPaginate(p contracts.Paginator, filter *InfoBlockFilter) ([]*InfoBlock, error) {
 	return s.infoBlockRepo.WithPaginate(p, filter)
 }
 
@@ -84,8 +84,8 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*InfoBlock) []*Info
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts2.User
-	var templates map[uint]contracts2.Template
+	var users map[uint]contracts.User
+	var templates map[uint]contracts.Template
 
 	wg.Add(2)
 
@@ -131,7 +131,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*InfoBlock
 
 	templateIDsMap := make(map[uint]bool)
 	userIDsMap := make(map[uint]bool)
-	infoBlocksInterface := make([]contracts2.Resource, 0, len(infoBlocks))
+	infoBlocksInterface := make([]contracts.Resource, 0, len(infoBlocks))
 
 	for _, infoBlock := range infoBlocks {
 		infoBlocksInterface = append(infoBlocksInterface, infoBlock)
@@ -153,9 +153,9 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*InfoBlock
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts2.User
-	var templates map[uint]contracts2.Template
-	var galleries map[uuid.UUID][]contracts2.Gallery
+	var users map[uint]contracts.User
+	var templates map[uint]contracts.Template
+	var galleries map[uuid.UUID][]contracts.Gallery
 
 	wg.Add(3)
 

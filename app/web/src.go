@@ -14,7 +14,7 @@ import (
 
 func Minify(config contracts.Config) {
 	if !config.IsLocal() {
-		logger.Info("[Minify] Запуск на стенде, файлы для HTML не собираем")
+		logger.Info("[Minify] Running on the staging environment; we don’t build the HTML files")
 		return
 	}
 
@@ -86,7 +86,7 @@ func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, out
 	for _, inputPath := range inputPaths {
 		input, err := ioutil.ReadFile(inputPath)
 		if err != nil {
-			logger.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка чтения файла %s: %v", inputPath, err)
+			logger.Fatalf("[Minify][mergeAndMinifyFiles] Error reading file %s: %v", inputPath, err)
 		}
 		buffer.Write(input)
 		buffer.WriteString("\n")
@@ -104,14 +104,14 @@ func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, out
 	}(output)
 
 	if err := m.Minify(mediaType, output, &buffer); err != nil {
-		logger.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка минификации файла %s: %v", outputPath, err)
+		logger.Fatalf("[Minify][mergeAndMinifyFiles] Error minifying file %s: %v", outputPath, err)
 	}
 }
 
 func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
 	input, err := os.Open(inputPath)
 	if err != nil {
-		logger.Fatalf("[Minify][minifyFile] Ошибка открытия файла %s: %v", inputPath, err)
+		logger.Fatalf("[Minify][minifyFile] Error opening file %s: %v", inputPath, err)
 	}
 	defer func(input *os.File) {
 		err := input.Close()
@@ -122,7 +122,7 @@ func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		log.Fatalf("Ошибка создания файла %s: %v", outputPath, err)
+		logger.Fatalf("Error creating file %s: %v", outputPath, err)
 	}
 	defer func(output *os.File) {
 		err := output.Close()
@@ -132,6 +132,6 @@ func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
 	}(output)
 
 	if err := m.Minify(mediaType, output, input); err != nil {
-		logger.Fatalf("[Minify][minifyFile] Ошибка минификации файла %s: %v", inputPath, err)
+		logger.Fatalf("[Minify][minifyFile] Error minifying file %s: %v", inputPath, err)
 	}
 }

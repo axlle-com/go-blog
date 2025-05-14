@@ -2,9 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/url"
 	"os"
@@ -12,7 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 var dynamicTemplates = make(map[string]string)
@@ -98,7 +98,9 @@ func (t *Template) loadTemplates(templatesDir string) *template.Template {
 }
 
 func add(x, y int) int { return x + y }
+
 func sub(x, y int) int { return x - y }
+
 func mul(x, y int) int { return x * y }
 
 func date(timePtr *time.Time) string {

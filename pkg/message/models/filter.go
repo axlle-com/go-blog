@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errors"
+	"github.com/axlle-com/blog/app/errutil"
 	. "github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
 	"strconv"
@@ -21,12 +21,12 @@ type MessageFilter struct {
 	Filter
 }
 
-func (p *MessageFilter) ValidateForm(ctx *gin.Context) (*MessageFilter, *errors.Errors) {
+func (p *MessageFilter) ValidateForm(ctx *gin.Context) (*MessageFilter, *errutil.Errors) {
 	err := p.Filter.ValidateForm(ctx, p)
 	return p, err
 }
 
-func (p *MessageFilter) ValidateQuery(ctx *gin.Context) (*MessageFilter, *errors.Errors) {
+func (p *MessageFilter) ValidateQuery(ctx *gin.Context) (*MessageFilter, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err
 }

@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/template/models"
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -45,7 +45,7 @@ func (s *TemplateCollectionService) DeleteTemplates(templates []*models.Template
 	return err
 }
 
-func (s *TemplateCollectionService) WithPaginate(p contracts2.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
+func (s *TemplateCollectionService) WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
 	return s.templateRepo.WithPaginate(p, filter)
 }
 
@@ -66,7 +66,7 @@ func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts2.User
+	var users map[uint]contracts.User
 
 	wg.Add(1)
 

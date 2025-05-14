@@ -1,6 +1,7 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 func (c *blockController) DetachInfoBlock(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 

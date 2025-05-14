@@ -2,21 +2,21 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	appContracts "github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
-	contracts2 "github.com/axlle-com/blog/pkg/message/contracts"
+	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type MessageService struct {
-	messageRepo  contracts2.MessageRepository
+	messageRepo  contracts.MessageRepository
 	userProvider userProvider.UserProvider
 }
 
 func NewMessageService(
-	messageRepository contracts2.MessageRepository,
+	messageRepository contracts.MessageRepository,
 	userProvider userProvider.UserProvider,
 ) *MessageService {
 	return &MessageService{
@@ -30,7 +30,7 @@ func (s *MessageService) GetByID(id uint) (*models.Message, error) {
 }
 
 func (s *MessageService) Aggregate(message *models.Message) *models.Message {
-	var user contracts.User
+	var user appContracts.User
 
 	if message.UserUUID != uuid.Nil {
 		var err error
@@ -71,7 +71,7 @@ func (s *MessageService) Delete(message *models.Message) (err error) {
 	return s.messageRepo.Delete(message)
 }
 
-func (s *MessageService) SaveFromRequest(form *models.MessageRequest, found *models.Message, user contracts.User) (message *models.Message, err error) {
+func (s *MessageService) SaveFromRequest(form *models.MessageRequest, found *models.Message, user appContracts.User) (message *models.Message, err error) {
 	templateForm := app.LoadStruct(&models.Message{}, form).(*models.Message)
 
 	if found == nil {

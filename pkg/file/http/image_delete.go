@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -11,21 +12,21 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 	if len(filePath) > 0 {
 		filePath = filePath[1:]
 	} else {
-		logger.Error("[Controller][DeleteImage] Не известный путь")
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		logger.WithRequest(ctx).Error("[Controller][DeleteImage] Unknown path")
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	err := c.fileService.Destroy(filePath)
 	if err != nil {
-		logger.Errorf("[Controller][Destroy] Error: %v", err)
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		logger.WithRequest(ctx).Errorf("[Controller][Destroy] Error: %v", err)
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	err = c.uploadService.DestroyFile(filePath)
 	if err != nil {
-		logger.Errorf("[Controller][DestroyFile] Error: %v", err)
+		logger.WithRequest(ctx).Errorf("[Controller][DestroyFile] Error: %v", err)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

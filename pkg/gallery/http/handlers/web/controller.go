@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func (c *controller) GetID(ctx *gin.Context) uint {
 	idParam := ctx.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		ctx.Abort()
 	}
 	return uint(id)
@@ -44,7 +45,7 @@ func (c *controller) getImageID(ctx *gin.Context) uint {
 	idParam := ctx.Param("image_id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.JSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		ctx.Abort()
 	}
 	return uint(id)

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errors"
+	"github.com/axlle-com/blog/app/errutil"
 	. "github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
 	"strconv"
@@ -21,12 +21,12 @@ type TemplateFilter struct {
 	Filter
 }
 
-func (p *TemplateFilter) ValidateForm(ctx *gin.Context) (*TemplateFilter, *errors.Errors) {
+func (p *TemplateFilter) ValidateForm(ctx *gin.Context) (*TemplateFilter, *errutil.Errors) {
 	err := p.Filter.ValidateForm(ctx, p)
 	return p, err
 }
 
-func (p *TemplateFilter) ValidateQuery(ctx *gin.Context) (*TemplateFilter, *errors.Errors) {
+func (p *TemplateFilter) ValidateQuery(ctx *gin.Context) (*TemplateFilter, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err
 }

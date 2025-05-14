@@ -248,7 +248,7 @@ func strToType(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTa
 			if val, err := uuid.Parse(trimmed); err == nil {
 				dest.Set(reflect.ValueOf(val))
 			} else {
-				logger.Errorf("Ошибка парсинга UUID '%s': %v", srcStr, err)
+				logger.Errorf("[LoadStruct] Error parsing UUID '%s': %v", srcStr, err)
 			}
 		}
 	}
@@ -269,7 +269,7 @@ func strToPtr(src *reflect.Value, dest *reflect.Value, destTag reflect.StructTag
 				newVal.Set(reflect.ValueOf(parsed))
 				dest.Set(newVal.Addr())
 			} else {
-				logger.Errorf("Ошибка парсинга UUID '%s': %v", srcStr, err)
+				logger.Errorf("[LoadStruct] Error parsing UUID '%s': %v", srcStr, err)
 			}
 			return
 		}

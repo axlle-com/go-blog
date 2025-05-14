@@ -27,7 +27,7 @@ func TestFailedDeletePost(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
-		assert.Contains(t, w.Body.String(), `"message":"Ресурс не найден"`)
+		assert.Contains(t, w.Body.String(), `"message":errutil.ResourceNotfound`)
 	})
 
 	t.Run("Failed delete post", func(t *testing.T) {

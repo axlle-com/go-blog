@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errors"
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
 	"html/template"
@@ -19,19 +19,19 @@ type Filter struct {
 	context     *gin.Context
 }
 
-func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errors.Errors {
+func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errutil.Errors {
 	f.context = ctx
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		return &errors.Errors{Message: "Форма не валидная!"}
+		return &errutil.Errors{Message: "Форма не валидная!"}
 	}
 
 	if len(ctx.Request.PostForm) == 0 {
-		return &errors.Errors{Message: "Форма не валидная!"}
+		return &errutil.Errors{Message: "Форма не валидная!"}
 	}
 
 	if err := ctx.ShouldBind(model); err != nil {
-		errBind := errors.ParseBindErrorToMap(err)
+		errBind := errutil.ParseBindErrorToMap(err)
 		return errBind
 	}
 	f.SetEmptyPointersToNil(model)
@@ -41,15 +41,15 @@ func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errors.Error
 		addQueryString(f.mapToQueryString())
 
 	if f.IsEmpty() {
-		return &errors.Errors{Message: "Форма пустая"}
+		return &errutil.Errors{Message: "Форма пустая"}
 	}
 	return nil
 }
 
-func (f *Filter) ValidateQuery(ctx *gin.Context, model interface{}) *errors.Errors {
+func (f *Filter) ValidateQuery(ctx *gin.Context, model interface{}) *errutil.Errors {
 	f.context = ctx
 	if err := ctx.ShouldBindQuery(model); err != nil {
-		errBind := errors.ParseBindErrorToMap(err)
+		errBind := errutil.ParseBindErrorToMap(err)
 		return errBind
 	}
 	f.SetEmptyPointersToNil(model)
@@ -101,7 +101,7 @@ func (f *Filter) setMap(model interface{}) *Filter {
 
 		fieldName, ok := structField.Tag.Lookup("json")
 		if !ok {
-			fieldName = errors.ToSnakeCase(v.Type().Field(i).Name)
+			fieldName = errutil.ToSnakeCase(v.Type().Field(i).Name)
 		}
 
 		if s := f.processFieldValue(field); s != "" {

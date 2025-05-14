@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 	app "github.com/axlle-com/blog/app/models"
-	contracts2 "github.com/axlle-com/blog/app/models/contracts"
+	appContracts "github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewMessageRepo(db contracts2.DB) contracts.MessageRepository {
+func NewMessageRepo(db appContracts.DB) contracts.MessageRepository {
 	r := &repository{db: db.GORM()}
 	return r
 }
@@ -100,7 +100,7 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(p contracts2.Paginator, filter *models.MessageFilter) ([]*models.Message, error) {
+func (r *repository) WithPaginate(p appContracts.Paginator, filter *models.MessageFilter) ([]*models.Message, error) {
 	var messages []*models.Message
 	var total int64
 
@@ -131,7 +131,7 @@ func (r *repository) WithPaginate(p contracts2.Paginator, filter *models.Message
 	return messages, nil
 }
 
-func (r *repository) Paginator(paginator contracts2.Paginator, filter *models.MessageFilter) (contracts2.Paginator, error) {
+func (r *repository) Paginator(paginator appContracts.Paginator, filter *models.MessageFilter) (appContracts.Paginator, error) {
 	var total int64
 
 	message := models.Message{}

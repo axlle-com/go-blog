@@ -1,7 +1,7 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/app/errors"
+	. "github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	. "github.com/axlle-com/blog/pkg/user/http/models"
 	"github.com/gin-contrib/sessions"
@@ -19,7 +19,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 			session.AddFlash(FlashErrorString(bindError))
 		}
 		if err := session.Save(); err != nil {
-			logger.Error(err)
+			logger.WithRequest(ctx).Error(err)
 		}
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
@@ -38,7 +38,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 		)
 		err := session.Save()
 		if err != nil {
-			logger.Error(err)
+			logger.WithRequest(ctx).Error(err)
 		}
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
@@ -51,7 +51,7 @@ func (c *controller) Auth(ctx *gin.Context) {
 	c.cache.AddUserSession(userFound.ID, session.ID())
 
 	if err := session.Save(); err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
 		return

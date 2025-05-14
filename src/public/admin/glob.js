@@ -198,28 +198,55 @@ const _glob = {
         }
 
         deepSet(obj, path, value) {
-            let keys = path.split('[').map(function (key) {
-                return key.replace(']', '');
-            });
+            // признак «множественного» поля — заканчивается на []
+            const isMulti = /\[\]$/.test(path);
+            // раскладываем путь, убираем все [] и скобки
+            const keys = path.match(/([^\[\]]+)/g) || [];
 
-            keys.reduce(function (acc, key, i) {
-                if (i === keys.length - 1) {
-                    if (
-                        value !== ''
-                        && value !== null
-                        && value !== undefined
-                        && !(Array.isArray(value) && value.length === 0)
-                        && (typeof value !== 'object' || Object.keys(value).length > 0)
-                    ) {
-                        acc[key] = value;
-                    }
-                } else {
-                    if (!acc[key]) {
-                        acc[key] = isNaN(keys[i + 1]) ? {} : [];
-                    }
+            // 1) Пробегаем все ключи, кроме последнего, создавая вложенные объекты/массивы
+            let curr = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
+                const next = keys[i + 1];
+
+                if (curr[key] == null) {
+                    // если следующий ключ — цифра, заводим массив, иначе объект
+                    curr[key] = /^\d+$/.test(next) ? [] : {};
                 }
-                return acc[key];
-            }, obj);
+                curr = curr[key];
+            }
+
+            const lastKey = keys[keys.length - 1];
+            let v = value;
+
+            // 2) Логика для множественных полей
+            if (isMulti) {
+                // превратить одиночную строку/число в [v], пустую строку/null → []
+                if (!Array.isArray(v)) {
+                    v = (v === '' || v == null) ? [] : [v];
+                }
+                // убедиться, что под lastKey лежит массив
+                if (!Array.isArray(curr[lastKey])) {
+                    curr[lastKey] = [];
+                }
+                // «накатываем» новые элементы, фильтруя пустые
+                v.forEach(item => {
+                    if (item != null && item !== '') {
+                        curr[lastKey].push(item);
+                    }
+                });
+
+                // 3) Обычное поле
+            } else {
+                // отфильтровываем пустые значения и пустые объекты
+                const isEmptyObj = typeof v === 'object'
+                    && !Array.isArray(v)
+                    && Object.keys(v).length === 0;
+                if (v === '' || v == null || isEmptyObj) {
+                    return;
+                }
+                curr[lastKey] = v;
+            }
         }
 
         send(callback = null) {

@@ -11,7 +11,7 @@ import (
 )
 
 type AliasProvider interface {
-	Generate(r contracts.Record, s string) string
+	Generate(r contracts.Publisher, s string) string
 	Create(title string) string
 	transliterate(input string) string
 }
@@ -26,13 +26,13 @@ type provider struct {
 	aliasRepo AliasRepository
 }
 
-func (p *provider) Generate(tabular contracts.Record, s string) string {
+func (p *provider) Generate(publisher contracts.Publisher, s string) string {
 	alias := p.Create(s)
 	aliasNew := alias
 	counter := 1
 
 	for {
-		err := p.aliasRepo.GetByAlias(tabular.GetID(), tabular.GetTable(), aliasNew)
+		err := p.aliasRepo.GetByAlias(publisher.GetID(), publisher.GetTable(), aliasNew)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			break
 		} else if err != nil {

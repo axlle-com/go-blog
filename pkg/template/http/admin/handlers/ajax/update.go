@@ -1,6 +1,7 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/errutil"
 	mApp "github.com/axlle-com/blog/app/models"
 	. "github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
@@ -10,13 +11,13 @@ import (
 func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	found, err := c.templateService.GetByID(id)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 

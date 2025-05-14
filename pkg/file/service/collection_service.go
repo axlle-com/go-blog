@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/pkg/file/repository"
 	"os"
-	"strings"
 )
 
 type CollectionService struct {
@@ -39,23 +39,20 @@ func (s *CollectionService) RevisionReceived() error {
 		return err
 	}
 
-	var errs []string
+	newErr := errutil.New()
 
 	for _, file := range byParams {
 		if err := s.uploadService.DestroyFile(file.File); err != nil {
 			if !os.IsNotExist(err) {
-				errs = append(errs, fmt.Sprintf("DestroyFile(%s): %v", file.File, err))
+				newErr.Add(fmt.Errorf("DestroyFile(%s): %v", file.File, err))
 			}
 			continue
 		}
 
 		if err := s.fileRepo.Destroy(file.ID); err != nil {
-			errs = append(errs, fmt.Sprintf("Destroy(record %d): %v", file.ID, err))
+			newErr.Add(fmt.Errorf("DestroyRecord(%d): %v", file.ID, err))
 		}
 	}
 
-	if len(errs) > 0 {
-		return fmt.Errorf("%s", strings.Join(errs, "; "))
-	}
-	return nil
+	return newErr.Error()
 }

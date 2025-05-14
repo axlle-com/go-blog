@@ -1,0 +1,209 @@
+{{ define "admin.tag_inner" }}
+    {{ if eq .tag.ID 0 }}
+        <form id="global-form" action="{{ .tag.AdminURL }}" method="post">
+    {{ else}}
+        <form id="global-form" action="{{ .tag.AdminURL }}" method="put">
+    {{ end }}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <input type="hidden" name="resource" value="{{ .tag.GetName }}">
+                    <div class="list-with-gap mb-2">
+                        <button type="button" class="btn btn-success js-save-button">Сохранить</button>
+                        <a type="button" class="btn btn-secondary" href="/admin/post-tags">Выйти</a>
+                    </div>
+                    <div class="list-with-gap mb-2">
+                        <ul class="nav nav-gap-x-1 mt-3" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded active"
+                                   id="home-tab-faded"
+                                   data-toggle="tab"
+                                   href="#home-page"
+                                   role="tab"
+                                   aria-controls="home-page"
+                                   aria-selected="false">Основное</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="profile-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab2Faded"
+                                   role="tab"
+                                   aria-controls="tab2Faded"
+                                   aria-selected="false">Галерея</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="info-block-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab3Faded"
+                                   role="tab"
+                                   aria-controls="tab3Faded"
+                                   aria-selected="true">Инфо-блоки</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-faded"
+                                   id="settings-tab-faded"
+                                   data-toggle="tab"
+                                   href="#tab4Faded"
+                                   role="tab"
+                                   aria-controls="tab4Faded"
+                                   aria-selected="true">Настройки</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show"
+                             id="home-page"
+                             role="tabpanel"
+                             aria-labelledby="home-tab-faded">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <fieldset class="form-block">
+                                        <legend>Связь данных</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Шаблон</label>
+                                            <select
+                                                    class="form-control select2"
+                                                    data-placeholder="Шаблон"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="template_id"
+                                                    data-validator="template_id">
+                                                <option></option>
+                                                {{ range .templates}}
+                                                    <option value="{{ .ID }}"
+                                                            {{ if eq .ID $.tag.GetTemplateID }}selected{{ end }}>
+                                                        {{ .Title }}
+                                                    </option>
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Ссылка</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Алиас</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Алиас"
+                                                    name="alias"
+                                                    id="alias"
+                                                    value="{{ .tag.Alias }}"
+                                                    data-validator="alias">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Ссылка</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Ссылка"
+                                                    name="url"
+                                                    id="url"
+                                                    value="{{ .tag.URL }}"
+                                                    data-validator="url" disabled>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>Заголовок</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Имя</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Имя"
+                                                    name="name"
+                                                    id="name"
+                                                    value="{{ .tag.Name }}"
+                                                    data-validator-required
+                                                    data-validator="name">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Обычный</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Обычный"
+                                                    name="title"
+                                                    id="title"
+                                                    value="{{ ptrStr .tag.Title }}"
+                                                    data-validator-required
+                                                    data-validator="title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-block">
+                                        <legend>SEO</legend>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Заголовок SEO</label>
+                                            <input
+                                                    class="form-control form-shadow"
+                                                    placeholder="Заголовок SEO"
+                                                    name="meta_title"
+                                                    id="meta_title"
+                                                    value="{{ ptrStr .tag.MetaTitle }}"
+                                                    data-validator-required
+                                                    data-validator="meta_title">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
+                                            <label for="blogTitle">Описание SEO</label>
+                                            <textarea
+                                                    class="form-control form-shadow"
+                                                    placeholder="Описание SEO"
+                                                    name="meta_description"
+                                                    id="meta_description"
+                                                    data-validator-required
+                                                    data-validator="meta_description">{{ ptrStr .tag.MetaDescription }}</textarea>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                    <div class="form-group small">
+                                            <textarea
+                                                    name="description"
+                                                    id="description"
+                                                    class="form-control summernote-500">{{ ptrStr .tag.Description }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <fieldset class="form-block">
+                                        <legend>Изображение</legend>
+                                        {{ template "admin.image" .tag }}
+                                        {{ template "admin.image_empty" .tag }}
+                                    </fieldset>
+
+                                    <fieldset class="form-block">
+                                        <legend>Меню</legend>
+                                        <div class="form-group">
+                                            <select
+                                                    class="form-control select2"
+                                                    name="menus[]"
+                                                    id="menu"
+                                                    data-validator="menus"
+                                                    multiple
+                                                    data-placeholder="Выберете меню">
+                                                <option value=""></option>
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
+                             aria-labelledby="profile-tab-faded">
+                            {{ template "admin.gallery_in_item" .tag }}
+                        </div>
+                        <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
+                             aria-labelledby="info-block-tab-faded">
+                            {{ template "admin.info_block_in_item" .collection }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </form>
+{{ end }}

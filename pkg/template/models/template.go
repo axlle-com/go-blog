@@ -46,7 +46,7 @@ func (t *Template) GetName() string {
 	return t.Name
 }
 
-func (t *Template) GetTabular() string {
+func (t *Template) GetResourceName() string {
 	return *t.ResourceName
 }
 

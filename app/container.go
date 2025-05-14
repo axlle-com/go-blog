@@ -44,14 +44,14 @@ import (
 	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
 	messageService "github.com/axlle-com/blog/pkg/message/service"
 
-	postDB "github.com/axlle-com/blog/pkg/post/db"
-	postMigrate "github.com/axlle-com/blog/pkg/post/db/migrate"
-	postAjax "github.com/axlle-com/blog/pkg/post/http/admin/handlers/ajax"
-	postApi "github.com/axlle-com/blog/pkg/post/http/admin/handlers/api"
-	postAdminWeb "github.com/axlle-com/blog/pkg/post/http/admin/handlers/web"
-	postFrontWeb "github.com/axlle-com/blog/pkg/post/http/front/handlers/web"
-	postRepo "github.com/axlle-com/blog/pkg/post/repository"
-	postService "github.com/axlle-com/blog/pkg/post/service"
+	postDB "github.com/axlle-com/blog/pkg/blog/db"
+	postMigrate "github.com/axlle-com/blog/pkg/blog/db/migrate"
+	postAjax "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/ajax"
+	postApi "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/api"
+	postAdminWeb "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/web"
+	postFrontWeb "github.com/axlle-com/blog/pkg/blog/http/front/handlers/web"
+	postRepo "github.com/axlle-com/blog/pkg/blog/repository"
+	postService "github.com/axlle-com/blog/pkg/blog/service"
 
 	templateDB "github.com/axlle-com/blog/pkg/template/db"
 	templateMigrate "github.com/axlle-com/blog/pkg/template/db/migrate"
@@ -94,7 +94,7 @@ type Container struct {
 
 	PostRepo          postRepo.PostRepository
 	PostService       *postService.PostService
-	PostsService      *postService.PostsService
+	PostsService      *postService.PostCollectionService
 	CategoryRepo      postRepo.CategoryRepository
 	CategoriesService *postService.CategoriesService
 	CategoryService   *postService.CategoryService
@@ -121,9 +121,10 @@ type Container struct {
 	InfoBlockCollectionService *infoBlockService.InfoBlockCollectionService
 	InfoBlockProvider          infoBlockProvider.InfoBlockProvider
 
-	PostTagRepo         postRepo.PostTagRepository
-	PostTagResourceRepo postRepo.PostTagResourceRepository
-	PostTagService      *postService.PostTagService
+	PostTagRepo              postRepo.PostTagRepository
+	PostTagResourceRepo      postRepo.PostTagResourceRepository
+	PostTagService           *postService.TagService
+	PostTagCollectionService *postService.TagCollectionService
 
 	MessageRepo              messageContracts.MessageRepository
 	MessageService           *messageService.MessageService
@@ -195,13 +196,14 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 
 	ptRepo := postRepo.NewPostTagRepo(db)
 	ptrRepo := postRepo.NewResourceRepo(db)
-	ptService := postService.NewPostTagService(ptRepo, ptrRepo)
+	ptService := postService.NewTagService(ptRepo, ptrRepo, newAliasProvider, newGalleryProvider, newBlockProvider, fileProv)
+	ptCollectionService := postService.NewTagCollectionService(ptService, ptRepo, ptrRepo, newTemplateProvider)
 
 	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
 	cService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	pService := postService.NewPostService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
-	psService := postService.NewPostsService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
+	pService := postService.NewPostService(newPostRepo, csService, cService, ptCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	psService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
 
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db)
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
@@ -295,9 +297,10 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		InfoBlockCollectionService: newBlockCollectionService,
 		InfoBlockProvider:          newBlockProvider,
 
-		PostTagRepo:         ptRepo,
-		PostTagResourceRepo: ptrRepo,
-		PostTagService:      ptService,
+		PostTagRepo:              ptRepo,
+		PostTagResourceRepo:      ptrRepo,
+		PostTagService:           ptService,
+		PostTagCollectionService: ptCollectionService,
 
 		MessageRepo:              newMessageRepo,
 		MessageService:           newMessageService,
@@ -325,11 +328,12 @@ func (c *Container) PostApiController() postApi.Controller {
 	)
 }
 
-func (c *Container) PostController() postAjax.Controller {
-	return postAjax.New(
+func (c *Container) PostController() postAjax.PostController {
+	return postAjax.NewPostController(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
+		c.PostTagCollectionService,
 		c.CategoriesService,
 		c.TemplateProvider,
 		c.UserProvider,
@@ -337,15 +341,37 @@ func (c *Container) PostController() postAjax.Controller {
 	)
 }
 
-func (c *Container) PostWebController() postAdminWeb.Controller {
-	return postAdminWeb.NewWebController(
+func (c *Container) PostWebController() postAdminWeb.PostController {
+	return postAdminWeb.NewWebPostController(
 		c.PostService,
 		c.PostsService,
 		c.CategoryService,
 		c.CategoriesService,
+		c.PostTagCollectionService,
 		c.TemplateProvider,
 		c.UserProvider,
 		c.GalleryProvider,
+		c.InfoBlockProvider,
+	)
+}
+
+func (c *Container) PostTagWebController() postAdminWeb.TagController {
+	return postAdminWeb.NewWebTagController(
+		c.PostTagService,
+		c.PostTagCollectionService,
+		c.TemplateProvider,
+		c.UserProvider,
+		c.GalleryProvider,
+		c.InfoBlockProvider,
+	)
+}
+
+func (c *Container) PostTagAjaxController() postAjax.TagController {
+	return postAjax.NewTagController(
+		c.PostTagService,
+		c.PostTagCollectionService,
+		c.TemplateProvider,
+		c.UserProvider,
 		c.InfoBlockProvider,
 	)
 }

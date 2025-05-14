@@ -1,6 +1,7 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
@@ -12,18 +13,18 @@ import (
 func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	block, err := c.blockService.GetByID(id)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	if err := c.blockService.Delete(block); err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
@@ -51,7 +52,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
-		logger.Error(err)
+		logger.WithRequest(ctx).Error(err)
 	}
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 

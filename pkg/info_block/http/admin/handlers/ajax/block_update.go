@@ -2,6 +2,7 @@ package ajax
 
 import (
 	"fmt"
+	"github.com/axlle-com/blog/app/errutil"
 	. "github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -10,13 +11,13 @@ import (
 func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 
 	found, err := c.blockService.GetByID(id)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "Ресурс не найден"})
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
 

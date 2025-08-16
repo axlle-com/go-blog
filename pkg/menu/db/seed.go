@@ -1,31 +1,31 @@
 package db
 
 import (
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
-	blog "github.com/axlle-com/blog/pkg/blog/provider"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/repository"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/bxcodec/faker/v3"
 	"github.com/google/uuid"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 type seeder struct {
 	menuRepo         repository.MenuRepository
 	menuItemRepo     repository.MenuItemRepository
-	postProvider     blog.PostProvider
+	postProvider     contracts.PostProvider
 	templateProvider template.TemplateProvider
 }
 
-func NewSeeder(
+func NewMenuSeeder(
 	menu repository.MenuRepository,
 	menuItem repository.MenuItemRepository,
-	postProvider blog.PostProvider,
+	postProvider contracts.PostProvider,
 	template template.TemplateProvider,
 ) contracts.Seeder {
 	return &seeder{
@@ -41,20 +41,19 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) SeedTest(n int) error {
-	err := s.menuItems(n)
+	err := s.menus(n)
 	if err != nil {
 		return err
 	}
 
-	return s.menus(n)
+	return s.menuItems(n)
 }
 
 func (s *seeder) menus(n int) error {
 	ids := s.templateProvider.GetAllIds()
-	rand.Seed(time.Now().UnixNano())
 	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
-		_ = models.Menu{
+		menu := &models.Menu{
 			UUID:        uuid.New(),
 			TemplateID:  &randomID,
 			IsPublished: db.RandBool(),
@@ -67,18 +66,16 @@ func (s *seeder) menus(n int) error {
 			DeletedAt:   nil,
 		}
 
-		//_, err := s.menuService.Save(&menu, userF)
-		//if err != nil {
-		//	return err
-		//}
+		err := s.menuRepo.Create(menu)
+		if err != nil {
+			return err
+		}
 	}
 	logger.Info("Database seeded Menu successfully!")
 	return nil
 }
 
 func (s *seeder) menuItems(n int) error {
-	rand.Seed(time.Now().UnixNano())
-
 	for i := 1; i <= n; i++ {
 		idsMenu, _ := s.menuRepo.GetAllIds()
 		idsMenuItem, _ := s.menuItemRepo.GetAllIds()
@@ -112,6 +109,6 @@ func (s *seeder) menuItems(n int) error {
 			return err
 		}
 	}
-	logger.Info("Database seeded Menu successfully!")
+	logger.Info("Database seeded MenuItem successfully!")
 	return nil
 }

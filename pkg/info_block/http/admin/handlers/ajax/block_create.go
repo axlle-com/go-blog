@@ -2,14 +2,15 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/http/response"
-	. "github.com/axlle-com/blog/pkg/info_block/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/axlle-com/blog/app/http/response"
+	"github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *blockController) CreateInfoBlock(ctx *gin.Context) {
-	form, formError := NewBlockRequest().ValidateJSON(ctx)
+	form, formError := models.NewBlockRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
@@ -28,8 +29,8 @@ type postRepository struct {
 	*app.Paginate
 }
 
-func NewPostRepo(db contracts.DB) PostRepository {
-	r := &postRepository{db: db.GORM()}
+func NewPostRepo(db *gorm.DB) PostRepository {
+	r := &postRepository{db: db}
 	return r
 }
 
@@ -84,7 +85,7 @@ func (r *postRepository) Delete(post *models.Post) error {
 	if post.Deleting() {
 		return r.db.Delete(&models.Post{}, post.ID).Error
 	}
-	return errors.New("При удалении произошли ошибки")
+	return errors.New("при удалении произошли ошибки")
 }
 
 func (r *postRepository) GetAll() ([]*models.Post, error) {

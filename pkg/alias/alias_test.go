@@ -1,9 +1,10 @@
 package alias
 
 import (
+	"testing"
+
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
-	"testing"
 )
 
 func TestCreate(t *testing.T) {
@@ -64,7 +65,7 @@ func TestCreate(t *testing.T) {
 	newDB, _ := db.SetupDB(config.Config())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAliasProvider(NewAliasRepo(newDB)).Create(tt.args.title); got != tt.want {
+			if got := NewAliasProvider(NewAliasRepo(newDB.PostgreSQL())).Create(tt.args.title); got != tt.want {
 				t.Errorf("Create() = %v, want %v", got, tt.want)
 			}
 		})
@@ -134,7 +135,7 @@ func TestTransliterate(t *testing.T) {
 	newDB, _ := db.SetupDB(config.Config())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAliasProvider(NewAliasRepo(newDB)).transliterate(tt.args.input); got != tt.want {
+			if got := NewAliasProvider(NewAliasRepo(newDB.PostgreSQL())).transliterate(tt.args.input); got != tt.want {
 				t.Errorf("transliterate() = %v, want %v", got, tt.want)
 			}
 		})

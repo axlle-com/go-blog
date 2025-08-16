@@ -2,10 +2,11 @@ package repository_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/axlle-com/blog/pkg/blog/db/migrate"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
@@ -23,19 +24,19 @@ func setupTestDB() contracts.DB {
 	if err != nil {
 		panic("db not initialized")
 	}
-	migrate.NewMigrator(newDB.GORM()).Migrate()
+	migrate.NewMigrator(newDB.PostgreSQL()).Migrate()
 	return newDB
 }
 
 func newTestRepo(db contracts.DB) repository.CategoryRepository {
-	return repository.NewCategoryRepo(db)
+	return repository.NewCategoryRepo(db.PostgreSQL())
 }
 
 func TestPathNotLikeQuery(t *testing.T) {
 	// Инициализируем тестовую базу и репозиторий.
 	testDB := setupTestDB()
 	// Очищаем таблицу для чистоты теста.
-	testDB.GORM().Exec("DELETE FROM post_categories")
+	testDB.PostgreSQL().Exec("DELETE FROM post_categories")
 	repo := newTestRepo(testDB)
 
 	// Создаем корневую категорию (будет иметь путь вида "/<ID>/")
@@ -75,7 +76,7 @@ func TestPathNotLikeQuery(t *testing.T) {
 
 	// Выполняем запрос с NOT LIKE.
 	var results []*models.PostCategory
-	err = testDB.GORM().Where("path NOT LIKE ?", likePattern).Find(&results).Error
+	err = testDB.PostgreSQL().Where("path NOT LIKE ?", likePattern).Find(&results).Error
 	assert.NoError(t, err)
 
 	// Ожидаем, что в выборке будет только root2,
@@ -86,7 +87,7 @@ func TestPathNotLikeQuery(t *testing.T) {
 
 func TestPathLikeQuery(t *testing.T) {
 	testDB := setupTestDB()
-	testDB.GORM().Exec("DELETE FROM post_categories")
+	testDB.PostgreSQL().Exec("DELETE FROM post_categories")
 	repo := newTestRepo(testDB)
 
 	// Создаем корневую категорию.
@@ -113,7 +114,7 @@ func TestPathLikeQuery(t *testing.T) {
 	likePattern := fmt.Sprintf("%s%%", root.Path)
 
 	var results []*models.PostCategory
-	err = testDB.GORM().Where("path LIKE ?", likePattern).Find(&results).Error
+	err = testDB.PostgreSQL().Where("path LIKE ?", likePattern).Find(&results).Error
 	assert.NoError(t, err)
 
 	assert.Equal(t, 3, len(results))

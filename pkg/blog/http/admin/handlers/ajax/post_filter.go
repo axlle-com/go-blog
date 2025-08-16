@@ -1,16 +1,17 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *postController) FilterPosts(ctx *gin.Context) {
-	filter, validError := NewPostFilter().ValidateQuery(ctx)
+	filter, validError := models.NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -24,7 +25,7 @@ func (c *postController) FilterPosts(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL("/admin/posts")
 
 	postsTemp, err := c.postCollectionService.WithPaginate(paginator, filter)
@@ -42,7 +43,7 @@ func (c *postController) FilterPosts(ctx *gin.Context) {
 	users := c.user.GetAll()
 	data := gin.H{
 		"title":      "Страница постов",
-		"post":       &Post{},
+		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
 		"templates":  templates,

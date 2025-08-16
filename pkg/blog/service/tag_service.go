@@ -2,6 +2,8 @@ package service
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
@@ -13,7 +15,6 @@ import (
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	infoBlock "github.com/axlle-com/blog/pkg/info_block/provider"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type TagService struct {
@@ -102,6 +103,7 @@ func (s *TagService) Attach(resource contracts.Resource, postTag contracts.PostT
 				PostTagID:    postTag.GetID(),
 			},
 		)
+		return err
 	}
 	return nil
 }

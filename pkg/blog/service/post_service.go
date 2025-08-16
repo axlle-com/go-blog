@@ -1,6 +1,8 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
@@ -9,7 +11,6 @@ import (
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	provider2 "github.com/axlle-com/blog/pkg/info_block/provider"
-	"sync"
 )
 
 type PostService struct {

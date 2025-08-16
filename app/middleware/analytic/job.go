@@ -3,9 +3,10 @@ package analytic
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/analytic/provider"
-	"time"
 )
 
 func NewAnalyticsJob(

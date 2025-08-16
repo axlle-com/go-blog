@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
@@ -28,11 +29,10 @@ type PostTagRepository interface {
 type postTagRepository struct {
 	db *gorm.DB
 	*app.Paginate
-	withImages bool
 }
 
-func NewPostTagRepo(db contracts.DB) PostTagRepository {
-	r := &postTagRepository{db: db.GORM()}
+func NewPostTagRepo(db *gorm.DB) PostTagRepository {
+	r := &postTagRepository{db: db}
 	return r
 }
 

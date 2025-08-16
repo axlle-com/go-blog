@@ -1,10 +1,11 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	. "github.com/axlle-com/blog/app/models"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/models"
+	"github.com/gin-gonic/gin"
 )
 
 func NewAnalyticFilter() *AnalyticFilter {
@@ -18,7 +19,7 @@ type AnalyticFilter struct {
 	Name         *string `json:"name" form:"name" binding:"omitempty"`
 	ResourceName *string `json:"resource_name" form:"resource_name" binding:"omitempty"`
 	Date         *string `json:"date" form:"date" binding:"omitempty"`
-	Filter
+	models.Filter
 }
 
 func (p *AnalyticFilter) ValidateForm(ctx *gin.Context) (*AnalyticFilter, *errutil.Errors) {

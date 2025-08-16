@@ -2,15 +2,16 @@ package web
 
 import (
 	"errors"
-	. "github.com/axlle-com/blog/pkg/user/http/models"
+	"net/http"
+
+	httpModels "github.com/axlle-com/blog/pkg/user/http/models"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 func (c *controller) CreateUser(ctx *gin.Context) {
-	var authInput AuthInput
+	var authInput httpModels.AuthInput
 
 	if err := ctx.ShouldBindJSON(&authInput); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -2,17 +2,18 @@ package service
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
-	. "github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	tProvider "github.com/axlle-com/blog/pkg/template/provider"
 	provider2 "github.com/axlle-com/blog/pkg/user/provider"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type InfoBlockService struct {
@@ -45,11 +46,11 @@ func NewInfoBlockService(
 	}
 }
 
-func (s *InfoBlockService) GetByID(id uint) (*InfoBlock, error) {
+func (s *InfoBlockService) GetByID(id uint) (*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetByID(id)
 }
 
-func (s *InfoBlockService) Aggregate(infoBlock *InfoBlock) *InfoBlock {
+func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBlock {
 	var wg sync.WaitGroup
 
 	wg.Add(3)
@@ -90,11 +91,11 @@ func (s *InfoBlockService) Aggregate(infoBlock *InfoBlock) *InfoBlock {
 	return infoBlock
 }
 
-func (s *InfoBlockService) GetByIDs(ids []uint) ([]*InfoBlock, error) {
+func (s *InfoBlockService) GetByIDs(ids []uint) ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetByIDs(ids)
 }
 
-func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*InfoBlock, error) {
+func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contracts.User) (*models.InfoBlock, error) {
 	if user != nil {
 		id := user.GetID()
 		infoBlock.UserID = &id
@@ -105,7 +106,7 @@ func (s *InfoBlockService) Create(infoBlock *InfoBlock, user contracts.User) (*I
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) Update(infoBlock *InfoBlock) (*InfoBlock, error) {
+func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
 	if err := s.infoBlockRepo.Update(infoBlock); err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contrac
 
 	if hasRepo == nil {
 		err = s.resourceRepo.Create(
-			&InfoBlockHasResource{
+			&models.InfoBlockHasResource{
 				ResourceUUID: resource.GetUUID(),
 				InfoBlockID:  infoBlock.GetID(),
 				Sort:         infoBlock.GetSort(),
@@ -137,7 +138,7 @@ func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contrac
 	return err
 }
 
-func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*InfoBlockResponse {
+func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*models.InfoBlockResponse {
 	infoBlocks, err := s.infoBlockRepo.GetForResource(resource)
 	if err != nil {
 		logger.Error(err)
@@ -154,7 +155,7 @@ func (s *InfoBlockService) DeleteResource(id uint) error {
 	return s.resourceRepo.Delete(id)
 }
 
-func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error) {
+func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err error) {
 	var ids []uint
 	for _, infoBlock := range infoBlocks {
 		ids = append(ids, infoBlock.ID)
@@ -168,15 +169,15 @@ func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error)
 	return err
 }
 
-func (s *InfoBlockService) Delete(infoBlocks *InfoBlock) (err error) {
+func (s *InfoBlockService) Delete(infoBlocks *models.InfoBlock) (err error) {
 	if err = s.resourceRepo.DetachInfoBlock(infoBlocks); err != nil {
 		return err
 	}
 	return s.infoBlockRepo.Delete(infoBlocks)
 }
 
-func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock, user contracts.User) (infoBlock *InfoBlock, err error) {
-	blockForm := app.LoadStruct(&InfoBlock{}, form).(*InfoBlock)
+func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *models.InfoBlock, user contracts.User) (infoBlock *models.InfoBlock, err error) {
+	blockForm := app.LoadStruct(&models.InfoBlock{}, form).(*models.InfoBlock)
 
 	if found == nil {
 		infoBlock, err = s.Create(blockForm, user)
@@ -208,7 +209,7 @@ func (s *InfoBlockService) SaveFromRequest(form *BlockRequest, found *InfoBlock,
 	return
 }
 
-func (s *InfoBlockService) DeleteImageFile(block *InfoBlock) error {
+func (s *InfoBlockService) DeleteImageFile(block *models.InfoBlock) error {
 	if block.Image == nil {
 		return nil
 	}

@@ -3,8 +3,9 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
@@ -34,14 +35,14 @@ type Post struct {
 	DescriptionPreview *string    `gorm:"type:text" json:"description_preview" form:"description_preview" binding:"omitempty"`
 	Description        *string    `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
 	ShowDate           bool       `gorm:"not null;default:false" json:"show_date" form:"show_date" binding:"omitempty"`
-	DatePub            *time.Time `json:"index;date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
-	DateEnd            *time.Time `json:"index;date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
+	DatePub            *time.Time `gorm:"index;date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
+	DateEnd            *time.Time `gorm:"index;date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
 	Image              *string    `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
 	Hits               uint       `gorm:"not null;default:0" json:"hits" form:"hits" binding:"-"`
 	Sort               int        `gorm:"index;not null;default:0" json:"sort" form:"sort" binding:"omitempty"`
 	Stars              float32    `gorm:"not null;default:0.0" json:"stars" form:"stars" binding:"-"`
 	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
-	UpdatedAt          *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
+	UpdatedAt          *time.Time `gorm:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
 	Category *PostCategory `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
@@ -225,11 +226,6 @@ func (p *Post) GetDirty() string {
 		return string(jsonData)
 	}
 	return ""
-}
-
-func (p *Post) isDirty(s string) bool {
-	_, ok := p.dirty[s]
-	return ok
 }
 
 func (p *Post) AdminURL() string {

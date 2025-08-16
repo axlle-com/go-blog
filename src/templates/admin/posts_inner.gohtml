@@ -165,7 +165,13 @@
                                 </a>
                             </td>
                             <td class="td-col-id">{{.ID}}</td>
-                            <td class="td-col-title">{{ ptrStr .TitleShort }}</td>
+                            <td class="td-col-title">
+                                {{ if .TitleShort }}
+                                    {{ ptrStr .TitleShort }}
+                                {{ else }}
+                                    {{ .Title }}
+                                {{ end }}
+                            </td>
                             <td class="td-col-title">{{ .GetCategoryTitleShort }}</td>
                             <td>{{ .GetTemplateTitle }}</td>
                             <td class="td-col-autor">{{ .UserLastName }}</td>

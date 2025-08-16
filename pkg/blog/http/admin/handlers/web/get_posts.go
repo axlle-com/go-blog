@@ -1,13 +1,14 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *postController) GetPosts(ctx *gin.Context) {
@@ -15,7 +16,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	filter, validError := NewPostFilter().ValidateQuery(ctx)
+	filter, validError := models.NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,
@@ -28,8 +29,8 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL((&Post{}).AdminURL())
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL((&models.Post{}).AdminURL())
 
 	templates := c.template.GetAll()
 	users := c.user.GetAll()
@@ -46,7 +47,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "admin.posts", gin.H{
 		"title":      "Страница постов",
-		"post":       &Post{},
+		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
 		"templates":  templates,
@@ -56,7 +57,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 		"settings": gin.H{
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      models2.NewMenu(ctx.FullPath()),
+			"menu":      menu.NewMenu(ctx.FullPath()),
 		},
 	})
 }

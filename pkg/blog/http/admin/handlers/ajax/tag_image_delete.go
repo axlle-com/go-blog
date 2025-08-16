@@ -1,10 +1,11 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *tagController) DeleteImage(ctx *gin.Context) {
@@ -35,5 +36,4 @@ func (c *tagController) DeleteImage(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Изображение удалено"})
-	return
 }

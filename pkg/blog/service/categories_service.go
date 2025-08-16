@@ -1,15 +1,16 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/alias"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
-	"sync"
 )
 
 type CategoriesService struct {
@@ -36,7 +37,7 @@ func NewCategoriesService(
 	}
 }
 
-func (s *CategoriesService) GetAggregates(categories []*PostCategory) []*PostCategory {
+func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*models.PostCategory {
 	var templateIDs []uint
 	var userIDs []uint
 	var categoryIDs []uint
@@ -73,7 +74,7 @@ func (s *CategoriesService) GetAggregates(categories []*PostCategory) []*PostCat
 
 	var users map[uint]contracts.User
 	var templates map[uint]contracts.Template
-	var parents map[uint]*PostCategory
+	var parents map[uint]*models.PostCategory
 
 	wg.Add(3)
 
@@ -127,24 +128,24 @@ func (s *CategoriesService) GetAggregates(categories []*PostCategory) []*PostCat
 	return categories
 }
 
-func (s *CategoriesService) GetAll() ([]*PostCategory, error) {
+func (s *CategoriesService) GetAll() ([]*models.PostCategory, error) {
 	return s.categoryRepo.GetAll()
 }
 
-func (s *CategoriesService) GetAllForParent(parent *PostCategory) ([]*PostCategory, error) {
+func (s *CategoriesService) GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error) {
 	return s.categoryRepo.GetAllForParent(parent)
 }
 
-func (s *CategoriesService) WithPaginate(p contracts.Paginator, filter *CategoryFilter) ([]*PostCategory, error) {
+func (s *CategoriesService) WithPaginate(p contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	return s.categoryRepo.WithPaginate(p, filter)
 }
 
-func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*PostCategory, error) {
+func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error) {
 	categories, err := s.categoryRepo.GetByIDs(ids)
 	if err != nil {
 		return nil, err
 	}
-	collection := make(map[uint]*PostCategory, len(categories))
+	collection := make(map[uint]*models.PostCategory, len(categories))
 	for _, item := range categories {
 		collection[item.ID] = item
 	}

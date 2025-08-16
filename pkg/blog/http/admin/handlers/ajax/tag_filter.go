@@ -1,16 +1,17 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *tagController) Filter(ctx *gin.Context) {
-	filter, validError := NewTagFilter().ValidateQuery(ctx)
+	filter, validError := models.NewTagFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -24,8 +25,8 @@ func (c *tagController) Filter(ctx *gin.Context) {
 		return
 	}
 
-	empty := &PostTag{}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	empty := &models.PostTag{}
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	temp, err := c.tagCollectionService.WithPaginate(paginator, filter)

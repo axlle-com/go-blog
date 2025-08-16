@@ -1,11 +1,12 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	. "github.com/axlle-com/blog/pkg/blog/http/admin/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *tagController) Update(ctx *gin.Context) {
@@ -21,7 +22,7 @@ func (c *tagController) Update(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := NewTagRequest().ValidateJSON(ctx)
+	form, formError := models.NewTagRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

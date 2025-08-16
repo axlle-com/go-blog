@@ -2,15 +2,14 @@ package models
 
 import (
 	"bytes"
-	"compress/gzip"
-	"encoding/base64"
-	"github.com/axlle-com/blog/app/models/contracts"
-	user "github.com/axlle-com/blog/pkg/user/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/axlle-com/blog/app/models/contracts"
+	user "github.com/axlle-com/blog/pkg/user/models"
+	"github.com/gin-gonic/gin"
 )
 
 type BaseAjax struct {
@@ -60,17 +59,4 @@ func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
 	re := regexp.MustCompile(`>\s+<`)
 	compactHTML := re.ReplaceAllString(s, "><")
 	return strings.TrimSpace(compactHTML)
-}
-
-func (c *BaseAjax) compressAndEncode(data string) (string, error) {
-	var buf bytes.Buffer
-	gzipWriter := gzip.NewWriter(&buf)
-	_, err := gzipWriter.Write([]byte(data))
-	if err != nil {
-		return "", err
-	}
-	if err := gzipWriter.Close(); err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(buf.Bytes()), nil
 }

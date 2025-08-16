@@ -16,7 +16,7 @@ func Store(cfg contracts.Config) redis.Store {
 		logger.Info("[Store] Using memstore")
 		return store
 	} else {
-		store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), cfg.RedisPassword(), cfg.KeyCookie())
+		store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), "", cfg.RedisPassword(), cfg.KeyCookie())
 		if err != nil {
 			logger.Errorf("[Store] Error: %v, Started memstore", err)
 			store = memstore.NewStore(cfg.KeyCookie())

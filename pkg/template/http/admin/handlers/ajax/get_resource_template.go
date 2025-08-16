@@ -1,10 +1,11 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *templateController) GetResourceTemplate(ctx *gin.Context) {

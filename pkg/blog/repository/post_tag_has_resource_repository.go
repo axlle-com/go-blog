@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
@@ -27,8 +28,8 @@ type postTagResourceRepository struct {
 	*app.Paginate
 }
 
-func NewResourceRepo(db contracts.DB) PostTagResourceRepository {
-	r := &postTagResourceRepository{db: db.GORM()}
+func NewResourceRepo(db *gorm.DB) PostTagResourceRepository {
+	r := &postTagResourceRepository{db: db}
 	return r
 }
 

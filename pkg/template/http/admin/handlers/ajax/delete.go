@@ -1,13 +1,14 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/template/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *templateController) DeleteTemplate(ctx *gin.Context) {
@@ -29,7 +30,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 		return
 	}
 
-	filter, validError := NeTemplateFilter().ValidateQuery(ctx)
+	filter, validError := models.NeTemplateFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -44,8 +45,8 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 		return
 	}
 
-	empty := &Template{}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	empty := &models.Template{}
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	users := c.userProvider.GetAll()
@@ -63,7 +64,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 		"users":         users,
 		"paginator":     paginator,
 		"filter":        filter,
-		"resources":     models.NewResources().Resources(),
+		"resources":     app.NewResources().Resources(),
 	}
 
 	ctx.JSON(

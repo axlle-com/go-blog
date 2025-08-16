@@ -9,6 +9,9 @@ import (
 	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/app/service/scheduler"
 	"github.com/axlle-com/blog/app/service/view"
+	"github.com/axlle-com/blog/pkg/blog/provider"
+	"github.com/axlle-com/blog/pkg/menu/repository"
+	"github.com/axlle-com/blog/pkg/menu/service"
 
 	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
@@ -20,6 +23,8 @@ import (
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	fileRepo "github.com/axlle-com/blog/pkg/file/repository"
 	fileService "github.com/axlle-com/blog/pkg/file/service"
+	menuDB "github.com/axlle-com/blog/pkg/menu/db"
+	menuMigrate "github.com/axlle-com/blog/pkg/menu/db/migrate"
 
 	galleryMigrate "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
@@ -146,97 +151,108 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newView := view.NewView(config.Config())
 	newMailer := mailer.NewMailer(newQueue)
 
-	newFileRepo := fileRepo.NewFileRepo(db)
+	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
 	newFileService := fileService.NewService(newFileRepo)
 	uploadService := fileService.NewUploadService(newFileService)
 	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
 	fileProv := fileProvider.NewFileProvider(uploadService, newFileService, fileCollectionService)
 
-	newImageRepo := galleryRepo.NewImageRepo(db)
+	newImageRepo := galleryRepo.NewImageRepo(db.PostgreSQL())
 	newImageEvent := galleryService.NewImageEvent(fileProv)
 	newImageService := galleryService.NewImageService(newImageRepo, newImageEvent, fileProv)
 	newImageProvider := galleryProvider.NewImageProvider(newImageRepo)
 
-	newResourceRepo := galleryRepo.NewResourceRepo(db)
+	newResourceRepo := galleryRepo.NewResourceRepo(db.PostgreSQL())
 
-	newGalleryRepo := galleryRepo.NewGalleryRepo(db)
+	newGalleryRepo := galleryRepo.NewGalleryRepo(db.PostgreSQL())
 	newGalleryEvent := galleryService.NewGalleryEvent(newImageService, newResourceRepo)
 	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, fileProv)
 	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
 
-	newUserRepo := userRepository.NewUserRepo(db)
-	newRoleRepo := userRepository.NewRoleRepo(db)
-	newPermissionRepo := userRepository.NewPermissionRepo(db)
+	newUserRepo := userRepository.NewUserRepo(db.PostgreSQL())
+	newRoleRepo := userRepository.NewRoleRepo(db.PostgreSQL())
+	newPermissionRepo := userRepository.NewPermissionRepo(db.PostgreSQL())
 	newUserService := usersService.NewUserService(newUserRepo, newRoleRepo, newPermissionRepo)
 	newAuthService := usersService.NewAuthService(newUserService)
 	newUserProvider := userProvider.NewProvider(newUserRepo, newUserService)
 
-	newTemplateRepo := templateRepo.NewTemplateRepo(db)
+	newTemplateRepo := templateRepo.NewTemplateRepo(db.PostgreSQL())
 	newTemplateProvider := templateProvider.NewProvider(newTemplateRepo)
 	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newUserProvider)
 	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newUserProvider)
 
-	newMessageRepo := messageRepo.NewMessageRepo(db)
+	newMessageRepo := messageRepo.NewMessageRepo(db.PostgreSQL())
 	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
 	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
 	newMailService := messageService.NewMailService(newMessageService, newMessageCollectionService, newUserProvider, newMailer, newQueue)
 
-	newAliasRepo := alias.NewAliasRepo(db)
+	newAliasRepo := alias.NewAliasRepo(db.PostgreSQL())
 	newAliasProvider := alias.NewAliasProvider(newAliasRepo)
 
-	newPostRepo := postRepo.NewPostRepo(db)
-	newCategoryRepo := postRepo.NewCategoryRepo(db)
+	newPostRepo := postRepo.NewPostRepo(db.PostgreSQL())
+	newCategoryRepo := postRepo.NewCategoryRepo(db.PostgreSQL())
 
-	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db)
-	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db)
+	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db.PostgreSQL())
+	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider)
 	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
-	ptRepo := postRepo.NewPostTagRepo(db)
-	ptrRepo := postRepo.NewResourceRepo(db)
-	ptService := postService.NewTagService(ptRepo, ptrRepo, newAliasProvider, newGalleryProvider, newBlockProvider, fileProv)
-	ptCollectionService := postService.NewTagCollectionService(ptService, ptRepo, ptrRepo, newTemplateProvider)
+	postTagRepo := postRepo.NewPostTagRepo(db.PostgreSQL())
+	postTagResourceRepo := postRepo.NewResourceRepo(db.PostgreSQL())
+	postTagService := postService.NewTagService(postTagRepo, postTagResourceRepo, newAliasProvider, newGalleryProvider, newBlockProvider, fileProv)
+	postTagCollectionService := postService.NewTagCollectionService(postTagService, postTagRepo, postTagResourceRepo, newTemplateProvider)
 
 	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
 	cService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	pService := postService.NewPostService(newPostRepo, csService, cService, ptCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
-	psService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
-
-	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db)
+	newPostService := postService.NewPostService(newPostRepo, csService, cService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
+	newPostProvider := provider.NewPostProvider(newPostRepo, newPostService)
+	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
-	mUser := userMigrate.NewMigrator(db.GORM())
-	mPost := postMigrate.NewMigrator(db.GORM())
-	mInfoBlock := infoBlockMigrate.NewMigrator(db.GORM())
-	mGallery := galleryMigrate.NewMigrator(db.GORM())
-	mTemplate := templateMigrate.NewMigrator(db.GORM())
-	mAnalytic := analyticMigrate.NewMigrator(db.GORM())
-	mMessage := messageMigrate.NewMigrator(db.GORM())
-	mFile := fileMigrate.NewMigrator(db.GORM())
+	menuRepo := repository.NewMenuRepo(db.PostgreSQL())
+	menuService := service.NewMenuService(menuRepo)
+	_ = service.NewMenuCollectionService(menuRepo, menuService)
 
-	sUser := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
-	sPost := postDB.NewSeeder(newPostRepo, pService, newCategoryRepo, newUserProvider, newTemplateProvider)
-	sTempl := templateDB.NewSeeder(newTemplateRepo)
-	sInfo := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider)
-	sMsg := messageDB.NewMessageSeeder(newMessageService, newUserProvider)
+	menuItemRepo := repository.NewMenuItemRepo(db.PostgreSQL())
+	menuItemService := service.NewMenuItemService(menuItemRepo)
+	_ = service.NewMenuItemCollectionService(menuItemRepo, menuItemService)
+	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newPostProvider, newTemplateProvider)
 
-	seeder := migrate.NewSeeder(sUser, sTempl, sPost, sInfo, sMsg)
+	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
+	postMigrator := postMigrate.NewMigrator(db.PostgreSQL())
+	infoBlockMigrator := infoBlockMigrate.NewMigrator(db.PostgreSQL())
+	galleryMigrator := galleryMigrate.NewMigrator(db.PostgreSQL())
+	templateMigrator := templateMigrate.NewMigrator(db.PostgreSQL())
+	analyticMigrator := analyticMigrate.NewMigrator(db.PostgreSQL())
+	messageMigrator := messageMigrate.NewMigrator(db.PostgreSQL())
+	fileMigrator := fileMigrate.NewMigrator(db.PostgreSQL())
+	menuMigrator := menuMigrate.NewMigrator(db.PostgreSQL())
+
+	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
+	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, newUserProvider, newTemplateProvider)
+	templateSeeder := templateDB.NewSeeder(newTemplateRepo)
+	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider)
+	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newUserProvider)
+
+	seeder := migrate.NewSeeder(userSeeder, templateSeeder, postSeeder, infoBlockSeeder, messageSeeder, menuSeeder)
 
 	newMigrator := migrate.NewMigrator(
-		db.GORM(),
-		mUser,
-		mPost,
-		mInfoBlock,
-		mGallery,
-		mTemplate,
-		mAnalytic,
-		mMessage,
-		mFile,
+		db.PostgreSQL(),
+		userMigrator,
+		postMigrator,
+		infoBlockMigrator,
+		galleryMigrator,
+		templateMigrator,
+		analyticMigrator,
+		messageMigrator,
+		fileMigrator,
+		menuMigrator,
 	)
 
 	newScheduler := scheduler.NewScheduler(
@@ -270,8 +286,8 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		GalleryEvent:    newGalleryEvent,
 
 		PostRepo:          newPostRepo,
-		PostService:       pService,
-		PostsService:      psService,
+		PostService:       newPostService,
+		PostsService:      newPostCollectionService,
 		CategoryRepo:      newCategoryRepo,
 		CategoriesService: csService,
 		CategoryService:   cService,
@@ -297,10 +313,10 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		InfoBlockCollectionService: newBlockCollectionService,
 		InfoBlockProvider:          newBlockProvider,
 
-		PostTagRepo:              ptRepo,
-		PostTagResourceRepo:      ptrRepo,
-		PostTagService:           ptService,
-		PostTagCollectionService: ptCollectionService,
+		PostTagRepo:              postTagRepo,
+		PostTagResourceRepo:      postTagResourceRepo,
+		PostTagService:           postTagService,
+		PostTagCollectionService: postTagCollectionService,
 
 		MessageRepo:              newMessageRepo,
 		MessageService:           newMessageService,

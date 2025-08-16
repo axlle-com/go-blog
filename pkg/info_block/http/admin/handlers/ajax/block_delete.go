@@ -1,13 +1,14 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/info_block/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
@@ -29,7 +30,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	filter, validError := NewInfoBlockFilter().ValidateQuery(ctx)
+	filter, validError := models.NewInfoBlockFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -44,8 +45,8 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL("/admin/info-blocks")
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator.SetURL("/admin/models-blocks")
 
 	users := c.userProvider.GetAll()
 	templates := c.templateProvider.GetAll()
@@ -59,7 +60,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	data := response.Body{
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
-		"infoBlock":  &InfoBlock{},
+		"infoBlock":  &models.InfoBlock{},
 		"templates":  templates,
 		"users":      users,
 		"paginator":  paginator,

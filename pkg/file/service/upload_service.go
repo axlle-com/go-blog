@@ -2,11 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/file/models"
-	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,6 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/file/models"
+	"github.com/google/uuid"
 )
 
 const staticPath = "/public/img/"
@@ -29,7 +30,7 @@ func NewUploadService(service *Service) *UploadService {
 func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, dist string, user contracts.User) (path string, err error) {
 	contentType := s.contentType(file)
 	if !s.isImage(contentType) {
-		return "", fmt.Errorf("Файл:%s не является изображением", file.Filename)
+		return "", fmt.Errorf("файл:%s не является изображением", file.Filename)
 	}
 
 	newUUID := uuid.New()

@@ -1,12 +1,13 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	mApp "github.com/axlle-com/blog/app/models"
+	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *messageController) DeleteMessage(ctx *gin.Context) {
@@ -48,7 +49,7 @@ func (c *messageController) DeleteMessage(ctx *gin.Context) {
 	}
 
 	empty := &models.Message{}
-	paginator := mApp.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	temp, err := c.messageCollectionService.WithPaginate(paginator, filter)

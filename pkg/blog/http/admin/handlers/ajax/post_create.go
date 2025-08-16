@@ -2,15 +2,16 @@ package ajax
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	. "github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *postController) CreatePost(ctx *gin.Context) {
-	form, formError := NewPostRequest().ValidateJSON(ctx)
+	form, formError := models.NewPostRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

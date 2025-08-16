@@ -397,13 +397,14 @@ const _glob = {
         }
 
         errorResponse(response, form = null) {
-            let json, message, error;
+            let extraErrors = '';
+            let json, message, errors;
             if (response && (json = response.responseJSON)) {
                 message = json.message;
                 if (message) {
                     message = message.replace(/\|/gi, `<br>`);
                 }
-                error = json.error;
+                errors = json.errors;
             }
 
             if (!message && response.responseText) {
@@ -419,26 +420,25 @@ const _glob = {
                 || response.status === 419
                 || response.status === 422
             ) {
-                if (error && Object.keys(error).length) {
-                    for (let key in error) {
+                let errs = errors || response.errors;
+                if (errs && Object.keys(errs).length) {
+                    for (let key in errs) {
+                        // подсветка
                         let selector = `[data-validator="${key}"]`;
                         if (form) {
                             $(form).find(selector).addClass('is-invalid');
                         } else {
                             $(selector).addClass('is-invalid');
                         }
-                    }
-                } else if (response.error && Object.keys(response.error).length) {
-                    for (let key in response.error) {
-                        let selector = `[data-validator="${key}"]`;
-                        if (form) {
-                            $(form).find(selector).addClass('is-invalid');
-                        } else {
-                            $(selector).addClass('is-invalid');
-                        }
+
+                        // собираем текст ошибок
+                        let fieldErrors = Array.isArray(errs[key]) ? errs[key] : [errs[key]];
+                        extraErrors += fieldErrors.join('<br>') + '<br>';
                     }
                 }
-                _glob.noty.error(message ? message : _glob.ERROR_MESSAGE);
+                _glob.noty.error(
+                    (message ? message + '<br>' : '') + (extraErrors || _glob.ERROR_MESSAGE)
+                );
             } else if (response.status === 406) {
                 _glob.noty.error(message ? message : _glob.ERROR_MESSAGE);
             } else if (response.status === 500) {

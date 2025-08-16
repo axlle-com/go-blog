@@ -36,5 +36,4 @@ func (c *postController) DeletePostImage(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Изображение удалено"})
-	return
 }

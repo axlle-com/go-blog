@@ -2,11 +2,12 @@ package repository
 
 import (
 	"fmt"
+	"log"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type AnalyticRepository interface {
@@ -27,8 +28,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewAnalyticRepo(db contracts.DB) AnalyticRepository {
-	r := &repository{db: db.GORM()}
+func NewAnalyticRepo(db *gorm.DB) AnalyticRepository {
+	r := &repository{db: db}
 	return r
 }
 

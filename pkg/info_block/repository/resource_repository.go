@@ -26,8 +26,8 @@ type infoBlockResource struct {
 	db *gorm.DB
 }
 
-func NewResourceRepo(db contracts.DB) InfoBlockHasResourceRepository {
-	r := &infoBlockResource{db: db.GORM()}
+func NewResourceRepo(db *gorm.DB) InfoBlockHasResourceRepository {
+	r := &infoBlockResource{db: db}
 	return r
 }
 

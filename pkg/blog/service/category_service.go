@@ -2,19 +2,20 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/app/db"
+	"sync"
+
+	"gorm.io/gorm"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
-	"gorm.io/gorm"
-	"sync"
 )
 
 type CategoryService struct {
@@ -41,7 +42,7 @@ func NewCategoryService(
 	}
 }
 
-func (s *CategoryService) GetAggregateByID(id uint) (*PostCategory, error) {
+func (s *CategoryService) GetAggregateByID(id uint) (*models.PostCategory, error) {
 	category, err := s.categoryRepo.GetByID(id)
 	if err != nil {
 		return nil, err
@@ -49,7 +50,7 @@ func (s *CategoryService) GetAggregateByID(id uint) (*PostCategory, error) {
 	return s.Aggregate(category)
 }
 
-func (s *CategoryService) Aggregate(category *PostCategory) (*PostCategory, error) {
+func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.PostCategory, error) {
 	var wg sync.WaitGroup
 
 	var galleries = make([]contracts.Gallery, 0)
@@ -75,8 +76,12 @@ func (s *CategoryService) Aggregate(category *PostCategory) (*PostCategory, erro
 	return category, nil
 }
 
-func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *PostCategory, user contracts.User) (model *PostCategory, err error) {
-	categoryForm := app.LoadStruct(&PostCategory{}, form).(*PostCategory)
+func (s *CategoryService) SaveFromRequest(
+	form *http.CategoryRequest,
+	found *models.PostCategory,
+	user contracts.User,
+) (model *models.PostCategory, err error) {
+	categoryForm := app.LoadStruct(&models.PostCategory{}, form).(*models.PostCategory)
 
 	categoryForm.Alias = s.GenerateAlias(categoryForm)
 
@@ -119,11 +124,11 @@ func (s *CategoryService) SaveFromRequest(form *http.CategoryRequest, found *Pos
 	return model, nil
 }
 
-func (s *CategoryService) GetByID(id uint) (*PostCategory, error) {
+func (s *CategoryService) GetByID(id uint) (*models.PostCategory, error) {
 	return s.categoryRepo.GetByID(id)
 }
 
-func (s *CategoryService) Delete(category *PostCategory) error {
+func (s *CategoryService) Delete(category *models.PostCategory) error {
 	err := s.galleryProvider.DetachResource(category)
 	if err != nil {
 		return err
@@ -132,7 +137,7 @@ func (s *CategoryService) Delete(category *PostCategory) error {
 	return s.categoryRepo.Delete(category)
 }
 
-func (s *CategoryService) Create(category *PostCategory, user contracts.User) (*PostCategory, error) {
+func (s *CategoryService) Create(category *models.PostCategory, user contracts.User) (*models.PostCategory, error) {
 	id := user.GetID()
 	category.UserID = &id
 	if err := s.categoryRepo.Create(category); err != nil {
@@ -141,11 +146,11 @@ func (s *CategoryService) Create(category *PostCategory, user contracts.User) (*
 	return category, nil
 }
 
-func (s *CategoryService) Update(category *PostCategory, found *PostCategory, user contracts.User) (*PostCategory, error) {
+func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contracts.User) (*models.PostCategory, error) {
 	category.ID = found.ID
 	category.UUID = found.UUID
 
-	tx := db.GetDB().Begin()
+	tx := s.categoryRepo.Tx()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -165,7 +170,7 @@ func (s *CategoryService) Update(category *PostCategory, found *PostCategory, us
 	return category, nil
 }
 
-func (s *CategoryService) GenerateAlias(category *PostCategory) string {
+func (s *CategoryService) GenerateAlias(category *models.PostCategory) string {
 	var aliasStr string
 	if category.Alias == "" {
 		aliasStr = category.Title
@@ -176,7 +181,7 @@ func (s *CategoryService) GenerateAlias(category *PostCategory) string {
 	return s.aliasProvider.Generate(category, aliasStr)
 }
 
-func (s *CategoryService) DeleteImageFile(category *PostCategory) error {
+func (s *CategoryService) DeleteImageFile(category *models.PostCategory) error {
 	if category.Image == nil {
 		return nil
 	}

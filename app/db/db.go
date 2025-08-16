@@ -15,15 +15,15 @@ var (
 )
 
 type db struct {
-	gorm *gorm.DB
+	pgsql *gorm.DB
 }
 
-func (r *db) GORM() *gorm.DB {
-	return r.gorm
+func (r *db) PostgreSQL() *gorm.DB {
+	return r.pgsql
 }
 
 func (r *db) Close() error {
-	sqlDB, err := r.gorm.DB()
+	sqlDB, err := r.pgsql.DB()
 	if err != nil {
 		return err
 	}
@@ -44,14 +44,7 @@ func SetupDB(config contracts.Config) (contracts.DB, error) {
 			initErr = fmt.Errorf("failed to open DB: %w", err)
 			return
 		}
-		instance = &db{gorm: dbConn}
+		instance = &db{pgsql: dbConn}
 	})
 	return instance, initErr //.Debug()
-}
-
-func GetDB() *gorm.DB {
-	if instance == nil {
-		panic("db not initialized: call InitDB first")
-	}
-	return instance.GORM()
 }

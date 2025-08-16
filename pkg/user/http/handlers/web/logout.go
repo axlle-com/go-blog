@@ -1,11 +1,12 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"net/http"
 )
 
 func (c *controller) Logout(ctx *gin.Context) {
@@ -28,5 +29,4 @@ func (c *controller) Logout(ctx *gin.Context) {
 	}
 	ctx.Redirect(http.StatusFound, "/")
 	ctx.Abort()
-	return
 }

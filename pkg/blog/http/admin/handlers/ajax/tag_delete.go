@@ -1,13 +1,14 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *tagController) Delete(ctx *gin.Context) {
@@ -23,13 +24,13 @@ func (c *tagController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.tagService.DeleteTags([]*PostTag{tag}); err != nil {
+	if err := c.tagService.DeleteTags([]*models.PostTag{tag}); err != nil {
 		logger.Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	filter, validError := NewTagFilter().ValidateQuery(ctx)
+	filter, validError := models.NewTagFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -44,8 +45,8 @@ func (c *tagController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	empty := &PostTag{}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	empty := &models.PostTag{}
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	temp, err := c.tagCollectionService.WithPaginate(paginator, filter)

@@ -1,22 +1,23 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/app/errutil"
+	"net/http"
+
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
-	. "github.com/axlle-com/blog/pkg/user/http/models"
+	"github.com/axlle-com/blog/pkg/user/http/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *controller) Auth(ctx *gin.Context) {
-	var authInput AuthInput
+	var authInput models.AuthInput
 	session := sessions.Default(ctx)
 
 	if err := ctx.ShouldBind(&authInput); err != nil {
-		errors := ParseBindError(err)
+		errors := errutil.NewBindError(err)
 		for _, bindError := range errors {
-			session.AddFlash(FlashErrorString(bindError))
+			session.AddFlash(errutil.FlashErrorString(bindError))
 		}
 		if err := session.Save(); err != nil {
 			logger.WithRequest(ctx).Error(err)
@@ -29,9 +30,9 @@ func (c *controller) Auth(ctx *gin.Context) {
 	userFound, err := c.authService.Auth(authInput)
 	if err != nil {
 		session.AddFlash(
-			FlashErrorString(
-				BindError{
-					Field:   GeneralFieldName,
+			errutil.FlashErrorString(
+				errutil.BindError{
+					Field:   errutil.GeneralFieldName,
 					Message: err.Error(),
 				},
 			),
@@ -59,5 +60,4 @@ func (c *controller) Auth(ctx *gin.Context) {
 
 	ctx.Redirect(http.StatusFound, "/admin")
 	ctx.Abort()
-	return
 }

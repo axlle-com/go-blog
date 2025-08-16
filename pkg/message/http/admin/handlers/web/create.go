@@ -1,12 +1,13 @@
 package web
 
 import (
-	mApp "github.com/axlle-com/blog/app/models"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	"net/http"
+
+	app "github.com/axlle-com/blog/app/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *messageController) CreateMessage(ctx *gin.Context) {
@@ -22,11 +23,11 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		gin.H{
 			"title":         "Страница шаблона",
 			"templateModel": template,
-			"resources":     mApp.NewResources().Resources(),
+			"resources":     app.NewResources().Resources(),
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models2.NewMenu(ctx.FullPath()),
+				"menu":      menu.NewMenu(ctx.FullPath()),
 			},
 		},
 	)

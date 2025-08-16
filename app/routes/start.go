@@ -3,6 +3,9 @@ package routes
 import (
 	"bytes"
 	"encoding/gob"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
@@ -12,8 +15,6 @@ import (
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"net/http/httptest"
 )
 
 var router *gin.Engine

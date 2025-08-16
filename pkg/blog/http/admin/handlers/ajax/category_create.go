@@ -1,15 +1,16 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	. "github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *categoryController) CreateCategory(ctx *gin.Context) {
-	form, formError := NewCategoryRequest().ValidateJSON(ctx)
+	form, formError := models.NewCategoryRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

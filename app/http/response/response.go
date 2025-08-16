@@ -1,12 +1,12 @@
 package response
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
 	"net/http"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type Body map[string]any
-type message map[string]any
 
 func Message(message string) map[string]any {
 	return map[string]any{
@@ -41,7 +41,7 @@ func Successful(code int, data any, message string, pagination contracts.Paginat
 	return body
 }
 
-func Fail(code int, message string, errors map[string]string) map[string]any {
+func Fail(code int, message string, errors map[string][]string) map[string]any {
 	result := Body{
 		"successful": false,
 		"code":       code,

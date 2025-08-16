@@ -2,15 +2,18 @@ package repository
 
 import (
 	"fmt"
+	"strings"
+
+	"gorm.io/gorm"
+
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
-	"gorm.io/gorm"
-	"strings"
 )
 
 type CategoryRepository interface {
+	Tx() *gorm.DB
 	WithTx(tx *gorm.DB) CategoryRepository
 	Create(postCategory *models.PostCategory) error
 	GetByID(id uint) (*models.PostCategory, error)
@@ -32,12 +35,16 @@ type categoryRepository struct {
 	*app.Paginate
 }
 
-func NewCategoryRepo(db contracts.DB) CategoryRepository {
-	return &categoryRepository{db: db.GORM()}
+func NewCategoryRepo(db *gorm.DB) CategoryRepository {
+	return &categoryRepository{db: db}
 }
 
 func (r *categoryRepository) WithTx(tx *gorm.DB) CategoryRepository {
 	return &categoryRepository{db: tx}
+}
+
+func (r *categoryRepository) Tx() *gorm.DB {
+	return r.db.Begin()
 }
 
 func (r *categoryRepository) GetDescendantsByID(id uint) ([]*models.PostCategory, error) {

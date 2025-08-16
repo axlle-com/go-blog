@@ -2,8 +2,9 @@ package errutil
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"unicode"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func message(fieldErr validator.FieldError) (message string) {

@@ -1,7 +1,7 @@
 package models
 
 import (
-	errorsForm "github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,25 +19,26 @@ type MessageRequest struct {
 	Viewed     string `json:"viewed"  form:"viewed" binding:"omitempty"`
 }
 
-func (m *MessageRequest) ValidateForm(ctx *gin.Context) (*MessageRequest, *errorsForm.Errors) {
+func (m *MessageRequest) ValidateForm(ctx *gin.Context) (*MessageRequest, *errutil.Errors) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
-		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
+		return nil, &errutil.Errors{Message: "Форма не валидная!"}
 	}
+
 	if len(ctx.Request.PostForm) == 0 {
-		return nil, &errorsForm.Errors{Message: "Форма не валидная!"}
+		return nil, &errutil.Errors{Message: "Форма не валидная!"}
 	}
+
 	if err := ctx.ShouldBind(&m); err != nil {
-		errBind := errorsForm.ParseBindErrorToMap(err)
-		return nil, errBind
+		return nil, errutil.NewErrors(err)
 	}
+
 	return m, nil
 }
 
-func (m *MessageRequest) ValidateJSON(ctx *gin.Context) (*MessageRequest, *errorsForm.Errors) {
+func (m *MessageRequest) ValidateJSON(ctx *gin.Context) (*MessageRequest, *errutil.Errors) {
 	if err := ctx.ShouldBindJSON(&m); err != nil {
-		errBind := errorsForm.ParseBindErrorToMap(err)
-		return nil, errBind
+		return nil, errutil.NewErrors(err)
 	}
 
 	return m, nil

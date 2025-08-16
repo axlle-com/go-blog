@@ -2,9 +2,11 @@ package models
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type Menu struct {

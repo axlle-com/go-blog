@@ -13,6 +13,6 @@ type Migrator interface {
 }
 
 type DB interface {
-	GORM() *gorm.DB
+	PostgreSQL() *gorm.DB
 	Close() error
 }

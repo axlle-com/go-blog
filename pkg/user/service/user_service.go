@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
@@ -76,6 +77,8 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 		newUserHasUser, err := s.userRepo.GetRelation(uuid.UUID, newUser.UUID)
 		if newUserHasUser != nil {
 			return newUser, nil
+		} else if err != nil {
+			return newUser, err
 		}
 
 		newUserHasUser = &models.UserHasUser{}
@@ -100,6 +103,8 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 	newUserHasUser, err := s.userRepo.GetRelation(email.UUID, user.GetUUID())
 	if newUserHasUser != nil {
 		return email, nil
+	} else if err != nil {
+		return email, err
 	}
 
 	newUserHasUser = &models.UserHasUser{}

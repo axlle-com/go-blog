@@ -1,15 +1,16 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/gallery/provider"
-	. "github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
-	"sync"
 )
 
 type InfoBlockCollectionService struct {
@@ -36,11 +37,11 @@ func NewInfoBlockCollectionService(
 	}
 }
 
-func (s *InfoBlockCollectionService) GetAll() ([]*InfoBlock, error) {
+func (s *InfoBlockCollectionService) GetAll() ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetAll()
 }
 
-func (s *InfoBlockCollectionService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (err error) {
+func (s *InfoBlockCollectionService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err error) {
 	var ids []uint
 	for _, infoBlock := range infoBlocks {
 		ids = append(ids, infoBlock.ID)
@@ -54,11 +55,11 @@ func (s *InfoBlockCollectionService) DeleteInfoBlocks(infoBlocks []*InfoBlock) (
 	return err
 }
 
-func (s *InfoBlockCollectionService) WithPaginate(p contracts.Paginator, filter *InfoBlockFilter) ([]*InfoBlock, error) {
+func (s *InfoBlockCollectionService) WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.WithPaginate(p, filter)
 }
 
-func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*InfoBlock) []*InfoBlock {
+func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) []*models.InfoBlock {
 	var templateIDs []uint
 	var userIDs []uint
 
@@ -125,7 +126,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*InfoBlock) []*Info
 	return infoBlocks
 }
 
-func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*InfoBlockResponse) []*InfoBlockResponse {
+func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.InfoBlockResponse) []*models.InfoBlockResponse {
 	var templateIDs []uint
 	var userIDs []uint
 

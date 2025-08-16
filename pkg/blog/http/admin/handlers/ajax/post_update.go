@@ -2,12 +2,13 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/logger"
-	. "github.com/axlle-com/blog/pkg/blog/http/admin/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) UpdatePost(ctx *gin.Context) {
@@ -23,7 +24,7 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := NewPostRequest().ValidateJSON(ctx)
+	form, formError := models.NewPostRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

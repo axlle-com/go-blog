@@ -1,14 +1,15 @@
 package db
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
-	. "github.com/axlle-com/blog/pkg/template/models"
+	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/bxcodec/faker/v3"
-	"strconv"
-	"time"
 )
 
 type seeder struct {
@@ -29,7 +30,7 @@ func (s *seeder) Seed() error {
 
 func (s *seeder) SeedTest(n int) error {
 	for i := 1; i <= n; i++ {
-		template := Template{}
+		template := models.Template{}
 
 		now := time.Now()
 		template.Title = "TitleTemplate #" + strconv.Itoa(i)

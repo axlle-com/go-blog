@@ -27,8 +27,8 @@ type infoBlockRepository struct {
 	*app.Paginate
 }
 
-func NewInfoBlockRepo(db contracts.DB) InfoBlockRepository {
-	r := &infoBlockRepository{db: db.GORM()}
+func NewInfoBlockRepo(db *gorm.DB) InfoBlockRepository {
+	r := &infoBlockRepository{db: db}
 	return r
 }
 

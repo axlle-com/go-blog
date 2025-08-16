@@ -1,49 +1,53 @@
-FROM golang:1.23-alpine AS builder
+# syntax=docker/dockerfile:1.7
 
-COPY go.mod ./
-COPY go.sum ./
+# ---- Build stage ----
+ARG GO_VERSION=1.24
+FROM golang:${GO_VERSION}-alpine AS builder
 
-RUN go mod download
+# Опционально: включить BuildKit-кэш для модулей и сборки
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache git ca-certificates
 
+WORKDIR /src
+
+# Сначала модули — лучше кэшируется
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+# Затем исходники
 COPY . .
-COPY .env .env
+# .env в бинарник не нужен — читай его в рантайме из /app/.env
+# COPY .env .env  # <-- обычно НЕ надо в билд-стадию
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go-app -ldflags="-s -w" cmd/main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go-cli -ldflags="-s -w" cmd/cli/cli.go
+# Сборка (по умолчанию на musl, без CGO)
+ENV CGO_ENABLED=0
+# если используешь buildx и multi-arch:
+# ARG TARGETOS TARGETARCH
+# ENV GOOS=$TARGETOS GOARCH=$TARGETARCH
 
-# Используем минимальный образ для запуска
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -ldflags="-s -w" -o /go-app ./cmd/main.go
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -ldflags="-s -w" -o /go-cli ./cmd/cli/cli.go
+
+# ---- Runtime (app) ----
 FROM alpine:latest AS app
-
-# Устанавливаем сертификаты для Sentry
-RUN apk --no-cache add ca-certificates curl
-
-# Создаем директорию для логов
-RUN mkdir -p /var/log/app
-
-# Копируем собранное приложение
-COPY --from=builder /go-app /go-app
-#COPY --from=builder /go-cli /go-cli
-
-# Устанавливаем рабочую директорию
+RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
-EXPOSE 3000
+# если нужен .env — монтируй его как файл/секрет в рантайме или COPY здесь
+# COPY .env .env
 
-# Запуск приложения
+COPY --from=builder /go-app /go-app
+EXPOSE 3000
 ENTRYPOINT ["/go-app"]
 
-# Образ для CLI
+# ---- Runtime (cli) ----
 FROM alpine:latest AS cli
-
-# Устанавливаем сертификаты для Sentry
-RUN apk --no-cache add ca-certificates
-
-# Создаем директорию для логов
-RUN mkdir -p /var/log/app
-
-# Копируем собранное CLI
-COPY --from=builder /go-cli /go-cli
-
-# Устанавливаем рабочую директорию
+RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
-
-ENTRYPOINT ["/go-cli", "-command=refill"]
+COPY --from=builder /go-cli /go-cli
+ENTRYPOINT ["/go-cli","-command=refill"]

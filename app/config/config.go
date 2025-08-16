@@ -2,14 +2,16 @@ package config
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/joho/godotenv"
-	"gorm.io/gorm"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 type config struct {
@@ -69,7 +71,7 @@ func LoadConfig() (err error) {
 
 		err = godotenv.Load(filepath.Join(rootDir, ".env"))
 		if err != nil {
-			err = fmt.Errorf("ошибка при загрузке .env файла: %v", err)
+			err = fmt.Errorf("ошибка при загрузке .env файла: %v. Скопируйте файл .env.example в .env", err)
 			return
 		}
 
@@ -130,7 +132,7 @@ func LoadConfig() (err error) {
 func Config() contracts.Config {
 	if instance == nil {
 		if err := LoadConfig(); err != nil {
-			panic("Ошибка загрузки конфигурации: " + err.Error())
+			log.Fatalf("\x1b[1;91m%s\x1b[0m", "Ошибка загрузки конфигурации: "+err.Error())
 		}
 	}
 	return instance

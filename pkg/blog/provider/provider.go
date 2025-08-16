@@ -7,23 +7,19 @@ import (
 	"github.com/axlle-com/blog/pkg/blog/service"
 )
 
-type PostProvider interface {
-	GetAll() []contracts.Post
-}
-
 func NewPostProvider(
 	postRepo repository.PostRepository,
-	service *service.PostService,
-) PostProvider {
+	postService *service.PostService,
+) contracts.PostProvider {
 	return &provider{
-		postRepo: postRepo,
-		service:  service,
+		postRepo:    postRepo,
+		postService: postService,
 	}
 }
 
 type provider struct {
-	postRepo repository.PostRepository
-	service  *service.PostService
+	postRepo    repository.PostRepository
+	postService *service.PostService
 }
 
 func (p *provider) GetAll() []contracts.Post {

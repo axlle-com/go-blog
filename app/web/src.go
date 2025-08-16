@@ -2,14 +2,14 @@ package web
 
 import (
 	"bytes"
+	"log"
+	"os"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
-	"io/ioutil"
-	"log"
-	"os"
 )
 
 func Minify(config contracts.Config) {
@@ -80,11 +80,11 @@ func minifyFront(minify *minify.M) {
 	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/app.js")
 }
 
-func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, outputPath string) {
+func mergeAndMinifyFiles(minifyTool *minify.M, mediaType string, inputPaths []string, outputPath string) {
 	var buffer bytes.Buffer
 
 	for _, inputPath := range inputPaths {
-		input, err := ioutil.ReadFile(inputPath)
+		input, err := os.ReadFile(inputPath)
 		if err != nil {
 			logger.Fatalf("[Minify][mergeAndMinifyFiles] Error reading file %s: %v", inputPath, err)
 		}
@@ -103,7 +103,7 @@ func mergeAndMinifyFiles(m *minify.M, mediaType string, inputPaths []string, out
 		}
 	}(output)
 
-	if err := m.Minify(mediaType, output, &buffer); err != nil {
+	if err := minifyTool.Minify(mediaType, output, &buffer); err != nil {
 		logger.Fatalf("[Minify][mergeAndMinifyFiles] Error minifying file %s: %v", outputPath, err)
 	}
 }

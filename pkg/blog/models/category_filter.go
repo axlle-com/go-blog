@@ -1,10 +1,11 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	. "github.com/axlle-com/blog/app/models"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/models"
+	"github.com/gin-gonic/gin"
 )
 
 func NewCategoryFilterFilter() *CategoryFilter {
@@ -18,7 +19,7 @@ type CategoryFilter struct {
 	PostCategoryID *uint   `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string `json:"title" form:"title" binding:"omitempty"`
 	Date           *string `json:"date" form:"date" binding:"omitempty"`
-	Filter
+	models.Filter
 }
 
 func (p *CategoryFilter) ValidateForm(ctx *gin.Context) (*CategoryFilter, *errutil.Errors) {

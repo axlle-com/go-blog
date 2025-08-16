@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *controller) GetPosts(ctx *gin.Context) {

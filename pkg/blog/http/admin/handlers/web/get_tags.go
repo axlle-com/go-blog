@@ -1,13 +1,14 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *tagController) GetTags(ctx *gin.Context) {
@@ -15,7 +16,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	filter, validError := NewTagFilter().ValidateQuery(ctx)
+	filter, validError := models.NewTagFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,
@@ -29,8 +30,8 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 		return
 	}
 
-	empty := &PostTag{}
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	empty := &models.PostTag{}
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	templates := c.template.GetAll()
@@ -53,7 +54,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 		"settings": gin.H{
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      models2.NewMenu(ctx.FullPath()),
+			"menu":      menu.NewMenu(ctx.FullPath()),
 		},
 	})
 }

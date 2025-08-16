@@ -1,12 +1,13 @@
 package web
 
 import (
-	. "github.com/axlle-com/blog/app/errutil"
+	"log"
+	"net/http"
+
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"log"
-	"net/http"
 )
 
 func (c *controller) Login(ctx *gin.Context) {
@@ -19,7 +20,7 @@ func (c *controller) Login(ctx *gin.Context) {
 	}
 
 	flashes := session.Flashes()
-	errorMessages := ParseFlashes(flashes)
+	errorMessages := errutil.ParseFlashes(flashes)
 	err := session.Save()
 	if err != nil {
 		log.Println(err)

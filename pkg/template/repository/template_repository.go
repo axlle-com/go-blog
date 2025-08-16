@@ -2,11 +2,12 @@ package repository
 
 import (
 	"fmt"
+	"log"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
-	"log"
 )
 
 type TemplateRepository interface {
@@ -27,8 +28,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewTemplateRepo(db contracts.DB) TemplateRepository {
-	r := &repository{db: db.GORM()}
+func NewTemplateRepo(db *gorm.DB) TemplateRepository {
+	r := &repository{db: db}
 	return r
 }
 

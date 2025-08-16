@@ -1,11 +1,12 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	mApp "github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/template/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/axlle-com/blog/app/errutil"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/template/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *templateController) UpdateTemplate(ctx *gin.Context) {
@@ -21,7 +22,7 @@ func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := NewTemplateRequest().ValidateJSON(ctx)
+	form, formError := models.NewTemplateRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -43,7 +44,7 @@ func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 
 	data := gin.H{
 		"templateModel": template,
-		"resources":     mApp.NewResources().Resources(),
+		"resources":     app.NewResources().Resources(),
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

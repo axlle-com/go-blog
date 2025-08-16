@@ -2,7 +2,8 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/app/logger"
+
+	"github.com/axlle-com/blog/app/errutil"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
@@ -40,35 +41,33 @@ func (s *ImageService) SaveImage(image *models.Image) (*models.Image, error) {
 	return image, nil
 }
 
-func (s *ImageService) DeleteImages(is []*models.Image) (err error) {
+func (s *ImageService) DeleteImages(images []*models.Image) (err error) {
 	var ids []uint
 	var resImages []*models.Image
-	var isErr bool
-	for _, im := range is {
-		if err := s.imageEvent.DeletingImage(im); err == nil {
-			ids = append(ids, im.ID)
-			resImages = append(resImages, im)
+	errCollection := errutil.New()
+	for _, image := range images {
+		if err := s.imageEvent.DeletingImage(image); err == nil {
+			ids = append(ids, image.ID)
+			resImages = append(resImages, image)
 		} else {
-			isErr = true
-			logger.Error(err)
+			errCollection.Add(err)
 		}
 	}
 
-	if isErr {
-		return errors.New("Ошибки при удалении изображений")
+	if err = errCollection.Error(); err != nil {
+		return err
 	}
 
 	if len(ids) > 0 {
 		if err = s.imageRepo.DeleteByIDs(ids); err == nil {
-			for _, im := range resImages {
-				if err := s.imageEvent.DeletedImage(im); err != nil {
-					logger.Error(err)
-					isErr = true
+			for _, image := range resImages {
+				if err := s.imageEvent.DeletedImage(image); err != nil {
+					errCollection.Add(err)
 				}
 			}
 
-			if isErr {
-				return errors.New("Ошибки при удалении изображений")
+			if err = errCollection.Error(); err != nil {
+				return errors.New("ошибки при удалении изображений")
 			}
 		}
 	}

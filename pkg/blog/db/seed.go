@@ -1,33 +1,34 @@
 package db
 
 import (
-	. "github.com/axlle-com/blog/app/db"
+	"math/rand"
+	"strconv"
+	"time"
+
+	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
-	. "github.com/axlle-com/blog/pkg/blog/models"
-	. "github.com/axlle-com/blog/pkg/blog/repository"
-	. "github.com/axlle-com/blog/pkg/blog/service"
+	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/repository"
+	"github.com/axlle-com/blog/pkg/blog/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
 	"github.com/google/uuid"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 type seeder struct {
-	postRepo         PostRepository
-	postService      *PostService
-	categoryRepo     CategoryRepository
+	postRepo         repository.PostRepository
+	postService      *service.PostService
+	categoryRepo     repository.CategoryRepository
 	userProvider     user.UserProvider
 	templateProvider template.TemplateProvider
 }
 
 func NewSeeder(
-	post PostRepository,
-	postService *PostService,
-	category CategoryRepository,
+	post repository.PostRepository,
+	postService *service.PostService,
+	category repository.CategoryRepository,
 	user user.UserProvider,
 	template template.TemplateProvider,
 ) contracts.Seeder {
@@ -57,37 +58,36 @@ func (s *seeder) posts(n int) error {
 	ids := s.templateProvider.GetAllIds()
 	idsCategory, _ := s.categoryRepo.GetAllIds()
 	idsUser := s.userProvider.GetAllIds()
-	rand.Seed(time.Now().UnixNano())
 	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
-		post := Post{
+		post := models.Post{
 			UUID:               uuid.New(),
 			TemplateID:         &randomID,
 			PostCategoryID:     &randomCategoryID,
-			MetaTitle:          StrPtr(faker.Sentence()),
-			MetaDescription:    StrPtr(faker.Sentence()),
-			IsPublished:        RandBool(),
-			IsFavourites:       RandBool(),
-			HasComments:        RandBool(),
-			ShowImagePost:      RandBool(),
-			ShowImageCategory:  RandBool(),
-			InSitemap:          RandBool(),
-			Media:              StrPtr(faker.Word()),
+			MetaTitle:          db.StrPtr(faker.Sentence()),
+			MetaDescription:    db.StrPtr(faker.Sentence()),
+			IsPublished:        db.RandBool(),
+			IsFavourites:       db.RandBool(),
+			HasComments:        db.RandBool(),
+			ShowImagePost:      db.RandBool(),
+			ShowImageCategory:  db.RandBool(),
+			InSitemap:          db.RandBool(),
+			Media:              db.StrPtr(faker.Word()),
 			Title:              "TitlePost #" + strconv.Itoa(i),
-			TitleShort:         StrPtr("TitlePostShort #" + strconv.Itoa(i)),
-			DescriptionPreview: StrPtr(faker.Paragraph()),
-			Description:        StrPtr(faker.Paragraph()),
-			ShowDate:           RandBool(),
-			DatePub:            ParseDate("02.01.2006"),
-			DateEnd:            ParseDate("02.01.2006"),
-			Image:              StrPtr("/public/img/404.svg"),
+			TitleShort:         db.StrPtr("TitlePostShort #" + strconv.Itoa(i)),
+			DescriptionPreview: db.StrPtr(faker.Paragraph()),
+			Description:        db.StrPtr(faker.Paragraph()),
+			ShowDate:           db.RandBool(),
+			DatePub:            db.ParseDate("02.01.2006"),
+			DateEnd:            db.ParseDate("02.01.2006"),
+			Image:              db.StrPtr("/public/img/404.svg"),
 			Hits:               uint(rand.Intn(1000)),
 			Sort:               rand.Intn(100),
 			Stars:              rand.Float32() * 5,
-			CreatedAt:          TimePtr(time.Now()),
-			UpdatedAt:          TimePtr(time.Now()),
+			CreatedAt:          db.TimePtr(time.Now()),
+			UpdatedAt:          db.TimePtr(time.Now()),
 			DeletedAt:          nil,
 		}
 
@@ -102,7 +102,6 @@ func (s *seeder) posts(n int) error {
 }
 
 func (s *seeder) categories(n int) error {
-	rand.Seed(time.Now().UnixNano())
 	ids := s.templateProvider.GetAllIds()
 	idsUser := s.userProvider.GetAllIds()
 
@@ -118,26 +117,26 @@ func (s *seeder) categories(n int) error {
 		}
 
 		randomID := ids[rand.Intn(len(ids))]
-		postCategory := PostCategory{
+		postCategory := models.PostCategory{
 			UUID:               uuid.New(),
 			TemplateID:         &randomID,
 			PostCategoryID:     randomCategoryID,
 			UserID:             &randomUserID,
-			MetaTitle:          StrPtr(faker.Sentence()),
-			MetaDescription:    StrPtr(faker.Sentence()),
+			MetaTitle:          db.StrPtr(faker.Sentence()),
+			MetaDescription:    db.StrPtr(faker.Sentence()),
 			Alias:              faker.Username(),
 			URL:                faker.URL(),
-			IsPublished:        IntToBoolPtr(),
-			IsFavourites:       IntToBoolPtr(),
-			InSitemap:          IntToBoolPtr(),
+			IsPublished:        db.IntToBoolPtr(),
+			IsFavourites:       db.IntToBoolPtr(),
+			InSitemap:          db.IntToBoolPtr(),
 			Title:              "TitleCategory #" + strconv.Itoa(i),
-			TitleShort:         StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
-			DescriptionPreview: StrPtr(faker.Paragraph()),
-			Description:        StrPtr(faker.Paragraph()),
-			Image:              StrPtr("/public/img/404.svg"),
-			Sort:               IntToUintPtr(rand.Intn(100)),
-			CreatedAt:          TimePtr(time.Now()),
-			UpdatedAt:          TimePtr(time.Now()),
+			TitleShort:         db.StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
+			DescriptionPreview: db.StrPtr(faker.Paragraph()),
+			Description:        db.StrPtr(faker.Paragraph()),
+			Image:              db.StrPtr("/public/img/404.svg"),
+			Sort:               db.IntToUintPtr(rand.Intn(100)),
+			CreatedAt:          db.TimePtr(time.Now()),
+			UpdatedAt:          db.TimePtr(time.Now()),
 			DeletedAt:          nil,
 		}
 

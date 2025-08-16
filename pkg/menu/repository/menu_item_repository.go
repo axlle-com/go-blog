@@ -2,12 +2,12 @@ package repository
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type MenuItemRepository interface {
@@ -31,8 +31,8 @@ type menuItemRepository struct {
 	*app.Paginate
 }
 
-func NewMenuItemRepo(db contracts.DB) MenuItemRepository {
-	return &menuItemRepository{db: db.GORM()}
+func NewMenuItemRepo(db *gorm.DB) MenuItemRepository {
+	return &menuItemRepository{db: db}
 }
 
 func (r *menuItemRepository) WithTx(tx *gorm.DB) MenuItemRepository {

@@ -1,13 +1,14 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
-	mApp "github.com/axlle-com/blog/app/models"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	app "github.com/axlle-com/blog/app/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *messageController) GetMessages(ctx *gin.Context) {
@@ -30,7 +31,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 	}
 
 	empty := &models.Message{}
-	paginator := mApp.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL(empty.AdminURL())
 
 	users := c.userProvider.GetAll()
@@ -57,7 +58,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 		"settings": gin.H{
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      models2.NewMenu(ctx.FullPath()),
+			"menu":      menu.NewMenu(ctx.FullPath()),
 		},
 	})
 }

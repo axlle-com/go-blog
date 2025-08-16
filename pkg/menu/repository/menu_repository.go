@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
@@ -28,8 +29,8 @@ type menuRepository struct {
 	*app.Paginate
 }
 
-func NewMenuRepo(db contracts.DB) MenuRepository {
-	r := &menuRepository{db: db.GORM()}
+func NewMenuRepo(db *gorm.DB) MenuRepository {
+	r := &menuRepository{db: db}
 	return r
 }
 
@@ -66,7 +67,7 @@ func (r *menuRepository) Delete(menu *models.Menu) error {
 	if menu.Deleting() {
 		return r.db.Delete(&models.Menu{}, menu.ID).Error
 	}
-	return errors.New("При удалении произошли ошибки")
+	return errors.New("при удалении произошли ошибки")
 }
 
 func (r *menuRepository) GetAll() ([]*models.Menu, error) {

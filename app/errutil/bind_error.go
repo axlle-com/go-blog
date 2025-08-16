@@ -1,6 +1,8 @@
 package errutil
 
 import (
+	"errors"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -13,46 +15,46 @@ type BindError struct {
 }
 
 type Errors struct {
-	Errors  map[string]string
-	Message string
+	Errors  map[string][]string `json:"errors"`
+	Message string              `json:"message"`
 }
 
 type MapErrors map[string]string
 
-func ParseBindError(err error) map[string]BindError {
-	errors := make(map[string]BindError)
-	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+func NewBindError(err error) map[string]BindError {
+	errs := make(map[string]BindError)
+	var validationErrors validator.ValidationErrors
+
+	if errors.As(err, &validationErrors) {
 		for _, fieldErr := range validationErrors {
 			field := ToSnakeCase(fieldErr.Field())
-			errors[field] = BindError{
+			errs[field] = BindError{
 				Field:   field,
 				Message: message(fieldErr),
 				Value:   fieldErr.Value(),
 			}
 		}
-	} else {
-		errors[GeneralFieldName] = BindError{
-			Field:   GeneralFieldName,
-			Message: err.Error(),
-		}
 	}
 
-	return errors
+	return errs
 }
 
-func ParseBindErrorToMap(err error) *Errors {
-	errors := make(map[string]string)
-	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+func NewErrors(err error) *Errors {
+	errs := make(map[string][]string)
+	var validationErrors validator.ValidationErrors
+
+	if errors.As(err, &validationErrors) {
 		for _, fieldErr := range validationErrors {
 			field := ToSnakeCase(fieldErr.Field())
-			errors[field] = message(fieldErr)
+			if _, ok := errs[field]; !ok {
+				errs[field] = make([]string, 0)
+			}
+			errs[field] = append(errs[field], message(fieldErr))
 		}
-	} else {
-		errors[GeneralFieldName] = err.Error()
 	}
 
 	return &Errors{
-		Errors:  errors,
+		Errors:  errs,
 		Message: "Ошибки валидации",
 	}
 }

@@ -49,5 +49,7 @@ func (e *ErrUtil) Error() error {
 			parts = append(parts, msg)
 		}
 	}
+	e.counts = make(map[string]int)
+
 	return errors.New(strings.Join(parts, "; "))
 }

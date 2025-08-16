@@ -1,10 +1,11 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/pkg/message/form"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"net/http"
 )
 
 func (c *messageController) CreateMessage(ctx *gin.Context) {
@@ -39,5 +40,4 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Сообщение успешно отправлено"})
-	return
 }

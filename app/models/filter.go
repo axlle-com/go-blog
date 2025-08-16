@@ -1,14 +1,15 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/gin-gonic/gin"
 )
 
 type Filter struct {
@@ -31,9 +32,9 @@ func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errutil.Erro
 	}
 
 	if err := ctx.ShouldBind(model); err != nil {
-		errBind := errutil.ParseBindErrorToMap(err)
-		return errBind
+		return errutil.NewErrors(err)
 	}
+
 	f.SetEmptyPointersToNil(model)
 	f.setQuery().
 		setQueryString().
@@ -43,22 +44,23 @@ func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errutil.Erro
 	if f.IsEmpty() {
 		return &errutil.Errors{Message: "Форма пустая"}
 	}
+
 	return nil
 }
 
 func (f *Filter) ValidateQuery(ctx *gin.Context, model interface{}) *errutil.Errors {
 	f.context = ctx
 	if err := ctx.ShouldBindQuery(model); err != nil {
-		errBind := errutil.ParseBindErrorToMap(err)
-		return errBind
+		return errutil.NewErrors(err)
 	}
 	f.SetEmptyPointersToNil(model)
 	f.setQuery().setQueryString().setMap(model)
+
 	return nil
 }
 
 func (f *Filter) IsEmpty() bool {
-	return f.array == nil || len(f.array) == 0
+	return len(f.array) == 0
 }
 
 func (f *Filter) GetMap() map[string]string {

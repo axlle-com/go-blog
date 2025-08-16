@@ -4,15 +4,15 @@ COMPOSE_FILE?=docker-compose.yml
 SERVICES?=postgres redis
 # elasticsearch app cli
 
-all: network up
+all: env network up
 
-up:
+up: env
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
 
 up-logging:
 	@docker compose -f $(COMPOSE_FILE) --profile logging up -d $(SERVICES)
 
-rebuild: network
+rebuild: env network
 	@docker compose -f $(COMPOSE_FILE) down -v
 	@docker compose -f $(COMPOSE_FILE) build --no-cache $(SERVICES)
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
@@ -45,3 +45,17 @@ clean-network:
 		echo "Удаляю сеть $(NETWORK)..."; \
 		docker network rm $(NETWORK); \
 	} || echo "Сеть $(NETWORK) не существует."
+
+.PHONY: env
+env:
+	@if [ ! -f .env ]; then \
+		if [ -f .env.example ]; then \
+			echo "Создаю .env из .env.example..."; \
+			cp .env.example .env; \
+		else \
+			echo "Файл .env отсутствует и .env.example не найден — создайте его вручную." >&2; \
+			exit 1; \
+		fi; \
+	else \
+		echo ".env уже существует"; \
+	fi

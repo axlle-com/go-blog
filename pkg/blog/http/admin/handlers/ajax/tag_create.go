@@ -1,14 +1,15 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/app/http/response"
-	. "github.com/axlle-com/blog/pkg/blog/http/admin/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/axlle-com/blog/app/http/response"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *tagController) Create(ctx *gin.Context) {
-	form, formError := NewTagRequest().ValidateJSON(ctx)
+	form, formError := models.NewTagRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

@@ -2,10 +2,11 @@ package ajax
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/errutil"
-	. "github.com/axlle-com/blog/pkg/info_block/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
@@ -21,7 +22,7 @@ func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := NewBlockRequest().ValidateJSON(ctx)
+	form, formError := models.NewBlockRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

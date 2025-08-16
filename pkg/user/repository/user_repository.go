@@ -2,7 +2,6 @@ package repository
 
 import (
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -30,8 +29,8 @@ type repository struct {
 	*app.Paginate
 }
 
-func NewUserRepo(db contracts.DB) UserRepository {
-	return &repository{db: db.GORM()}
+func NewUserRepo(db *gorm.DB) UserRepository {
+	return &repository{db: db}
 }
 
 func (r *repository) WithTx(tx *gorm.DB) UserRepository {

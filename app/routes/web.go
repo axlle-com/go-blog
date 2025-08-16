@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/middleware"

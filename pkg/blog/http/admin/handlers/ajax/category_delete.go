@@ -1,13 +1,14 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
-	. "github.com/axlle-com/blog/pkg/blog/models"
+	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *categoryController) DeleteCategory(ctx *gin.Context) {
@@ -29,7 +30,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 
-	filter, validError := NewCategoryFilterFilter().ValidateQuery(ctx)
+	filter, validError := models.NewCategoryFilterFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -44,7 +45,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 
-	paginator := models.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
 	paginator.SetURL("/admin/categories")
 
 	users := c.userProvider.GetAll()
@@ -63,7 +64,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 
 	data := response.Body{
 		"title":          "Страница постов",
-		"category":       &PostCategory{},
+		"category":       &models.PostCategory{},
 		"categories":     categories,
 		"postCategories": postCategories,
 		"templates":      templates,

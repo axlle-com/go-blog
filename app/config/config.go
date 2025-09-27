@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"log"
+	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -18,7 +20,8 @@ type config struct {
 	*sync.Mutex
 	rootDir  string
 	env      string
-	port     string
+	appHost  string
+	appPort  string
 	logLevel int
 
 	store         string
@@ -76,7 +79,8 @@ func LoadConfig() (err error) {
 		}
 
 		instance.env = getEnv("ENV", "local")
-		instance.port = getEnv("PORT", "3000")
+		instance.appHost = getEnv("APP_HOST", "local")
+		instance.appPort = getEnv("APP_PORT", "3000")
 
 		logLevel := getEnv("LOG_LEVEL", "6")
 		instance.logLevel, err = strconv.Atoi(logLevel)
@@ -177,7 +181,7 @@ func (c *config) DBUrlTest() string {
 			" user=" + c.dbUserTest +
 			" password=" + c.dbPasswordTest +
 			" dbname=" + c.dbNameTest +
-			" port=" + c.dbPort +
+			" appPort=" + c.dbPort +
 			" sslmode=disable TimeZone=Europe/Moscow"
 	}
 	return dsn
@@ -238,18 +242,45 @@ func (c *config) SessionsName() string {
 	return s
 }
 
+func (c *config) AppHost() string {
+	host := strings.TrimSpace(c.appHost)
+	port := strings.TrimPrefix(strings.TrimSpace(c.appPort), ":")
+
+	// Не добавляем "дефолтные" порты
+	if port == "" || port == "80" || port == "8080" {
+		return host
+	}
+
+	// Если это полный URL — аккуратно добавим порт к u.Host
+	if u, err := url.Parse(host); err == nil && u.Scheme != "" {
+		// если порт уже указан — ничего не меняем
+		if _, _, err := net.SplitHostPort(u.Host); err == nil {
+			return host
+		}
+		u.Host = net.JoinHostPort(u.Hostname(), port)
+		return u.String()
+	}
+
+	// Сырой хост (в т.ч. IPv6 в квадратных скобках). Если порт уже есть — вернуть как есть.
+	if _, _, err := net.SplitHostPort(host); err == nil {
+		return host
+	}
+	return net.JoinHostPort(host, port)
+}
+
 func (c *config) Port() string {
 	if c.IsTest() {
-		return c.port
+		return ":" + strings.TrimPrefix(strings.TrimSpace(c.appPort), ":")
 	}
-	return c.port
+	return ":" + strings.TrimPrefix(strings.TrimSpace(c.appPort), ":")
 }
 
 func (c *config) UploadPath() string {
+	path := "/" + strings.Trim(c.uploadsPath, "/") + "/"
 	if c.IsTest() {
-		return c.uploadsPath + "test/"
+		return path + "test/"
 	}
-	return c.uploadsPath
+	return path
 }
 
 func (c *config) RuntimeFolder(s string) string {

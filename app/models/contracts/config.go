@@ -3,6 +3,7 @@ package contracts
 import "gorm.io/gorm"
 
 type Config interface {
+	AppHost() string
 	Port() string
 	LogLevel() int
 	SetTestENV()
@@ -24,6 +25,7 @@ type Config interface {
 	SessionKey(string) string
 	UserSessionKey(string) string
 
+	// UploadPath return /public/uploads/
 	UploadPath() string
 	RuntimeFolder(s string) string
 	SrcFolder() string

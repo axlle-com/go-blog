@@ -1,10 +1,11 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *controller) DeleteImage(ctx *gin.Context) {

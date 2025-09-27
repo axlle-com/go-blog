@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type File struct {
@@ -14,7 +15,7 @@ type File struct {
 	OriginalName string         `gorm:"size:255;not null" json:"original_name"`
 	Size         int64          `gorm:"size:255;not null" json:"size,omitempty"`
 	Type         string         `gorm:"size:255" json:"type,omitempty"`
-	IsReceived   bool           `gorm:"index;not null;default:false" json:"is_received" form:"is_received" binding:"omitempty"`
+	ReceivedAt   *time.Time     `gorm:"index" json:"received_at" form:"received_at" binding:"omitempty"`
 	CreatedAt    *time.Time     `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt    *time.Time     `json:"updated_at,omitempty"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"omitempty"`
@@ -29,7 +30,7 @@ func (u *File) Fields() []string {
 		"original_name",
 		"size",
 		"type",
-		"is_received",
+		"received_at",
 	}
 }
 

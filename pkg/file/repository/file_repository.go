@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/file/models"
 	"github.com/google/uuid"
@@ -105,7 +107,7 @@ func (r *repository) Received(files []string) error {
 	if err := r.db.
 		Model(&models.File{}).
 		Where("file IN ?", files).
-		Update("is_received", true).
+		Update("received_at", time.Now()).
 		Error; err != nil {
 		return err
 	}

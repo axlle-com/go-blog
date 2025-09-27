@@ -8,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/app/service/migrate"
 	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/app/service/scheduler"
+	service2 "github.com/axlle-com/blog/app/service/storage"
 	"github.com/axlle-com/blog/app/service/view"
 	"github.com/axlle-com/blog/pkg/blog/provider"
 	"github.com/axlle-com/blog/pkg/menu/repository"
@@ -82,7 +83,7 @@ type Container struct {
 	Scheduler contracts.Scheduler
 
 	FileUploadService     *fileService.UploadService
-	FileService           *fileService.Service
+	FileService           *fileService.FileService
 	FileCollectionService *fileService.CollectionService
 	FileProvider          fileProvider.FileProvider
 
@@ -152,8 +153,9 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newMailer := mailer.NewMailer(newQueue)
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
-	newFileService := fileService.NewService(newFileRepo)
-	uploadService := fileService.NewUploadService(newFileService)
+	newFileService := fileService.NewFileService(newFileRepo)
+	newStorageService := service2.NewLocalStorageService(cfg)
+	uploadService := fileService.NewUploadService(newFileService, newStorageService)
 	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
 	fileProv := fileProvider.NewFileProvider(uploadService, newFileService, fileCollectionService)
 

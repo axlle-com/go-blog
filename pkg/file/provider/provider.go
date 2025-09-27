@@ -1,9 +1,10 @@
 package provider
 
 import (
+	"mime/multipart"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/file/service"
-	"mime/multipart"
 )
 
 type FileProvider interface {
@@ -17,7 +18,7 @@ type FileProvider interface {
 
 func NewFileProvider(
 	uploadService *service.UploadService,
-	fileService *service.Service,
+	fileService *service.FileService,
 	collectionService *service.CollectionService,
 ) FileProvider {
 	return &provider{
@@ -29,7 +30,7 @@ func NewFileProvider(
 
 type provider struct {
 	uploadService     *service.UploadService
-	fileService       *service.Service
+	fileService       *service.FileService
 	collectionService *service.CollectionService
 }
 

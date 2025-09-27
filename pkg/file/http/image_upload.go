@@ -1,9 +1,10 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *controller) UploadImage(ctx *gin.Context) {
@@ -79,11 +80,11 @@ func (c *controller) UploadImages(ctx *gin.Context) {
 	}
 
 	files := form.File["files"]
-	paths := c.uploadService.SaveUploadedFiles(files, resource, user)
-	if len(paths) <= 0 {
+	paths, err := c.uploadService.SaveUploadedFiles(files, resource, user)
+	if err != nil {
 		logger.Error("[Controller][UploadImages] Error: paths is empty")
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error: paths is empty",
+			"message": err.Error(),
 		})
 		ctx.Abort()
 		return

@@ -3,6 +3,13 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
@@ -11,12 +18,6 @@ import (
 	modelsGallery "github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
-	"math/rand"
-	"net/http"
-	"net/http/httptest"
-	"strconv"
-	"testing"
-	"time"
 )
 
 var cntPost = 10

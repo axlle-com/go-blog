@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
 )
 
 type Gallery struct {
@@ -16,6 +17,7 @@ type Gallery struct {
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
+	// @todo delete?
 	Sort         int       `gorm:"-" json:"sort" form:"sort" binding:"omitempty"`
 	Position     string    `gorm:"-" json:"position" form:"position" binding:"omitempty"`
 	ResourceUUID uuid.UUID `gorm:"-" json:"uuid" form:"uuid" binding:"-"`

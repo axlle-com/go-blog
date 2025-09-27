@@ -2,9 +2,10 @@ package job
 
 import (
 	"context"
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
-	"time"
 )
 
 type DeleteFiles struct {

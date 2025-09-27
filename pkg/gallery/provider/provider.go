@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"sync"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
@@ -9,7 +11,6 @@ import (
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/google/uuid"
-	"sync"
 )
 
 type GalleryProvider interface {

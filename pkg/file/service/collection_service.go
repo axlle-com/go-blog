@@ -2,20 +2,21 @@ package service
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/pkg/file/repository"
-	"os"
 )
 
 type CollectionService struct {
 	fileRepo      repository.FileRepository
-	fileService   *Service
+	fileService   *FileService
 	uploadService *UploadService
 }
 
 func NewCollectionService(
 	fileRepo repository.FileRepository,
-	fileService *Service,
+	fileService *FileService,
 	uploadService *UploadService,
 ) *CollectionService {
 	return &CollectionService{
@@ -31,7 +32,7 @@ func (s *CollectionService) Received(files []string) error {
 
 func (s *CollectionService) RevisionReceived() error {
 	params := map[string]any{
-		"is_received": false,
+		"received_at": nil,
 	}
 
 	byParams, err := s.fileRepo.GetByParams(params, true)

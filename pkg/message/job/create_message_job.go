@@ -2,10 +2,11 @@ package mailer
 
 import (
 	"context"
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	messageContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
-	"time"
 )
 
 func NewCreateMessageJob(

@@ -3,38 +3,42 @@ package service
 import (
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/file/models"
 	"github.com/google/uuid"
 )
 
-const staticPath = "/public/img/"
-
 type UploadService struct {
-	service *Service
+	fileService    *FileService
+	storageService contracts.Storage
 }
 
-func NewUploadService(service *Service) *UploadService {
-	return &UploadService{service}
+func NewUploadService(
+	fileService *FileService,
+	storageService contracts.Storage,
+) *UploadService {
+	return &UploadService{
+		fileService,
+		storageService,
+	}
 }
 
-func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, dist string, user contracts.User) (path string, err error) {
-	contentType := s.contentType(file)
+func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder string, user contracts.User) (path string, err error) {
+	ext, contentType := s.safeExt(file)
 	if !s.isImage(contentType) {
 		return "", fmt.Errorf("файл:%s не является изображением", file.Filename)
 	}
 
 	newUUID := uuid.New()
-	if path, err = s.save(file, dist, newUUID.String()); err != nil {
+	if path, err = s.storageService.Save(file, folder, newUUID.String()+ext); err != nil {
 		return
 	}
 
@@ -45,12 +49,11 @@ func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, dist string
 		OriginalName: file.Filename,
 		Size:         file.Size,
 		Type:         contentType,
-		IsReceived:   false,
 	}
 
-	err = s.service.Create(newFile)
+	err = s.fileService.Create(newFile)
 	if err != nil {
-		newErr := s.DestroyFile(path)
+		newErr := s.storageService.Destroy(path)
 		if newErr != nil {
 			return "", newErr
 		}
@@ -60,9 +63,12 @@ func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, dist string
 	return
 }
 
-func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist string, user contracts.User) (paths []string) {
+func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist string, user contracts.User) ([]string, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
+
+	var paths []string
+	newErr := errutil.New()
 
 	for _, file := range files {
 		wg.Add(1)
@@ -71,7 +77,7 @@ func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist st
 			defer wg.Done()
 			path, e := s.SaveUploadedFile(file, dist, user)
 			if e != nil {
-				logger.Error(e)
+				newErr.Add(e)
 				return
 			}
 
@@ -82,85 +88,15 @@ func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist st
 	}
 
 	wg.Wait()
-	return
+	return paths, newErr.Error()
 }
 
 func (s *UploadService) DestroyFile(file string) error {
-	if strings.HasPrefix(file, staticPath) {
-		return nil
-	}
-	absPath, err := filepath.Abs(s.realPath(file))
-	if err != nil {
-		return err
-	}
-	if _, err := os.Stat(absPath); os.IsNotExist(err) {
-		return nil
-	}
-	return os.Remove(absPath)
+	return s.storageService.Destroy(file)
 }
 
 func (s *UploadService) Exist(file string) bool {
-	if strings.HasPrefix(file, staticPath) {
-		return true
-	}
-
-	absPath, err := filepath.Abs(s.realPath(file))
-	if err != nil {
-		// на всякий случай, если не получилось построить путь — говорим, что нет
-		return false
-	}
-
-	if info, err := os.Stat(absPath); err == nil {
-		// Убедимся, что это не директория (если нужно только файлы)
-		return !info.IsDir()
-	} else if os.IsNotExist(err) {
-		// Файл точно отсутствует
-		return false
-	} else {
-		// Какая-то другая ошибка (например, прав доступа) — можно трактовать как “нет”
-		return false
-	}
-}
-
-func (s *UploadService) save(file *multipart.FileHeader, dst, newUUID string) (string, error) {
-	name := s.newName(dst, filepath.Ext(file.Filename), newUUID)
-	path := s.realPath(name)
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer func(src multipart.File) {
-		err := src.Close()
-		if err != nil {
-
-		}
-	}(src)
-
-	if err = os.MkdirAll(filepath.Dir(path), 0750); err != nil {
-		return "", err
-	}
-
-	out, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-			logger.Error(err)
-		}
-	}(out)
-
-	_, err = io.Copy(out, src)
-	return name, err
-}
-
-func (s *UploadService) newName(dist, ext, newUUID string) string {
-	return fmt.Sprintf(config.Config().UploadPath()+"%s/%s%s", dist, newUUID, ext)
-}
-
-func (s *UploadService) realPath(path string) string {
-	return config.Config().SrcFolderBuilder(path)
+	return s.storageService.Exists(file)
 }
 
 func (s *UploadService) isImage(contentType string) bool {
@@ -173,24 +109,62 @@ func (s *UploadService) isImage(contentType string) bool {
 	}
 }
 
-func (s *UploadService) contentType(fileHeader *multipart.FileHeader) string {
-	file, err := fileHeader.Open()
-	if err != nil {
-		return ""
+func (s *UploadService) safeExt(fh *multipart.FileHeader) (ext, contentType string) {
+	// 1) из имени файла
+	ext = strings.ToLower(strings.TrimPrefix(filepath.Ext(fh.Filename), "."))
+	if ext != "" && isAllowedExt(ext) {
+		return "." + ext, mime.TypeByExtension("." + ext)
 	}
-	defer func(file multipart.File) {
-		err := file.Close()
-		if err != nil {
-			logger.Error(err)
+
+	// 2) по заголовку из формы (если передавали)
+	if ct := fh.Header.Get("Content-Type"); ct != "" {
+		if exts, _ := mime.ExtensionsByType(ct); len(exts) > 0 {
+			e := strings.ToLower(exts[0])
+			if isAllowedExt(strings.TrimPrefix(e, ".")) {
+				return e, ct
+			}
 		}
-	}(file)
-
-	// Чтение первых 512 байт файла для определения MIME-типа
-	buffer := make([]byte, 512)
-	if _, err := file.Read(buffer); err != nil {
-		return ""
 	}
 
-	// Получение MIME-типа файла
-	return http.DetectContentType(buffer)
+	// 3) «понюхаем» первые 512 байт
+	f, err := fh.Open()
+	if err == nil {
+		defer f.Close()
+		var head [512]byte
+		n, _ := io.ReadFull(f, head[:])
+		ct := http.DetectContentType(head[:n])
+
+		if exts, _ := mime.ExtensionsByType(ct); len(exts) > 0 {
+			e := strings.ToLower(exts[0])
+			if isAllowedExt(strings.TrimPrefix(e, ".")) {
+				return e, ct
+			}
+		}
+
+		// fallback на популярные типы
+		switch {
+		case strings.Contains(ct, "jpeg"):
+			return ".jpg", ct
+		case strings.Contains(ct, "png"):
+			return ".png", ct
+		case strings.Contains(ct, "gif"):
+			return ".gif", ct
+		case strings.Contains(ct, "webp"):
+			return ".webp", ct
+		case strings.Contains(ct, "pdf"):
+			return ".pdf", ct
+		}
+	}
+
+	// финальный дефолт
+	return ".bin", "application/octet-stream"
+}
+
+func isAllowedExt(ext string) bool {
+	switch ext {
+	case "jpg", "jpeg", "png", "gif", "webp", "svg", "pdf", "mp4", "txt", "csv", "json":
+		return true
+	default:
+		return false
+	}
 }

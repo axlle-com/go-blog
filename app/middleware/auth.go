@@ -1,23 +1,24 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func AuthRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
+	return func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
 		userID := session.Get("user_id")
 		userUUID := session.Get("user_uuid")
 		user := session.Get("user")
 		if userID == nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		c.Set("user", user)
-		c.Set("user_uuid", userUUID)
-		c.Next()
+		ctx.Set("user", user)
+		ctx.Set("user_uuid", userUUID)
+		ctx.Next()
 	}
 }

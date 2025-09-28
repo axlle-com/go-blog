@@ -8,41 +8,41 @@ import (
 )
 
 func Error() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
+	return func(ctx *gin.Context) {
+		ctx.Next()
 
-		if c.Writer.Written() {
+		if ctx.Writer.Written() {
 			return
 		}
 
-		status := c.Writer.Status()
+		status := ctx.Writer.Status()
 
 		// Решаем по заголовку Accept, является ли это API-запросом
-		accept := c.GetHeader("Accept")
+		accept := ctx.GetHeader("Accept")
 		isAPI := strings.Contains(accept, "application/json") ||
-			strings.Contains(c.GetHeader("X-Requested-With"), "XMLHttpRequest")
+			strings.Contains(ctx.GetHeader("X-Requested-With"), "XMLHttpRequest")
 
 		switch status {
 		case http.StatusUnauthorized:
 			if isAPI {
-				c.JSON(status, gin.H{"message": "Не авторизован"})
+				ctx.JSON(status, gin.H{"message": "Не авторизован"})
 			} else {
-				c.HTML(status, "404", gin.H{"title": "Админка — Не авторизован"})
+				ctx.HTML(status, "404", gin.H{"title": "Админка — Не авторизован"})
 			}
 
 		case http.StatusForbidden:
 			if isAPI {
-				c.JSON(status, gin.H{"message": "Доступ запрещён"})
+				ctx.JSON(status, gin.H{"message": "Доступ запрещён"})
 			} else {
-				c.HTML(status, "404", gin.H{"title": "Админка — Доступ запрещён"})
+				ctx.HTML(status, "404", gin.H{"title": "Админка — Доступ запрещён"})
 			}
 
 		case http.StatusInternalServerError:
-			errMsg := c.Errors.String()
+			errMsg := ctx.Errors.String()
 			if isAPI {
-				c.JSON(status, gin.H{"message": errMsg})
+				ctx.JSON(status, gin.H{"message": errMsg})
 			} else {
-				c.HTML(status, "404", gin.H{"error": errMsg})
+				ctx.HTML(status, "404", gin.H{"error": errMsg})
 			}
 		}
 	}

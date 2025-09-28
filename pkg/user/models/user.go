@@ -1,16 +1,18 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"regexp"
-	"strings"
-	"time"
+
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type User struct {

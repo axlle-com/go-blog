@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 )
 

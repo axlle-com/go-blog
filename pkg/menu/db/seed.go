@@ -58,7 +58,7 @@ func (s *seeder) menus(n int) error {
 			TemplateID:  &randomID,
 			IsPublished: db.RandBool(),
 			IsMain:      db.RandBool(),
-			Name:        "Name #" + strconv.Itoa(i),
+			Title:       "Name #" + strconv.Itoa(i),
 			Ico:         db.StrPtr("Ico #" + strconv.Itoa(i)),
 			Sort:        rand.Intn(100),
 			CreatedAt:   db.TimePtr(time.Now()),

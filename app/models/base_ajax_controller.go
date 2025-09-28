@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	user "github.com/axlle-com/blog/pkg/user/models"
-	"github.com/gin-gonic/gin"
 )
 
 type BaseAjax struct {

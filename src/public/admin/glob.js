@@ -270,7 +270,6 @@ const _glob = {
             this.hasSend = true;
             let formObject = {};
             const csrf = $('meta[name="csrf-token"]').attr('content');
-            this.payload.append('_csrf', csrf);
 
             // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
@@ -330,7 +329,6 @@ const _glob = {
             this.hasSend = true;
             // this.appendImages();
             const csrf = $('meta[name="csrf-token"]').attr('content');
-            this.payload.append('_csrf', csrf);
             $.ajax({
                 url: _this.action,
                 headers: {'X-CSRF-TOKEN': csrf},

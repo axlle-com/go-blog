@@ -13,7 +13,7 @@ type Menu struct {
 	ID          uint       `gorm:"primaryKey" json:"id"`
 	UUID        uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	TemplateID  *uint      `gorm:"index" json:"template_id"`
-	Name        string     `gorm:"size:100" json:"name,omitempty"`
+	Title       string     `gorm:"size:100" json:"title,omitempty"`
 	IsPublished bool       `gorm:"default:true" json:"is_published,omitempty"`
 	IsMain      bool       `gorm:"default:false" json:"IsMain,omitempty"`
 	Ico         *string    `gorm:"size:255" json:"ico,omitempty"`
@@ -31,9 +31,6 @@ func (m *Menu) GetUUID() uuid.UUID {
 
 func (m *Menu) GetTemplateName() string {
 	if m.Template != nil {
-		if m.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", m.GetTable())
-		}
 		return fmt.Sprintf("%s.%s", m.GetTable(), m.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", m.GetTable())
@@ -41,6 +38,21 @@ func (m *Menu) GetTemplateName() string {
 
 func (m *Menu) GetName() string {
 	return m.GetTable()
+}
+
+func (m *Menu) GetTemplateTitle() string {
+	var title string
+	if m.Template != nil {
+		title = m.Template.GetTitle()
+	}
+	return title
+}
+
+func (m *Menu) Date() string {
+	if m.CreatedAt == nil {
+		return ""
+	}
+	return m.CreatedAt.Format("02.01.2006 15:04:05")
 }
 
 func (m *Menu) SetUUID() {
@@ -75,4 +87,11 @@ func (m *Menu) Deleting() bool {
 
 func (m *Menu) Saving() {
 	m.SetUUID()
+}
+
+func (m *Menu) AdminURL() string {
+	if m.ID == 0 {
+		return "/admin/menus"
+	}
+	return fmt.Sprintf("/admin/menus/%d", m.ID)
 }

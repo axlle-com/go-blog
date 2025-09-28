@@ -46,7 +46,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 	}
 
 	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL("/admin/categories")
+	paginator.SetURL("/admin/post/categories")
 
 	users := c.userProvider.GetAll()
 	templates := c.templateProvider.GetAll()

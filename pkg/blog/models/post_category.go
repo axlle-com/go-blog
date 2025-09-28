@@ -2,9 +2,11 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
+	"gorm.io/datatypes"
 )
 
 type PostCategory struct {
@@ -31,6 +33,9 @@ type PostCategory struct {
 	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+
+	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
+	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
 
 	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
@@ -68,9 +73,6 @@ func (c *PostCategory) GetTitle() string {
 
 func (c *PostCategory) GetTemplateName() string {
 	if c.Template != nil {
-		if c.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", c.GetTable())
-		}
 		return fmt.Sprintf("%s.%s", c.GetTable(), c.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", c.GetTable())
@@ -78,9 +80,9 @@ func (c *PostCategory) GetTemplateName() string {
 
 func (c *PostCategory) AdminURL() string {
 	if c.ID == 0 {
-		return "/admin/categories"
+		return "/admin/post/categories"
 	}
-	return fmt.Sprintf("/admin/categories/%d", c.ID)
+	return fmt.Sprintf("/admin/post/categories/%d", c.ID)
 }
 
 func (c *PostCategory) SetUUID() {

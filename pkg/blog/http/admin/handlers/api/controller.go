@@ -1,17 +1,18 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
-	"github.com/gin-gonic/gin"
 )
 
 type Controller interface {
-	GetPost(c *gin.Context)
-	GetPosts(c *gin.Context)
+	GetPost(*gin.Context)
+	GetPosts(*gin.Context)
 	UpdatePost(*gin.Context)
 	CreatePost(*gin.Context)
 	DeletePost(*gin.Context)

@@ -40,7 +40,7 @@ func (p *TagFilter) PrintTemplateID() uint {
 }
 
 func (p *TagFilter) GetURL() string {
-	return string("post-tags?" + p.GetQueryString())
+	return string("post/tags?" + p.GetQueryString())
 }
 
 func (p *TagFilter) PrintID() string {

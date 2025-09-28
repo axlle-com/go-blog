@@ -8,24 +8,28 @@ import (
 	"github.com/axlle-com/blog/app/service/migrate"
 	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/app/service/scheduler"
-	service2 "github.com/axlle-com/blog/app/service/storage"
+	"github.com/axlle-com/blog/app/service/storage"
 	"github.com/axlle-com/blog/app/service/view"
+
 	"github.com/axlle-com/blog/pkg/blog/provider"
-	"github.com/axlle-com/blog/pkg/menu/repository"
-	"github.com/axlle-com/blog/pkg/menu/service"
 
 	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
 	analyticRepo "github.com/axlle-com/blog/pkg/analytic/repository"
 	analyticService "github.com/axlle-com/blog/pkg/analytic/service"
+
 	fileMigrate "github.com/axlle-com/blog/pkg/file/db/migrate"
 	fileAdminWeb "github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	fileRepo "github.com/axlle-com/blog/pkg/file/repository"
 	fileService "github.com/axlle-com/blog/pkg/file/service"
+
 	menuDB "github.com/axlle-com/blog/pkg/menu/db"
 	menuMigrate "github.com/axlle-com/blog/pkg/menu/db/migrate"
+	menuAdminWeb "github.com/axlle-com/blog/pkg/menu/http/handlers/web"
+	menuRepository "github.com/axlle-com/blog/pkg/menu/repository"
+	menuService "github.com/axlle-com/blog/pkg/menu/service"
 
 	galleryMigrate "github.com/axlle-com/blog/pkg/gallery/db/migrate"
 	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
@@ -142,6 +146,13 @@ type Container struct {
 	AnalyticCollectionService *analyticService.AnalyticCollectionService
 	AnalyticProvider          analyticProvider.AnalyticProvider
 
+	MenuRepo                  menuRepository.MenuRepository
+	MenuService               *menuService.MenuService
+	MenuCollectionService     *menuService.MenuCollectionService
+	MenuItemRepo              menuRepository.MenuItemRepository
+	MenuItemService           *menuService.MenuItemService
+	MenuItemCollectionService *menuService.MenuItemCollectionService
+
 	Migrator contracts.Migrator
 	Seeder   contracts.Seeder
 }
@@ -154,7 +165,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
 	newFileService := fileService.NewFileService(newFileRepo)
-	newStorageService := service2.NewLocalStorageService(cfg)
+	newStorageService := storage.NewLocalStorageService(cfg)
 	uploadService := fileService.NewUploadService(newFileService, newStorageService)
 	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
 	fileProv := fileProvider.NewFileProvider(uploadService, newFileService, fileCollectionService)
@@ -217,13 +228,13 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
-	menuRepo := repository.NewMenuRepo(db.PostgreSQL())
-	menuService := service.NewMenuService(menuRepo)
-	_ = service.NewMenuCollectionService(menuRepo, menuService)
+	menuRepo := menuRepository.NewMenuRepo(db.PostgreSQL())
+	newMenuService := menuService.NewMenuService(menuRepo)
+	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
 
-	menuItemRepo := repository.NewMenuItemRepo(db.PostgreSQL())
-	menuItemService := service.NewMenuItemService(menuItemRepo)
-	_ = service.NewMenuItemCollectionService(menuItemRepo, menuItemService)
+	menuItemRepo := menuRepository.NewMenuItemRepo(db.PostgreSQL())
+	menuItemService := menuService.NewMenuItemService(menuItemRepo)
+	menuItemCollectionService := menuService.NewMenuItemCollectionService(menuItemRepo, menuItemService)
 	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newPostProvider, newTemplateProvider)
 
 	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
@@ -329,6 +340,13 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		AnalyticService:           newAnalyticService,
 		AnalyticCollectionService: analyticCollectionService,
 		AnalyticProvider:          newAnalyticProvider,
+
+		MenuRepo:                  menuRepo,
+		MenuService:               newMenuService,
+		MenuCollectionService:     newMenuCollectionService,
+		MenuItemRepo:              menuItemRepo,
+		MenuItemService:           menuItemService,
+		MenuItemCollectionService: menuItemCollectionService,
 
 		Migrator: newMigrator,
 		Seeder:   seeder,
@@ -505,5 +523,15 @@ func (c *Container) FileController() fileAdminWeb.Controller {
 	return fileAdminWeb.NewFileController(
 		c.FileUploadService,
 		c.FileService,
+	)
+}
+
+func (c *Container) MenuController() menuAdminWeb.Controller {
+	return menuAdminWeb.NewMenuWebController(
+		c.MenuService,
+		c.MenuCollectionService,
+		c.MenuItemService,
+		c.MenuItemCollectionService,
+		c.TemplateProvider,
 	)
 }

@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	csrf "github.com/utrack/gin-csrf"
 	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
@@ -91,9 +92,9 @@ func Init(config contracts.Config, container *app.Container) *gin.Engine {
 	router.Use(gzip.Gzip(gzip.BestSpeed))
 	router.Use(csrf.Middleware(csrf.Options{
 		Secret: string(config.KeyCookie()),
-		ErrorFunc: func(c *gin.Context) {
-			c.String(http.StatusForbidden, "CSRF token mismatch")
-			c.Abort()
+		ErrorFunc: func(ctx *gin.Context) {
+			ctx.String(http.StatusForbidden, "CSRF token mismatch")
+			ctx.Abort()
 		},
 	}))
 

@@ -2,10 +2,12 @@ package mailer
 
 import (
 	"context"
-	config2 "github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"gopkg.in/gomail.v2"
 	"time"
+
+	"gopkg.in/gomail.v2"
+
+	appConfig "github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 func NewMailerJob(
@@ -23,7 +25,7 @@ type MailerJob struct {
 }
 
 func (j *MailerJob) Run(ctx context.Context) error {
-	config := config2.Config()
+	config := appConfig.Config()
 	if !config.SMTPActive() {
 		return nil
 	}

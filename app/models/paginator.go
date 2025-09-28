@@ -1,11 +1,12 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
 	"html/template"
 	"math"
 	"net/url"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 const DefaultPageSize = 20
@@ -93,7 +94,7 @@ func (p *paginator) setQueryString() {
 
 	query := make(url.Values)
 	for key, values := range p.Query {
-		if key == "page" || key == "pageSize" {
+		if key == "page" || key == "pageSize" || key == "_csrf" {
 			continue
 		}
 		query[key] = values

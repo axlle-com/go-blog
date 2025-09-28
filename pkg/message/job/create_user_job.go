@@ -2,12 +2,14 @@ package mailer
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/axlle-com/blog/pkg/user/provider"
-	"github.com/google/uuid"
-	"time"
 )
 
 func NewCreateUserJob(

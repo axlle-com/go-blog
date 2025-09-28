@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
@@ -44,6 +45,9 @@ type Post struct {
 	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
 	UpdatedAt          *time.Time `gorm:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
+
+	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
+	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
 
 	Category *PostCategory `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
 	PostTags []*PostTag    `gorm:"-" json:"tags" form:"tags" binding:"-" ignore:"true"`
@@ -88,9 +92,6 @@ func (p *Post) GetName() string {
 
 func (p *Post) GetTemplateName() string {
 	if p.Template != nil {
-		if p.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", p.GetTable())
-		}
 		return fmt.Sprintf("%s.%s", p.GetTable(), p.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", p.GetTable())

@@ -54,7 +54,7 @@ func (p *CategoryFilter) PrintPostCategoryID() uint {
 }
 
 func (p *CategoryFilter) GetURL() string {
-	return string("categories?" + p.GetQueryString())
+	return string("post/categories?" + p.GetQueryString())
 }
 
 func (p *CategoryFilter) PrintID() string {

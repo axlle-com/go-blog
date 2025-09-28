@@ -1,11 +1,12 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *infoBlockWebController) CreateInfoBlock(ctx *gin.Context) {

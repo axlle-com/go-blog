@@ -3,12 +3,13 @@ package web
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
+
+	"github.com/axlle-com/blog/pkg/menu/models"
 )
 
-func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
+func (c *controller) GetMenu(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
@@ -20,21 +21,20 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	block, err := c.blockService.GetByID(id)
+	model, err := c.menuService.GetByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	block.Galleries = c.galleryProvider.GetForResource(block)
 	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
-		"admin.info_block",
+		"admin.menu",
 		gin.H{
-			"title":     "Страница инфо блока",
+			"title":     "Страница меню",
 			"templates": templates,
-			"infoBlock": block,
+			"model":     model,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

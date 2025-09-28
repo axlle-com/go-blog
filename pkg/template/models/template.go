@@ -2,8 +2,9 @@ package models
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/models/contracts"
 	"time"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type Template struct {
@@ -43,6 +44,9 @@ func (t *Template) GetTitle() string {
 }
 
 func (t *Template) GetName() string {
+	if t.Name == "" {
+		return "default"
+	}
 	return t.Name
 }
 

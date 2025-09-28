@@ -36,10 +36,12 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 	messageAjaxController := container.MessageAjaxController()
 	messageFrontController := container.MessageFrontController()
 
+	menuController := container.MenuController()
+
 	analytic := analyticMiddleware.NewAnalytic(container.Queue, container.AnalyticProvider)
 
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "OK")
+	r.GET("/health", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "OK")
 	})
 	r.Use(middleware.Main())
 	r.Use(middleware.Error())
@@ -69,24 +71,24 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.DELETE("/posts/:id/image", postController.DeletePostImage)
 		protected.POST("/posts/:id/info-blocks/:info_block_id", postController.AddPostInfoBlock)
 
-		protected.GET("/categories", postCategoryWebController.GetCategories)
-		protected.GET("/categories/:id", postCategoryWebController.GetCategory)
-		protected.POST("/categories", postCategoryController.CreateCategory)
-		protected.PUT("/categories/:id", postCategoryController.UpdateCategory)
-		protected.DELETE("/categories/:id/image", postCategoryController.DeleteCategoryImage)
-		protected.POST("/categories/:id/info-blocks/:info_block_id", postCategoryController.AddPostInfoBlock)
-		protected.DELETE("/categories/:id", postCategoryController.DeleteCategory)
-		protected.GET("/categories/form", postCategoryWebController.CreateCategory)
-		protected.GET("/categories/filter", postCategoryController.FilterCategory)
+		protected.GET("/post/categories", postCategoryWebController.GetCategories)
+		protected.GET("/post/categories/:id", postCategoryWebController.GetCategory)
+		protected.POST("/post/categories", postCategoryController.CreateCategory)
+		protected.PUT("/post/categories/:id", postCategoryController.UpdateCategory)
+		protected.DELETE("/post/categories/:id/image", postCategoryController.DeleteCategoryImage)
+		protected.POST("/post/categories/:id/info-blocks/:info_block_id", postCategoryController.AddPostInfoBlock)
+		protected.DELETE("/post/categories/:id", postCategoryController.DeleteCategory)
+		protected.GET("/post/categories/form", postCategoryWebController.CreateCategory)
+		protected.GET("/post/categories/filter", postCategoryController.FilterCategory)
 
-		protected.GET("/post-tags", postTagWebController.GetTags)
-		protected.GET("/post-tags/form", postTagWebController.CreateTag)
-		protected.GET("/post-tags/:id", postTagWebController.GetTag)
-		protected.POST("/post-tags", postTagAjaxController.Create)
-		protected.PUT("/post-tags/:id", postTagAjaxController.Update)
-		protected.DELETE("/post-tags/:id", postTagAjaxController.Delete)
-		protected.DELETE("/post-tags/:id/image", postTagAjaxController.DeleteImage)
-		protected.GET("/post-tags/filter", postTagAjaxController.Filter)
+		protected.GET("/post/tags", postTagWebController.GetTags)
+		protected.GET("/post/tags/form", postTagWebController.CreateTag)
+		protected.GET("/post/tags/:id", postTagWebController.GetTag)
+		protected.POST("/post/tags", postTagAjaxController.Create)
+		protected.PUT("/post/tags/:id", postTagAjaxController.Update)
+		protected.DELETE("/post/tags/:id", postTagAjaxController.Delete)
+		protected.DELETE("/post/tags/:id/image", postTagAjaxController.DeleteImage)
+		protected.GET("/post/tags/filter", postTagAjaxController.Filter)
 
 		protected.GET("/info-blocks", infoBlockController.GetInfoBlocks)
 		protected.GET("/info-blocks/:id", infoBlockController.GetInfoBlock)
@@ -117,6 +119,10 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.DELETE("/ajax/messages/:id", messageAjaxController.DeleteMessage)
 
 		protected.DELETE("/gallery/:id/image/:image_id", galleryController.DeleteImage)
+
+		protected.GET("/menus", menuController.GetMenus)
+		protected.GET("/menus/form", menuController.CreateMenu)
+		protected.GET("/menus/:id", menuController.GetMenu)
 	}
 
 	r.GET("/:alias", postFrontWebController.GetPost)

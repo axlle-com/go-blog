@@ -26,7 +26,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 	}
 
 	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL("/admin/categories")
+	paginator.SetURL("/admin/post/categories")
 
 	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()

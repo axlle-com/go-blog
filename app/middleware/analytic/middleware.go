@@ -1,14 +1,16 @@
 package analytic
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/analytic/provider"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/mssola/user_agent"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/mssola/user_agent"
+
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/analytic/provider"
 )
 
 func NewAnalytic(
@@ -27,67 +29,67 @@ type Analytic struct {
 }
 
 func (a *Analytic) Handler() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	return func(ctx *gin.Context) {
 		start := time.Now()
 
-		ua := user_agent.New(c.GetHeader("User-Agent"))
+		ua := user_agent.New(ctx.GetHeader("User-Agent"))
 		browserName, _ := ua.Browser()
-		c.Set("device", detectDeviceType(c.GetHeader("User-Agent")))
-		c.Set("browser", browserName)
-		c.Set("os", ua.OS())
-		c.Set("request_uuid", uuid.New().String())
+		ctx.Set("device", detectDeviceType(ctx.GetHeader("User-Agent")))
+		ctx.Set("browser", browserName)
+		ctx.Set("os", ua.OS())
+		ctx.Set("request_uuid", uuid.New().String())
 
-		if res, err := c.Cookie("resolution"); err == nil {
+		if res, err := ctx.Cookie("resolution"); err == nil {
 			if p := strings.Split(res, ";"); len(p) == 2 {
 				if w, _ := strconv.Atoi(p[0]); w > 0 {
-					c.Set("resolution_width", w)
+					ctx.Set("resolution_width", w)
 				}
 				if h, _ := strconv.Atoi(p[1]); h > 0 {
-					c.Set("resolution_height", h)
+					ctx.Set("resolution_height", h)
 				}
 			}
 		}
 
-		c.Next()
+		ctx.Next()
 
-		host := c.GetHeader("X-Forwarded-Host")
+		host := ctx.GetHeader("X-Forwarded-Host")
 		if host == "" {
-			host = c.Request.Host
+			host = ctx.Request.Host
 		}
 
-		referer := c.GetHeader("Referer")
+		referer := ctx.GetHeader("Referer")
 		if referer == "" {
-			referer = c.GetHeader("Origin")
+			referer = ctx.GetHeader("Origin")
 		}
 
-		userUUID := c.GetString("user_uuid")
+		userUUID := ctx.GetString("user_uuid")
 		if userUUID == "" {
-			userUUID = c.GetString("guest_uuid")
+			userUUID = ctx.GetString("guest_uuid")
 		}
 
 		evt := AnalyticsEvent{
-			RequestUUID:      c.GetString("request_uuid"),
+			RequestUUID:      ctx.GetString("request_uuid"),
 			UserUUID:         userUUID,
 			Timestamp:        time.Now().UTC(),
-			Method:           c.Request.Method,
+			Method:           ctx.Request.Method,
 			Host:             host,
-			Path:             c.FullPath(),
-			Query:            c.Request.URL.RawQuery,
-			Status:           c.Writer.Status(),
+			Path:             ctx.FullPath(),
+			Query:            ctx.Request.URL.RawQuery,
+			Status:           ctx.Writer.Status(),
 			Latency:          time.Since(start),
-			IP:               c.ClientIP(),
-			OS:               c.GetString("os"),
-			Browser:          c.GetString("browser"),
-			Device:           c.GetString("device"),
-			Language:         c.GetString("lang"),
+			IP:               ctx.ClientIP(),
+			OS:               ctx.GetString("os"),
+			Browser:          ctx.GetString("browser"),
+			Device:           ctx.GetString("device"),
+			Language:         ctx.GetString("lang"),
 			Referrer:         referer,
-			ResolutionWidth:  c.GetInt("resolution_width"),
-			ResolutionHeight: c.GetInt("resolution_height"),
-			RequestSize:      c.Request.ContentLength,
-			ResponseSize:     int64(c.Writer.Size()),
-			UTMCampaign:      c.Query("utm_campaign"),
-			UTMSource:        c.Query("utm_source"),
-			UTMMedium:        c.Query("utm_medium"),
+			ResolutionWidth:  ctx.GetInt("resolution_width"),
+			ResolutionHeight: ctx.GetInt("resolution_height"),
+			RequestSize:      ctx.Request.ContentLength,
+			ResponseSize:     int64(ctx.Writer.Size()),
+			UTMCampaign:      ctx.Query("utm_campaign"),
+			UTMSource:        ctx.Query("utm_source"),
+			UTMMedium:        ctx.Query("utm_medium"),
 		}
 
 		a.queue.Enqueue(NewAnalyticsJob(evt, a.analyticProvider), 0)

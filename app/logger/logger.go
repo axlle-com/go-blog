@@ -2,17 +2,18 @@ package logger
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/config"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gin-gonic/gin"
-	"github.com/jc633/rotatelogs"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"runtime"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/axlle-com/blog/app/config"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-gonic/gin"
+	"github.com/jc633/rotatelogs"
+	"github.com/sirupsen/logrus"
 )
 
 type WriterHook struct {
@@ -168,10 +169,10 @@ func Debugf(format string, a ...any) {
 	log(logrus.DebugLevel, fmt.Sprintf(format, a...))
 }
 
-func WithRequest(c *gin.Context) *logrus.Entry {
+func WithRequest(ctx *gin.Context) *logrus.Entry {
 	base := getLogger()
 	fields := logrus.Fields{
-		"request_uuid": c.GetString("request_uuid"),
+		"request_uuid": ctx.GetString("request_uuid"),
 	}
 	return base.WithFields(fields)
 }

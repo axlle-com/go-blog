@@ -1,9 +1,10 @@
 package web
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"regexp"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) GetPost(ctx *gin.Context) {

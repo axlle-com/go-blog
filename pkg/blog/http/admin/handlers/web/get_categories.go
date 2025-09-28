@@ -30,7 +30,7 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 		return
 	}
 	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
-	paginator.SetURL("/admin/categories")
+	paginator.SetURL("/admin/post/categories")
 
 	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()

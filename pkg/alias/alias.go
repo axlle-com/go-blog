@@ -3,11 +3,12 @@ package alias
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"gorm.io/gorm"
-	"regexp"
-	"strings"
 )
 
 type AliasProvider interface {

@@ -2,9 +2,10 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
 )
 
 type InfoBlock struct {
@@ -39,9 +40,6 @@ func (i *InfoBlock) GetName() string {
 
 func (i *InfoBlock) GetTemplateName() string {
 	if i.Template != nil {
-		if i.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", i.GetTable())
-		}
 		return fmt.Sprintf("%s.%s", i.GetTable(), i.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", i.GetTable())

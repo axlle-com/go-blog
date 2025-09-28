@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
@@ -36,9 +37,6 @@ func (i *InfoBlockResponse) GetName() string {
 
 func (i *InfoBlockResponse) GetTemplateName() string {
 	if i.Template != nil {
-		if i.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", i.GetName())
-		}
 		return fmt.Sprintf("%s.%s", i.GetName(), i.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", i.GetName())

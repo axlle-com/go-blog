@@ -2,9 +2,11 @@ package models
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
+	"gorm.io/datatypes"
 )
 
 type PostTag struct {
@@ -22,6 +24,9 @@ type PostTag struct {
 	CreatedAt       *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
 	UpdatedAt       *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt       *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
+
+	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
+	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
 
 	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
@@ -57,9 +62,9 @@ func (pt *PostTag) GetTitle() string {
 
 func (pt *PostTag) AdminURL() string {
 	if pt.ID == 0 {
-		return "/admin/post-tags"
+		return "/admin/post/tags"
 	}
-	return fmt.Sprintf("/admin/post-tags/%d", pt.ID)
+	return fmt.Sprintf("/admin/post/tags/%d", pt.ID)
 }
 
 func (pt *PostTag) GetTemplateID() uint {
@@ -72,9 +77,6 @@ func (pt *PostTag) GetTemplateID() uint {
 
 func (pt *PostTag) GetTemplateName() string {
 	if pt.Template != nil {
-		if pt.Template.GetName() == "" {
-			return fmt.Sprintf("%s.default", pt.GetTable())
-		}
 		return fmt.Sprintf("%s.%s", pt.GetTable(), pt.Template.GetName())
 	}
 	return fmt.Sprintf("%s.default", pt.GetTable())

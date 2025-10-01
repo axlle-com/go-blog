@@ -21,7 +21,7 @@
                     <caption class="p-0 text-right"><small>Показано 1 to 5 из 57 строк</small></caption>
                     <thead class="thead-primary">
                     <tr class="column-filter">
-                        <th colspan="2" class="width-5"></th>
+                        <th class="width-5"></th>
                         <th class="width-5">
                             <label class="input-clearable input-icon input-icon-sm input-icon-right">
                                 <input
@@ -93,7 +93,6 @@
                                 <label class="custom-control-label" for="checkAll"></label>
                             </div>
                         </th>
-                        <th scope="col" class="text-center">Детали</th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting asc">ID</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Заголовок</a></th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting">Шаблон</a></th>
@@ -110,15 +109,6 @@
                                            id="checkbox-{{.ID}}">
                                     <label for="checkbox-{{.ID}}" class="custom-control-label"></label>
                                 </div>
-                            </td>
-                            <td class="td-col-button-details text-center">
-                                <a href="#detail-{{.ID}}"
-                                   class="detail-toggle text-secondary"
-                                   data-toggle="collapse"
-                                   role="button"
-                                   aria-expanded="false"
-                                   aria-controls="detail-{{.ID}}">
-                                </a>
                             </td>
                             <td class="td-col-id">{{.ID}}</td>
                             <td class="td-col-title">{{ ptrStr .Title }}</td>
@@ -141,13 +131,6 @@
                                         </a>
                                     </form>
                                 </div>
-                            </td>
-                        </tr>
-                        <tr class="detail-row collapse" id="detail-{{.ID}}">
-                            <td colspan="10">
-                                <ul class="data-detail ml-5">
-                                    <li><span>Заголовок: </span> <span>{{ .Title }}</span></li>
-                                </ul>
                             </td>
                         </tr>
                     {{ end }}

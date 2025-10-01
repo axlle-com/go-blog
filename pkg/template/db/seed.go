@@ -1,7 +1,8 @@
 package db
 
 import (
-	"strconv"
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/axlle-com/blog/app/db"
@@ -29,18 +30,38 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) SeedTest(n int) error {
-	for i := 1; i <= n; i++ {
-		template := models.Template{}
+	resources := map[string]string{
+		"Шаблон для постов":    "posts",
+		"Шаблон для категорий": "post_categories",
+		"Шаблон для тегов":     "post_tags",
+		"Шаблон для блоков":    "info_blocks",
+		"Шаблон для меню":      "menus",
+	}
 
+	// один раз посеять rng
+	rand.Seed(time.Now().UnixNano())
+
+	// подготовим слайс ключей
+	keys := make([]string, 0, len(resources))
+	for title := range resources {
+		keys = append(keys, title)
+	}
+
+	for i := 1; i <= n; i++ {
+		var template models.Template
 		now := time.Now()
-		template.Title = "TitleTemplate #" + strconv.Itoa(i)
+
+		// берём случайный ключ и значение из map
+		title := keys[rand.Intn(len(keys))]
+		resource := resources[title]
+
+		template.Title = fmt.Sprintf("%s #%d", title, i)
 		template.Name = faker.Username()
-		template.ResourceName = db.StrPtr(faker.Username())
+		template.ResourceName = db.StrPtr(resource)
 		template.CreatedAt = &now
 		template.UpdatedAt = &now
 
-		err := s.template.Create(&template)
-		if err != nil {
+		if err := s.template.Create(&template); err != nil {
 			return err
 		}
 	}

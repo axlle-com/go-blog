@@ -5,7 +5,7 @@ import (
 
 	"github.com/axlle-com/blog/app/errutil"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/pkg/template/models"
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := models.NewTemplateRequest().ValidateJSON(ctx)
+	form, formError := request.NewTemplateRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

@@ -5,7 +5,6 @@ import (
 
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/gin-gonic/gin"
 )
@@ -51,7 +50,7 @@ func (c *messageController) GetMessage(ctx *gin.Context) {
 	message = c.messageService.Aggregate(message)
 
 	empty := &models.Message{}
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
 	temp, err := c.messageCollectionService.WithPaginate(paginator, filter)

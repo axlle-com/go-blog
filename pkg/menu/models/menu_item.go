@@ -20,19 +20,29 @@ type MenuItem struct {
 	CreatedAt     *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
 	DeletedAt     *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+
+	Children []*MenuItem
 }
 
-func (c *MenuItem) Creating() {
-	c.Saving()
+func (mi *MenuItem) GetTable() string {
+	return "menu_items"
 }
 
-func (c *MenuItem) Updating() {
-	c.Saving()
+func (mi *MenuItem) Creating() {
+	mi.Saving()
 }
 
-func (c *MenuItem) Deleting() bool {
+func (mi *MenuItem) Updating() {
+	mi.Saving()
+}
+
+func (mi *MenuItem) Deleting() bool {
 	return true
 }
 
-func (c *MenuItem) Saving() {
+func (mi *MenuItem) Saving() {
+}
+
+func (mi *MenuItem) AdminAjaxFilterURL() string {
+	return "/admin/ajax/menus/menus-items"
 }

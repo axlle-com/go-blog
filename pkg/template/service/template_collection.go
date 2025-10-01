@@ -1,23 +1,25 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
-	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
+	"github.com/axlle-com/blog/pkg/template/repository"
 	user "github.com/axlle-com/blog/pkg/user/provider"
-	"sync"
 )
 
 type TemplateCollectionService struct {
 	templateService *TemplateService
-	templateRepo    templateRepository.TemplateRepository
+	templateRepo    repository.TemplateRepository
 	userProvider    user.UserProvider
 }
 
 func NewTemplateCollectionService(
 	templateService *TemplateService,
-	templateRepo templateRepository.TemplateRepository,
+	templateRepo repository.TemplateRepository,
 	userProvider user.UserProvider,
 ) *TemplateCollectionService {
 	return &TemplateCollectionService{
@@ -45,7 +47,7 @@ func (s *TemplateCollectionService) DeleteTemplates(templates []*models.Template
 	return err
 }
 
-func (s *TemplateCollectionService) WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
+func (s *TemplateCollectionService) WithPaginate(p contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
 	return s.templateRepo.WithPaginate(p, filter)
 }
 

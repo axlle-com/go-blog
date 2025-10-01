@@ -27,6 +27,7 @@ import (
 
 	menuDB "github.com/axlle-com/blog/pkg/menu/db"
 	menuMigrate "github.com/axlle-com/blog/pkg/menu/db/migrate"
+	menuAdminAjax "github.com/axlle-com/blog/pkg/menu/http/handlers/ajax"
 	menuAdminWeb "github.com/axlle-com/blog/pkg/menu/http/handlers/web"
 	menuRepository "github.com/axlle-com/blog/pkg/menu/repository"
 	menuService "github.com/axlle-com/blog/pkg/menu/service"
@@ -229,12 +230,12 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
 	menuRepo := menuRepository.NewMenuRepo(db.PostgreSQL())
-	newMenuService := menuService.NewMenuService(menuRepo)
-	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
-
 	menuItemRepo := menuRepository.NewMenuItemRepo(db.PostgreSQL())
 	menuItemService := menuService.NewMenuItemService(menuItemRepo)
 	menuItemCollectionService := menuService.NewMenuItemCollectionService(menuItemRepo, menuItemService)
+	newMenuService := menuService.NewMenuService(menuRepo, menuItemService, menuItemCollectionService)
+	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
+
 	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newPostProvider, newTemplateProvider)
 
 	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
@@ -533,5 +534,19 @@ func (c *Container) MenuController() menuAdminWeb.Controller {
 		c.MenuItemService,
 		c.MenuItemCollectionService,
 		c.TemplateProvider,
+	)
+}
+
+func (c *Container) MenuItemAjaxController() menuAdminAjax.ControllerMenuItem {
+	return menuAdminAjax.NewMenuItemAjaxController(
+		c.MenuItemService,
+		c.MenuItemCollectionService,
+	)
+}
+
+func (c *Container) MenuAjaxController() menuAdminAjax.ControllerMenu {
+	return menuAdminAjax.NewMenuAjaxController(
+		c.MenuService,
+		c.MenuCollectionService,
 	)
 }

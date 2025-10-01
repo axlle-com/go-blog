@@ -22,7 +22,8 @@ type Menu struct {
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
-	Template contracts.Template `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	Template  contracts.Template `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	MenuItems []*MenuItem        `gorm:"-" json:"menu_items" form:"menu_items" binding:"-" ignore:"true"`
 }
 
 func (m *Menu) GetUUID() uuid.UUID {

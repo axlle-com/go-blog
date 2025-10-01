@@ -62,6 +62,72 @@ const _form = {
         }
     }
 };
+const _filterApi = {
+    create: function () {
+        return {
+            // target: '#id' | '.class' | DOM | jQuery
+            send: function (target) {
+                const $list = (target && target.jquery) ? target : $(target);
+                if (!$list.length) {
+                    console.warn(`_filterApi: элементов по селектору "${target}" не найдено`);
+                    return;
+                }
+
+                $list.each(function () {
+                    const $el = $(this);
+
+                    // свой URL для КАЖДОГО select’а
+                    const getUrl = () => $el.data('action') || $el.attr('data-action');
+                    const url = getUrl();
+                    if (!url) {
+                        console.warn('select2: data-action не задан у', $el[0]);
+                        return;
+                    }
+
+                    // если уже инициализирован — пересоздаём
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        $el.select2('destroy');
+                    }
+
+                    $el.select2({
+                        placeholder: $el.data('placeholder') || 'Выберите...',
+                        allowClear: true,
+                        minimumInputLength: 0,
+                        width: '100%',
+                        ajax: {
+                            url: getUrl,
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                const q = params.term || '';
+                                return q ? { query: q, page: params.page || 1 } : { page: params.page || 1 };
+                            },
+                            processResults: function (resp, params) {
+                                params.page = params.page || 1;
+
+                                const data = resp.data || resp || {};
+                                const items = Array.isArray(data.items) ? data.items : [];
+                                const p = data.paginator || {};
+                                const pageSize = Number(p.pageSize || 20);
+                                const page = Number(p.page || params.page || 1);
+                                const total = Number(p.total || 0);
+
+                                const results = items.map(it => ({
+                                    id:   it.id   ?? it.ID   ?? it.value,
+                                    text: it.text ?? it.title ?? it.Name
+                                })).filter(o => o.id != null && o.text != null);
+
+                                const more = page * pageSize < total;
+                                return { results, pagination: { more } };
+                            },
+                            cache: true
+                        }
+                    });
+                });
+            }
+        };
+    }
+};
 const _filter = {
     _block: {},
     send: function () {
@@ -442,6 +508,21 @@ const _infoBlock = {
         this.detach();
     }
 };
+const _menu = {
+    _block: {},
+    search: function () {
+        const _this = this;
+        const filterApi = _filterApi.create();
+        filterApi.send('.select2-search')
+    },
+    run: function (selector) {
+        this._block = $(selector);
+        if (this._block.length) {
+            this.search();
+        }
+
+    }
+};
 const _template = {
     _block: {},
     add: function () {
@@ -593,6 +674,10 @@ const _config = {
     },
     select2: function () {
         for (const el of document.querySelectorAll('.select2')) {
+            if (el.classList.contains('select2-search')) {
+                continue;
+            }
+
             let config = {
                 width: '100%',
                 minimumResultsForSearch: 'Infinity', // hide search
@@ -636,13 +721,14 @@ const _config = {
 
 $(document).ready(function () {
     _glob.run();
+    _config.run();
     _form.run('.a-block-inner');
     _filter.run('.a-block-inner');
     _image.run();
     _infoBlock.run();
-    _config.run();
     _auth.run();
     _post.run();
     _template.run();
     _message.run();
+    _menu.run('.a-block-inner.menu');
 })

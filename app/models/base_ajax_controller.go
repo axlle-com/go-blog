@@ -61,3 +61,7 @@ func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
 	compactHTML := re.ReplaceAllString(s, "><")
 	return strings.TrimSpace(compactHTML)
 }
+
+func (c *BaseAjax) PaginatorFromQuery(ctx *gin.Context) contracts.Paginator {
+	return PaginatorFromQuery(ctx.Request.URL.Query())
+}

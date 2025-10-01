@@ -499,6 +499,12 @@ form.delete-button {
 }
 /********** //message **********/
 
+/********** menus **********/
+.menu .list-group-item {
+    padding: unset;
+}
+/********** //menus **********/
+
 /********** loader **********/
 .relative {
     position: relative;

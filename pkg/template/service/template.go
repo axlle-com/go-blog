@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
@@ -67,7 +68,7 @@ func (s *TemplateService) Delete(template *models.Template) (err error) {
 	return s.templateRepo.Delete(template)
 }
 
-func (s *TemplateService) SaveFromRequest(form *models.TemplateRequest, found *models.Template, user contracts.User) (template *models.Template, err error) {
+func (s *TemplateService) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contracts.User) (template *models.Template, err error) {
 	templateForm := app.LoadStruct(&models.Template{}, form).(*models.Template)
 
 	if found == nil {

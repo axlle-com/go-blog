@@ -55,7 +55,7 @@ func (r *menuRepository) Update(menu *models.Menu) error {
 	menu.Updating()
 	return r.db.Select(
 		"TemplateID",
-		"Name",
+		"Title",
 		"IsPublished",
 		"IsMain",
 		"Ico",

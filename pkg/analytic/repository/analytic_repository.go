@@ -86,14 +86,14 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(p contracts.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
-	var analytics []*models.Analytic
+func (r *repository) WithPaginate(paginator contracts.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
+	var items []*models.Analytic
 	var total int64
 
-	analytic := models.Analytic{}
-	table := analytic.GetTable()
+	model := models.Analytic{}
+	table := model.GetTable()
 
-	query := r.db.Model(&analytic)
+	query := r.db.Model(&model)
 
 	// TODO WHERE IN; LIKE
 	for col, val := range filter.GetMap() {
@@ -106,13 +106,13 @@ func (r *repository) WithPaginate(p contracts.Paginator, filter *models.Analytic
 
 	query.Count(&total)
 
-	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
-		Order(fmt.Sprintf("%s.id ASC", analytic.GetTable())).
-		Find(&analytics).Error
+	err := query.Scopes(r.SetPaginate(paginator.GetPage(), paginator.GetPageSize())).
+		Order(fmt.Sprintf("%s.id ASC", model.GetTable())).
+		Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
 
-	p.SetTotal(int(total))
-	return analytics, nil
+	paginator.SetTotal(int(total))
+	return items, nil
 }

@@ -3,12 +3,11 @@ package web
 import (
 	"net/http"
 
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/menu/http/request"
+	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-
-	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/pkg/menu/models"
 )
 
 func (c *controller) GetMenus(ctx *gin.Context) {
@@ -16,7 +15,7 @@ func (c *controller) GetMenus(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	filter, validError := models.NewMenuFilter().ValidateQuery(ctx)
+	filter, validError := request.NewMenuFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,
@@ -30,12 +29,12 @@ func (c *controller) GetMenus(ctx *gin.Context) {
 		return
 	}
 	empty := &models.Menu{}
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
 	templates := c.templateProvider.GetAll()
 
-	menus, err := c.menuCollectionService.WithPaginate(paginator, filter)
+	menus, err := c.menuCollectionService.WithPaginate(paginator, filter.ToFilter())
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

@@ -3,15 +3,14 @@ package ajax
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/pkg/template/http/request"
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/http/response"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/menu/http/request"
+	"github.com/gin-gonic/gin"
 )
 
-func (c *templateController) CreateTemplate(ctx *gin.Context) {
-	form, formError := request.NewTemplateRequest().ValidateJSON(ctx)
+func (c *controllerMenu) Create(ctx *gin.Context) {
+	form, formError := request.NewMenuRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(
@@ -25,7 +24,7 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 		return
 	}
 
-	template, err := c.templateService.SaveFromRequest(form, nil, c.GetUser(ctx))
+	menu, err := c.menuService.SaveFromRequest(form, nil, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -35,16 +34,16 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 	}
 
 	data := response.Body{
-		"templateModel": template,
-		"resources":     app.NewResources().Resources(),
+		"model":     menu,
+		"resources": app.NewResources().Resources(),
 	}
 	ctx.JSON(
 		http.StatusCreated,
 		response.Created(
 			response.Body{
-				"view":     c.RenderView("admin.template_inner", data, ctx),
-				"url":      template.AdminURL(),
-				"template": template,
+				"view": c.RenderView("admin.menu_inner", data, ctx),
+				"url":  menu.AdminURL(),
+				"menu": menu,
 			},
 			"Запись создана",
 		),

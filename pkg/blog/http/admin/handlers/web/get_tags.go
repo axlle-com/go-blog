@@ -3,12 +3,12 @@ package web
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/pkg/blog/models"
-	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
+
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/blog/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 )
 
 func (c *tagController) GetTags(ctx *gin.Context) {
@@ -31,7 +31,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 	}
 
 	empty := &models.PostTag{}
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
 	templates := c.template.GetAll()

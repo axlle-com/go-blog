@@ -37,6 +37,7 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 	messageFrontController := container.MessageFrontController()
 
 	menuController := container.MenuController()
+	menuItemController := container.MenuItemWebController()
 
 	analytic := analyticMiddleware.NewAnalytic(container.Queue, container.AnalyticProvider)
 
@@ -123,6 +124,7 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 		protected.GET("/menus", menuController.GetMenus)
 		protected.GET("/menus/form", menuController.CreateMenu)
 		protected.GET("/menus/:id", menuController.GetMenu)
+		protected.GET("/ajax/menus/menus-items", menuItemController.GetMenuItems)
 	}
 
 	r.GET("/:alias", postFrontWebController.GetPost)

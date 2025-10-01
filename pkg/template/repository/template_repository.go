@@ -6,6 +6,7 @@ import (
 
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,8 @@ type TemplateRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Template, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error)
+	WithPaginate(p contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error)
+	Filter(filter *models.TemplateFilter) ([]*models.Template, error)
 }
 
 type repository struct {
@@ -86,7 +88,7 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(p contracts.Paginator, filter *models.TemplateFilter) ([]*models.Template, error) {
+func (r *repository) WithPaginate(paginator contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
 	var templates []*models.Template
 	var total int64
 
@@ -106,13 +108,31 @@ func (r *repository) WithPaginate(p contracts.Paginator, filter *models.Template
 
 	query.Count(&total)
 
-	err := query.Scopes(r.SetPaginate(p.GetPage(), p.GetPageSize())).
+	err := query.Scopes(r.SetPaginate(paginator.GetPage(), paginator.GetPageSize())).
 		Order(fmt.Sprintf("%s.id ASC", template.GetTable())).
 		Find(&templates).Error
 	if err != nil {
 		return nil, err
 	}
 
-	p.SetTotal(int(total))
+	paginator.SetTotal(int(total))
+	return templates, nil
+}
+
+func (r *repository) Filter(filter *models.TemplateFilter) ([]*models.Template, error) {
+	var templates []*models.Template
+	template := models.Template{}
+
+	query := r.db.Model(&template)
+
+	if filter.ResourceName != nil && *filter.ResourceName != "" {
+		query = query.Where("resource_name = ?", *filter.ResourceName)
+	}
+
+	err := query.Order(fmt.Sprintf("%s.id ASC", template.GetTable())).Find(&templates).Error
+	if err != nil {
+		return nil, err
+	}
+
 	return templates, nil
 }

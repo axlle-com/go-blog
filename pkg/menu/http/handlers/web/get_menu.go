@@ -3,9 +3,11 @@ package web
 import (
 	"net/http"
 
+	"github.com/axlle-com/blog/pkg/menu/http/request"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
 
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/menu/models"
 )
 
@@ -27,7 +29,24 @@ func (c *controller) GetMenu(ctx *gin.Context) {
 		return
 	}
 
-	templates := c.templateProvider.GetAll()
+	model, err = c.menuService.Aggregate(model)
+	if err != nil {
+		ctx.HTML(http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
+		return
+	}
+
+	filter := request.NewMenuItemFilter()
+	filter.SetMenuID(model.ID)
+	items, err := c.menuItemCollectionService.Filter(c.PaginatorFromQuery(ctx), filter.ToFilter())
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	templates, err := c.templateProvider.GetForResources(model)
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
 	ctx.HTML(
 		http.StatusOK,
 		"admin.menu",
@@ -35,6 +54,7 @@ func (c *controller) GetMenu(ctx *gin.Context) {
 			"title":     "Страница меню",
 			"templates": templates,
 			"model":     model,
+			"items":     items,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

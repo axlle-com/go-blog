@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
@@ -29,7 +28,7 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
 		return
 	}
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/post/categories")
 
 	templates := c.templateProvider.GetAll()

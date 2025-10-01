@@ -6,7 +6,6 @@ import (
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
 )
@@ -45,7 +44,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 		return
 	}
 
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/post/categories")
 
 	users := c.userProvider.GetAll()

@@ -3,6 +3,7 @@ package provider
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 )
 
@@ -12,6 +13,7 @@ type TemplateProvider interface {
 	GetAllIds() []uint
 	GetByIDs(ids []uint) ([]contracts.Template, error)
 	GetMapByIDs(ids []uint) (map[uint]contracts.Template, error)
+	GetForResources(resource contracts.Resource) ([]contracts.Template, error)
 }
 
 func NewProvider(
@@ -81,4 +83,18 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.Template, error) 
 	}
 	logger.Error(err)
 	return nil, err
+}
+
+func (p *provider) GetForResources(resource contracts.Resource) ([]contracts.Template, error) {
+	all, err := p.templateRepo.Filter(models.NewTemplateFilter().SetResourceName(resource.GetName()))
+	if err != nil {
+		logger.Error(err)
+		return nil, err
+	}
+
+	collection := make([]contracts.Template, 0, len(all))
+	for _, t := range all {
+		collection = append(collection, t)
+	}
+	return collection, nil
 }

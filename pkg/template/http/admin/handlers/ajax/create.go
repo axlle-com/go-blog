@@ -3,15 +3,15 @@ package ajax
 import (
 	"net/http"
 
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/gin-gonic/gin"
 
 	"github.com/axlle-com/blog/app/http/response"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/pkg/template/models"
 )
 
 func (c *templateController) CreateTemplate(ctx *gin.Context) {
-	form, formError := models.NewTemplateRequest().ValidateJSON(ctx)
+	form, formError := request.NewTemplateRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

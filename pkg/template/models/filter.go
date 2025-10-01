@@ -1,14 +1,6 @@
 package models
 
-import (
-	"strconv"
-
-	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/models"
-	"github.com/gin-gonic/gin"
-)
-
-func NeTemplateFilter() *TemplateFilter {
+func NewTemplateFilter() *TemplateFilter {
 	return &TemplateFilter{}
 }
 
@@ -19,33 +11,10 @@ type TemplateFilter struct {
 	Name         *string `json:"name" form:"name" binding:"omitempty"`
 	ResourceName *string `json:"resource_name" form:"resource_name" binding:"omitempty"`
 	Date         *string `json:"date" form:"date" binding:"omitempty"`
-	models.Filter
 }
 
-func (p *TemplateFilter) ValidateForm(ctx *gin.Context) (*TemplateFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
+func (f *TemplateFilter) SetResourceName(name string) *TemplateFilter {
+	f.ResourceName = &name
 
-func (p *TemplateFilter) ValidateQuery(ctx *gin.Context) (*TemplateFilter, *errutil.Errors) {
-	err := p.Filter.ValidateQuery(ctx, p)
-	return p, err
-}
-
-func (p *TemplateFilter) PrintUserID() uint {
-	if p.UserID == nil {
-		return 0
-	}
-	return *p.UserID
-}
-
-func (p *TemplateFilter) GetURL() string {
-	return string("templates?" + p.GetQueryString())
-}
-
-func (p *TemplateFilter) PrintID() string {
-	if p.ID == nil {
-		return ""
-	}
-	return strconv.Itoa(int(*p.ID))
+	return f
 }

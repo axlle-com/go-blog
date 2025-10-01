@@ -3,11 +3,11 @@ package ajax
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/info_block/models"
-	"github.com/gin-gonic/gin"
 )
 
 func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
@@ -25,7 +25,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/models-blocks")
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)

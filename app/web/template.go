@@ -2,13 +2,15 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"html/template"
 	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
@@ -70,14 +72,16 @@ func (t *Template) AddTemplateFromString(name, tmplStr string) error {
 
 func (t *Template) loadTemplates(templatesDir string) *template.Template {
 	tmpl := template.New("").Funcs(template.FuncMap{
-		"add":     add,
-		"sub":     sub,
-		"mul":     mul,
-		"date":    date,
-		"query":   query,
-		"ptrStr":  ptrStr,
-		"ptrUint": ptrUint,
-		"json":    jsonFunc,
+		"add":        add,
+		"sub":        sub,
+		"mul":        mul,
+		"dict":       dict,
+		"date":       date,
+		"query":      query,
+		"ptrStr":     ptrStr,
+		"ptrUint":    ptrUint,
+		"json":       jsonFunc,
+		"collapseID": collapseID,
 	})
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -138,4 +142,23 @@ func jsonFunc(v interface{}) (string, error) {
 		return "", err
 	}
 	return string(b), nil
+}
+
+func collapseID(prefix string, id uint) string {
+	return fmt.Sprintf("%s-%d", prefix, id)
+}
+
+func dict(values ...any) (map[string]any, error) {
+	if len(values)%2 != 0 {
+		return nil, fmt.Errorf("dict: odd args")
+	}
+	m := make(map[string]any, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		k, ok := values[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("dict: key %d not string", i)
+		}
+		m[k] = values[i+1]
+	}
+	return m, nil
 }

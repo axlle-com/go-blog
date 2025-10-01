@@ -6,12 +6,13 @@ import (
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (c *templateController) FilterTemplate(ctx *gin.Context) {
-	filter, validError := models.NeTemplateFilter().ValidateQuery(ctx)
+	filter, validError := request.NeTemplateFilter().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -26,7 +27,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 	}
 
 	empty := &models.Template{}
-	paginator := app.PaginatorFromQuery(ctx.Request.URL.Query())
+	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
 	temp, err := c.templateCollectionService.WithPaginate(paginator, filter)

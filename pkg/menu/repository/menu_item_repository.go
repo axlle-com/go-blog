@@ -6,6 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,8 @@ type MenuItemRepository interface {
 	Update(new *models.MenuItem, old *models.MenuItem) error
 	DeleteByID(id uint) error
 	Delete(menuItem *models.MenuItem) error
+	GetByFilter(p contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error)
+	GetByParams(params map[string]any) ([]*models.MenuItem, error)
 	GetAll() ([]*models.MenuItem, error)
 	GetAllForParent(parent *models.MenuItem) ([]*models.MenuItem, error)
 	GetAllIds() ([]uint, error)
@@ -76,6 +79,51 @@ func (r *menuItemRepository) DeleteByID(id uint) error {
 		return err
 	}
 	return r.Delete(&node)
+}
+
+func (r *menuItemRepository) GetByParams(params map[string]any) ([]*models.MenuItem, error) {
+	var items []*models.MenuItem
+	if err := r.db.Where(params).Find(&items).Error; err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (r *menuItemRepository) GetByFilter(paginator contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error) {
+	var items []*models.MenuItem
+	model := models.MenuItem{}
+	var total int64
+
+	query := r.db.Model(&model)
+
+	if filter.MenuID != nil && *filter.MenuID != 0 {
+		query = query.Where("menu_id = ?", *filter.MenuID)
+	}
+
+	if filter.ForNotMenuItemID != nil && *filter.ForNotMenuItemID != 0 {
+		var nodePath string
+		err := r.db.Table(model.GetTable()).
+			Where("id = ?", *filter.ForNotMenuItemID).
+			Pluck("path", &nodePath).Error
+		if err != nil {
+			return nil, err
+		}
+
+		query = query.Where("path NOT LIKE ?", nodePath+"%")
+	}
+
+	query.Count(&total)
+
+	err := query.Scopes(r.SetPaginate(paginator.GetPage(), paginator.GetPageSize())).
+		Order(fmt.Sprintf("%s.id ASC", model.GetTable())).
+		Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+
+	paginator.SetTotal(int(total))
+
+	return items, nil
 }
 
 func (r *menuItemRepository) GetAll() ([]*models.MenuItem, error) {

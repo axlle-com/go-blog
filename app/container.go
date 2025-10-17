@@ -106,6 +106,7 @@ type Container struct {
 	PostRepo          postRepo.PostRepository
 	PostService       *postService.PostService
 	PostsService      *postService.PostCollectionService
+	PostProvider      contracts.PostProvider
 	CategoryRepo      postRepo.CategoryRepository
 	CategoriesService *postService.CategoriesService
 	CategoryService   *postService.CategoryService
@@ -223,7 +224,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 
 	newPostService := postService.NewPostService(newPostRepo, csService, cService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
-	newPostProvider := provider.NewPostProvider(newPostRepo, newPostService)
+	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, csService, postTagCollectionService)
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
@@ -302,6 +303,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		PostRepo:          newPostRepo,
 		PostService:       newPostService,
 		PostsService:      newPostCollectionService,
+		PostProvider:      newPostProvider,
 		CategoryRepo:      newCategoryRepo,
 		CategoriesService: csService,
 		CategoryService:   cService,
@@ -534,6 +536,7 @@ func (c *Container) MenuController() menuAdminWeb.Controller {
 		c.MenuItemService,
 		c.MenuItemCollectionService,
 		c.TemplateProvider,
+		c.PostProvider,
 	)
 }
 
@@ -548,5 +551,7 @@ func (c *Container) MenuAjaxController() menuAdminAjax.ControllerMenu {
 	return menuAdminAjax.NewMenuAjaxController(
 		c.MenuService,
 		c.MenuCollectionService,
+		c.TemplateProvider,
+		c.PostProvider,
 	)
 }

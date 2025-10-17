@@ -8,13 +8,12 @@ import (
 
 type MenuItem struct {
 	ID            uint       `gorm:"primaryKey" json:"id"`
-	PublisherUUID uuid.UUID  `gorm:"type:uuid;index,using:hash"` // Publisher материал который доступен по URL
+	PublisherUUID *uuid.UUID `gorm:"type:uuid;index,using:hash"` // Publisher материал который доступен по URL
 	MenuID        uint       `gorm:"index" json:"menu_id"`
 	MenuItemID    *uint      `gorm:"index" json:"menu_item_id,omitempty"`
 	Path          string     `gorm:"size:1000;index" json:"-"`
 	Title         string     `gorm:"size:100" json:"title"`
-	URL           string     `gorm:"size:1000;unique" json:"url"`
-	IsPublished   bool       `gorm:"default:true" json:"is_published,omitempty"`
+	URL           string     `gorm:"size:1000" json:"url"`
 	Ico           *string    `gorm:"size:255" json:"ico,omitempty"`
 	Sort          int        `gorm:"default:0" json:"sort,omitempty"`
 	CreatedAt     *time.Time `gorm:"index" json:"created_at,omitempty"`
@@ -22,6 +21,7 @@ type MenuItem struct {
 	DeletedAt     *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
 	Children []*MenuItem
+	Parent   *MenuItem
 }
 
 func (mi *MenuItem) GetTable() string {

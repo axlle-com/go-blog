@@ -10,6 +10,7 @@ type MenuItemFilter struct {
 	MenuItemID       *uint   `json:"menu_item_id" form:"menu_item_id" binding:"omitempty"`
 	Title            *string `json:"title" form:"title" binding:"omitempty"`
 	ForNotMenuItemID *uint   `json:"for_not_menu_item_id" form:"for_not_menu_item_id" binding:"omitempty"`
+	IDs              []uint  `json:"ids" form:"ids" binding:"omitempty"`
 
 	array map[string]string // TODO map[string][]string
 }

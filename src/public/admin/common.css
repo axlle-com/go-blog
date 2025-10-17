@@ -497,12 +497,59 @@ form.delete-button {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 /********** //message **********/
 
 /********** menus **********/
 .menu .list-group-item {
     padding: unset;
 }
+
+/* @todo recursive!!!
+/* === Уровень 1 === */
+.accordion-unstacked > .card:has(> .collapse.show) {
+    background: #e8f4ff;            /* голубой фон всей карточки */
+    border-color: #b7dbff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+.accordion-unstacked > .card:has(> .collapse.show) > .card-header {
+    background: transparent;         /* чтобы фон был единый */
+    color: #0b3558;
+    border-bottom-color: #cfe8ff;
+}
+
+/* === Уровень 2 === */
+.accordion-unstacked .accordion-unstacked > .card:has(> .collapse.show) {
+    background: #e6ffed;             /* зелёный */
+    border-color: #b9f2cf;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+.accordion-unstacked .accordion-unstacked > .card:has(> .collapse.show) > .card-header {
+    background: transparent;
+    color: #0a3b26;
+    border-bottom-color: #c6f7d3;
+}
+
+/* === Уровень 3 === */
+.accordion-unstacked .accordion-unstacked .accordion-unstacked > .card:has(> .collapse.show) {
+    background: #fff7e6;             /* оранжеватый */
+    border-color: #ffe3b3;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+}
+.accordion-unstacked .accordion-unstacked .accordion-unstacked > .card:has(> .collapse.show) > .card-header {
+    background: transparent;
+    color: #5a3a00;
+    border-bottom-color: #ffe1ad;
+}
+
+/* общие мелочи */
+.accordion-unstacked .card {
+    transition: background .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.accordion-unstacked .card .btn.dropdown-toggle {
+    text-decoration: none;
+}
+
 /********** //menus **********/
 
 /********** loader **********/

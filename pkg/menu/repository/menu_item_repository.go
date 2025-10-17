@@ -67,7 +67,6 @@ func (r *menuItemRepository) save(menuItem *models.MenuItem) error {
 		"Path",
 		"Title",
 		"URL",
-		"IsPublished",
 		"Ico",
 		"Sort",
 	).Save(menuItem).Error
@@ -83,7 +82,7 @@ func (r *menuItemRepository) DeleteByID(id uint) error {
 
 func (r *menuItemRepository) GetByParams(params map[string]any) ([]*models.MenuItem, error) {
 	var items []*models.MenuItem
-	if err := r.db.Where(params).Find(&items).Error; err != nil {
+	if err := r.db.Where(params).Order(fmt.Sprintf("%s.sort ASC", (&models.MenuItem{}).GetTable())).Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
@@ -112,10 +111,20 @@ func (r *menuItemRepository) GetByFilter(paginator contracts.Paginator, filter *
 		query = query.Where("path NOT LIKE ?", nodePath+"%")
 	}
 
+	if filter.IDs != nil {
+		query = query.Where("id IN ?", filter.IDs)
+	}
+
+	if paginator == nil {
+		err := query.Order(fmt.Sprintf("%s.sort ASC", model.GetTable())).Find(&items).Error
+
+		return items, err
+	}
+
 	query.Count(&total)
 
 	err := query.Scopes(r.SetPaginate(paginator.GetPage(), paginator.GetPageSize())).
-		Order(fmt.Sprintf("%s.id ASC", model.GetTable())).
+		Order(fmt.Sprintf("%s.sort ASC", model.GetTable())).
 		Find(&items).Error
 	if err != nil {
 		return nil, err
@@ -214,6 +223,7 @@ func (r *menuItemRepository) GetAllForParent(parent *models.MenuItem) ([]*models
 
 func (r *menuItemRepository) Update(new *models.MenuItem, old *models.MenuItem) error {
 	new.Updating()
+	new.Path = old.Path
 
 	// Если родитель не изменился – просто сохраняем изменения.
 	oldParent, newParent := uint(0), uint(0)

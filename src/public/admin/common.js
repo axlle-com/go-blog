@@ -100,7 +100,7 @@ const _filterApi = {
                             delay: 250,
                             data: function (params) {
                                 const q = params.term || '';
-                                return q ? { query: q, page: params.page || 1 } : { page: params.page || 1 };
+                                return q ? {query: q, page: params.page || 1} : {page: params.page || 1};
                             },
                             processResults: function (resp, params) {
                                 params.page = params.page || 1;
@@ -113,12 +113,12 @@ const _filterApi = {
                                 const total = Number(p.total || 0);
 
                                 const results = items.map(it => ({
-                                    id:   it.id   ?? it.ID   ?? it.value,
+                                    id: it.id ?? it.ID ?? it.value,
                                     text: it.text ?? it.title ?? it.Name
                                 })).filter(o => o.id != null && o.text != null);
 
                                 const more = page * pageSize < total;
-                                return { results, pagination: { more } };
+                                return {results, pagination: {more}};
                             },
                             cache: true
                         }
@@ -515,12 +515,46 @@ const _menu = {
         const filterApi = _filterApi.create();
         filterApi.send('.select2-search')
     },
+    setUrl: function () {
+        const _this = this;
+        const sel = 'select[name^="menu_items"][name$="[publisher_uuid]"]';
+
+        // снимаем возможные старые обработчики и навешиваем заново
+        $(document)
+            .off('select2:select.menuurl select2:clear.menuurl', sel)
+            .on('select2:select.menuurl', sel, function (e) {
+                const select   = e.target;
+                const url      = select.options[select.selectedIndex]?.dataset.url || '';
+
+                const fieldset = select.closest('.form-block.js-menu-items-publisher-url');
+                if (!fieldset) return;
+
+                const linkInput = fieldset.querySelector('input[name$="[url]"]');
+                if (!linkInput) return;
+
+                if (!linkInput.dataset.oldUrl) {
+                    linkInput.dataset.oldUrl = linkInput.value; // запомним «исходник»
+                }
+                linkInput.value = url;
+            })
+            .on('select2:clear.menuurl', sel, function (e) {
+                const select   = e.target;
+                const fieldset = select.closest('.form-block.js-menu-items-publisher-url');
+                if (!fieldset) return;
+
+                const linkInput = fieldset.querySelector('input[name$="[url]"]');
+                if (!linkInput) return;
+
+                linkInput.value = linkInput.dataset.oldUrl || '';
+                delete linkInput.dataset.oldUrl;
+            });
+    },
     run: function (selector) {
         this._block = $(selector);
         if (this._block.length) {
+            this.setUrl();
             this.search();
         }
-
     }
 };
 const _template = {
@@ -716,6 +750,7 @@ const _config = {
         this.summernote500();
         this.summernote();
         this.flatpickr();
+        _menu.run('.a-block-inner.menu');
     }
 }
 

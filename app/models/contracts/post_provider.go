@@ -1,5 +1,6 @@
 package contracts
 
 type PostProvider interface {
-	GetAll() []Post
+	GetPosts() []Post
+	GetPublishers() ([]Publisher, error)
 }

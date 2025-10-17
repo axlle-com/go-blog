@@ -41,6 +41,8 @@ func (s *MenuService) Aggregate(model *models.Menu) (*models.Menu, error) {
 		return nil, err
 	}
 
+	menuItems = s.menuItemCollectionService.Aggregate(menuItems)
+
 	nodes := make(map[uint]*models.MenuItem, len(menuItems))
 	roots := make([]*models.MenuItem, 0)
 
@@ -49,15 +51,15 @@ func (s *MenuService) Aggregate(model *models.Menu) (*models.Menu, error) {
 	}
 
 	for _, menuItem := range menuItems {
-		n := nodes[menuItem.ID]
+		item := nodes[menuItem.ID]
 		if menuItem.MenuItemID == nil {
-			roots = append(roots, n)
+			roots = append(roots, item)
 			continue
 		}
-		if p, ok := nodes[*menuItem.MenuItemID]; ok {
-			p.Children = append(p.Children, n)
+		if itemInNode, ok := nodes[*menuItem.MenuItemID]; ok {
+			itemInNode.Children = append(itemInNode.Children, item)
 		} else {
-			roots = append(roots, n)
+			roots = append(roots, item)
 		}
 	}
 
@@ -104,14 +106,14 @@ func (s *MenuService) SaveFromRequest(form *request.MenuRequest, found *models.M
 	newErr := errutil.New()
 
 	for i := range itemsReq {
+		if itemsReq[i] == nil {
+			continue
+		}
+
 		i := i // захват индекса!
-		wg.Add(1)
+		sem <- struct{}{}
 
-		go func() {
-			defer wg.Done()
-
-			// семафор
-			sem <- struct{}{}
+		app.SafeGo(&wg, func() {
 			defer func() { <-sem }()
 
 			item, err := s.menuItemService.SaveFromRequest(itemsReq[i], user)
@@ -120,9 +122,14 @@ func (s *MenuService) SaveFromRequest(form *request.MenuRequest, found *models.M
 				return
 			}
 
+			if item == nil {
+				newErr.Add(fmt.Errorf("[MenuItemService][SaveFromRequest] item is nil"))
+				return
+			}
+
 			// писать в заранее выделенный слайс безопасно по разным индексам
 			results[i] = item
-		}()
+		})
 	}
 
 	wg.Wait()

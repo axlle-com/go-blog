@@ -145,3 +145,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 func (s *PostCollectionService) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
 	return s.postRepo.WithPaginate(p, filter)
 }
+
+func (s *PostCollectionService) GetAll() ([]*models.Post, error) {
+	return s.postRepo.GetAll()
+}

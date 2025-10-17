@@ -1,6 +1,6 @@
 {{ define "admin.menu_inner" }}
-    {{ if eq .model.ID 0 }}
-    <form id="global-form" action="{{ .model.AdminURL }}" method="post">
+{{ if eq .model.ID 0 }}
+<form id="global-form" action="{{ .model.AdminURL }}" method="post">
     {{ else }}
     <form id="global-form" action="{{ .model.AdminURL }}" method="put">
         {{ end }}
@@ -33,7 +33,8 @@
                                                 data-validator="template_id">
                                             <option></option>
                                             {{ range .templates }}
-                                                <option value="{{ .ID }}" {{ if eq .ID $.model.GetTemplateID }}selected{{ end }}>
+                                                <option value="{{ .ID }}"
+                                                        {{ if eq .ID $.model.GetTemplateID }}selected{{ end }}>
                                                     {{ .Title }}
                                                 </option>
                                             {{ end }}
@@ -63,9 +64,13 @@
             </div>
         </div>
 
-        <div class="accordion-unstacked accordion-active-primary" id="{{ $rootID }}">
+        <div class="accordion-unstacked accordion-active-primary accordion-root" id="{{ $rootID }}">
             {{ range .model.MenuItems }}
-                {{ template "menuItemUnstackedAllOpenFlat" dict "item" . "parent" $rootID "prefix" $prefix }}
+                {{ template "menuItemUnstackedAllOpenFlat" dict
+                "item"        .
+                "parent"      $rootID
+                "prefix"      $prefix
+                "publishers"  $.publishers  }}
             {{ end }}
         </div>
     </form>
@@ -92,7 +97,7 @@
                 <div class="card-body text-secondary">
                     <div class="row">
                         <div class="col-md-6">
-                            <fieldset class="form-block">
+                            <fieldset class="form-block js-menu-items-publisher-url">
                                 <legend>Параметры пункта</legend>
 
                                 <!-- скрытые поля плоского объекта -->
@@ -117,9 +122,13 @@
                                             name="menu_items[{{ $it.ID }}][publisher_uuid]"
                                             data-validator="publisher_uuid">
                                         <option></option>
-                                        {{ range .items }}
-                                            <option value="{{ .ID }}">{{ .Title }}</option>
-                                        {{ end }}
+                                        {{- range .publishers }}
+                                            {{ $opt := printf "%s" .GetUUID }}
+                                            <option value="{{ $opt }}" data-url="{{ .GetURL }}"
+                                                    {{ if and $it.PublisherUUID (eq $opt (printf "%s" $it.PublisherUUID)) }} selected{{ end }}>
+                                                {{ .Title }}
+                                            </option>
+                                        {{- end }}
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -146,9 +155,13 @@
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             data-action="{{ $it.AdminAjaxFilterURL }}?for_not_menu_item_id={{ $it.ID }}&menu_id={{ $it.MenuID }}"
-                                            name="menu_items[{{ $it.ID }}][parent_id]"
-                                            data-validator="parent_id">
+                                            name="menu_items[{{ $it.ID }}][menu_item_id]"
+                                            data-validator="menu_item_id">
                                         <option></option>
+                                        {{$it.Parent}}
+                                        {{ with $it.Parent }}
+                                            <option value="{{ .ID }}" selected>{{ .Title }}</option>
+                                        {{ end }}
                                     </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -169,10 +182,15 @@
                     {{ if $hasKids }}
                         <div class="accordion-unstacked accordion-active-primary" id="{{$childAccID}}">
                             {{- range $it.Children }}
-                                {{ template "menuItemUnstackedAllOpenFlat" dict "item" . "parent" $childAccID "prefix" $prefix }}
+                                {{ template "menuItemUnstackedAllOpenFlat" dict
+                                "item"        .
+                                "parent"      $childAccID
+                                "prefix"      $prefix
+                                "publishers"  $.publishers }}
                             {{- end }}
                         </div>
                     {{ end }}
+
                 </div>
             </div>
         </div>

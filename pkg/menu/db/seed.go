@@ -100,14 +100,13 @@ func (s *seeder) seedTreeForMenu(menuID uint) error {
 	// локальный helper: создаёт пункт в рамках menuID; parentID — внутри того же меню
 	createItem := func(parentID *uint, sort int, title string) (*models.MenuItem, error) {
 		it := &models.MenuItem{
-			MenuID:      menuID,
-			MenuItemID:  parentID,
-			URL:         faker.URL(),
-			IsPublished: db.RandBool(),
-			Title:       title,
-			Sort:        sort,
-			CreatedAt:   db.TimePtr(now),
-			UpdatedAt:   db.TimePtr(now),
+			MenuID:     menuID,
+			MenuItemID: parentID,
+			URL:        faker.URL(),
+			Title:      title,
+			Sort:       sort,
+			CreatedAt:  db.TimePtr(now),
+			UpdatedAt:  db.TimePtr(now),
 		}
 		if err := s.menuItemRepo.Create(it); err != nil {
 			return nil, err

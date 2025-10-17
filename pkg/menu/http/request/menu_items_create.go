@@ -11,16 +11,15 @@ func NewMenuItemsRequest() *MenuItemsRequest {
 }
 
 type MenuItemsRequest struct {
-	ID            *uint     `json:"id"`
-	PublisherUUID uuid.UUID `json:"publisher_uuid"`
-	MenuID        uint      `json:"menu_id"`
-	MenuItemID    *uint     `json:"menu_item_id,omitempty"`
-	Path          string    `json:"path"`
-	Title         string    `json:"title"`
-	URL           *string   `json:"url"`
-	IsPublished   *bool     `json:"is_published,omitempty"`
-	Ico           *string   `json:"ico,omitempty"`
-	Sort          int       `json:"sort,omitempty"`
+	ID            *uint      `json:"id"`
+	PublisherUUID *uuid.UUID `json:"publisher_uuid"`
+	MenuID        uint       `json:"menu_id"`
+	MenuItemID    *uint      `json:"menu_item_id,omitempty"`
+	Path          string     `json:"path"`
+	Title         string     `json:"title"`
+	URL           string     `json:"url"`
+	Ico           *string    `json:"ico,omitempty"`
+	Sort          int        `json:"sort,omitempty"`
 }
 
 func (r *MenuItemsRequest) ValidateForm(ctx *gin.Context) (*MenuItemsRequest, *errutil.Errors) {

@@ -99,25 +99,6 @@ const _glob = {
             return _this;
         }
 
-        fillFormData(formData, object, cnt = 0) {
-            if (Object.keys(object).length) {
-                for (let key in object) {
-                    /****** TODO make recursive  ******/
-                    if (typeof object[key] === 'object') {
-                        let cnt = 0;
-                        for (let key2 in object[key]) {
-                            formData.append(key + '[' + key2 + ']', object[key][key2]);
-                            cnt++;
-                        }
-                    } else {
-                        if (object[key]) {
-                            formData.append(key, object[key]);
-                        }
-                    }
-                }
-            }
-        }
-
         setObject(object = null) {
             this.data = this.view = this.response = null;
             if (object) {
@@ -164,88 +145,61 @@ const _glob = {
             return this;
         }
 
-        appendPayload(object = null) {
-            if (object && this.payload) {
-                if (Object.keys(object).length) {
-                    for (let key in object) {
-                        /****** TODO make recursive  ******/
-                        if (typeof object[key] === 'object') {
-                            for (let key2 in object[key]) {
-                                this.payload.append(key + '[' + key2 + ']', object[key][key2]);
-                            }
-                        } else {
-                            this.payload.append(key, object[key]);
-                        }
-                    }
-                }
-            } else {
-                _glob.console.error('Нечего отправлять');
-            }
-            return this;
-        }
-
-        appendImages() {
-            if (Object.keys(_glob.images).length) {
-                for (let key in _glob.images) {
-                    let images = _glob.images[key]['images'];
-                    if (Object.keys(images).length) {
-                        for (let key2 in images) {
-                            this.payload.append('galleries[' + key + '][images][' + key2 + '][file]', images[key2]['file']);
-                        }
-                    }
-                }
-            }
-        }
-
-        deepSet(obj, path, value) {
-            // признак «множественного» поля — заканчивается на []
+        deepSetWithTypes(target, path, value) {
             const isMulti = /\[\]$/.test(path);
-            // раскладываем путь, убираем все [] и скобки
-            const keys = path.match(/([^\[\]]+)/g) || [];
+            const keys = path.match(/([^\[\]\.]+)/g) || [];
+            let curr = target;
 
-            // 1) Пробегаем все ключи, кроме последнего, создавая вложенные объекты/массивы
-            let curr = obj;
+            // создаём контейнеры на пути
             for (let i = 0; i < keys.length - 1; i++) {
                 const key = keys[i];
                 const next = keys[i + 1];
+                const needArray = /^\d+$/.test(next);
 
-                if (curr[key] == null) {
-                    // если следующий ключ — цифра, заводим массив, иначе объект
-                    curr[key] = /^\d+$/.test(next) ? [] : {};
+                const exists = curr[key];
+                if (exists == null) {
+                    curr[key] = needArray ? [] : {};
+                } else {
+                    if (needArray && !Array.isArray(exists)) {
+                        curr[key] = [];
+                    }
+                    if (!needArray && (typeof exists !== 'object' || Array.isArray(exists))) {
+                        curr[key] = {};
+                    }
                 }
                 curr = curr[key];
             }
 
             const lastKey = keys[keys.length - 1];
-            let v = value;
+            const typeHint = _glob.typeHints.get(path);
 
-            // 2) Логика для множественных полей
             if (isMulti) {
-                // превратить одиночную строку/число в [v], пустую строку/null → []
-                if (!Array.isArray(v)) {
-                    v = (v === '' || v == null) ? [] : [v];
-                }
-                // убедиться, что под lastKey лежит массив
                 if (!Array.isArray(curr[lastKey])) {
-                    curr[lastKey] = [];
+                    curr[lastKey] = curr[lastKey] == null ? [] : [curr[lastKey]];
                 }
-                // «накатываем» новые элементы, фильтруя пустые
-                v.forEach(item => {
-                    if (item != null && item !== '') {
-                        curr[lastKey].push(item);
+                const incoming = Array.isArray(value) ? value : [value];
+                incoming.forEach(item => {
+                    const casted = this.castByType(item, typeHint);
+                    if (casted !== '' && casted != null) {
+                        curr[lastKey].push(casted);
                     }
                 });
+                return;
+            }
 
-                // 3) Обычное поле
+            let newValue = this.castByType(value, typeHint);
+            if (newValue === '' || newValue == null || (this.isPlainObject(newValue) && Object.keys(newValue).length === 0)) {
+                return;
+            }
+
+            // если уже было значение и это не массив — превратим в массив и добавим
+            if (Object.prototype.hasOwnProperty.call(curr, lastKey) && !Array.isArray(curr[lastKey])) {
+                curr[lastKey] = [curr[lastKey]];
+            }
+            if (Array.isArray(curr[lastKey])) {
+                curr[lastKey].push(newValue);
             } else {
-                // отфильтровываем пустые значения и пустые объекты
-                const isEmptyObj = typeof v === 'object'
-                    && !Array.isArray(v)
-                    && Object.keys(v).length === 0;
-                if (v === '' || v == null || isEmptyObj) {
-                    return;
-                }
-                curr[lastKey] = v;
+                curr[lastKey] = newValue;
             }
         }
 
@@ -273,7 +227,7 @@ const _glob = {
 
             // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
-                _this.deepSet(formObject, key, value);
+                _this.deepSetWithTypes(formObject, key, value);
             });
 
             let ajaxOptions = {
@@ -457,6 +411,94 @@ const _glob = {
             }
             location.hash = '#' + url;
         }
+
+        castValueAuto(value) {
+            // Бинарные/особые типы не трогаем
+            if (value instanceof File || value instanceof Blob || value instanceof Date || value instanceof ArrayBuffer) return value;
+            if (typeof value !== 'string') return value;
+
+            const s = value.trim();
+            if (s === '') return s;
+
+            // boolean
+            if (/^(true|false)$/i.test(s)) return s.toLowerCase() === 'true';
+
+            // null/undefined
+            if (/^(null)$/i.test(s)) return null;
+            if (/^(undefined)$/i.test(s)) return undefined;
+
+            // int
+            if (/^[+-]?\d+$/.test(s)) {
+                const n = Number(s);
+                if (Number.isSafeInteger(n)) return n;
+            }
+            // float
+            if (/^[+-]?\d*\.\d+$/.test(s)) {
+                const n = Number(s);
+                if (!Number.isNaN(n)) return n;
+            }
+            return value;
+        }
+
+        castByType(value, typeStr) {
+            if (!typeStr) {
+                return this.castValueAuto(value);
+            }
+
+            const isArrayType = /\[\]$/.test(typeStr);
+            const base = typeStr.replace(/\[\]$/, '').toLowerCase();
+
+            const castOne = (val) => {
+                if (val instanceof File || val instanceof Blob || val instanceof Date || val instanceof ArrayBuffer) return val;
+                if (typeof val !== 'string') return val;
+                const s = val.trim();
+                if (s === '') return s;
+
+                switch (base) {
+                    case 'int':
+                    case 'integer':
+                        if (/^[+-]?\d+$/.test(s)) {
+                            const n = Number(s);
+                            if (Number.isSafeInteger(n)) return n;
+                        }
+                        return s;
+                    case 'float':
+                    case 'number':
+                        if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
+                            const n = Number(s);
+                            if (!Number.isNaN(n)) return n;
+                        }
+                        return s;
+                    case 'bool':
+                    case 'boolean':
+                        if (/^(true|false)$/i.test(s)) return s.toLowerCase() === 'true';
+                        if (/^(on)$/i.test(s)) return true;
+                        if (/^(off)$/i.test(s)) return false;
+                        return s;
+                    case 'json':
+                        try {
+                            return JSON.parse(s);
+                        } catch {
+                            return s;
+                        }
+                    case 'string':
+                    default:
+                        return s;
+                }
+            };
+
+            if (isArrayType) {
+                if (Array.isArray(value)) return value.map(castOne);
+                return [castOne(value)];
+            }
+            return castOne(value);
+        }
+
+        isPlainObject(value) {
+            if (value === null || typeof value !== 'object') return false;
+            const proto = Object.getPrototypeOf(value);
+            return proto === Object.prototype || proto === null;
+        }
     },
     validation: {
         control: function () {
@@ -535,6 +577,177 @@ const _glob = {
             cookie.options = {expires: '', path: '/'};
             cookie.set();
         }
+    },
+    typeHints: {
+        _exact: new Map(),   // полный путь (если когда-нибудь захочешь)
+        _norm: new Map(),   // нормализованный путь ( [0] -> [] )
+        _leaf: new Map(),   // тип по имени поля (leaf), например parent_id -> int
+
+        _normPath(name) {
+            return String(name).replace(/\[\d+\]/g, '[]');
+        },
+        _lastField(name) {
+            const parts = String(name).match(/([^\[\]\.]+)/g) || [];
+            return parts[parts.length - 1] || '';
+        },
+
+        // задаём типы пачкой (ключи — имена полей или точные пути)
+        set(dict) {
+            Object.entries(dict || {}).forEach(([key, type]) => {
+                const t = String(type).trim();
+                if (/[\[\]\.]/.test(key)) {
+                    // это путь
+                    const p = String(key).trim();
+                    this._exact.set(p, t);
+                    this._norm.set(this._normPath(p), t);
+                } else {
+                    // это просто имя поля
+                    this._leaf.set(String(key).trim(), t);
+                }
+            });
+            return this;
+        },
+
+        // (не обязательно, но пусть будет)
+        setPath(path, type) {
+            const p = String(path).trim();
+            const t = String(type).trim();
+            this._exact.set(p, t);
+            this._norm.set(this._normPath(p), t);
+            return this;
+        },
+
+        setLeaf(field, type) {
+            this._leaf.set(String(field).trim(), String(type).trim());
+            return this;
+        },
+
+        // резолв типа
+        get(path) {
+            const exact = this._exact.get(path);
+            if (exact) return exact;
+
+            const norm = this._norm.get(this._normPath(path));
+            if (norm) return norm;
+
+            return this._leaf.get(this._lastField(path)) || null;
+        },
+
+        run: function () {
+            this.set({
+                // базовые
+                id: 'int',
+                uuid: 'string',
+
+                // users
+                first_name: 'string',
+                last_name: 'string',
+                patronymic: 'string',
+                phone: 'string',
+                email: 'string',
+                is_email: 'bool',
+                is_phone: 'bool',
+                status: 'int',
+                avatar: 'string',
+                password_hash: 'string',
+                remember_token: 'string',
+                auth_token: 'string',
+                auth_key: 'string',
+                password_reset_token: 'string',
+                created_at: 'string',
+                updated_at: 'string',
+                deleted_at: 'string',
+
+                // связи и ACL
+                permission_id: 'int',
+                user_id: 'int',
+                role_id: 'int',
+                user_uuid: 'string',
+                relation_uuid: 'string',
+
+                // общие для контента/шаблонов
+                template_id: 'int',
+                post_category_id: 'int',
+                meta_title: 'string',
+                meta_description: 'string',
+                alias: 'string',
+                url: 'string',
+                is_main: 'bool',
+                is_published: 'bool',
+                is_favourites: 'bool',
+                has_comments: 'bool',
+                show_image_post: 'bool',
+                show_image_category: 'bool',
+                in_sitemap: 'bool',
+                media: 'string',
+                title: 'string',
+                title_short: 'string',
+                description_preview: 'string',
+                description: 'string',
+                show_date: 'bool',
+                date_pub: 'string',
+                date_end: 'string',
+                image: 'string',
+                hits: 'int',
+                sort: 'int',
+                stars: 'float',
+                path: 'string',
+                show_image: 'bool',
+                name: 'string',
+
+                // теги/ресурсы/инфо-блоки/галереи
+                post_tag_id: 'int',
+                resource_uuid: 'string',
+                position: 'string',
+                info_block_id: 'int',
+                gallery_id: 'int',
+                original_name: 'string',
+                file: 'string',
+
+                // аналитика
+                request_uuid: 'string',
+                timestamp: 'string',
+                method: 'string',
+                host: 'string',
+                query: 'string',
+                latency: 'int',
+                ip: 'string',
+                country: 'string',
+                city: 'string',
+                browser: 'string',
+                device: 'string',
+                os: 'string',
+                language: 'string',
+                referrer: 'string',
+                resolution_width: 'int',
+                resolution_height: 'int',
+                request_size: 'int',
+                response_size: 'int',
+                utm_campaign: 'string',
+                utm_source: 'string',
+                utm_medium: 'string',
+
+                // сообщения
+                from: 'string',
+                to: 'string',
+                subject: 'string',
+                body: 'string',
+                attachment: 'string',
+                viewed: 'bool',
+
+                // меню
+                ico: 'string',
+                publisher_uuid: 'string',
+                menu_id: 'int',
+                menu_item_id: 'int',
+
+                // файлы
+                size: 'int',
+                type: 'string',
+                is_received: 'bool',
+            });
+        }
+
     },
     resolution: function () {
         const cookie = new this.cookie('resolution');
@@ -676,5 +889,6 @@ const _glob = {
         this.resolution();
         this.synchronization();
         this.lazyLoading.loading('[data-js-image-lazy-loading]', 'src');
+        this.typeHints.run()
     }
 }

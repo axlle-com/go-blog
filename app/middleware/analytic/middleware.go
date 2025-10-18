@@ -10,22 +10,18 @@ import (
 	"github.com/mssola/user_agent"
 
 	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/analytic/provider"
 )
 
 func NewAnalytic(
 	queue contracts.Queue,
-	analyticProvider provider.AnalyticProvider,
 ) *Analytic {
 	return &Analytic{
-		queue:            queue,
-		analyticProvider: analyticProvider,
+		queue: queue,
 	}
 }
 
 type Analytic struct {
-	queue            contracts.Queue
-	analyticProvider provider.AnalyticProvider
+	queue contracts.Queue
 }
 
 func (a *Analytic) Handler() gin.HandlerFunc {
@@ -67,13 +63,17 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 			userUUID = ctx.GetString("guest_uuid")
 		}
 
+		if ctx.Request.URL.Path == "/.well-known/appspecific/com.chrome.devtools.json" {
+			return
+		}
+
 		evt := AnalyticsEvent{
 			RequestUUID:      ctx.GetString("request_uuid"),
 			UserUUID:         userUUID,
 			Timestamp:        time.Now().UTC(),
 			Method:           ctx.Request.Method,
 			Host:             host,
-			Path:             ctx.FullPath(),
+			Path:             ctx.Request.URL.Path,
 			Query:            ctx.Request.URL.RawQuery,
 			Status:           ctx.Writer.Status(),
 			Latency:          time.Since(start),
@@ -92,7 +92,7 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 			UTMMedium:        ctx.Query("utm_medium"),
 		}
 
-		a.queue.Enqueue(NewAnalyticsJob(evt, a.analyticProvider), 0)
+		a.queue.Enqueue(NewAnalyticsJob(evt), 0)
 	}
 }
 

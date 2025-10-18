@@ -10,3 +10,7 @@ type Queue interface {
 	Start(ctx context.Context, n int)
 	Close()
 }
+
+type QueueHandler interface {
+	Run([]byte)
+}

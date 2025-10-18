@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -50,9 +51,9 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 		return nil, nil
 	}
 
-	email, err := s.userRepo.GetByEmail(user.GetEmail())
+	byEmail, err := s.userRepo.GetByEmail(user.GetEmail())
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		uuid, err := s.userRepo.GetByUUID(user.GetUUID())
+		byUUID, err := s.userRepo.GetByUUID(user.GetUUID())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			newUser := &models.User{}
 			newUser.FromInterface(user)
@@ -63,26 +64,25 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 			return newUser, nil
 		}
 
-		if uuid == nil {
-			return uuid, err
+		if byUUID == nil {
+			return byUUID, err
 		}
 
 		newUser := &models.User{}
 		newUser.FromInterface(user)
+		newUser.UUID = uuid.New()
 		err = s.userRepo.Create(newUser)
 		if err != nil {
 			return nil, err
 		}
 
-		newUserHasUser, err := s.userRepo.GetRelation(uuid.UUID, newUser.UUID)
+		newUserHasUser, err := s.userRepo.GetRelation(byUUID.UUID, newUser.UUID)
 		if newUserHasUser != nil {
 			return newUser, nil
-		} else if err != nil {
-			return newUser, err
 		}
 
 		newUserHasUser = &models.UserHasUser{}
-		newUserHasUser.UserUUID = uuid.UUID
+		newUserHasUser.UserUUID = byUUID.UUID
 		newUserHasUser.RelationUUID = newUser.UUID
 		err = s.userRepo.Attach(newUserHasUser)
 		if err != nil {
@@ -92,28 +92,28 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 
 	}
 
-	if email == nil {
-		return email, err
+	if byEmail == nil {
+		return byEmail, err
 	}
 
-	if email.UUID == user.GetUUID() {
-		return email, nil
+	if byEmail.UUID == user.GetUUID() {
+		return byEmail, nil
 	}
 
-	newUserHasUser, err := s.userRepo.GetRelation(email.UUID, user.GetUUID())
+	newUserHasUser, err := s.userRepo.GetRelation(byEmail.UUID, user.GetUUID())
 	if newUserHasUser != nil {
-		return email, nil
+		return byEmail, nil
 	} else if err != nil {
-		return email, err
+		return byEmail, err
 	}
 
 	newUserHasUser = &models.UserHasUser{}
-	newUserHasUser.UserUUID = email.UUID
+	newUserHasUser.UserUUID = byEmail.UUID
 	newUserHasUser.RelationUUID = user.GetUUID()
 	err = s.userRepo.Attach(newUserHasUser)
 	if err != nil {
-		return email, err
+		return byEmail, err
 	}
 
-	return email, err
+	return byEmail, err
 }

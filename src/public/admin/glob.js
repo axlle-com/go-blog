@@ -459,22 +459,30 @@ const _glob = {
                     case 'integer':
                         if (/^[+-]?\d+$/.test(s)) {
                             const n = Number(s);
-                            if (Number.isSafeInteger(n)) return n;
+                            if (Number.isSafeInteger(n)) {
+                                return n;
+                            }
                         }
                         return s;
                     case 'float':
                     case 'number':
                         if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
                             const n = Number(s);
-                            if (!Number.isNaN(n)) return n;
+                            if (!Number.isNaN(n)) {
+                                return n;
+                            }
                         }
                         return s;
                     case 'bool':
                     case 'boolean':
-                        if (/^(true|false)$/i.test(s)) return s.toLowerCase() === 'true';
-                        if (/^(on)$/i.test(s)) return true;
-                        if (/^(off)$/i.test(s)) return false;
-                        return s;
+                        // поддерживаем "1"/"0" и true/false
+                        if (value === '1' || value === 1 || value === true || value === 'true') {
+                            return true;
+                        }
+                        if (value === '0' || value === 0 || value === false || value === 'false') {
+                            return false;
+                        }
+                        return Boolean(value);
                     case 'json':
                         try {
                             return JSON.parse(s);

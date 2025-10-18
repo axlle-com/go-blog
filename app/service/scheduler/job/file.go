@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 )
@@ -26,11 +27,19 @@ func (j *DeleteFiles) Run(ctx context.Context) error {
 }
 
 func (j *DeleteFiles) GetData() []byte {
-	return nil
+	return app.NewEnvelopeQueue().ConvertData(j.GetAction(), "")
 }
 
 func (j *DeleteFiles) GetName() string {
-	return "DeleteFiles"
+	return "files"
+}
+
+func (j *DeleteFiles) GetQueue() string {
+	return "files"
+}
+
+func (j *DeleteFiles) GetAction() string {
+	return "revision_received"
 }
 
 func (j *DeleteFiles) Duration() float64 {

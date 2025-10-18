@@ -10,18 +10,21 @@ import (
 	"github.com/axlle-com/blog/app/service/scheduler"
 	"github.com/axlle-com/blog/app/service/storage"
 	"github.com/axlle-com/blog/app/service/view"
+	queue2 "github.com/axlle-com/blog/pkg/menu/queue"
 
 	"github.com/axlle-com/blog/pkg/blog/provider"
 
 	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
+	analyticQueue "github.com/axlle-com/blog/pkg/analytic/queue"
 	analyticRepo "github.com/axlle-com/blog/pkg/analytic/repository"
 	analyticService "github.com/axlle-com/blog/pkg/analytic/service"
 
 	fileMigrate "github.com/axlle-com/blog/pkg/file/db/migrate"
 	fileAdminWeb "github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
+	fileQueue "github.com/axlle-com/blog/pkg/file/queue"
 	fileRepo "github.com/axlle-com/blog/pkg/file/repository"
 	fileService "github.com/axlle-com/blog/pkg/file/service"
 
@@ -52,6 +55,7 @@ import (
 	messageAdminAjax "github.com/axlle-com/blog/pkg/message/http/admin/handlers/ajax"
 	messageAdminWeb "github.com/axlle-com/blog/pkg/message/http/admin/handlers/web"
 	messageFrontWeb "github.com/axlle-com/blog/pkg/message/http/front/handlers/ajax"
+	messageQueue "github.com/axlle-com/blog/pkg/message/queue"
 	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
 	messageService "github.com/axlle-com/blog/pkg/message/service"
 
@@ -76,6 +80,7 @@ import (
 	userMigrate "github.com/axlle-com/blog/pkg/user/db/migrate"
 	userFrontWeb "github.com/axlle-com/blog/pkg/user/http/handlers/web"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
+	usersQueue "github.com/axlle-com/blog/pkg/user/queue"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	usersService "github.com/axlle-com/blog/pkg/user/service"
 )
@@ -222,7 +227,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
 	cService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	newPostService := postService.NewPostService(newPostRepo, csService, cService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	newPostService := postService.NewPostService(newQueue, newPostRepo, csService, cService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
 	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, csService, postTagCollectionService)
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
@@ -275,6 +280,24 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		newQueue,
 		fileProv,
 	)
+
+	newQueue.SetHandlers(map[string][]contracts.QueueHandler{
+		"messages": {
+			messageQueue.NewMessageQueueHandler(newMessageService, newMessageCollectionService),
+		},
+		"users": {
+			usersQueue.NewUserQueueHandler(newUserService),
+		},
+		"files": {
+			fileQueue.NewFileQueueHandler(fileCollectionService),
+		},
+		"analytics": {
+			analyticQueue.NewAnalyticQueueHandler(newAnalyticService, analyticCollectionService),
+		},
+		"posts": {
+			queue2.NewPublisherQueueHandler(newMenuService),
+		},
+	})
 
 	return &Container{
 		Config:    cfg,

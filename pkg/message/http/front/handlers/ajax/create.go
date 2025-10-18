@@ -3,6 +3,8 @@ package web
 import (
 	"net/http"
 
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/pkg/message/form"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -27,7 +29,12 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindBodyWith(tempForm, binding.JSON); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		formError := errutil.NewErrors(err)
+		ctx.JSON(
+			http.StatusBadRequest,
+			response.Fail(http.StatusBadRequest, formError.Message, formError.Errors),
+		)
+		ctx.Abort()
 		return
 	}
 

@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
 )
 
 type Analytic struct {

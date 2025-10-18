@@ -6,61 +6,55 @@ import (
 	"time"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/pkg/analytic/provider"
+	"github.com/axlle-com/blog/app/models"
 )
 
 func NewAnalyticsJob(
 	event AnalyticsEvent,
-	analyticProvider provider.AnalyticProvider,
 ) *AnalyticsJob {
 	return &AnalyticsJob{
-		event:            &event,
-		analyticProvider: analyticProvider,
-		start:            time.Now(),
+		event: &event,
+		start: time.Now(),
 	}
 }
 
 type AnalyticsJob struct {
-	start            time.Time
-	event            *AnalyticsEvent
-	analyticProvider provider.AnalyticProvider
+	start time.Time
+	event *AnalyticsEvent
+	data  []byte
 }
 
 func (j *AnalyticsJob) Run(ctx context.Context) error {
-	_, err := j.analyticProvider.SaveForm(j.event)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (j *AnalyticsJob) GetData() []byte {
+	if j.data != nil {
+		return j.data
+	}
+
 	raw, err := json.Marshal(j.event)
 	if err != nil {
 		logger.Errorf("[AnalyticsJob][GetData] Error: %v", err)
 		return nil
 	}
-
-	return raw
+	j.data = models.NewEnvelopeQueue().ConvertData("create", string(raw))
+	return j.data
 }
 
 func (j *AnalyticsJob) GetName() string {
-	return "Analytics"
+	return "analytics"
+}
+
+func (j *AnalyticsJob) GetQueue() string {
+	return "analytics"
+}
+
+func (j *AnalyticsJob) GetAction() string {
+	return "create"
 }
 
 func (j *AnalyticsJob) Duration() float64 {
 	elapsed := time.Since(j.start)
 	return float64(elapsed.Nanoseconds()) / 1e6
-}
-
-func toMap(v any) (map[string]any, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	var m map[string]any
-	if err = json.Unmarshal(b, &m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }

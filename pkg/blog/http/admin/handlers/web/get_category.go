@@ -1,14 +1,15 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
-func (c *controllerCategory) GetCategory(ctx *gin.Context) {
+func (c *categoryController) GetCategory(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
@@ -33,7 +34,6 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.templateProvider.GetAll()
 	infoBlocks := c.infoBlockProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
@@ -41,12 +41,12 @@ func (c *controllerCategory) GetCategory(ctx *gin.Context) {
 		gin.H{
 			"title":      "Страница категории",
 			"categories": categories,
-			"templates":  templates,
+			"templates":  c.templates(ctx),
 			"category":   category,
 			"collection": gin.H{
-				"infoBlocks":         infoBlocks,
-				"ifoBlockCollection": category.InfoBlocks,
-				"relationURL":        category.AdminURL(),
+				"infoBlocks":          infoBlocks,
+				"infoBlockCollection": category.InfoBlocks,
+				"relationURL":         category.AdminURL(),
 			},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

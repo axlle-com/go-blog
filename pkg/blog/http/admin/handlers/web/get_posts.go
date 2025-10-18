@@ -31,7 +31,6 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL((&models.Post{}).AdminURL())
 
-	templates := c.template.GetAll()
 	users := c.user.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
@@ -49,7 +48,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

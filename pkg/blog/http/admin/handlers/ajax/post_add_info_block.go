@@ -1,10 +1,11 @@
 package ajax
 
 import (
-	"github.com/axlle-com/blog/app/errutil"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/axlle-com/blog/app/errutil"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) AddPostInfoBlock(ctx *gin.Context) {
@@ -27,7 +28,7 @@ func (c *postController) AddPostInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	ifoBlockCollection, err := c.infoBlock.Attach(uint(infoBlockId), found)
+	infoBlockCollection, err := c.infoBlock.Attach(uint(infoBlockId), found)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
 		return
@@ -35,15 +36,15 @@ func (c *postController) AddPostInfoBlock(ctx *gin.Context) {
 
 	infoBlocks := c.infoBlock.GetAll()
 	data := gin.H{
-		"infoBlocks":         infoBlocks,
-		"ifoBlockCollection": ifoBlockCollection,
+		"infoBlocks":          infoBlocks,
+		"infoBlockCollection": infoBlockCollection,
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": gin.H{
-			"view":               c.RenderView("admin.info_block_in_item_inner", data, ctx),
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": ifoBlockCollection,
+			"view":                c.RenderView("admin.info_block_in_item_inner", data, ctx),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": infoBlockCollection,
 		},
 	})
 }

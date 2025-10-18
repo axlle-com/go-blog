@@ -15,15 +15,13 @@ func (c *infoBlockWebController) CreateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	block := &models.InfoBlock{}
-	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{
 			"title":     "Страница инфо блока",
-			"templates": templates,
-			"infoBlock": block,
+			"templates": c.templates(ctx),
+			"infoBlock": &models.InfoBlock{},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

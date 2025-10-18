@@ -44,16 +44,15 @@ func (c *tagController) Update(ctx *gin.Context) {
 		return
 	}
 
-	templates := c.template.GetAll()
 	infoBlocks := c.infoBlock.GetAll()
 
 	data := gin.H{
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"tag":       tag,
 		"collection": gin.H{
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": tag.InfoBlocks,
-			"relationURL":        tag.AdminURL(),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": tag.InfoBlocks,
+			"relationURL":         tag.AdminURL(),
 		},
 	}
 

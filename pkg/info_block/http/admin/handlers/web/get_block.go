@@ -27,13 +27,13 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 	}
 
 	block.Galleries = c.galleryProvider.GetForResource(block)
-	templates := c.templateProvider.GetAll()
+
 	ctx.HTML(
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{
 			"title":     "Страница инфо блока",
-			"templates": templates,
+			"templates": c.templates(ctx),
 			"infoBlock": block,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

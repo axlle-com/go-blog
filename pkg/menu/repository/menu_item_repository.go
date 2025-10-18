@@ -8,6 +8,7 @@ import (
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/menu/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,8 @@ type MenuItemRepository interface {
 	GetByID(id uint) (*models.MenuItem, error)
 	GetByIDs(ids []uint) ([]*models.MenuItem, error)
 	Update(new *models.MenuItem, old *models.MenuItem) error
+	UpdateURLForPublisher(publisherUuid uuid.UUID, newURL string) (int64, error)
+	DetachPublisher(publisherUuid uuid.UUID) (int64, error)
 	DeleteByID(id uint) error
 	Delete(menuItem *models.MenuItem) error
 	GetByFilter(p contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error)
@@ -278,4 +281,37 @@ func (r *menuItemRepository) Update(new *models.MenuItem, old *models.MenuItem) 
 	// Обновляем сам узел.
 	new.Path = newPath
 	return r.save(new)
+}
+
+func (r *menuItemRepository) UpdateURLForPublisher(publisherUuid uuid.UUID, newURL string) (int64, error) {
+	res := r.db.Model(&models.MenuItem{}).
+		Where("publisher_uuid = ?", publisherUuid).
+		Updates(map[string]any{
+			"url": newURL,
+		})
+	return res.RowsAffected, res.Error
+}
+
+func (r *menuItemRepository) DetachPublisher(publisherUuid uuid.UUID) (int64, error) {
+	res := r.db.Model(&models.MenuItem{}).
+		Where("publisher_uuid = ?", publisherUuid).
+		Updates(map[string]any{
+			"publisher_uuid": gorm.Expr("NULL"),
+			"url":            "#",
+		})
+	return res.RowsAffected, res.Error
+}
+
+func (r *menuItemRepository) ReassignPublisher(oldPub uuid.UUID, newPub uuid.UUID, newURL string) (int64, error) {
+	updates := map[string]any{
+		"publisher_uuid": newPub,
+	}
+	if newURL != "" {
+		updates["url"] = newURL
+	}
+	res := r.db.Model(&models.MenuItem{}).
+		Where("publisher_uuid = ?", oldPub).
+		Updates(updates)
+
+	return res.RowsAffected, res.Error
 }

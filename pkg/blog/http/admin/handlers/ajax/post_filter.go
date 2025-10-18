@@ -38,14 +38,13 @@ func (c *postController) FilterPosts(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.template.GetAll()
 	users := c.user.GetAll()
 	data := gin.H{
 		"title":      "Страница постов",
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

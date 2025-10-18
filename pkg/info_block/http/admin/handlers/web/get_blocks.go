@@ -33,7 +33,6 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
-	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
@@ -46,7 +45,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
 		"infoBlock":  empty,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

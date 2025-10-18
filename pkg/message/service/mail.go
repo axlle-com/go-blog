@@ -34,8 +34,8 @@ func NewMailService(
 
 func (s *MailService) SendContact(form form.Form) {
 	mailRequest := NewInformer(form.Data(), form.Title())
-	messageJob := mailer.NewCreateMessageJob(s.messageService, form)
-	userJob := mailer.NewCreateUserJob(s.userProvider, form)
+	messageJob := mailer.NewCreateMessageJob(form)
+	userJob := mailer.NewCreateUserJob(form)
 
 	s.mailer.SendMail(mailRequest)
 	s.queue.Enqueue(messageJob, 0)

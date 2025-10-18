@@ -48,7 +48,6 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	paginator.SetURL("/admin/models-blocks")
 
 	users := c.userProvider.GetAll()
-	templates := c.templateProvider.GetAll()
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
 	if err != nil {
@@ -60,7 +59,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

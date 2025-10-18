@@ -34,7 +34,6 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
-	templates := c.template.GetAll()
 	users := c.user.GetAll()
 
 	tagsTemp, err := c.tagCollectionService.WithPaginate(paginator, filter)
@@ -47,7 +46,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 		"title":     "Страница тэгов",
 		"tag":       empty,
 		"tags":      tags,
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"users":     users,
 		"paginator": paginator,
 		"filter":    filter,

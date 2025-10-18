@@ -1,12 +1,13 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *tagController) CreateTag(ctx *gin.Context) {
@@ -22,14 +23,13 @@ func (c *tagController) CreateTag(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	templates := c.template.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.tag",
 		gin.H{
 			"title":     "Страница тэга",
 			"tags":      tags,
-			"templates": templates,
+			"templates": c.templates(ctx),
 			"tag":       tag,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

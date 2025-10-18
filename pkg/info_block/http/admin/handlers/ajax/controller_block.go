@@ -1,7 +1,10 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
@@ -40,4 +43,13 @@ type blockController struct {
 	blockCollectionService *service.InfoBlockCollectionService
 	templateProvider       template.TemplateProvider
 	userProvider           user.UserProvider
+}
+
+func (c *blockController) templates(ctx *gin.Context) []contracts.Template {
+	templates, err := c.templateProvider.GetForResources(&models.InfoBlock{})
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	return templates
 }

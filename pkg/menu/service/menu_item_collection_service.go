@@ -97,3 +97,11 @@ func (s *MenuItemCollectionService) Aggregate(collection []*models.MenuItem) []*
 
 	return collection
 }
+
+func (s *MenuItemCollectionService) UpdateURLForPublisher(publisher contracts.Publisher) (int64, error) {
+	return s.menuItemRepository.UpdateURLForPublisher(publisher.GetUUID(), publisher.GetURL())
+}
+
+func (s *MenuItemCollectionService) DetachPublisher(publisher contracts.Publisher) (int64, error) {
+	return s.menuItemRepository.DetachPublisher(publisher.GetUUID())
+}

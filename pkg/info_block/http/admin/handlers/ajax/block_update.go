@@ -42,10 +42,8 @@ func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	templates := c.templateProvider.GetAll()
-
 	data := gin.H{
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"infoBlock": block,
 	}
 

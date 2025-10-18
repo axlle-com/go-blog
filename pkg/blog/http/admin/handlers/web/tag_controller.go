@@ -1,7 +1,10 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
@@ -27,7 +30,7 @@ func NewWebTagController(
 	return &tagController{
 		tagService:           tagService,
 		tagCollectionService: tagCollectionService,
-		template:             template,
+		templateProvider:     template,
 		user:                 user,
 		gallery:              gallery,
 		infoBlock:            infoBlock,
@@ -39,8 +42,17 @@ type tagController struct {
 
 	tagService           *service.TagService
 	tagCollectionService *service.TagCollectionService
-	template             template.TemplateProvider
+	templateProvider     template.TemplateProvider
 	user                 user.UserProvider
 	gallery              gallery.GalleryProvider
 	infoBlock            provider.InfoBlockProvider
+}
+
+func (c *tagController) templates(ctx *gin.Context) []contracts.Template {
+	templates, err := c.templateProvider.GetForResources(&models.PostTag{})
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	return templates
 }

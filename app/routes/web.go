@@ -40,12 +40,13 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 	menuItemController := container.MenuItemAjaxController()
 	menuAjaxController := container.MenuAjaxController()
 
-	analytic := analyticMiddleware.NewAnalytic(container.Queue, container.AnalyticProvider)
+	analytic := analyticMiddleware.NewAnalytic(container.Queue)
 
 	r.GET("/health", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "OK")
 	})
 	r.Use(middleware.Main())
+	r.Use(middleware.Language())
 	r.Use(middleware.Error())
 	r.Use(analytic.Handler())
 	r.GET("/", postFrontWebController.GetHome)

@@ -10,7 +10,7 @@ import (
 	"github.com/axlle-com/blog/pkg/menu/models"
 )
 
-func (c *controller) GetMenu(ctx *gin.Context) {
+func (c *menuController) GetMenu(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
@@ -34,11 +34,6 @@ func (c *controller) GetMenu(ctx *gin.Context) {
 		return
 	}
 
-	templates, err := c.templateProvider.GetForResources(model)
-	if err != nil {
-		logger.WithRequest(ctx).Error(err)
-	}
-
 	publishers, err := c.postProvider.GetPublishers()
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
@@ -49,7 +44,7 @@ func (c *controller) GetMenu(ctx *gin.Context) {
 		"admin.menu",
 		gin.H{
 			"title":      "Страница меню",
-			"templates":  templates,
+			"templates":  c.templates(ctx),
 			"model":      model,
 			"publishers": publishers,
 			"settings": gin.H{

@@ -1,8 +1,9 @@
 package queue
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
 	"time"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type queueItem struct {

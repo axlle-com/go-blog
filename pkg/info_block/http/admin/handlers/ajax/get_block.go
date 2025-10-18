@@ -1,10 +1,11 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *blockController) GetInfoBlock(ctx *gin.Context) {

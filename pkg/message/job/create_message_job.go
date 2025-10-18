@@ -4,42 +4,43 @@ import (
 	"context"
 	"time"
 
+	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
-	messageContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
 )
 
 func NewCreateMessageJob(
-	messageService messageContracts.MessageService,
 	form form.Form,
 ) contracts.Job {
 	return &CreateMessageJob{
-		messageService: messageService,
-		form:           form,
-		start:          time.Now(),
+		form:  form,
+		start: time.Now(),
 	}
 }
 
 type CreateMessageJob struct {
-	messageService messageContracts.MessageService
-	form           form.Form
-	start          time.Time
+	form  form.Form
+	start time.Time
 }
 
 func (j *CreateMessageJob) Run(ctx context.Context) error {
-	_, err := j.messageService.Create(j.form.Model(), j.form.GetUserUUID())
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
 func (j *CreateMessageJob) GetData() []byte {
-	return []byte(j.form.Data())
+	return models.NewEnvelopeQueue().ConvertData("create", j.form.Data())
 }
 
 func (j *CreateMessageJob) GetName() string {
-	return "CreateMessage"
+	return "messages"
+}
+
+func (j *CreateMessageJob) GetQueue() string {
+	return "messages"
+}
+
+func (j *CreateMessageJob) GetAction() string {
+	return "create"
 }
 
 func (j *CreateMessageJob) Duration() float64 {

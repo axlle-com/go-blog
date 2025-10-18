@@ -33,10 +33,8 @@ func (c *blockController) CreateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	templates := c.templateProvider.GetAll()
-
 	data := response.Body{
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"infoBlock": block,
 	}
 	ctx.JSON(

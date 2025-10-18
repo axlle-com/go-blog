@@ -34,14 +34,13 @@ func (c *tagController) Filter(ctx *gin.Context) {
 	}
 	tags := c.tagCollectionService.Aggregates(temp)
 
-	templates := c.template.GetAll()
 	users := c.user.GetAll()
 
 	data := gin.H{
 		"title":     "Страница тэгов",
 		"tag":       empty,
 		"tags":      tags,
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"users":     users,
 		"paginator": paginator,
 		"filter":    filter,

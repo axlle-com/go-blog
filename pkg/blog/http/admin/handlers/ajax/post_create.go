@@ -44,18 +44,17 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.template.GetAll()
 	infoBlocks := c.infoBlock.GetAll()
 
 	data := response.Body{
 		"tags":       tags,
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"post":       post,
 		"collection": gin.H{
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": post.InfoBlocks,
-			"relationURL":        post.AdminURL(),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": post.InfoBlocks,
+			"relationURL":         post.AdminURL(),
 		},
 	}
 	ctx.JSON(

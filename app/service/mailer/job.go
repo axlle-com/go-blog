@@ -51,7 +51,15 @@ func (j *MailerJob) GetData() []byte {
 }
 
 func (j *MailerJob) GetName() string {
-	return "Mailer"
+	return "mailer"
+}
+
+func (j *MailerJob) GetQueue() string {
+	return "mailer"
+}
+
+func (j *MailerJob) GetAction() string {
+	return "send"
 }
 
 func (j *MailerJob) Duration() float64 {

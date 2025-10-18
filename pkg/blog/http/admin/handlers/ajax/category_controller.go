@@ -1,7 +1,10 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -42,4 +45,13 @@ type categoryController struct {
 	templateProvider  template.TemplateProvider
 	userProvider      user.UserProvider
 	infoBlockProvider provider.InfoBlockProvider
+}
+
+func (c *categoryController) templates(ctx *gin.Context) []contracts.Template {
+	templates, err := c.templateProvider.GetForResources(&models.PostCategory{})
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	return templates
 }

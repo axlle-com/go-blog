@@ -16,6 +16,7 @@ type Queue struct {
 	wake          chan struct{} // сигнал «появилась более ранняя задача»
 	priorityQueue priorityQueue
 	closing       bool
+	handlers      map[string][]contracts.QueueHandler
 }
 
 func NewQueue() *Queue {
@@ -27,6 +28,10 @@ func NewQueue() *Queue {
 	}
 	q.cond = sync.NewCond(mu)
 	return q
+}
+
+func (q *Queue) SetHandlers(handlers map[string][]contracts.QueueHandler) {
+	q.handlers = handlers
 }
 
 // Enqueue ставит задачу в очередь; delay==0 — немедленно.
@@ -88,7 +93,7 @@ func (q *Queue) worker(ctx context.Context) {
 	for {
 		q.mu.Lock()
 
-		it, ok := q.next()
+		item, ok := q.next()
 		if !ok {
 			if q.closing {
 				q.mu.Unlock()
@@ -100,8 +105,8 @@ func (q *Queue) worker(ctx context.Context) {
 		}
 
 		now := time.Now()
-		if now.Before(it.runAt) {
-			wait := time.Until(it.runAt)
+		if now.Before(item.runAt) {
+			wait := time.Until(item.runAt)
 			q.mu.Unlock()
 
 			timer := time.NewTimer(wait)
@@ -120,9 +125,19 @@ func (q *Queue) worker(ctx context.Context) {
 		heap.Pop(&q.priorityQueue)
 		q.mu.Unlock()
 
-		if err := it.job.Run(ctx); err != nil {
-			logger.Errorf("[Queue][%s] Error: %v, Data: %s", it.job.GetName(), err, string(it.job.GetData()))
+		//if err := item.job.Run(ctx); err != nil {
+		//	logger.Errorf("[Queue][%s] Error: %v, Data: %s", item.job.GetName(), err, string(item.job.GetData()))
+		//}
+
+		handlers, ok := q.handlers[item.job.GetQueue()]
+		if !ok {
+			logger.Errorf("[Queue][%s] handlers not found, Data: %s", item.job.GetName(), string(item.job.GetData()))
 		}
-		logger.Debugf("[Queue][%s] Duration: %.2fms", it.job.GetName(), it.job.Duration())
+
+		for _, handler := range handlers {
+			handler.Run(item.job.GetData())
+		}
+
+		logger.Debugf("[Queue][%s] Duration: %.2fms", item.job.GetName(), item.job.Duration())
 	}
 }

@@ -1,15 +1,16 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	models2 "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
-func (c *controllerCategory) CreateCategory(ctx *gin.Context) {
+func (c *categoryController) CreateCategory(ctx *gin.Context) {
 	user := c.GetUser(ctx)
 	if user == nil {
 		return
@@ -21,14 +22,13 @@ func (c *controllerCategory) CreateCategory(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	templates := c.templateProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.category",
 		gin.H{
 			"title":      "Страница категории",
 			"categories": categories,
-			"templates":  templates,
+			"templates":  c.templates(ctx),
 			"category":   category,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

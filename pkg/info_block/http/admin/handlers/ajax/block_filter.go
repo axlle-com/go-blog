@@ -34,13 +34,12 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 	}
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
-	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
 	data := response.Body{
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

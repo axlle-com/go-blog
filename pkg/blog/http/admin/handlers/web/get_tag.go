@@ -1,11 +1,12 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *tagController) GetTag(ctx *gin.Context) {
@@ -31,20 +32,23 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 	if err != nil {
 		logger.Error(err.Error())
 	}
+	if tag == nil {
+		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		return
+	}
 
-	templates := c.template.GetAll()
 	infoBlocks := c.infoBlock.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.tag",
 		gin.H{
 			"title":     "Страница тега",
-			"templates": templates,
+			"templates": c.templates(ctx),
 			"tag":       tag,
 			"collection": gin.H{
-				"infoBlocks":         infoBlocks,
-				"ifoBlockCollection": tag.InfoBlocks,
-				"relationURL":        tag.AdminURL(),
+				"infoBlocks":          infoBlocks,
+				"infoBlockCollection": tag.InfoBlocks,
+				"relationURL":         tag.AdminURL(),
 			},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

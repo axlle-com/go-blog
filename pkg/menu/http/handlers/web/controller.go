@@ -1,8 +1,10 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
@@ -22,7 +24,7 @@ func NewMenuWebController(
 	templateProvider template.TemplateProvider,
 	postProvider contracts.PostProvider,
 ) Controller {
-	return &controller{
+	return &menuController{
 		menuService:               menuService,
 		menuCollectionService:     menuCollectionService,
 		menuItemService:           menuItemService,
@@ -32,7 +34,7 @@ func NewMenuWebController(
 	}
 }
 
-type controller struct {
+type menuController struct {
 	*app.BaseAjax
 
 	menuService               *service.MenuService
@@ -41,4 +43,13 @@ type controller struct {
 	menuItemCollectionService *service.MenuItemCollectionService
 	templateProvider          template.TemplateProvider
 	postProvider              contracts.PostProvider
+}
+
+func (c *menuController) templates(ctx *gin.Context) []contracts.Template {
+	templates, err := c.templateProvider.GetForResources(&models.Menu{})
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	return templates
 }

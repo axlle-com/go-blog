@@ -14,6 +14,7 @@ import (
 )
 
 type PostService struct {
+	queue                contracts.Queue
 	postRepo             repository.PostRepository
 	categoriesService    *CategoriesService
 	categoryService      *CategoryService
@@ -25,6 +26,7 @@ type PostService struct {
 }
 
 func NewPostService(
+	queue contracts.Queue,
 	postRepo repository.PostRepository,
 	categoriesService *CategoriesService,
 	categoryService *CategoryService,
@@ -35,6 +37,7 @@ func NewPostService(
 	infoBlockProvider provider2.InfoBlockProvider,
 ) *PostService {
 	return &PostService{
+		queue:                queue,
 		postRepo:             postRepo,
 		categoriesService:    categoriesService,
 		categoryService:      categoryService,

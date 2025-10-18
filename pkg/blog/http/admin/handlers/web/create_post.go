@@ -1,12 +1,13 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *postController) CreatePost(ctx *gin.Context) {
@@ -26,7 +27,6 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.template.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.post",
@@ -34,7 +34,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 			"title":      "Страница поста",
 			"categories": categories,
 			"tags":       tags,
-			"templates":  templates,
+			"templates":  c.templates(ctx),
 			"post":       post,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

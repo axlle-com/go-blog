@@ -3,7 +3,6 @@ package ajax
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
@@ -38,7 +37,7 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	form.ID = strconv.Itoa(int(id))
+	form.ID = id
 	form.UUID = found.UUID.String()
 	post, err := c.postService.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {
@@ -56,18 +55,17 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.template.GetAll()
 	infoBlocks := c.infoBlock.GetAll()
 
 	data := gin.H{
 		"tags":       tags,
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"post":       post,
 		"collection": gin.H{
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": post.InfoBlocks,
-			"relationURL":        post.AdminURL(),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": post.InfoBlocks,
+			"relationURL":         post.AdminURL(),
 		},
 	}
 

@@ -48,7 +48,6 @@ func (c *postController) DeletePost(ctx *gin.Context) {
 	paginator.SetURL("/admin/posts")
 
 	users := c.user.GetAll()
-	templates := c.template.GetAll()
 
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
@@ -67,7 +66,7 @@ func (c *postController) DeletePost(ctx *gin.Context) {
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"users":      users,
 		"paginator":  paginator,
 		"filter":     filter,

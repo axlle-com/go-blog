@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/queue"
 )
 
 func (s *PostService) PostDelete(post *models.Post) error {
@@ -17,5 +18,8 @@ func (s *PostService) PostDelete(post *models.Post) error {
 	if err := s.postRepo.Delete(post); err != nil {
 		return err
 	}
+
+	s.queue.Enqueue(queue.NewPostJob(post, "delete"), 0)
+
 	return nil
 }

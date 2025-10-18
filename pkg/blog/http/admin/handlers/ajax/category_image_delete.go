@@ -1,10 +1,11 @@
 package ajax
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *categoryController) DeleteCategoryImage(ctx *gin.Context) {

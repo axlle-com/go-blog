@@ -32,16 +32,15 @@ func (c *tagController) Create(ctx *gin.Context) {
 		return
 	}
 
-	templates := c.template.GetAll()
 	infoBlocks := c.infoBlock.GetAll()
 
 	data := response.Body{
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"tag":       tag,
 		"collection": gin.H{
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": tag.InfoBlocks,
-			"relationURL":        tag.AdminURL(),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": tag.InfoBlocks,
+			"relationURL":         tag.AdminURL(),
 		},
 	}
 	ctx.JSON(

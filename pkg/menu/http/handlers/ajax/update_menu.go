@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *controllerMenu) Update(ctx *gin.Context) {
+func (c *menuController) Update(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
@@ -53,11 +53,6 @@ func (c *controllerMenu) Update(ctx *gin.Context) {
 		return
 	}
 
-	templates, err := c.templateProvider.GetForResources(menu)
-	if err != nil {
-		logger.WithRequest(ctx).Error(err)
-	}
-
 	publishers, err := c.postProvider.GetPublishers()
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
@@ -65,7 +60,7 @@ func (c *controllerMenu) Update(ctx *gin.Context) {
 
 	data := response.Body{
 		"model":      menu,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"publishers": publishers,
 		"resources":  app.NewResources().Resources(),
 	}

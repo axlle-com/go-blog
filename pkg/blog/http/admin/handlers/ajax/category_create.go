@@ -38,17 +38,16 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	templates := c.templateProvider.GetAll()
 	infoBlocks := c.infoBlockProvider.GetAll()
 
 	data := response.Body{
 		"categories": categories,
-		"templates":  templates,
+		"templates":  c.templates(ctx),
 		"category":   category,
 		"collection": gin.H{
-			"infoBlocks":         infoBlocks,
-			"ifoBlockCollection": category.InfoBlocks,
-			"relationURL":        category.AdminURL(),
+			"infoBlocks":          infoBlocks,
+			"infoBlockCollection": category.InfoBlocks,
+			"relationURL":         category.AdminURL(),
 		},
 	}
 	ctx.JSON(

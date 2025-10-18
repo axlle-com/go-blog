@@ -10,7 +10,7 @@ import (
 	csrf "github.com/utrack/gin-csrf"
 )
 
-func (c *controllerCategory) GetCategories(ctx *gin.Context) {
+func (c *categoryController) GetCategories(ctx *gin.Context) {
 	user := c.GetUser(ctx)
 	if user == nil {
 		return
@@ -31,7 +31,6 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/post/categories")
 
-	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
@@ -49,7 +48,7 @@ func (c *controllerCategory) GetCategories(ctx *gin.Context) {
 		"postCategories": postCategories,
 		"categories":     categories,
 		"category":       &models.PostCategory{},
-		"templates":      templates,
+		"templates":      c.templates(ctx),
 		"users":          users,
 		"paginator":      paginator,
 		"filter":         filter,

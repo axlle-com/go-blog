@@ -27,7 +27,6 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/post/categories")
 
-	templates := c.templateProvider.GetAll()
 	users := c.userProvider.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
@@ -45,7 +44,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 		"category":       &models.PostCategory{},
 		"postCategories": postCategories,
 		"categories":     categories,
-		"templates":      templates,
+		"templates":      c.templates(ctx),
 		"users":          users,
 		"paginator":      paginator,
 		"filter":         filter,

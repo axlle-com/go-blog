@@ -1,7 +1,10 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	"github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -24,7 +27,7 @@ func NewPostController(
 	category *service.CategoryService,
 	tagCollectionService *service.TagCollectionService,
 	categories *service.CategoriesService,
-	template template.TemplateProvider,
+	templateProvider template.TemplateProvider,
 	user user.UserProvider,
 	infoBlock provider.InfoBlockProvider,
 
@@ -35,7 +38,7 @@ func NewPostController(
 		categoryService:       category,
 		categoriesService:     categories,
 		tagCollectionService:  tagCollectionService,
-		template:              template,
+		templateProvider:      templateProvider,
 		user:                  user,
 		infoBlock:             infoBlock,
 	}
@@ -49,7 +52,16 @@ type postController struct {
 	categoryService       *service.CategoryService
 	categoriesService     *service.CategoriesService
 	tagCollectionService  *service.TagCollectionService
-	template              template.TemplateProvider
+	templateProvider      template.TemplateProvider
 	user                  user.UserProvider
 	infoBlock             provider.InfoBlockProvider
+}
+
+func (c *postController) templates(ctx *gin.Context) []contracts.Template {
+	templates, err := c.templateProvider.GetForResources(&models.Post{})
+	if err != nil {
+		logger.WithRequest(ctx).Error(err)
+	}
+
+	return templates
 }

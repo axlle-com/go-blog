@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *controllerMenu) Create(ctx *gin.Context) {
+func (c *menuController) Create(ctx *gin.Context) {
 	form, formError := request.NewMenuRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {

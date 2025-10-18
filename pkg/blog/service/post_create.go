@@ -6,6 +6,7 @@ import (
 	app "github.com/axlle-com/blog/app/service"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/models"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/queue"
 )
 
 func (s *PostService) SaveFromRequest(form *http.PostRequest, user contracts.User) (*models.Post, error) {
@@ -72,6 +73,8 @@ func (s *PostService) Save(post *models.Post, user contracts.User) (*models.Post
 		if err := s.postRepo.Update(post); err != nil {
 			return nil, err
 		}
+
+		s.queue.Enqueue(queue.NewPostJob(post, "update"), 0)
 	}
 
 	if post.Image != nil && *post.Image != "" {

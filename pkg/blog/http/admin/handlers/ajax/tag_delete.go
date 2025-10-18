@@ -55,13 +55,12 @@ func (c *tagController) Delete(ctx *gin.Context) {
 	tags := c.tagCollectionService.Aggregates(temp)
 
 	users := c.user.GetAll()
-	templates := c.template.GetAll()
 
 	data := response.Body{
 		"title":     "Страница тэгов",
 		"tag":       empty,
 		"tags":      tags,
-		"templates": templates,
+		"templates": c.templates(ctx),
 		"users":     users,
 		"paginator": paginator,
 		"filter":    filter,

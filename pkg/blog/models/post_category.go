@@ -22,7 +22,7 @@ type PostCategory struct {
 	URL                string     `gorm:"size:1000;unique" json:"url"`
 	IsPublished        *bool      `gorm:"index;default:true" json:"is_published,omitempty"`
 	IsFavourites       *bool      `gorm:"default:false" json:"is_favourites,omitempty"`
-	InSitemap          *bool      `gorm:"index;default:true" json:"in_sitemap,omitempty"`
+	InSitemap          bool       `gorm:"index;default:true" json:"in_sitemap,omitempty"`
 	Image              *string    `gorm:"size:255" json:"image,omitempty"`
 	ShowImage          *bool      `gorm:"default:true" json:"show_image,omitempty"`
 	Title              string     `gorm:"size:255;not null" json:"title"`

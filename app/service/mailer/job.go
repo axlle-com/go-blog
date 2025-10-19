@@ -31,10 +31,10 @@ func (j *MailerJob) Run(ctx context.Context) error {
 	}
 
 	m := gomail.NewMessage()
-	m.SetHeader("From", j.message.From())
-	m.SetHeader("To", j.message.To())
-	m.SetHeader("Subject", j.message.Subject())
-	m.SetBody("text/html", j.message.Body())
+	m.SetHeader("GetFrom", j.message.GetFrom())
+	m.SetHeader("GetTo", j.message.GetTo())
+	m.SetHeader("GetSubject", j.message.GetSubject())
+	m.SetBody("text/html", j.message.GetBody())
 
 	d := gomail.NewDialer(config.SMTPHost(), config.SMTPPort(), config.SMTPUsername(), config.SMTPPassword())
 

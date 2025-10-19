@@ -1,0 +1,6 @@
+{{ define "spring.posts.default" }}
+    {{ template "spring.header" .}}
+    <h1>{{ .title }}</h1>
+    <p>{{ .post.Description }}</p>
+    {{ template "spring.footer" . }}
+{{ end }}

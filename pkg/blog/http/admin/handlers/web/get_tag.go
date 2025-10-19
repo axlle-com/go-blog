@@ -37,7 +37,6 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 		return
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.tag",
@@ -46,7 +45,7 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 			"templates": c.templates(ctx),
 			"tag":       tag,
 			"collection": gin.H{
-				"infoBlocks":          infoBlocks,
+				"infoBlocks":          c.infoBlock.GetAll(),
 				"infoBlockCollection": tag.InfoBlocks,
 				"relationURL":         tag.AdminURL(),
 			},

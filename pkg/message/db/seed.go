@@ -40,7 +40,7 @@ func (s *seeder) SeedTest(n int) error {
 		message := &models.Message{}
 
 		now := time.Now()
-		message.Subject = db.StrPtr("Subject #" + strconv.Itoa(i))
+		message.Subject = db.StrPtr("GetSubject #" + strconv.Itoa(i))
 		message.To = db.StrPtr(strconv.Itoa(i) + "_to@mail.com")
 		message.Viewed = false
 		message.From = db.StrPtr(strconv.Itoa(i) + "_from@mail.com")

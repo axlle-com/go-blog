@@ -1,0 +1,25 @@
+/***** index *****/
+.section-about { padding: 60px 0 30px; }
+
+.section-about h2 { margin-bottom: 24px; text-align:center; }
+
+.section-about .about-body{
+    margin: 0 auto;
+    text-align: center;
+}
+
+.section-about .about-body p{
+    margin: 0 0 12px;
+    line-height: 1.5;
+    color: inherit;
+    font: inherit;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+@media (max-width: 767px){
+    .section-about { padding: 40px 0 20px; }
+    .section-about .about-body{ max-width: 100%; padding: 0 15px; text-align: left; }
+    .section-about .about-body p{ line-height: 1.5; }
+}

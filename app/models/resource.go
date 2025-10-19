@@ -15,6 +15,7 @@ func NewResources() *Resources {
 		resources: map[string]string{
 			"posts":           "index",
 			"post_categories": "post_categories",
+			"post_tags":       "post_tags",
 			"info_blocks":     "info_blocks",
 		},
 	}

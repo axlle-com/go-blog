@@ -36,6 +36,7 @@ func (c *categoryController) UpdateCategory(ctx *gin.Context) {
 		return
 	}
 
+	form.PreloadFromModel(found)
 	category, err := c.categoryService.SaveFromRequest(form, found, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

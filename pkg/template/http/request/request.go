@@ -10,14 +10,14 @@ func NewTemplateRequest() *TemplateRequest {
 }
 
 type TemplateRequest struct {
-	ID           string `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
-	Title        string `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
-	IsMain       string `json:"is_main" form:"is_main" binding:"omitempty"`
-	Name         string `gorm:"type:text" json:"name" form:"name" binding:"required,max=25"`
-	ResourceName string `gorm:"size:255" json:"resource_name" form:"resource_name" binding:"required,max=255"`
-	HTML         string `gorm:"type:text" json:"html" form:"html" binding:"required"`
-	JS           string `gorm:"type:text" json:"js" form:"js" binding:"omitempty"`
-	CSS          string `gorm:"type:text" json:"css" form:"css" binding:"omitempty"`
+	ID           uint    `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
+	Title        string  `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
+	IsMain       bool    `json:"is_main" form:"is_main" binding:"omitempty"`
+	Name         string  `gorm:"type:text" json:"name" form:"name" binding:"required,max=25"`
+	ResourceName *string `gorm:"size:255" json:"resource_name" form:"resource_name" binding:"required,max=255"`
+	HTML         *string `gorm:"type:text" json:"html" form:"html" binding:"omitempty"`
+	JS           *string `gorm:"type:text" json:"js" form:"js" binding:"omitempty"`
+	CSS          *string `gorm:"type:text" json:"css" form:"css" binding:"omitempty"`
 }
 
 func (p *TemplateRequest) ValidateForm(ctx *gin.Context) (*TemplateRequest, *errutil.Errors) {

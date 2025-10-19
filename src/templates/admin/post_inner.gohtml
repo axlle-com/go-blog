@@ -233,38 +233,6 @@
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <div class="custom-control custom-checkbox">
-                                            <input
-                                                    type="checkbox"
-                                                    class="custom-control-input"
-                                                    name="is_main"
-                                                    id="is_main"
-                                                    {{ if .post.IsMain }}
-                                                        checked
-                                                    {{ end }}
-                                                    value="1">
-                                            <label class="custom-control-label" for="is_main">
-                                                Вывести на главную
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                    <fieldset class="form-block">
-                                        <div class="custom-control custom-checkbox">
-                                            <input
-                                                    type="checkbox"
-                                                    class="custom-control-input"
-                                                    name="has_comments"
-                                                    id="has_comments"
-                                                    {{ if .post.HasComments }}
-                                                        checked
-                                                    {{ end }}
-                                                    value="1">
-                                            <label class="custom-control-label" for="has_comments">
-                                                Подключить комментарии
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                    <fieldset class="form-block">
                                         <legend>Публикация</legend>
                                         <div class="input-group datepicker-wrap form-group">
                                             <label for="blogTitle">Дата публикации</label>
@@ -291,39 +259,6 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox">
-                                                <input
-                                                        type="checkbox"
-                                                        class="custom-control-input"
-                                                        name="is_published"
-                                                        id="is_published"
-                                                        {{ if .post.IsPublished }}
-                                                            checked
-                                                        {{ end }}
-                                                        value="1">
-                                                <label class="custom-control-label"
-                                                       for="is_published">Опубликовано</label>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox">
-                                                <input
-                                                        type="checkbox"
-                                                        class="custom-control-input"
-                                                        name="show_date"
-                                                        id="show_date"
-                                                        {{ if .post.ShowDate }}
-                                                            checked
-                                                        {{ end }}
-                                                        value="1">
-                                                <label class="custom-control-label" for="show_date">
-                                                    Показывать дату в посте
-                                                </label>
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </div>
                                         <div class="input-group datepicker-wrap form-group">
                                             <label for="blogTitle">Дата окончания публикации</label>
                                             <input
@@ -344,6 +279,65 @@
                                                     <i class="material-icons">close</i>
                                                 </button>
                                             </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="show_date"
+                                                        id="show_date"
+                                                        {{ if .post.ShowDate }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label" for="show_date">
+                                                    Показывать дату в посте
+                                                </label>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    class="custom-control-input"
+                                                    name="is_main"
+                                                    id="is_main"
+                                                    {{ if .post.IsMain }}
+                                                        checked
+                                                    {{ end }}
+                                                    value="1">
+                                            <label class="custom-control-label" for="is_main">
+                                                Вывести на главную
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    class="custom-control-input"
+                                                    name="has_comments"
+                                                    id="has_comments"
+                                                    {{ if .post.HasComments }}
+                                                        checked
+                                                    {{ end }}
+                                                    value="1">
+                                            <label class="custom-control-label" for="has_comments">
+                                                Подключить комментарии
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input
+                                                    type="checkbox"
+                                                    class="custom-control-input"
+                                                    name="is_published"
+                                                    id="is_published"
+                                                    {{ if .post.IsPublished }}
+                                                        checked
+                                                    {{ end }}
+                                                    value="1">
+                                            <label class="custom-control-label"
+                                                   for="is_published">Опубликовано</label>
+                                            <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox">

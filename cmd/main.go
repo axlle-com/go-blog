@@ -9,11 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	csrf "github.com/utrack/gin-csrf"
-
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
@@ -23,6 +18,10 @@ import (
 	"github.com/axlle-com/blog/app/routes"
 	"github.com/axlle-com/blog/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 )
 
 func main() {

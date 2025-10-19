@@ -37,4 +37,6 @@ type Config interface {
 	SMTPHost() string
 	SMTPUsername() string
 	SMTPPassword() string
+
+	NotifyEmail() string
 }

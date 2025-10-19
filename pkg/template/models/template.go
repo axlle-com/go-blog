@@ -51,7 +51,10 @@ func (t *Template) GetName() string {
 }
 
 func (t *Template) GetResourceName() string {
-	return *t.ResourceName
+	if t.ResourceName != nil {
+		return *t.ResourceName
+	}
+	return ""
 }
 
 func (t *Template) UserLastName() string {

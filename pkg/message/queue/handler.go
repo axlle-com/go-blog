@@ -54,6 +54,6 @@ func (qh *queueHandler) create(payload []byte) error {
 		return fmt.Errorf("incorrect data format: %v", err)
 	}
 
-	_, err := qh.messageService.Create(obj.Model(), "")
+	_, err := qh.messageService.Create(obj.Model(), obj.UserUUID)
 	return err
 }

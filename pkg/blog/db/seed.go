@@ -128,7 +128,7 @@ func (s *seeder) categories(n int) error {
 			URL:                faker.URL(),
 			IsPublished:        db.IntToBoolPtr(),
 			IsFavourites:       db.IntToBoolPtr(),
-			InSitemap:          db.IntToBoolPtr(),
+			InSitemap:          db.RandBool(),
 			Title:              "TitleCategory #" + strconv.Itoa(i),
 			TitleShort:         db.StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
 			DescriptionPreview: db.StrPtr(faker.Paragraph()),

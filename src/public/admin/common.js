@@ -572,7 +572,6 @@ const _template = {
                 });
             }
         });
-
     },
     run: function () {
         MyCodeMirror6.createEditor(document.getElementById('HTML'), `<div></div>`);

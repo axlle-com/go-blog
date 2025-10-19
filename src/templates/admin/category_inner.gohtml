@@ -205,13 +205,13 @@
                                                 <input
                                                         type="checkbox"
                                                         class="custom-control-input"
-                                                        name="show_image_post"
-                                                        id="show_image_post"
+                                                        name="show_image"
+                                                        id="show_image"
                                                         {{ if .category.ShowImage }}
                                                             checked
                                                         {{ end }}
                                                         value="1">
-                                                <label class="custom-control-label" for="show_image_post">
+                                                <label class="custom-control-label" for="show_image">
                                                     Отобразить изображение
                                                 </label>
                                                 <div class="invalid-feedback"></div>
@@ -249,6 +249,22 @@
                                                         value="1">
                                                 <label class="custom-control-label"
                                                        for="is_favourites">Избранное</label>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox">
+                                                <input
+                                                        type="checkbox"
+                                                        class="custom-control-input"
+                                                        name="in_sitemap"
+                                                        id="in_sitemap"
+                                                        {{ if .category.InSitemap }}
+                                                            checked
+                                                        {{ end }}
+                                                        value="1">
+                                                <label class="custom-control-label"
+                                                       for="in_sitemap">В карту сайта</label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
                                         </div>

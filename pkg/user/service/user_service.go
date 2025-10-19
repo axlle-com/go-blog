@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/user/models"
@@ -104,7 +105,7 @@ func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, er
 	if newUserHasUser != nil {
 		return byEmail, nil
 	} else if err != nil {
-		return byEmail, err
+		return byEmail, fmt.Errorf("user by email exist, but relation not found, err: %v", err)
 	}
 
 	newUserHasUser = &models.UserHasUser{}

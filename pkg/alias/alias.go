@@ -27,8 +27,8 @@ type provider struct {
 	aliasRepo AliasRepository
 }
 
-func (p *provider) Generate(publisher contracts.Publisher, s string) string {
-	alias := p.Create(s)
+func (p *provider) Generate(publisher contracts.Publisher, aliasOld string) string {
+	alias := p.Create(aliasOld)
 	aliasNew := alias
 	counter := 1
 

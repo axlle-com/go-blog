@@ -147,9 +147,6 @@ func (s *CategoryService) Create(category *models.PostCategory, user contracts.U
 }
 
 func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contracts.User) (*models.PostCategory, error) {
-	category.ID = found.ID
-	category.UUID = found.UUID
-
 	tx := s.categoryRepo.Tx()
 
 	defer func() {

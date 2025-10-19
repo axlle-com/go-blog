@@ -9,6 +9,7 @@ import (
 
 type Contact struct {
 	From     *string `json:"from" binding:"required,email"`
+	To       *string `json:"to" binding:"omitempty,email"`
 	Subject  *string `json:"subject" binding:"required"`
 	Body     *string `json:"body" binding:"required"`
 	UserUUID string  `json:"user_uuid" binding:"omitempty"`
@@ -29,6 +30,13 @@ func (c *Contact) Name() string {
 func (c *Contact) GetFrom() string {
 	if c.From != nil {
 		return *c.From
+	}
+	return ""
+}
+
+func (c *Contact) GetTo() string {
+	if c.To != nil {
+		return *c.To
 	}
 	return ""
 }

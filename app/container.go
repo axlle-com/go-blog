@@ -5,6 +5,7 @@ import (
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/app/service/mailer"
+	mailerQueue "github.com/axlle-com/blog/app/service/mailer/queue"
 	"github.com/axlle-com/blog/app/service/migrate"
 	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/app/service/scheduler"
@@ -168,7 +169,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newQueue := queue.NewQueue()
 	newCache := cache.NewCache()
 	newView := view.NewView(config.Config())
-	newMailer := mailer.NewMailer(newQueue)
+	newMailer := mailer.NewMailer(cfg, newQueue)
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
 	newFileService := fileService.NewFileService(newFileRepo)
@@ -204,7 +205,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newMessageRepo := messageRepo.NewMessageRepo(db.PostgreSQL())
 	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
 	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
-	newMailService := messageService.NewMailService(newMessageService, newMessageCollectionService, newUserProvider, newMailer, newQueue)
+	newMailService := messageService.NewMailService(cfg, newQueue, newMessageService, newMessageCollectionService, newUserProvider)
 
 	newAliasRepo := alias.NewAliasRepo(db.PostgreSQL())
 	newAliasProvider := alias.NewAliasProvider(newAliasRepo)
@@ -284,6 +285,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newQueue.SetHandlers(map[string][]contracts.QueueHandler{
 		"messages": {
 			messageQueue.NewMessageQueueHandler(newMessageService, newMessageCollectionService),
+			mailerQueue.NewMailerQueueHandler(newMailer),
 		},
 		"users": {
 			usersQueue.NewUserQueueHandler(newUserService),

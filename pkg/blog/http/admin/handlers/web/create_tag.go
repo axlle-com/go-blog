@@ -31,6 +31,11 @@ func (c *tagController) CreateTag(ctx *gin.Context) {
 			"tags":      tags,
 			"templates": c.templates(ctx),
 			"tag":       tag,
+			"collection": gin.H{
+				"infoBlocks":          c.infoBlock.GetAll(),
+				"infoBlockCollection": tag.InfoBlocks,
+				"relationURL":         tag.AdminURL(),
+			},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

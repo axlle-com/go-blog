@@ -8,5 +8,6 @@ type Form interface {
 	Title() string
 	GetUserUUID() string
 	GetFrom() string
+	GetTo() string
 	Model() *models.Message
 }

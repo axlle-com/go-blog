@@ -1,9 +1,10 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
 	"mime/multipart"
 	"time"
+
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type Image struct {

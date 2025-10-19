@@ -1,13 +1,13 @@
 package contracts
 
 type MailRequest interface {
-	From() string
-	To() string
-	Subject() string
-	Body() string
+	GetFrom() string
+	GetTo() string
+	GetSubject() string
+	GetBody() string
 	ToString() string
 }
 
 type Mailer interface {
-	SendMail(MailRequest)
+	SendMail(MailRequest) error
 }

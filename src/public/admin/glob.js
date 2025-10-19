@@ -227,6 +227,8 @@ const _glob = {
 
             // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
+                _cl_(key)
+                _cl_(value)
                 _this.deepSetWithTypes(formObject, key, value);
             });
 

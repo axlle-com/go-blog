@@ -61,7 +61,16 @@ func (r *repository) GetByIDs(ids []uint) ([]*models.Template, error) {
 }
 
 func (r *repository) Update(template *models.Template) error {
-	return r.db.Save(template).Error
+	return r.db.Select(
+		"UserID",
+		"Title",
+		"IsMain",
+		"Name",
+		"ResourceName",
+		"HTML",
+		"JS",
+		"CSS",
+	).Save(template).Error
 }
 
 func (r *repository) Delete(template *models.Template) error {

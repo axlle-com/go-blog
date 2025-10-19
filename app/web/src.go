@@ -22,7 +22,11 @@ func Minify(config contracts.Config) {
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("application/javascript", js.Minify)
 	minifyAdmin(m)
-	minifyFront(m)
+	if config.Layout() == "spring" {
+		minifySpring(m)
+	} else {
+		minifyFront(m)
+	}
 }
 
 func minifyAdmin(minify *minify.M) {
@@ -78,6 +82,35 @@ func minifyFront(minify *minify.M) {
 
 	mergeAndMinifyFiles(minify, "text/css", CSS, "src/public/app.css")
 	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/app.js")
+}
+
+func minifySpring(minify *minify.M) {
+	CSS := []string{
+		"src/resources/spring/css/bootstrap.css",
+		"src/resources/spring/css/font-awesome.css",
+		"src/resources/spring/css/themify-icons.css",
+		"src/resources/spring/css/linear-icons.css",
+		"src/resources/spring/css/animate.css",
+		"src/resources/spring/css/owl.css",
+		"src/resources/spring/css/jquery.fancybox.css",
+		"src/resources/spring/css/responsive.css",
+		"src/resources/spring/css/style.css",
+	}
+	JS := []string{
+		"src/resources/spring/js/jquery.js",
+		"src/resources/spring/js/bootstrap.min.js",
+		"src/resources/spring/js/pagenav.js",
+		"src/resources/spring/js/jquery.scrollTo.js",
+		"src/resources/spring/js/jquery.fancybox.pack.js",
+		"src/resources/spring/js/owl.js",
+		"src/resources/spring/js/wow.js",
+		"src/resources/spring/js/validate.js",
+		"src/resources/spring/js/script.js",
+		"src/public/admin/glob.js",
+	}
+
+	mergeAndMinifyFiles(minify, "text/css", CSS, "src/public/spring/css/app.css")
+	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/spring/js/app.js")
 }
 
 func mergeAndMinifyFiles(minifyTool *minify.M, mediaType string, inputPaths []string, outputPath string) {

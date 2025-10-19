@@ -54,6 +54,8 @@ type config struct {
 	smtpPort     int
 	smtpUsername string
 	smtpPassword string
+
+	notifyEmail string
 }
 
 var (
@@ -129,6 +131,11 @@ func LoadConfig() (err error) {
 			instance.smtpActive = false
 		}
 		instance.smtpActive = smtpActive == 1
+
+		instance.notifyEmail = getEnv("NOTIFY_EMAIL", "")
+		if instance.notifyEmail == "" {
+			instance.smtpActive = false
+		}
 	})
 	return
 }
@@ -346,6 +353,10 @@ func (c *config) SMTPUsername() string {
 
 func (c *config) SMTPPassword() string {
 	return c.smtpPassword
+}
+
+func (c *config) NotifyEmail() string {
+	return c.notifyEmail
 }
 
 func getEnv(key string, defaultValue string) string {

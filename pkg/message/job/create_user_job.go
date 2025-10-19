@@ -37,8 +37,8 @@ func (j *CreateUserJob) GetData() []byte {
 		j.form.GetFrom(),
 	}
 
-	js, _ := json.Marshal(payload)
-	return app.NewEnvelopeQueue().ConvertData("create", string(js))
+	bytes, _ := json.Marshal(payload)
+	return app.NewEnvelopeQueue().ConvertData("create", string(bytes))
 }
 
 func (j *CreateUserJob) GetName() string {

@@ -2,7 +2,6 @@ package ajax
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
@@ -36,7 +35,7 @@ func (c *tagController) Update(ctx *gin.Context) {
 		return
 	}
 
-	form.ID = strconv.Itoa(int(id))
+	form.ID = id
 	form.UUID = found.UUID.String()
 	tag, err := c.tagService.SaveFromRequest(form, c.GetUser(ctx))
 	if err != nil {

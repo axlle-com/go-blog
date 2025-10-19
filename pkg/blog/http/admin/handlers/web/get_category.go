@@ -34,7 +34,6 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlockProvider.GetAll()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.category",
@@ -44,7 +43,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 			"templates":  c.templates(ctx),
 			"category":   category,
 			"collection": gin.H{
-				"infoBlocks":          infoBlocks,
+				"infoBlocks":          c.infoBlockProvider.GetAll(),
 				"infoBlockCollection": category.InfoBlocks,
 				"relationURL":         category.AdminURL(),
 			},

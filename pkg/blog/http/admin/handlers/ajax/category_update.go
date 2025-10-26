@@ -5,7 +5,7 @@ import (
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ func (c *categoryController) UpdateCategory(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := models.NewCategoryRequest().ValidateJSON(ctx)
+	form, formError := request.NewCategoryRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

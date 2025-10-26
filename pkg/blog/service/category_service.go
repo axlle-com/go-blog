@@ -4,18 +4,17 @@ import (
 	"errors"
 	"sync"
 
-	"gorm.io/gorm"
-
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
-	http "github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/file/provider"
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
+	"gorm.io/gorm"
 )
 
 type CategoryService struct {
@@ -65,7 +64,7 @@ func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.Post
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.infoBlockProvider.GetForResource(category)
+		infoBlocks = s.infoBlockProvider.GetForResourceUUID(category.UUID.String())
 	}()
 
 	wg.Wait()
@@ -114,7 +113,7 @@ func (s *CategoryService) SaveFromRequest(
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model)
+		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}

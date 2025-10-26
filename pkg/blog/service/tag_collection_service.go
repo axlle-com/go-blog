@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/google/uuid"
 	"strings"
 
 	"github.com/axlle-com/blog/app/logger"
@@ -9,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/template/provider"
+	"github.com/google/uuid"
 )
 
 type TagCollectionService struct {
@@ -154,4 +154,8 @@ func (s *TagCollectionService) GetAll() ([]*models.PostTag, error) {
 
 func (s *TagCollectionService) GetForResource(resource contracts.Resource) ([]*models.PostTag, error) {
 	return s.tagRepo.GetForResource(resource)
+}
+
+func (s *TagCollectionService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	return s.tagRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

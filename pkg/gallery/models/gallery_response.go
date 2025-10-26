@@ -1,13 +1,15 @@
 package models
 
 import (
+	"time"
+
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/google/uuid"
-	"time"
 )
 
 type GalleryResponse struct {
 	ID          uint       `json:"id"`
+	UUID        uuid.UUID  `json:"uuid" form:"uuid" binding:"-"`
 	Title       *string    `json:"title"`
 	Description *string    `json:"description"`
 	Image       *string    `json:"image"`
@@ -18,7 +20,7 @@ type GalleryResponse struct {
 
 	Sort         int       `json:"sort" form:"sort" binding:"omitempty"`
 	Position     string    `json:"position" form:"position" binding:"omitempty"`
-	ResourceUUID uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
+	ResourceUUID uuid.UUID `json:"resource_uuid" form:"resource_uuid" binding:"-"`
 	Images       []*Image  `json:"images,omitempty" gorm:"foreignKey:GalleryID;references:ID"`
 }
 

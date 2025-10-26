@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
@@ -50,6 +51,9 @@ func (s *GalleryService) UpdateGallery(gallery *models.Gallery) (*models.Gallery
 	}
 
 	err := s.galleryImageUpdate(gallery)
+
+	s.galleryEvent.UpdateTrigger([]uint{gallery.ID})
+
 	return gallery, err
 }
 
@@ -135,6 +139,9 @@ func (s *GalleryService) DeleteGalleries(galleries []*models.Gallery) (err error
 					return err
 				}
 			}
+
+			s.galleryEvent.UpdateTrigger(ids)
+
 			return nil
 		}
 	}

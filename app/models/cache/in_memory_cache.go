@@ -2,10 +2,11 @@ package cache
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
 	"strings"
 	"sync"
+
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type inMemoryCache struct {

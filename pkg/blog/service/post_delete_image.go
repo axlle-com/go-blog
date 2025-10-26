@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"github.com/axlle-com/blog/app/logger"
-	"gorm.io/gorm"
 
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"gorm.io/gorm"
 )
 
 func (s *PostService) DeleteImageFile(post *models.Post) error {

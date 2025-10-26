@@ -6,12 +6,12 @@ import (
 
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) CreatePost(ctx *gin.Context) {
-	form, formError := models.NewPostRequest().ValidateJSON(ctx)
+	form, formError := request.NewPostRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(
@@ -25,7 +25,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.postService.SaveFromRequest(form, c.GetUser(ctx))
+	post, err := c.postService.SaveFromRequest(form, nil, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(
 			http.StatusInternalServerError,

@@ -92,7 +92,7 @@ func (s *seeder) posts(n int) error {
 		}
 
 		userF, _ := s.userProvider.GetByID(randomUserID)
-		_, err := s.postService.Save(&post, userF)
+		_, err := s.postService.Create(&post, userF)
 		if err != nil {
 			return err
 		}

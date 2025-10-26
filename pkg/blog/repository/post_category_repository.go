@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"gorm.io/gorm"
-
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type CategoryRepository interface {
@@ -19,6 +19,7 @@ type CategoryRepository interface {
 	GetByID(id uint) (*models.PostCategory, error)
 	GetByIDs(ids []uint) ([]*models.PostCategory, error)
 	Update(new *models.PostCategory, old *models.PostCategory) error
+	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
 	DeleteByID(id uint) error
 	Delete(category *models.PostCategory) error
 	GetAll() ([]*models.PostCategory, error)
@@ -269,4 +270,19 @@ func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCa
 	// Обновляем сам узел.
 	new.Path = newPath
 	return r.save(new)
+}
+
+func (r *categoryRepository) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	if len(uuids) == 0 {
+		return 0, fmt.Errorf("empty uuids")
+	}
+	if len(patch) == 0 {
+		return 0, fmt.Errorf("empty patch")
+	}
+
+	tx := r.db.Model(&models.PostCategory{}).
+		Where("uuid IN ?", uuids).
+		Updates(patch)
+
+	return tx.RowsAffected, tx.Error
 }

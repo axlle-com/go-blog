@@ -6,7 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +23,7 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := models.NewPostRequest().ValidateJSON(ctx)
+	form, formError := request.NewPostRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -37,9 +37,7 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	form.ID = id
-	form.UUID = found.UUID.String()
-	post, err := c.postService.SaveFromRequest(form, c.GetUser(ctx))
+	post, err := c.postService.SaveFromRequest(form, found, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

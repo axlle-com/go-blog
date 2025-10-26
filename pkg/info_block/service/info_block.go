@@ -13,41 +13,45 @@ import (
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	tProvider "github.com/axlle-com/blog/pkg/template/provider"
 	provider2 "github.com/axlle-com/blog/pkg/user/provider"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type InfoBlockService struct {
-	infoBlockRepo       repository.InfoBlockRepository
-	infoBlockCollection *InfoBlockCollectionService
-	resourceRepo        repository.InfoBlockHasResourceRepository
-	galleryProvider     provider.GalleryProvider
-	templateProvider    tProvider.TemplateProvider
-	userProvider        provider2.UserProvider
-	fileProvider        fileProvider.FileProvider
+	infoBlockRepo         repository.InfoBlockRepository
+	infoBlockCollection   *InfoBlockCollectionService
+	resourceRepo          repository.InfoBlockHasResourceRepository
+	infoBlockEventService *InfoBlockEventService
+	galleryProvider       provider.GalleryProvider
+	templateProvider      tProvider.TemplateProvider
+	userProvider          provider2.UserProvider
+	fileProvider          fileProvider.FileProvider
 }
 
 func NewInfoBlockService(
 	infoBlockRepo repository.InfoBlockRepository,
 	infoBlockCollection *InfoBlockCollectionService,
 	resourceRepo repository.InfoBlockHasResourceRepository,
+	infoBlockEventService *InfoBlockEventService,
 	galleryProvider provider.GalleryProvider,
 	templateProvider tProvider.TemplateProvider,
 	userProvider provider2.UserProvider,
 	fileProvider fileProvider.FileProvider,
 ) *InfoBlockService {
 	return &InfoBlockService{
-		infoBlockRepo:       infoBlockRepo,
-		infoBlockCollection: infoBlockCollection,
-		resourceRepo:        resourceRepo,
-		galleryProvider:     galleryProvider,
-		templateProvider:    templateProvider,
-		userProvider:        userProvider,
-		fileProvider:        fileProvider,
+		infoBlockRepo:         infoBlockRepo,
+		infoBlockCollection:   infoBlockCollection,
+		resourceRepo:          resourceRepo,
+		infoBlockEventService: infoBlockEventService,
+		galleryProvider:       galleryProvider,
+		templateProvider:      templateProvider,
+		userProvider:          userProvider,
+		fileProvider:          fileProvider,
 	}
 }
 
-func (s *InfoBlockService) GetByID(id uint) (*models.InfoBlock, error) {
-	return s.infoBlockRepo.GetByID(id)
+func (s *InfoBlockService) FindByID(id uint) (*models.InfoBlock, error) {
+	return s.infoBlockRepo.FindByID(id)
 }
 
 func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBlock {
@@ -95,85 +99,13 @@ func (s *InfoBlockService) GetByIDs(ids []uint) ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetByIDs(ids)
 }
 
-func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contracts.User) (*models.InfoBlock, error) {
-	if user != nil {
-		id := user.GetID()
-		infoBlock.UserID = &id
-	}
-	if err := s.infoBlockRepo.Create(infoBlock); err != nil {
-		return nil, err
-	}
-	return infoBlock, nil
-}
-
-func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
-	if err := s.infoBlockRepo.Update(infoBlock); err != nil {
-		return nil, err
-	}
-
-	return infoBlock, nil
-}
-
-func (s *InfoBlockService) Attach(resource contracts.Resource, infoBlock contracts.InfoBlock) error {
-	hasRepo, err := s.resourceRepo.GetByID(infoBlock.GetRelationID())
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-
-	if hasRepo == nil {
-		err = s.resourceRepo.Create(
-			&models.InfoBlockHasResource{
-				ResourceUUID: resource.GetUUID(),
-				InfoBlockID:  infoBlock.GetID(),
-				Sort:         infoBlock.GetSort(),
-				Position:     infoBlock.GetPosition(),
-			},
-		)
-	} else {
-		hasRepo.Position = infoBlock.GetPosition()
-		hasRepo.Sort = infoBlock.GetSort()
-		err = s.resourceRepo.Update(hasRepo)
-	}
-
-	return err
-}
-
-func (s *InfoBlockService) GetForResource(resource contracts.Resource) []*models.InfoBlockResponse {
-	infoBlocks, err := s.infoBlockRepo.GetForResource(resource)
+func (s *InfoBlockService) GetForResourceByFilter(filter *models.InfoBlockFilter) []*models.InfoBlockResponse {
+	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
 		logger.Error(err)
 		return nil
 	}
 	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
-}
-
-func (s *InfoBlockService) DetachResource(resource contracts.Resource) error {
-	return s.resourceRepo.DetachResource(resource)
-}
-
-func (s *InfoBlockService) DeleteResource(id uint) error {
-	return s.resourceRepo.Delete(id)
-}
-
-func (s *InfoBlockService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err error) {
-	var ids []uint
-	for _, infoBlock := range infoBlocks {
-		ids = append(ids, infoBlock.ID)
-	}
-
-	if len(ids) > 0 {
-		if err = s.infoBlockRepo.DeleteByIDs(ids); err == nil {
-			return nil
-		}
-	}
-	return err
-}
-
-func (s *InfoBlockService) Delete(infoBlocks *models.InfoBlock) (err error) {
-	if err = s.resourceRepo.DetachInfoBlock(infoBlocks); err != nil {
-		return err
-	}
-	return s.infoBlockRepo.Delete(infoBlocks)
 }
 
 func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *models.InfoBlock, user contracts.User) (infoBlock *models.InfoBlock, err error) {
@@ -209,17 +141,143 @@ func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *mod
 	return
 }
 
-func (s *InfoBlockService) DeleteImageFile(block *models.InfoBlock) error {
-	if block.Image == nil {
-		return nil
+func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contracts.User) (*models.InfoBlock, error) {
+	if user != nil {
+		id := user.GetID()
+		infoBlock.UserID = &id
 	}
-	err := s.fileProvider.DeleteFile(*block.Image)
+	if err := s.infoBlockRepo.Create(infoBlock); err != nil {
+		return nil, err
+	}
+	return infoBlock, nil
+}
+
+func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+	if err := s.infoBlockRepo.Update(infoBlock); err != nil {
+		return nil, err
+	}
+
+	filter := models.NewInfoBlockFilter()
+	filter.ID = &infoBlock.ID
+
+	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
+	if err != nil {
+		logger.Errorf("[info_block][InfoBlockService][Update] error: %v", err)
+	}
+
+	s.infoBlockEventService.StartJob(collection)
+
+	return infoBlock, nil
+}
+
+func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contracts.InfoBlock) error {
+	hasRepo, err := s.resourceRepo.FindByID(infoBlock.GetRelationID())
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	if hasRepo == nil {
+		err = s.resourceRepo.Create(
+			&models.InfoBlockHasResource{
+				ResourceUUID: resourceUUID,
+				InfoBlockID:  infoBlock.GetID(),
+				Sort:         infoBlock.GetSort(),
+				Position:     infoBlock.GetPosition(),
+			},
+		)
+	} else {
+		hasRepo.Position = infoBlock.GetPosition()
+		hasRepo.Sort = infoBlock.GetSort()
+		err = s.resourceRepo.Update(hasRepo)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	filter := models.NewInfoBlockFilter()
+	filter.ResourceUUID = &resourceUUID
+
+	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
+	if err != nil {
+		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
+	}
+
+	s.infoBlockEventService.StartJob(collection)
+
+	return nil
+}
+
+func (s *InfoBlockService) DeleteByResourceUUID(resourceUUID uuid.UUID) error {
+	filter := models.NewInfoBlockFilter()
+	filter.ResourceUUID = &resourceUUID
+
+	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
+	if err != nil {
+		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
+	}
+
+	err = s.resourceRepo.DeleteByResourceUUID(resourceUUID)
+	if err != nil {
+		return err
+	}
+
+	s.infoBlockEventService.StartJob(collection)
+
+	return nil
+}
+
+func (s *InfoBlockService) DeleteHasResourceByID(id uint) error {
+	filter := models.NewInfoBlockFilter()
+	filter.RelationID = &id
+
+	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
+	if err != nil {
+		logger.Errorf("[info_block][InfoBlockService][DeleteHasResourceByID] error: %v", err)
+	}
+
+	if err := s.resourceRepo.DeleteByID(id); err == nil {
+		s.infoBlockEventService.StartJob(collection)
+	}
+
+	return err
+}
+
+func (s *InfoBlockService) Delete(infoBlock *models.InfoBlock) (err error) {
+	filter := models.NewInfoBlockFilter()
+	filter.ID = &infoBlock.ID
+
+	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
+	if err != nil {
+		logger.Errorf("[info_block][InfoBlockService][DeleteHasResourceByID] error: %v", err)
+	}
+
+	if err = s.resourceRepo.DeleteByInfoBlockID(infoBlock.ID); err != nil {
+		return err
+	}
+
+	if err = s.infoBlockRepo.Delete(infoBlock); err != nil {
+		return err
+	}
+
+	s.infoBlockEventService.StartJob(collection)
+
+	return nil
+}
+
+func (s *InfoBlockService) DeleteImageFile(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+	if infoBlock.Image == nil {
+		return infoBlock, nil
+	}
+
+	err := s.fileProvider.DeleteFile(*infoBlock.Image)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return err
+			return infoBlock, err
 		}
-		logger.Errorf("[DeleteImageFile] Error: %v", err)
+		logger.Errorf("[info_block][InfoBlockService][DeleteImageFile] Error: %v", err)
 	}
-	block.Image = nil
-	return nil
+	infoBlock.Image = nil
+
+	return s.Update(infoBlock)
 }

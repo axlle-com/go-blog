@@ -1,10 +1,12 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/app/errutil"
+	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func (c *controller) DeleteImage(ctx *gin.Context) {
@@ -35,9 +37,10 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 	err = c.imageService.DeleteImage(image)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to delete file: " + err.Error(),
-		})
+		ctx.JSON(
+			http.StatusInternalServerError,
+			response.Fail(http.StatusInternalServerError, "Failed to delete file: "+err.Error(), nil),
+		)
 		ctx.Abort()
 		return
 	} else {

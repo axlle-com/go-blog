@@ -5,12 +5,12 @@ import (
 
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/gin-gonic/gin"
 )
 
 func (c *categoryController) CreateCategory(ctx *gin.Context) {
-	form, formError := models.NewCategoryRequest().ValidateJSON(ctx)
+	form, formError := request.NewCategoryRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(

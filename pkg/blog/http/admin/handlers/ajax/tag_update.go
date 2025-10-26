@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	"github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +21,7 @@ func (c *tagController) Update(ctx *gin.Context) {
 		return
 	}
 
-	form, formError := models.NewTagRequest().ValidateJSON(ctx)
+	form, formError := request.NewTagRequest().ValidateJSON(ctx)
 	if form == nil {
 		if formError != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{

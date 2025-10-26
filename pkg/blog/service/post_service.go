@@ -74,7 +74,7 @@ func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.infoBlockProvider.GetForResource(post)
+		infoBlocks = s.infoBlockProvider.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {
@@ -102,6 +102,21 @@ func (s *PostService) GetByID(id uint) (*models.Post, error) {
 	return s.postRepo.GetByID(id)
 }
 
-func (s *PostService) Update(post *models.Post) error {
-	return s.postRepo.Update(post)
+func (s *PostService) generateAlias(post *models.Post) string {
+	var alias string
+	if post.Alias == "" {
+		alias = post.Title
+	} else {
+		alias = post.Alias
+	}
+
+	return s.aliasProvider.Generate(post, alias)
+}
+
+func (s *PostService) receivedImage(post *models.Post) error {
+	if post.Image != nil && *post.Image != "" {
+		return s.fileProvider.Received([]string{*post.Image})
+	}
+
+	return nil
 }

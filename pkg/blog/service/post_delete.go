@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/pkg/blog/models"
-	"github.com/axlle-com/blog/pkg/blog/queue"
+	"github.com/axlle-com/blog/pkg/blog/queue/job"
 )
 
 func (s *PostService) PostDelete(post *models.Post) error {
@@ -11,7 +11,7 @@ func (s *PostService) PostDelete(post *models.Post) error {
 		return err
 	}
 
-	err = s.infoBlockProvider.DetachResource(post)
+	err = s.infoBlockProvider.DetachResourceUUID(post.UUID.String())
 	if err != nil {
 		return err
 	}
@@ -19,7 +19,7 @@ func (s *PostService) PostDelete(post *models.Post) error {
 		return err
 	}
 
-	s.queue.Enqueue(queue.NewPostJob(post, "delete"), 0)
+	s.queue.Enqueue(job.NewPostJob(post, "delete"), 0)
 
 	return nil
 }

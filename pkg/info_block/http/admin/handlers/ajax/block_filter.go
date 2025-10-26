@@ -3,15 +3,15 @@ package ajax
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/info_block/http/admin/request"
 	"github.com/axlle-com/blog/pkg/info_block/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
-	filter, validError := models.NewInfoBlockFilter().ValidateQuery(ctx)
+	filter, validError := request.NewInfoBlockRequest().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -28,7 +28,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/models-blocks")
 
-	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter.ToFilter())
 	if err != nil {
 		logger.Error(err)
 	}

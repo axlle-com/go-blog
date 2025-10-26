@@ -1,12 +1,11 @@
 package middleware
 
 import (
+	"github.com/axlle-com/blog/app/logger"
+	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"github.com/axlle-com/blog/app/logger"
-	user "github.com/axlle-com/blog/pkg/user/models"
 )
 
 func Main() gin.HandlerFunc {
@@ -25,7 +24,7 @@ func Main() gin.HandlerFunc {
 			session.Set("guest_uuid", guestUUID)
 		}
 		if err := session.Save(); err != nil {
-			logger.Errorf("[Main][Save] Error :%v", err)
+			logger.Errorf("[Main][Create] Error :%v", err)
 			guestUUID = ""
 		}
 

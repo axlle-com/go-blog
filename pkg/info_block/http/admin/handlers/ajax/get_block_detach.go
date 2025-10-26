@@ -15,7 +15,7 @@ func (c *blockController) DetachInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	err := c.blockService.DeleteResource(id)
+	err := c.blockService.DeleteHasResourceByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": err.Error()})
 		return

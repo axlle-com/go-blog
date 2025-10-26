@@ -3,9 +3,8 @@ package models
 import (
 	"strconv"
 
-	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func NewInfoBlockFilter() *InfoBlockFilter {
@@ -13,23 +12,18 @@ func NewInfoBlockFilter() *InfoBlockFilter {
 }
 
 type InfoBlockFilter struct {
-	ID             *uint   `json:"id" form:"id" binding:"omitempty"`
-	TemplateID     *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
-	UserID         *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
-	PostCategoryID *uint   `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
-	Title          *string `json:"title" form:"title" binding:"omitempty"`
-	Date           *string `json:"date" form:"date" binding:"omitempty"`
+	ID             *uint       `json:"id" form:"id" binding:"omitempty"`
+	UUIDs          []uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
+	TemplateID     *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
+	UserID         *uint       `json:"user_id" form:"user_id" binding:"omitempty"`
+	PostCategoryID *uint       `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
+	Title          *string     `json:"title" form:"title" binding:"omitempty"`
+	Date           *string     `json:"date" form:"date" binding:"omitempty"`
+	ResourceUUID   *uuid.UUID  `json:"resource_uuid" form:"resource_uuid" binding:"omitempty"`
+	RelationID     *uint       `json:"relation_id" form:"relation_id" binding:"omitempty"`
+	RelationIDs    []uint      `json:"relation_ids" form:"relation_ids" binding:"omitempty"`
+	InfoBlockIDs   []uint      `json:"info_block_ids" form:"info_block_ids" binding:"omitempty"`
 	models.Filter
-}
-
-func (p *InfoBlockFilter) ValidateForm(ctx *gin.Context) (*InfoBlockFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
-
-func (p *InfoBlockFilter) ValidateQuery(ctx *gin.Context) (*InfoBlockFilter, *errutil.Errors) {
-	err := p.Filter.ValidateQuery(ctx, p)
-	return p, err
 }
 
 func (p *InfoBlockFilter) PrintTemplateID() uint {

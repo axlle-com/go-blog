@@ -12,7 +12,7 @@ type Template struct {
 	UserID       *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	Title        string     `gorm:"size:255;not null" json:"title"`
 	IsMain       bool       `gorm:"index;not null;default:false" json:"is_main" form:"is_main" binding:"omitempty"`
-	Name         string     `gorm:"size:45;not null;unique" json:"name"`
+	Name         string     `gorm:"size:255;not null;unique" json:"name"`
 	ResourceName *string    `gorm:"size:255" json:"resource_name,omitempty"`
 	HTML         *string    `gorm:"type:text" json:"html" binding:"omitempty"`
 	JS           *string    `gorm:"type:text" json:"js,omitempty"`

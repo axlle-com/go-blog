@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
@@ -12,14 +13,14 @@ import (
 type InfoBlockRepository interface {
 	WithTx(tx *gorm.DB) InfoBlockRepository
 	Create(infoBlock *models.InfoBlock) error
-	GetByID(id uint) (*models.InfoBlock, error)
-	WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
 	Update(infoBlock *models.InfoBlock) error
-	Delete(infoBlock *models.InfoBlock) error
 	GetAll() ([]*models.InfoBlock, error)
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
+	GetForResourceByFilter(filter *models.InfoBlockFilter) ([]*models.InfoBlockResponse, error)
+	FindByID(id uint) (*models.InfoBlock, error)
+	WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
+	Delete(infoBlock *models.InfoBlock) error
 	DeleteByIDs(ids []uint) (err error)
-	GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error)
 }
 
 type infoBlockRepository struct {
@@ -41,7 +42,7 @@ func (r *infoBlockRepository) Create(infoBlock *models.InfoBlock) error {
 	return r.db.Create(infoBlock).Error
 }
 
-func (r *infoBlockRepository) GetByID(id uint) (*models.InfoBlock, error) {
+func (r *infoBlockRepository) FindByID(id uint) (*models.InfoBlock, error) {
 	var model models.InfoBlock
 	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
@@ -121,14 +122,35 @@ func (r *infoBlockRepository) DeleteByIDs(ids []uint) (err error) {
 	return r.db.Where("id IN ?", ids).Delete(&models.InfoBlock{}).Error
 }
 
-func (r *infoBlockRepository) GetForResource(resource contracts.Resource) ([]*models.InfoBlockResponse, error) {
+func (r *infoBlockRepository) GetForResourceByFilter(filter *models.InfoBlockFilter) ([]*models.InfoBlockResponse, error) {
 	var infoBlocks []*models.InfoBlockResponse
 	query := r.db.
 		Joins("inner join info_block_has_resources as r on info_blocks.id = r.info_block_id").
-		Select("info_blocks.*", "r.id as relation_id", "r.sort as sort", "r.Position as position").
-		Where("r.resource_uuid = ?", resource.GetUUID()).
-		Order("r.sort ASC").
+		Select("info_blocks.*", "r.id as relation_id", "r.sort as sort", "r.position as position", "r.resource_uuid as resource_uuid")
+
+	if filter.ResourceUUID != nil {
+		query = query.Where("r.resource_uuid = ?", filter.ResourceUUID)
+	}
+
+	if filter.RelationID != nil {
+		query = query.Where("r.id = ?", filter.RelationID)
+	}
+
+	if filter.RelationIDs != nil && len(filter.RelationIDs) > 0 {
+		query = query.Where("r.id IN ?", filter.RelationIDs)
+	}
+
+	if filter.ID != nil {
+		query = query.Where("info_blocks.id = ?", filter.ID)
+	}
+
+	if filter.InfoBlockIDs != nil && len(filter.InfoBlockIDs) > 0 {
+		query = query.Where("info_blocks.id IN ?", filter.InfoBlockIDs)
+	}
+
+	query = query.Order("r.sort ASC").
 		Order("r.position ASC").
+		Order("r.id DESC").
 		Model(&models.InfoBlock{})
 
 	err := query.Find(&infoBlocks).Error

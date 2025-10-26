@@ -107,6 +107,7 @@ func (r *repository) Received(files []string) error {
 	if err := r.db.
 		Model(&models.File{}).
 		Where("file IN ?", files).
+		Where("received_at IS NULL").
 		Update("received_at", time.Now()).
 		Error; err != nil {
 		return err

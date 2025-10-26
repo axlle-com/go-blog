@@ -11,6 +11,7 @@ import (
 	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
+	"github.com/google/uuid"
 )
 
 type CategoriesService struct {
@@ -150,4 +151,8 @@ func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*models.PostCatego
 		collection[item.ID] = item
 	}
 	return collection, nil
+}
+
+func (s *CategoriesService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	return s.categoryRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

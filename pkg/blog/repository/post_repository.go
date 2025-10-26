@@ -7,6 +7,7 @@ import (
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,7 @@ type PostRepository interface {
 	GetByParam(field string, value any) (*models.Post, error)
 	GetByParams(params map[string]any) ([]*models.Post, error)
 	Update(post *models.Post) error
+	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
 	Delete(post *models.Post) error
 	GetAll() ([]*models.Post, error)
 	WithPaginate(paginator contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error)
@@ -161,4 +163,19 @@ func (r *postRepository) GetByAliasNotID(alias string, id uint) (*models.Post, e
 		return nil, err
 	}
 	return &post, nil
+}
+
+func (r *postRepository) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	if len(uuids) == 0 {
+		return 0, fmt.Errorf("empty uuids")
+	}
+	if len(patch) == 0 {
+		return 0, fmt.Errorf("empty patch")
+	}
+
+	tx := r.db.Model(&models.Post{}).
+		Where("uuid IN ?", uuids).
+		Updates(patch)
+
+	return tx.RowsAffected, tx.Error
 }

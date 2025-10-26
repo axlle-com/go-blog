@@ -41,22 +41,8 @@ func (s *InfoBlockCollectionService) GetAll() ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetAll()
 }
 
-func (s *InfoBlockCollectionService) DeleteInfoBlocks(infoBlocks []*models.InfoBlock) (err error) {
-	var ids []uint
-	for _, infoBlock := range infoBlocks {
-		ids = append(ids, infoBlock.ID)
-	}
-
-	if len(ids) > 0 {
-		if err = s.infoBlockRepo.DeleteByIDs(ids); err == nil {
-			return nil
-		}
-	}
-	return err
-}
-
-func (s *InfoBlockCollectionService) WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
-	return s.infoBlockRepo.WithPaginate(p, filter)
+func (s *InfoBlockCollectionService) WithPaginate(paginator contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
+	return s.infoBlockRepo.WithPaginate(paginator, filter)
 }
 
 func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) []*models.InfoBlock {

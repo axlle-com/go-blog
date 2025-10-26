@@ -8,7 +8,7 @@ import (
 	"github.com/axlle-com/blog/app/models/contracts"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
-	http "github.com/axlle-com/blog/pkg/blog/http/admin/models"
+	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	file "github.com/axlle-com/blog/pkg/file/provider"
@@ -63,7 +63,7 @@ func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.infoBlockProvider.GetForResource(post)
+		infoBlocks = s.infoBlockProvider.GetForResourceUUID(post.UUID.String())
 	}()
 
 	wg.Wait()
@@ -153,7 +153,7 @@ func (s *TagService) SaveFromRequest(form *http.TagRequest, user contracts.User)
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model)
+		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}

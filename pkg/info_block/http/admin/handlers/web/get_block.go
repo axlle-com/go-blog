@@ -20,7 +20,7 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	block, err := c.blockService.GetByID(id)
+	block, err := c.blockService.FindByID(id)
 	if err != nil {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return

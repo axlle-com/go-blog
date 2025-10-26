@@ -22,9 +22,10 @@ type InfoBlockResponse struct {
 	User      contracts.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 	Galleries []contracts.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 
-	RelationID uint   `gorm:"relation_id" json:"relation_id" form:"relation_id" binding:"omitempty"`
-	Sort       int    `gorm:"sort" json:"sort" form:"sort" binding:"omitempty"`
-	Position   string `gorm:"position" json:"position" form:"position" binding:"omitempty"`
+	RelationID   uint      `gorm:"relation_id" json:"relation_id" form:"relation_id" binding:"omitempty"`
+	ResourceUUID uuid.UUID `gorm:"resource_uuid" json:"resource_uuid" form:"resource_uuid" binding:"omitempty"`
+	Sort         int       `gorm:"sort" json:"sort" form:"sort" binding:"omitempty"`
+	Position     string    `gorm:"position" json:"position" form:"position" binding:"omitempty"`
 }
 
 func (i *InfoBlockResponse) GetUUID() uuid.UUID {
@@ -92,7 +93,10 @@ func (i *InfoBlockResponse) GetTitle() string {
 }
 
 func (i *InfoBlockResponse) GetMedia() string {
-	return *i.Media
+	if i.Media != nil {
+		return *i.Media
+	}
+	return ""
 }
 
 func (i *InfoBlockResponse) GetDescription() string {

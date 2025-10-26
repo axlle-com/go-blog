@@ -3,6 +3,8 @@ package queue
 import (
 	"container/heap"
 	"context"
+	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -12,11 +14,13 @@ import (
 
 type Queue struct {
 	mu            *sync.Mutex
-	cond          *sync.Cond    // ожидание, когда очередь пуста
-	wake          chan struct{} // сигнал «появилась более ранняя задача»
+	cond          *sync.Cond    // ожидание при пустой очереди
+	wake          chan struct{} // «появилась более ранняя задача»
 	priorityQueue priorityQueue
 	closing       bool
 	handlers      map[string][]contracts.QueueHandler
+
+	wg sync.WaitGroup // ждём воркеры при Close()
 }
 
 func NewQueue() *Queue {
@@ -31,12 +35,11 @@ func NewQueue() *Queue {
 }
 
 func (q *Queue) SetHandlers(handlers map[string][]contracts.QueueHandler) {
+	q.mu.Lock()
 	q.handlers = handlers
+	q.mu.Unlock()
 }
 
-// Enqueue ставит задачу в очередь; delay==0 — немедленно.
-// Если воркер спит до будущего runAt, посылаем wake‑сигнал,
-// чтобы он пересмотрел приоритеты.
 func (q *Queue) Enqueue(job contracts.Job, delay time.Duration) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -59,12 +62,16 @@ func (q *Queue) Enqueue(job contracts.Job, delay time.Duration) {
 }
 
 func (q *Queue) Start(ctx context.Context, n int) {
-	if ctx == nil {
+	if ctx == nil || n <= 0 {
 		return
 	}
 
 	for i := 0; i < n; i++ {
-		go q.worker(ctx)
+		q.wg.Add(1)
+		go func() {
+			defer q.wg.Done()
+			q.worker(ctx)
+		}()
 	}
 }
 
@@ -78,7 +85,9 @@ func (q *Queue) Close() {
 	default:
 	}
 	q.mu.Unlock()
-	logger.Info("[Queue] Close")
+
+	q.wg.Wait()
+	logger.Info("[queue] Close")
 }
 
 func (q *Queue) next() (*queueItem, bool) {
@@ -89,7 +98,13 @@ func (q *Queue) next() (*queueItem, bool) {
 }
 
 func (q *Queue) worker(ctx context.Context) {
-	logger.Info("[Queue][worker] Start")
+	logger.Info("[queue][worker] Start")
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Errorf("[queue][worker] panic: %v\n%s", r, debug.Stack())
+		}
+	}()
+
 	for {
 		q.mu.Lock()
 
@@ -125,19 +140,56 @@ func (q *Queue) worker(ctx context.Context) {
 		heap.Pop(&q.priorityQueue)
 		q.mu.Unlock()
 
-		//if err := item.job.Run(ctx); err != nil {
-		//	logger.Errorf("[Queue][%s] Error: %v, Data: %s", item.job.GetName(), err, string(item.job.GetData()))
-		//}
-
-		handlers, ok := q.handlers[item.job.GetQueue()]
-		if !ok {
-			logger.Errorf("[Queue][%s] handlers not found, Data: %s", item.job.GetName(), string(item.job.GetData()))
+		handlers := q.safeHandlersFor(item.job.GetQueue())
+		if len(handlers) == 0 {
+			logger.Errorf("[queue][%s] handlers not found, Data: %s", item.job.GetName(), string(item.job.GetData()))
+			continue
 		}
+
+		// Общий таймаут на job (чтобы один job не висел вечно)
+		jobTimeout := 30 * time.Second
+		jobContext, cancel := context.WithTimeout(ctx, jobTimeout)
 
 		for _, handler := range handlers {
-			handler.Run(item.job.GetData())
+			// Таймаут на каждый handler короче общего
+			perHandlerTimeout := 15 * time.Second
+			if err := runHandlerSafe(jobContext, handler, item.job.GetData(), perHandlerTimeout); err != nil {
+				logger.Errorf("[queue][%s] handler error: %v", item.job.GetName(), err)
+				// Здесь нужно включить retry/Backoff/DLQ (см. комментарии ниже)
+			}
 		}
+		cancel()
 
-		logger.Debugf("[Queue][%s] Duration: %.2fms", item.job.GetName(), item.job.Duration())
+		logger.Debugf("[queue][%s] Duration: %.2fms", item.job.GetName(), item.job.Duration())
+	}
+}
+
+func (q *Queue) safeHandlersFor(queueName string) []contracts.QueueHandler {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	return q.handlers[queueName]
+}
+
+// runHandlerSafe запускает handler с перехватом panics и таймаутом.
+func runHandlerSafe(ctx context.Context, handler contracts.QueueHandler, payload []byte, timeout time.Duration) error {
+	handlerContext, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				errCh <- fmt.Errorf("panic: %v\n%s", r, debug.Stack())
+			}
+		}()
+		handler.Run(payload) // старый контракт: Run([]byte)
+		errCh <- nil
+	}()
+
+	select {
+	case <-handlerContext.Done():
+		return handlerContext.Err() // DeadlineExceeded / Canceled
+	case err := <-errCh:
+		return err
 	}
 }

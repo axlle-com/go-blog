@@ -20,6 +20,7 @@ type GalleryRepository interface {
 	GetAllIds() ([]uint, error)
 	GetForResource(uuid.UUID) ([]*models.GalleryResponse, error)
 	GetForResources([]uuid.UUID) ([]*models.GalleryResponse, error)
+	GetForResourceByFilter(filter *models.GalleryFilter) ([]*models.GalleryResponse, error)
 	WithImages() GalleryRepository
 	WithTx(tx *gorm.DB) GalleryRepository
 }
@@ -46,6 +47,7 @@ func (r *galleryRepository) WithImages() GalleryRepository {
 }
 
 func (r *galleryRepository) Create(gallery *models.Gallery) error {
+	gallery.Saving()
 	return r.db.Omit("Images").Create(gallery).Error
 }
 
@@ -127,6 +129,37 @@ func (r *galleryRepository) GetForResources(uuids []uuid.UUID) ([]*models.Galler
 
 	if r.withImages {
 		query.Preload("Images", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sort ASC")
+		})
+	}
+
+	err := query.Find(&galleries).Error
+	return galleries, err
+}
+
+func (r *galleryRepository) GetForResourceByFilter(filter *models.GalleryFilter) ([]*models.GalleryResponse, error) {
+	var galleries []*models.GalleryResponse
+	query := r.db.
+		Joins("inner join gallery_has_resources as r on galleries.id = r.gallery_id").
+		Select("galleries.*", "r.sort as sort", "r.resource_uuid as resource_uuid").
+		Model(&models.Gallery{})
+
+	if filter.ResourceUUID != nil {
+		query = query.Where("r.resource_uuid = ?", filter.ResourceUUID)
+	}
+
+	if filter.IDs != nil && len(filter.IDs) > 0 {
+		query = query.Where("galleries.id IN ?", filter.IDs)
+	}
+
+	if filter.ID != nil {
+		query = query.Where("galleries.id = ?", filter.ID)
+	}
+
+	query = query.Order("r.sort ASC").Order("galleries.id DESC")
+
+	if r.withImages {
+		query = query.Preload("Images", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sort ASC")
 		})
 	}

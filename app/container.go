@@ -11,23 +11,41 @@ import (
 	"github.com/axlle-com/blog/app/service/scheduler"
 	"github.com/axlle-com/blog/app/service/storage"
 	"github.com/axlle-com/blog/app/service/view"
-
-	"github.com/axlle-com/blog/pkg/blog/provider"
-
 	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
 	analyticQueue "github.com/axlle-com/blog/pkg/analytic/queue"
 	analyticRepo "github.com/axlle-com/blog/pkg/analytic/repository"
 	analyticService "github.com/axlle-com/blog/pkg/analytic/service"
-
+	postDB "github.com/axlle-com/blog/pkg/blog/db"
+	postMigrate "github.com/axlle-com/blog/pkg/blog/db/migrate"
+	postAjax "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/ajax"
+	postApi "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/api"
+	postAdminWeb "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/web"
+	postFrontWeb "github.com/axlle-com/blog/pkg/blog/http/front/handlers/web"
+	"github.com/axlle-com/blog/pkg/blog/provider"
+	postQueue "github.com/axlle-com/blog/pkg/blog/queue"
+	postRepo "github.com/axlle-com/blog/pkg/blog/repository"
+	postService "github.com/axlle-com/blog/pkg/blog/service"
 	fileMigrate "github.com/axlle-com/blog/pkg/file/db/migrate"
 	fileAdminWeb "github.com/axlle-com/blog/pkg/file/http"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	fileQueue "github.com/axlle-com/blog/pkg/file/queue"
 	fileRepo "github.com/axlle-com/blog/pkg/file/repository"
 	fileService "github.com/axlle-com/blog/pkg/file/service"
-
+	galleryMigrate "github.com/axlle-com/blog/pkg/gallery/db/migrate"
+	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
+	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
+	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
+	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
+	infoBlockDB "github.com/axlle-com/blog/pkg/info_block/db"
+	infoBlockMigrate "github.com/axlle-com/blog/pkg/info_block/db/migrate"
+	infoBlockAdminAjax "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/ajax"
+	infoBlockAdminWeb "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/web"
+	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
+	infoBlockQueue "github.com/axlle-com/blog/pkg/info_block/queue"
+	infoBlockRepo "github.com/axlle-com/blog/pkg/info_block/repository"
+	infoBlockService "github.com/axlle-com/blog/pkg/info_block/service"
 	menuDB "github.com/axlle-com/blog/pkg/menu/db"
 	menuMigrate "github.com/axlle-com/blog/pkg/menu/db/migrate"
 	menuAdminAjax "github.com/axlle-com/blog/pkg/menu/http/handlers/ajax"
@@ -35,21 +53,6 @@ import (
 	menuQueue "github.com/axlle-com/blog/pkg/menu/queue"
 	menuRepository "github.com/axlle-com/blog/pkg/menu/repository"
 	menuService "github.com/axlle-com/blog/pkg/menu/service"
-
-	galleryMigrate "github.com/axlle-com/blog/pkg/gallery/db/migrate"
-	galleryAjax "github.com/axlle-com/blog/pkg/gallery/http/handlers/web"
-	galleryProvider "github.com/axlle-com/blog/pkg/gallery/provider"
-	galleryRepo "github.com/axlle-com/blog/pkg/gallery/repository"
-	galleryService "github.com/axlle-com/blog/pkg/gallery/service"
-
-	infoBlockDB "github.com/axlle-com/blog/pkg/info_block/db"
-	infoBlockMigrate "github.com/axlle-com/blog/pkg/info_block/db/migrate"
-	infoBlockAdminAjax "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/ajax"
-	infoBlockAdminWeb "github.com/axlle-com/blog/pkg/info_block/http/admin/handlers/web"
-	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
-	infoBlockRepo "github.com/axlle-com/blog/pkg/info_block/repository"
-	infoBlockService "github.com/axlle-com/blog/pkg/info_block/service"
-
 	messageContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	messageDB "github.com/axlle-com/blog/pkg/message/db"
 	messageMigrate "github.com/axlle-com/blog/pkg/message/db/migrate"
@@ -59,16 +62,6 @@ import (
 	messageQueue "github.com/axlle-com/blog/pkg/message/queue"
 	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
 	messageService "github.com/axlle-com/blog/pkg/message/service"
-
-	postDB "github.com/axlle-com/blog/pkg/blog/db"
-	postMigrate "github.com/axlle-com/blog/pkg/blog/db/migrate"
-	postAjax "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/ajax"
-	postApi "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/api"
-	postAdminWeb "github.com/axlle-com/blog/pkg/blog/http/admin/handlers/web"
-	postFrontWeb "github.com/axlle-com/blog/pkg/blog/http/front/handlers/web"
-	postRepo "github.com/axlle-com/blog/pkg/blog/repository"
-	postService "github.com/axlle-com/blog/pkg/blog/service"
-
 	templateDB "github.com/axlle-com/blog/pkg/template/db"
 	templateMigrate "github.com/axlle-com/blog/pkg/template/db/migrate"
 	templateAdminAjax "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
@@ -76,7 +69,6 @@ import (
 	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
 	templateRepo "github.com/axlle-com/blog/pkg/template/repository"
 	templateService "github.com/axlle-com/blog/pkg/template/service"
-
 	userDB "github.com/axlle-com/blog/pkg/user/db"
 	userMigrate "github.com/axlle-com/blog/pkg/user/db/migrate"
 	userFrontWeb "github.com/axlle-com/blog/pkg/user/http/handlers/web"
@@ -186,7 +178,8 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newResourceRepo := galleryRepo.NewResourceRepo(db.PostgreSQL())
 
 	newGalleryRepo := galleryRepo.NewGalleryRepo(db.PostgreSQL())
-	newGalleryEvent := galleryService.NewGalleryEvent(newImageService, newResourceRepo)
+	newGalleryEvent := galleryService.NewGalleryEvent(newQueue, newImageService, newGalleryRepo, newResourceRepo)
+	newImageEvent.SetGalleryEvent(newGalleryEvent)
 	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, fileProv)
 	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
 
@@ -217,7 +210,8 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider)
-	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
+	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue)
+	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
 	postTagRepo := postRepo.NewPostTagRepo(db.PostgreSQL())
@@ -225,12 +219,12 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	postTagService := postService.NewTagService(postTagRepo, postTagResourceRepo, newAliasProvider, newGalleryProvider, newBlockProvider, fileProv)
 	postTagCollectionService := postService.NewTagCollectionService(postTagService, postTagRepo, postTagResourceRepo, newTemplateProvider)
 
-	csService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
-	cService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
+	newCategoriesService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
+	categoryService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	newPostService := postService.NewPostService(newQueue, newPostRepo, csService, cService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
-	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, csService, cService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
-	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, csService, postTagCollectionService)
+	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
+	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
@@ -299,6 +293,12 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		"posts": {
 			menuQueue.NewPublisherQueueHandler(newMenuService, menuItemCollectionService),
 		},
+		"info_blocks": {
+			postQueue.NewInfoBlockQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newBlockProvider),
+		},
+		"galleries": {
+			infoBlockQueue.NewGalleryQueueHandler(newBlockService, newBlockEventService),
+		},
 	})
 
 	return &Container{
@@ -330,8 +330,8 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		PostsService:      newPostCollectionService,
 		PostProvider:      newPostProvider,
 		CategoryRepo:      newCategoryRepo,
-		CategoriesService: csService,
-		CategoryService:   cService,
+		CategoriesService: newCategoriesService,
+		CategoryService:   categoryService,
 
 		TemplateProvider:          newTemplateProvider,
 		TemplateRepo:              newTemplateRepo,

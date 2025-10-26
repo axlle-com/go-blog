@@ -137,7 +137,7 @@ func (p *provider) SaveFormBatch(anys []any, resource contracts.Resource) (galle
 
 	// Блокировки для конкурентного доступа к срезам.
 	var galleriesMu sync.Mutex
-	var errorsMu sync.Mutex
+	var errorsMu sync.Mutex // @todo new error
 
 	var errs []error
 

@@ -9,6 +9,7 @@ type InfoBlock interface {
 	GetUUID() uuid.UUID
 	GetTemplateID() uint
 	GetTemplateTitle() string
+	GetTemplateName() string
 	GetTitle() string
 	GetDescription() string
 	GetImage() string

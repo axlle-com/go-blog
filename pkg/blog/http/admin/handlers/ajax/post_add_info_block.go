@@ -28,7 +28,7 @@ func (c *postController) AddPostInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	infoBlockCollection, err := c.infoBlock.Attach(uint(infoBlockId), found)
+	infoBlockCollection, err := c.infoBlock.Attach(uint(infoBlockId), found.UUID.String())
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
 		return

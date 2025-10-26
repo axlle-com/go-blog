@@ -29,7 +29,7 @@ func (c *postController) DeletePostImage(ctx *gin.Context) {
 		return
 	}
 
-	err = c.postService.Update(post)
+	_, err = c.postService.Update(post, post)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

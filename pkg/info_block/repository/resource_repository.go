@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 
-	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -11,16 +10,13 @@ import (
 
 type InfoBlockHasResourceRepository interface {
 	WithTx(tx *gorm.DB) InfoBlockHasResourceRepository
-	GetByParams(resourceUUID uuid.UUID, infoBlockID uint) (*models.InfoBlockHasResource, error)
-	DeleteByParams(resourceUUID uuid.UUID, infoBlockID uint) error
-	GetByID(id uint) (*models.InfoBlockHasResource, error)
-	GetForResource(contracts.Resource) ([]*models.InfoBlockHasResource, error)
-	GetByResource(c contracts.Resource) ([]*models.InfoBlockHasResource, error)
 	Create(*models.InfoBlockHasResource) error
-	Delete(uint) error
-	DetachResource(contracts.Resource) error
-	DetachInfoBlock(infoBlock *models.InfoBlock) error
 	Update(infoBlockHasResource *models.InfoBlockHasResource) error
+	FindByParams(resourceUUID uuid.UUID, infoBlockID uint) (*models.InfoBlockHasResource, error)
+	FindByID(id uint) (*models.InfoBlockHasResource, error)
+	DeleteByID(uint) error
+	DeleteByResourceUUID(uuid.UUID) error
+	DeleteByInfoBlockID(infoBlockID uint) error
 }
 
 type infoBlockResource struct {
@@ -40,7 +36,7 @@ func (r *infoBlockResource) Create(infoBlockHasResource *models.InfoBlockHasReso
 	return r.db.Create(infoBlockHasResource).Error
 }
 
-func (r *infoBlockResource) GetByID(id uint) (*models.InfoBlockHasResource, error) {
+func (r *infoBlockResource) FindByID(id uint) (*models.InfoBlockHasResource, error) {
 	var infoBlockHasResource models.InfoBlockHasResource
 	if err := r.db.
 		Where("id = ?", id).
@@ -50,7 +46,7 @@ func (r *infoBlockResource) GetByID(id uint) (*models.InfoBlockHasResource, erro
 	return &infoBlockHasResource, nil
 }
 
-func (r *infoBlockResource) GetByParams(resourceUUID uuid.UUID, infoBlockID uint) (*models.InfoBlockHasResource, error) {
+func (r *infoBlockResource) FindByParams(resourceUUID uuid.UUID, infoBlockID uint) (*models.InfoBlockHasResource, error) {
 	var infoBlockHasResource models.InfoBlockHasResource
 	if err := r.db.
 		Where("resource_uuid = ?", resourceUUID).
@@ -61,76 +57,32 @@ func (r *infoBlockResource) GetByParams(resourceUUID uuid.UUID, infoBlockID uint
 	return &infoBlockHasResource, nil
 }
 
-func (r *infoBlockResource) DeleteByParams(resourceUUID uuid.UUID, infoBlockID uint) error {
+func (r *infoBlockResource) DeleteByID(id uint) error {
+	err := r.db.
+		Where("id = ?", id).
+		Delete(&models.InfoBlockHasResource{}).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	return err
+}
+
+func (r *infoBlockResource) DeleteByResourceUUID(resourceUUID uuid.UUID) error {
 	err := r.db.
 		Where("resource_uuid = ?", resourceUUID).
+		Delete(&models.InfoBlockHasResource{}).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	return err
+}
+
+func (r *infoBlockResource) DeleteByInfoBlockID(infoBlockID uint) error {
+	err := r.db.
 		Where("info_block_id = ?", infoBlockID).
 		Delete(&models.InfoBlockHasResource{}).Error
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil
-	}
-
-	return err
-}
-
-func (r *infoBlockResource) GetForResource(resource contracts.Resource) ([]*models.InfoBlockHasResource, error) {
-	var infoBlockHasResource []*models.InfoBlockHasResource
-	err := r.db.
-		Where("resource_uuid = ?", resource.GetUUID()).
-		Find(&infoBlockHasResource).Error
-
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return infoBlockHasResource, nil
-}
-
-func (r *infoBlockResource) GetByResource(resource contracts.Resource) ([]*models.InfoBlockHasResource, error) {
-	var infoBlockHasResource []*models.InfoBlockHasResource
-	err := r.db.
-		Where("resource_uuid = ?", resource.GetUUID()).
-		Or("info_block_id IN (?)",
-			r.db.Model(&models.InfoBlockHasResource{}).
-				Select("info_block_id").
-				Where("resource_uuid = ?", resource.GetUUID()),
-		).
-		Find(&infoBlockHasResource).Error
-
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return infoBlockHasResource, nil
-}
-
-func (r *infoBlockResource) DetachResource(resource contracts.Resource) error {
-	err := r.db.
-		Where("resource_uuid = ?", resource.GetUUID()).
-		Delete(&models.InfoBlockHasResource{}).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil
-	}
-	return err
-}
-
-func (r *infoBlockResource) DetachInfoBlock(infoBlock *models.InfoBlock) error {
-	err := r.db.
-		Where("info_block_id = ?", infoBlock.ID).
-		Delete(&models.InfoBlockHasResource{}).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil
-	}
-	return err
-}
-
-func (r *infoBlockResource) Delete(id uint) error {
-	err := r.db.Where("id = ?", id).Delete(&models.InfoBlockHasResource{}).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil

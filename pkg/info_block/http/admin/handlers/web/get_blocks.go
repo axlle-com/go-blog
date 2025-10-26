@@ -3,12 +3,12 @@ package web
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	csrf "github.com/utrack/gin-csrf"
-
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/info_block/http/admin/request"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
+	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 )
 
 func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
@@ -16,7 +16,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	filter, validError := models.NewInfoBlockFilter().ValidateQuery(ctx)
+	filter, validError := request.NewInfoBlockRequest().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"errors":  validError.Errors,
@@ -35,7 +35,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 
 	users := c.userProvider.GetAll()
 
-	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter.ToFilter())
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

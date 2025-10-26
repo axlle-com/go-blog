@@ -7,6 +7,7 @@ import (
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contracts"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +17,7 @@ type PostTagRepository interface {
 	GetByIDs(ids []uint) ([]*models.PostTag, error)
 	GetByNames(titles []string) ([]*models.PostTag, error)
 	Update(postTag *models.PostTag) error
+	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
 	DeleteByID(id uint) error
 	Delete(*models.PostTag) error
 	DeleteByIDs(ids []uint) (err error)
@@ -156,4 +158,19 @@ func (r *postTagRepository) GetAllIds() ([]uint, error) {
 		logger.Error(err)
 	}
 	return ids, nil
+}
+
+func (r *postTagRepository) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	if len(uuids) == 0 {
+		return 0, fmt.Errorf("empty uuids")
+	}
+	if len(patch) == 0 {
+		return 0, fmt.Errorf("empty patch")
+	}
+
+	tx := r.db.Model(&models.PostTag{}).
+		Where("uuid IN ?", uuids).
+		Updates(patch)
+
+	return tx.RowsAffected, tx.Error
 }

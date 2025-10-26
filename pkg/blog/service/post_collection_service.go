@@ -13,6 +13,7 @@ import (
 	infoBlock "github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
+	"github.com/google/uuid"
 )
 
 type PostCollectionService struct {
@@ -148,4 +149,8 @@ func (s *PostCollectionService) WithPaginate(p contracts.Paginator, filter *mode
 
 func (s *PostCollectionService) GetAll() ([]*models.Post, error) {
 	return s.postRepo.GetAll()
+}
+
+func (s *PostCollectionService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+	return s.postRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

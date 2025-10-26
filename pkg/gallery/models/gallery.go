@@ -9,6 +9,7 @@ import (
 
 type Gallery struct {
 	ID          uint       `gorm:"primary_key" json:"id"`
+	UUID        uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	Title       *string    `gorm:"size:255" json:"title"`
 	Description *string    `gorm:"type:text" json:"description"`
 	Image       *string    `gorm:"size:255;" json:"image"`
@@ -20,7 +21,7 @@ type Gallery struct {
 	// @todo delete?
 	Sort         int       `gorm:"-" json:"sort" form:"sort" binding:"omitempty"`
 	Position     string    `gorm:"-" json:"position" form:"position" binding:"omitempty"`
-	ResourceUUID uuid.UUID `gorm:"-" json:"uuid" form:"uuid" binding:"-"`
+	ResourceUUID uuid.UUID `gorm:"-" json:"resource_uuid" form:"resource_uuid" binding:"-"`
 	Images       []*Image  `json:"images,omitempty"`
 }
 
@@ -66,4 +67,14 @@ func (g *Gallery) GetImages() []contracts.Image {
 		images[i] = image
 	}
 	return images
+}
+
+func (g *Gallery) Saving() {
+	g.SetUUID()
+}
+
+func (g *Gallery) SetUUID() {
+	if g.UUID == uuid.Nil {
+		g.UUID = uuid.New()
+	}
 }

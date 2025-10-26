@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/pkg/info_block/http/admin/request"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	block, err := c.blockService.GetByID(id)
+	block, err := c.blockService.FindByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
@@ -29,7 +30,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	filter, validError := models.NewInfoBlockFilter().ValidateQuery(ctx)
+	filter, validError := request.NewInfoBlockRequest().ValidateQuery(ctx)
 	if validError != nil {
 		ctx.JSON(
 			http.StatusBadRequest,
@@ -49,7 +50,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 
 	users := c.userProvider.GetAll()
 
-	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter)
+	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter.ToFilter())
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

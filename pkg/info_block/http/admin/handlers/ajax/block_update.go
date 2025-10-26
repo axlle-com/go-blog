@@ -16,7 +16,7 @@ func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	found, err := c.blockService.GetByID(id)
+	found, err := c.blockService.FindByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return

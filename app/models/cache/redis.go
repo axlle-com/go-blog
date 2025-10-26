@@ -3,11 +3,12 @@ package cache
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contracts"
 	client "github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"
-	"time"
 )
 
 func NewRedisCache(cfg contracts.Config) contracts.Cache {

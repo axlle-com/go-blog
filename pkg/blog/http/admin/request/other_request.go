@@ -1,4 +1,4 @@
-package models
+package request
 
 type GalleryRequest struct {
 	ID          uint            `json:"id" form:"id" binding:"omitempty"`

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/axlle-com/blog/app/logger"
 	"reflect"
+
+	"github.com/axlle-com/blog/app/logger"
 )
 
 type Field struct {

@@ -13,7 +13,7 @@ import (
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/service"
 	modelsGallery "github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/bxcodec/faker/v3"
@@ -210,7 +210,7 @@ func TestSuccessfulCreatePost(t *testing.T) {
 				t.Error(err)
 			}
 
-			gSlice := gProvider.GetForResource(model)
+			gSlice := gProvider.GetForResourceUUID(model.UUID.String())
 			if err != nil {
 				t.Error(err)
 			}
@@ -222,7 +222,7 @@ func TestSuccessfulCreatePost(t *testing.T) {
 			}
 
 			postMap := make(map[string]*ImageRequest)
-			modelMap := make(map[string]contracts.Image)
+			modelMap := make(map[string]contract.Image)
 
 			for _, gallery := range gSlice {
 				iSlice := iProvider.GetForGallery(gallery.GetID())

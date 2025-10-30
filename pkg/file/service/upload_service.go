@@ -11,19 +11,19 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/file/models"
 	"github.com/google/uuid"
 )
 
 type UploadService struct {
 	fileService    *FileService
-	storageService contracts.Storage
+	storageService contract.Storage
 }
 
 func NewUploadService(
 	fileService *FileService,
-	storageService contracts.Storage,
+	storageService contract.Storage,
 ) *UploadService {
 	return &UploadService{
 		fileService,
@@ -31,7 +31,7 @@ func NewUploadService(
 	}
 }
 
-func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder string, user contracts.User) (path string, err error) {
+func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder string, user contract.User) (path string, err error) {
 	ext, contentType := s.safeExt(file)
 	if !s.isImage(contentType) {
 		return "", fmt.Errorf("файл:%s не является изображением", file.Filename)
@@ -63,7 +63,7 @@ func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder stri
 	return
 }
 
-func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist string, user contracts.User) ([]string, error) {
+func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist string, user contract.User) ([]string, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 
@@ -73,7 +73,7 @@ func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist st
 	for _, file := range files {
 		wg.Add(1)
 
-		go func(file *multipart.FileHeader, dist string, user contracts.User) {
+		go func(file *multipart.FileHeader, dist string, user contract.User) {
 			defer wg.Done()
 			path, e := s.SaveUploadedFile(file, dist, user)
 			if e != nil {

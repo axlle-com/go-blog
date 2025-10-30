@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/template/provider"
@@ -32,7 +32,7 @@ func NewTagCollectionService(
 	}
 }
 
-func (s *TagCollectionService) WithPaginate(p contracts.Paginator, filter *models.TagFilter) ([]*models.PostTag, error) {
+func (s *TagCollectionService) WithPaginate(p contract.Paginator, filter *models.TagFilter) ([]*models.PostTag, error) {
 	return s.tagRepo.WithPaginate(p, filter)
 }
 
@@ -51,7 +51,7 @@ func (s *TagCollectionService) Aggregates(tags []*models.PostTag) []*models.Post
 		}
 	}
 
-	var templates map[uint]contracts.Template
+	var templates map[uint]contract.Template
 
 	if len(templateIDs) > 0 {
 		var err error
@@ -152,10 +152,10 @@ func (s *TagCollectionService) GetAll() ([]*models.PostTag, error) {
 	return s.tagRepo.GetAll()
 }
 
-func (s *TagCollectionService) GetForResource(resource contracts.Resource) ([]*models.PostTag, error) {
+func (s *TagCollectionService) GetForResource(resource contract.Resource) ([]*models.PostTag, error) {
 	return s.tagRepo.GetForResource(resource)
 }
 
-func (s *TagCollectionService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+func (s *TagCollectionService) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
 	return s.tagRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

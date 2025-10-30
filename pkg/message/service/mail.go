@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	selfContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
 	mailer "github.com/axlle-com/blog/pkg/message/job"
@@ -9,16 +9,16 @@ import (
 )
 
 type MailService struct {
-	config                   contracts.Config
-	queue                    contracts.Queue
+	config                   contract.Config
+	queue                    contract.Queue
 	messageService           selfContracts.MessageService
 	messageCollectionService selfContracts.MessageCollectionService
 	userProvider             provider.UserProvider
 }
 
 func NewMailService(
-	config contracts.Config,
-	queue contracts.Queue,
+	config contract.Config,
+	queue contract.Queue,
 	messageService selfContracts.MessageService,
 	messageCollectionService selfContracts.MessageCollectionService,
 	userProvider provider.UserProvider,

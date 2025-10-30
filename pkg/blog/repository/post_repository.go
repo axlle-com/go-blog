@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -21,7 +21,7 @@ type PostRepository interface {
 	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
 	Delete(post *models.Post) error
 	GetAll() ([]*models.Post, error)
-	WithPaginate(paginator contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error)
+	WithPaginate(paginator contract.Paginator, filter *models.PostFilter) ([]*models.Post, error)
 	GetByAlias(alias string) (*models.Post, error)
 	GetByAliasNotID(alias string, id uint) (*models.Post, error)
 }
@@ -98,7 +98,7 @@ func (r *postRepository) GetAll() ([]*models.Post, error) {
 	return posts, nil
 }
 
-func (r *postRepository) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
+func (r *postRepository) WithPaginate(p contract.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
 	var posts []*models.Post
 	var total int64
 

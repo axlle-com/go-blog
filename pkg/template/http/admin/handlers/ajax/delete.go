@@ -58,6 +58,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 	}
 	templates := c.templateCollectionService.Aggregates(temp)
 
+	resources := app.NewResources()
 	data := response.Body{
 		"title":         "Страница шаблонов",
 		"templateModel": empty,
@@ -65,7 +66,8 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 		"users":         users,
 		"paginator":     paginator,
 		"filter":        filter,
-		"resources":     app.NewResources().Resources(),
+		"resources":     resources.Resources(),
+		"themes":        resources.Themes(),
 	}
 
 	ctx.JSON(

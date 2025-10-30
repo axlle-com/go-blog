@@ -1,18 +1,18 @@
 package migrate
 
 import (
-	"gorm.io/gorm"
-
+	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/models"
+	"gorm.io/gorm"
 )
 
 type migrator struct {
 	db *gorm.DB
 }
 
-func NewMigrator(db *gorm.DB) contracts.Migrator {
+func NewMigrator(db *gorm.DB) contract.Migrator {
 	return &migrator{db: db}
 }
 
@@ -28,9 +28,9 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_users_uuid ON users USING hash (uuid);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_user_has_users_user_uuid ON user_has_users USING hash (user_uuid);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_user_has_users_relation_uuid ON user_has_users USING hash (relation_uuid);`)
+	m.db.Exec(db.CreateHashIndex("users", "uuid"))
+	m.db.Exec(db.CreateHashIndex("user_has_users", "user_uuid"))
+	m.db.Exec(db.CreateHashIndex("user_has_users", "relation_uuid"))
 
 	return nil
 }

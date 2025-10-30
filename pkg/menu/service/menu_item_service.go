@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/menu/http/request"
 	"github.com/axlle-com/blog/pkg/menu/models"
@@ -20,7 +20,7 @@ func NewMenuItemService(
 	}
 }
 
-func (s *MenuItemService) SaveFromRequest(form *request.MenuItemsRequest, user contracts.User) (menu *models.MenuItem, err error) {
+func (s *MenuItemService) SaveFromRequest(form *request.MenuItemsRequest, user contract.User) (menu *models.MenuItem, err error) {
 	menu = app.LoadStruct(&models.MenuItem{}, form).(*models.MenuItem)
 
 	if form.ID == nil {

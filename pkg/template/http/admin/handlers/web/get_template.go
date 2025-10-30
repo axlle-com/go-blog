@@ -26,14 +26,15 @@ func (c *templateWebController) GetTemplate(ctx *gin.Context) {
 		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
-
+	resources := app.NewResources()
 	ctx.HTML(
 		http.StatusOK,
 		"admin.template",
 		gin.H{
 			"title":         "Страница шаблона",
 			"templateModel": template,
-			"resources":     app.NewResources().Resources(),
+			"resources":     resources.Resources(),
+			"themes":        resources.Themes(),
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

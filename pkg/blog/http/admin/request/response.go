@@ -1,15 +1,15 @@
 package request
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
-	paginator *contracts.Paginator
+	paginator *contract.Paginator
 }
 
-func NewResponse(p *contracts.Paginator) *Response {
+func NewResponse(p *contract.Paginator) *Response {
 	return &Response{paginator: p}
 }
 

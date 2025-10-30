@@ -7,14 +7,14 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 )
 
 func NewPostJob(
 	post *models.Post,
 	action string,
-) contracts.Job {
+) contract.Job {
 	return &UpdatePostJob{
 		post:   post,
 		action: action,

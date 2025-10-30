@@ -3,11 +3,11 @@ package queue
 import (
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type queueItem struct {
-	job   contracts.Job
+	job   contract.Job
 	runAt time.Time
 	index int // нужен для container/heap
 }

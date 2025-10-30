@@ -5,7 +5,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -23,8 +23,8 @@ type PostTagRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.PostTag, error)
 	GetAllIds() ([]uint, error)
-	GetForResource(contracts.Resource) ([]*models.PostTag, error)
-	WithPaginate(p contracts.Paginator, filter *models.TagFilter) ([]*models.PostTag, error)
+	GetForResource(contract.Resource) ([]*models.PostTag, error)
+	WithPaginate(p contract.Paginator, filter *models.TagFilter) ([]*models.PostTag, error)
 	WithTx(tx *gorm.DB) PostTagRepository
 }
 
@@ -42,7 +42,7 @@ func (r *postTagRepository) WithTx(tx *gorm.DB) PostTagRepository {
 	return &postTagRepository{db: tx}
 }
 
-func (r *postTagRepository) WithPaginate(p contracts.Paginator, filter *models.TagFilter) ([]*models.PostTag, error) {
+func (r *postTagRepository) WithPaginate(p contract.Paginator, filter *models.TagFilter) ([]*models.PostTag, error) {
 	var postTags []*models.PostTag
 	var total int64
 
@@ -141,7 +141,7 @@ func (r *postTagRepository) GetAll() ([]*models.PostTag, error) {
 	return galleries, nil
 }
 
-func (r *postTagRepository) GetForResource(resource contracts.Resource) ([]*models.PostTag, error) {
+func (r *postTagRepository) GetForResource(resource contract.Resource) ([]*models.PostTag, error) {
 	var galleries []*models.PostTag
 	query := r.db.
 		Joins("inner join post_tag_has_resources as r on post_tags.id = r.post_tag_id").

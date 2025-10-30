@@ -3,11 +3,10 @@ package web
 import (
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	"github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
@@ -27,8 +26,8 @@ func NewWebPostController(
 	tagCollectionService *service.TagCollectionService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	gallery gallery.GalleryProvider,
-	infoBlock provider.InfoBlockProvider,
+	gallery appPovider.GalleryProvider,
+	infoBlock appPovider.InfoBlockProvider,
 ) PostController {
 	return &postController{
 		postService:           service,
@@ -53,11 +52,11 @@ type postController struct {
 	tagCollectionService  *service.TagCollectionService
 	templateProvider      template.TemplateProvider
 	user                  user.UserProvider
-	gallery               gallery.GalleryProvider
-	infoBlock             provider.InfoBlockProvider
+	gallery               appPovider.GalleryProvider
+	infoBlock             appPovider.InfoBlockProvider
 }
 
-func (c *postController) templates(ctx *gin.Context) []contracts.Template {
+func (c *postController) templates(ctx *gin.Context) []contract.Template {
 	templates, err := c.templateProvider.GetForResources(&models.Post{})
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)

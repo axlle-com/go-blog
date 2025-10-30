@@ -1,18 +1,18 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/queue/job"
 )
 
 type InfoBlockEventService struct {
-	queue contracts.Queue
+	queue contract.Queue
 }
 
 func NewInfoBlockEventService(
-	queue contracts.Queue,
+	queue contract.Queue,
 ) *InfoBlockEventService {
 	return &InfoBlockEventService{
 		queue: queue,

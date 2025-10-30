@@ -4,37 +4,36 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/file/provider"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	provider2 "github.com/axlle-com/blog/pkg/info_block/provider"
 )
 
 type PostService struct {
-	queue                contracts.Queue
+	queue                contract.Queue
 	postRepo             repository.PostRepository
 	categoriesService    *CategoriesService
 	categoryService      *CategoryService
 	tagCollectionService *TagCollectionService
-	galleryProvider      gallery.GalleryProvider
+	galleryProvider      appPovider.GalleryProvider
 	fileProvider         provider.FileProvider
 	aliasProvider        alias.AliasProvider
-	infoBlockProvider    provider2.InfoBlockProvider
+	infoBlockProvider    appPovider.InfoBlockProvider
 }
 
 func NewPostService(
-	queue contracts.Queue,
+	queue contract.Queue,
 	postRepo repository.PostRepository,
 	categoriesService *CategoriesService,
 	categoryService *CategoryService,
 	tagCollectionService *TagCollectionService,
-	galleryProvider gallery.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	fileProvider provider.FileProvider,
 	aliasProvider alias.AliasProvider,
-	infoBlockProvider provider2.InfoBlockProvider,
+	infoBlockProvider appPovider.InfoBlockProvider,
 ) *PostService {
 	return &PostService{
 		queue:                queue,
@@ -60,8 +59,8 @@ func (s *PostService) GetAggregateByID(id uint) (*models.Post, error) {
 func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 	var wg sync.WaitGroup
 
-	var galleries = make([]contracts.Gallery, 0)
-	var infoBlocks = make([]contracts.InfoBlock, 0)
+	var galleries = make([]contract.Gallery, 0)
+	var infoBlocks = make([]contract.InfoBlock, 0)
 	var tags = make([]*models.PostTag, 0)
 	var err error
 
@@ -69,7 +68,7 @@ func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetForResource(post)
+		galleries = s.galleryProvider.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {

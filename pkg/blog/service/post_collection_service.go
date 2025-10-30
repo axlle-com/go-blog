@@ -4,13 +4,12 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	file "github.com/axlle-com/blog/pkg/file/provider"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	infoBlock "github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
@@ -20,24 +19,24 @@ type PostCollectionService struct {
 	postRepo          repository.PostRepository
 	categoriesService *CategoriesService
 	categoryService   *CategoryService
-	galleryProvider   gallery.GalleryProvider
+	galleryProvider   appPovider.GalleryProvider
 	fileProvider      file.FileProvider
 	aliasProvider     alias.AliasProvider
 	userProvider      user.UserProvider
 	templateProvider  template.TemplateProvider
-	infoBlockProvider infoBlock.InfoBlockProvider
+	infoBlockProvider appPovider.InfoBlockProvider
 }
 
 func NewPostCollectionService(
 	postRepo repository.PostRepository,
 	categoriesService *CategoriesService,
 	categoryService *CategoryService,
-	galleryProvider gallery.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	fileProvider file.FileProvider,
 	aliasProvider alias.AliasProvider,
 	userProvider user.UserProvider,
 	templateProvider template.TemplateProvider,
-	infoBlockProvider infoBlock.InfoBlockProvider,
+	infoBlockProvider appPovider.InfoBlockProvider,
 ) *PostCollectionService {
 	return &PostCollectionService{
 		postRepo:          postRepo,
@@ -87,8 +86,8 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
+	var users map[uint]contract.User
+	var templates map[uint]contract.Template
 	var categories map[uint]*models.PostCategory
 
 	wg.Add(3)
@@ -143,7 +142,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 	return posts
 }
 
-func (s *PostCollectionService) WithPaginate(p contracts.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
+func (s *PostCollectionService) WithPaginate(p contract.Paginator, filter *models.PostFilter) ([]*models.Post, error) {
 	return s.postRepo.WithPaginate(p, filter)
 }
 
@@ -151,6 +150,6 @@ func (s *PostCollectionService) GetAll() ([]*models.Post, error) {
 	return s.postRepo.GetAll()
 }
 
-func (s *PostCollectionService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+func (s *PostCollectionService) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
 	return s.postRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

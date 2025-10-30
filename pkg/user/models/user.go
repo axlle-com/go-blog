@@ -5,14 +5,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type User struct {
@@ -205,7 +204,7 @@ func (u *User) GetUUID() uuid.UUID {
 	return u.UUID
 }
 
-func (u *User) FromInterface(user contracts.User) {
+func (u *User) FromInterface(user contract.User) {
 	u.FirstName = user.GetFirstName()
 	u.LastName = user.GetLastName()
 	u.Email = user.GetEmail()

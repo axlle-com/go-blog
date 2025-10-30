@@ -2,10 +2,12 @@ package db
 
 import (
 	"fmt"
-	"github.com/axlle-com/blog/app/logger"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/axlle-com/blog/app/logger"
 )
 
 func RandBool() bool {
@@ -142,4 +144,28 @@ func RandomDate() time.Time {
 	delta := endDate.Sub(startDate)
 	randomDuration := time.Duration(rand.Int63n(int64(delta)))
 	return startDate.Add(randomDuration)
+}
+
+// IndexName формирует единый формат имени индекса: idx_<table>_<col1>[_<col2>...]
+func IndexName(table string, columns ...string) string {
+	parts := make([]string, 0, 1+len(columns))
+	clean := func(s string) string {
+		s = strings.TrimSpace(s)
+		s = strings.ReplaceAll(s, " ", "_")
+		s = strings.ReplaceAll(s, ".", "_")
+		s = strings.ReplaceAll(s, ",", "_")
+		return s
+	}
+	parts = append(parts, clean(table))
+	for _, c := range columns {
+		parts = append(parts, clean(c))
+	}
+	return "idx_" + strings.Join(parts, "_")
+}
+
+// CreateHashIndex создаёт HASH индекс по колонке: CREATE INDEX IF NOT EXISTS idx_<table>_<col> ON <table> USING hash (<col>);
+// Важно: HASH индексы в PostgreSQL применяются к одной колонке. Для нескольких колонок создавайте отдельные индексы.
+func CreateHashIndex(table string, column string) string {
+	name := IndexName(table, column)
+	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING hash (%s);", name, table, column)
 }

@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"gorm.io/gorm"
 )
 
 type AliasProvider interface {
-	Generate(r contracts.Publisher, s string) string
+	Generate(r contract.Publisher, s string) string
 	Create(title string) string
 	transliterate(input string) string
 }
@@ -27,7 +27,7 @@ type provider struct {
 	aliasRepo AliasRepository
 }
 
-func (p *provider) Generate(publisher contracts.Publisher, aliasOld string) string {
+func (p *provider) Generate(publisher contract.Publisher, aliasOld string) string {
 	alias := p.Create(aliasOld)
 	aliasNew := alias
 	counter := 1

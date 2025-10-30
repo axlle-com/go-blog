@@ -2,21 +2,21 @@ package provider
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/google/uuid"
 )
 
 type UserProvider interface {
-	GetAll() []contracts.User
+	GetAll() []contract.User
 	GetAllIds() []uint
-	GetByID(id uint) (contracts.User, error)
-	GetByUUID(uuid uuid.UUID) (contracts.User, error)
-	GetByIDs(ids []uint) ([]contracts.User, error)
-	GetMapByIDs(ids []uint) (map[uint]contracts.User, error)
-	GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.User, error)
-	Create(contracts.User) (contracts.User, error)
+	GetByID(id uint) (contract.User, error)
+	GetByUUID(uuid uuid.UUID) (contract.User, error)
+	GetByIDs(ids []uint) ([]contract.User, error)
+	GetMapByIDs(ids []uint) (map[uint]contract.User, error)
+	GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contract.User, error)
+	Create(contract.User) (contract.User, error)
 }
 
 func NewProvider(
@@ -34,10 +34,10 @@ type provider struct {
 	userService *service.UserService
 }
 
-func (p *provider) GetAll() []contracts.User {
+func (p *provider) GetAll() []contract.User {
 	all, err := p.userRepo.GetAll()
 	if err == nil && len(all) > 0 {
-		var users []contracts.User
+		var users []contract.User
 		for _, item := range all {
 			users = append(users, item)
 		}
@@ -56,7 +56,7 @@ func (p *provider) GetAllIds() []uint {
 	return nil
 }
 
-func (p *provider) GetByID(id uint) (contracts.User, error) {
+func (p *provider) GetByID(id uint) (contract.User, error) {
 	t, err := p.userRepo.GetByID(id)
 	if err == nil {
 		return t, nil
@@ -65,7 +65,7 @@ func (p *provider) GetByID(id uint) (contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetByUUID(uuid uuid.UUID) (contracts.User, error) {
+func (p *provider) GetByUUID(uuid uuid.UUID) (contract.User, error) {
 	t, err := p.userRepo.GetByUUID(uuid)
 	if err == nil {
 		return t, nil
@@ -75,10 +75,10 @@ func (p *provider) GetByUUID(uuid uuid.UUID) (contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetByIDs(ids []uint) ([]contracts.User, error) {
+func (p *provider) GetByIDs(ids []uint) ([]contract.User, error) {
 	all, err := p.userRepo.GetByIDs(ids)
 	if err == nil && len(all) > 0 {
-		collection := make([]contracts.User, 0, len(all))
+		collection := make([]contract.User, 0, len(all))
 		for _, item := range all {
 			collection = append(collection, item)
 		}
@@ -88,11 +88,11 @@ func (p *provider) GetByIDs(ids []uint) ([]contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.User, error) {
+func (p *provider) GetMapByIDs(ids []uint) (map[uint]contract.User, error) {
 	all, err := p.userRepo.GetByIDs(ids)
 
 	if err == nil && len(all) > 0 {
-		users := make(map[uint]contracts.User)
+		users := make(map[uint]contract.User)
 		for _, item := range all {
 			users[item.ID] = item
 		}
@@ -104,11 +104,11 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.User, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.User, error) {
+func (p *provider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contract.User, error) {
 	all, err := p.userRepo.GetByUUIDs(uuids)
 
 	if err == nil && len(all) > 0 {
-		users := make(map[uuid.UUID]contracts.User)
+		users := make(map[uuid.UUID]contract.User)
 		for _, item := range all {
 			users[item.UUID] = item
 		}
@@ -120,6 +120,6 @@ func (p *provider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contracts.Use
 	return nil, err
 }
 
-func (p *provider) Create(user contracts.User) (contracts.User, error) {
+func (p *provider) Create(user contract.User) (contract.User, error) {
 	return p.userService.CreateFromInterface(user)
 }

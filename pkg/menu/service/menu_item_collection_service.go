@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/repository"
 )
@@ -22,7 +22,7 @@ func NewMenuItemCollectionService(
 	}
 }
 
-func (s *MenuItemCollectionService) Filter(paginator contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error) {
+func (s *MenuItemCollectionService) Filter(paginator contract.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error) {
 	collection, err := s.menuItemRepository.GetByFilter(paginator, filter)
 	if err != nil {
 		return nil, err
@@ -98,10 +98,10 @@ func (s *MenuItemCollectionService) Aggregate(collection []*models.MenuItem) []*
 	return collection
 }
 
-func (s *MenuItemCollectionService) UpdateURLForPublisher(publisher contracts.Publisher) (int64, error) {
+func (s *MenuItemCollectionService) UpdateURLForPublisher(publisher contract.Publisher) (int64, error) {
 	return s.menuItemRepository.UpdateURLForPublisher(publisher.GetUUID(), publisher.GetURL())
 }
 
-func (s *MenuItemCollectionService) DetachPublisher(publisher contracts.Publisher) (int64, error) {
+func (s *MenuItemCollectionService) DetachPublisher(publisher contract.Publisher) (int64, error) {
 	return s.menuItemRepository.DetachPublisher(publisher.GetUUID())
 }

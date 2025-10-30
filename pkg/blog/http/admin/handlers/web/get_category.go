@@ -27,7 +27,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 		return
 	}
 
-	category.Galleries = c.galleryProvider.GetForResource(category)
+	category.Galleries = c.galleryProvider.GetForResourceUUID(category.UUID.String())
 
 	categories, err := c.categoriesService.GetAllForParent(category)
 	if err != nil {

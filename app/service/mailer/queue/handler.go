@@ -7,18 +7,18 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/service/mailer/queue/model"
 )
 
-func NewMailerQueueHandler(mailer contracts.Mailer) contracts.QueueHandler {
+func NewMailerQueueHandler(mailer contract.Mailer) contract.QueueHandler {
 	return &queueHandler{
 		mailer: mailer,
 	}
 }
 
 type queueHandler struct {
-	mailer contracts.Mailer
+	mailer contract.Mailer
 }
 
 func (qh *queueHandler) Run(data []byte) {

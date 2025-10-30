@@ -3,11 +3,10 @@ package ajax
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/pkg/template/http/request"
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/http/response"
 	app "github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/pkg/template/http/request"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *templateController) CreateTemplate(ctx *gin.Context) {
@@ -34,9 +33,11 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 		return
 	}
 
+	resources := app.NewResources()
 	data := response.Body{
 		"templateModel": template,
-		"resources":     app.NewResources().Resources(),
+		"resources":     resources.Resources(),
+		"themes":        resources.Themes(),
 	}
 	ctx.JSON(
 		http.StatusCreated,

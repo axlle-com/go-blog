@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
 	"github.com/tdewolff/minify/js"
 )
 
-func Minify(config contracts.Config) {
+func Minify(config contract.Config) {
 	if !config.IsLocal() {
 		logger.Info("[Minify] Running on the staging environment; we don’t build the HTML files")
 		return

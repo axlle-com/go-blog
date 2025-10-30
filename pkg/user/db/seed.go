@@ -1,15 +1,15 @@
 package db
 
 import (
-	"github.com/bxcodec/faker/v3"
 	"math/rand"
 	"time"
 
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
+	"github.com/bxcodec/faker/v3"
 )
 
 type seeder struct {
@@ -22,7 +22,7 @@ func NewSeeder(
 	user repository.UserRepository,
 	role repository.RoleRepository,
 	permission repository.PermissionRepository,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		user:       user,
 		role:       role,

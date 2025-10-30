@@ -2,25 +2,25 @@ package scheduler
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/service/scheduler/job"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/robfig/cron/v3"
 )
 
 type Scheduler struct {
-	queue  contracts.Queue
-	config contracts.Config
+	queue  contract.Queue
+	config contract.Config
 	cron   *cron.Cron
 
 	file fileProvider.FileProvider
 }
 
 func NewScheduler(
-	config contracts.Config,
-	queue contracts.Queue,
+	config contract.Config,
+	queue contract.Queue,
 	file fileProvider.FileProvider,
-) contracts.Scheduler {
+) contract.Scheduler {
 	return &Scheduler{
 		config: config,
 		queue:  queue,

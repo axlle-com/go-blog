@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 const DefaultPageSize = 20
@@ -20,7 +20,7 @@ type paginator struct {
 	URL         template.URL `json:"url"`
 }
 
-func PaginatorFromQuery(query url.Values) contracts.Paginator {
+func PaginatorFromQuery(query url.Values) contract.Paginator {
 	p := &paginator{
 		Query: query,
 	}
@@ -31,7 +31,7 @@ func PaginatorFromQuery(query url.Values) contracts.Paginator {
 	return p
 }
 
-func PaginatorFromPage(page, pageSize int) contracts.Paginator {
+func PaginatorFromPage(page, pageSize int) contract.Paginator {
 	p := &paginator{
 		Page:     page,
 		PageSize: pageSize,

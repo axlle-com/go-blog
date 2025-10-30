@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type Queue struct {
@@ -18,7 +18,7 @@ type Queue struct {
 	wake          chan struct{} // «появилась более ранняя задача»
 	priorityQueue priorityQueue
 	closing       bool
-	handlers      map[string][]contracts.QueueHandler
+	handlers      map[string][]contract.QueueHandler
 
 	wg sync.WaitGroup // ждём воркеры при Close()
 }
@@ -34,13 +34,13 @@ func NewQueue() *Queue {
 	return q
 }
 
-func (q *Queue) SetHandlers(handlers map[string][]contracts.QueueHandler) {
+func (q *Queue) SetHandlers(handlers map[string][]contract.QueueHandler) {
 	q.mu.Lock()
 	q.handlers = handlers
 	q.mu.Unlock()
 }
 
-func (q *Queue) Enqueue(job contracts.Job, delay time.Duration) {
+func (q *Queue) Enqueue(job contract.Job, delay time.Duration) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
@@ -164,14 +164,14 @@ func (q *Queue) worker(ctx context.Context) {
 	}
 }
 
-func (q *Queue) safeHandlersFor(queueName string) []contracts.QueueHandler {
+func (q *Queue) safeHandlersFor(queueName string) []contract.QueueHandler {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	return q.handlers[queueName]
 }
 
 // runHandlerSafe запускает handler с перехватом panics и таймаутом.
-func runHandlerSafe(ctx context.Context, handler contracts.QueueHandler, payload []byte, timeout time.Duration) error {
+func runHandlerSafe(ctx context.Context, handler contract.QueueHandler, payload []byte, timeout time.Duration) error {
 	handlerContext, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 

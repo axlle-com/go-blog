@@ -5,7 +5,7 @@ import (
 	"log"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
@@ -21,7 +21,7 @@ type TemplateRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Template, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error)
+	WithPaginate(p contract.Paginator, filter *request.TemplateFilter) ([]*models.Template, error)
 	Filter(filter *models.TemplateFilter) ([]*models.Template, error)
 }
 
@@ -41,6 +41,7 @@ func (r *repository) WithTx(tx *gorm.DB) TemplateRepository {
 }
 
 func (r *repository) Create(template *models.Template) error {
+	template.Creating()
 	return r.db.Create(template).Error
 }
 
@@ -61,10 +62,12 @@ func (r *repository) GetByIDs(ids []uint) ([]*models.Template, error) {
 }
 
 func (r *repository) Update(template *models.Template) error {
+	template.Updating()
 	return r.db.Select(
 		"UserID",
 		"Title",
 		"IsMain",
+		"Theme",
 		"Name",
 		"ResourceName",
 		"HTML",
@@ -97,7 +100,7 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(paginator contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
+func (r *repository) WithPaginate(paginator contract.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
 	var templates []*models.Template
 	var total int64
 

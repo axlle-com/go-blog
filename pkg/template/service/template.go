@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
@@ -45,7 +45,7 @@ func (s *TemplateService) GetByIDs(ids []uint) ([]*models.Template, error) {
 	return s.templateRepo.GetByIDs(ids)
 }
 
-func (s *TemplateService) Create(template *models.Template, user contracts.User) (*models.Template, error) {
+func (s *TemplateService) Create(template *models.Template, user contract.User) (*models.Template, error) {
 	if user != nil {
 		id := user.GetID()
 		template.UserID = &id
@@ -68,7 +68,7 @@ func (s *TemplateService) Delete(template *models.Template) (err error) {
 	return s.templateRepo.Delete(template)
 }
 
-func (s *TemplateService) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contracts.User) (template *models.Template, err error) {
+func (s *TemplateService) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contract.User) (template *models.Template, err error) {
 	templateForm := app.LoadStruct(&models.Template{}, form).(*models.Template)
 
 	if found == nil {

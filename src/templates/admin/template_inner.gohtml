@@ -11,6 +11,9 @@
                     <div class="list-with-gap mb-2">
                         <button type="button" class="btn btn-success js-save-button">Сохранить</button>
                         <a type="button" class="btn btn-secondary" href="/admin/templates">Выйти</a>
+                        <textarea id="HTML" name="html" hidden></textarea>
+                        <textarea id="JS" name="js" hidden></textarea>
+                        <textarea id="CSS" name="css" hidden></textarea>
                     </div>
                     <div class="list-with-gap mb-2">
                         <ul class="nav nav-gap-x-1 mt-3" role="tablist">
@@ -94,7 +97,7 @@
                                     </fieldset>
                                     <div class="form-group small">
                                         <label for="HTML">HTML</label>
-                                        <div id="HTML">{{ ptrStr .templateModel.HTML }}</div>
+                                        <div id="HTML_container">{{ ptrStr .templateModel.HTML }}</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -125,12 +128,12 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <div class="form-group small">
-                                        <div id="JS">{{ ptrStr .templateModel.JS }}</div>
+                                        <div id="JS_container">{{ ptrStr .templateModel.JS }}</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <div class="form-group small">
-                                        <div id="CSS">{{ ptrStr .templateModel.CSS }}</div>
+                                        <div id="CSS_container">{{ ptrStr .templateModel.CSS }}</div>
                                     </div>
                                 </div>
                             </div>

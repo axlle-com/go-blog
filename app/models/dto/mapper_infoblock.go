@@ -1,10 +1,10 @@
 package dto
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
-func MapInfoBlock(src contracts.InfoBlock) InfoBlock {
+func MapInfoBlock(src contract.InfoBlock) InfoBlock {
 	if src == nil {
 		return InfoBlock{}
 	}
@@ -24,7 +24,7 @@ func MapInfoBlock(src contracts.InfoBlock) InfoBlock {
 	}
 }
 
-func MapInfoBlocks(list []contracts.InfoBlock) []InfoBlock {
+func MapInfoBlocks(list []contract.InfoBlock) []InfoBlock {
 	if len(list) == 0 {
 		return nil
 	}
@@ -36,7 +36,7 @@ func MapInfoBlocks(list []contracts.InfoBlock) []InfoBlock {
 	return out
 }
 
-func MapGallery(src contracts.Gallery) Gallery {
+func MapGallery(src contract.Gallery) Gallery {
 	if src == nil {
 		return Gallery{}
 	}
@@ -53,7 +53,7 @@ func MapGallery(src contracts.Gallery) Gallery {
 	}
 }
 
-func MapGalleries(list []contracts.Gallery) []Gallery {
+func MapGalleries(list []contract.Gallery) []Gallery {
 	if len(list) == 0 {
 		return nil
 	}
@@ -64,7 +64,7 @@ func MapGalleries(list []contracts.Gallery) []Gallery {
 	return out
 }
 
-func MapImage(src contracts.Image) Image {
+func MapImage(src contract.Image) Image {
 	if src == nil {
 		return Image{}
 	}
@@ -78,7 +78,7 @@ func MapImage(src contracts.Image) Image {
 	}
 }
 
-func MapImages(list []contracts.Image) []Image {
+func MapImages(list []contract.Image) []Image {
 	if len(list) == 0 {
 		return nil
 	}

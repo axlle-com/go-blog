@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"gorm.io/datatypes"
-
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 type Post struct {
@@ -52,10 +51,10 @@ type Post struct {
 	Category *PostCategory `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
 	PostTags []*PostTag    `gorm:"-" json:"tags" form:"tags" binding:"-" ignore:"true"`
 
-	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
-	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User       contracts.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries  []contract.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contract.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Template   contract.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User       contract.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 
 	dirty      map[string]interface{} `ignore:"true"`
 	original   *Post                  `ignore:"true"`

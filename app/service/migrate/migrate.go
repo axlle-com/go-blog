@@ -1,16 +1,16 @@
 package migrate
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"gorm.io/gorm"
 )
 
 type migrator struct {
 	db        *gorm.DB
-	migrators []contracts.Migrator
+	migrators []contract.Migrator
 }
 
-func NewMigrator(db *gorm.DB, arg ...contracts.Migrator) contracts.Migrator {
+func NewMigrator(db *gorm.DB, arg ...contract.Migrator) contract.Migrator {
 	m := &migrator{db: db}
 	m.migrators = append(m.migrators, arg...)
 	return m

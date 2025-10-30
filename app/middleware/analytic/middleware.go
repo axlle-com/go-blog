@@ -5,15 +5,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mssola/user_agent"
-
-	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 func NewAnalytic(
-	queue contracts.Queue,
+	queue contract.Queue,
 ) *Analytic {
 	return &Analytic{
 		queue: queue,
@@ -21,7 +20,7 @@ func NewAnalytic(
 }
 
 type Analytic struct {
-	queue contracts.Queue
+	queue contract.Queue
 }
 
 func (a *Analytic) Handler() gin.HandlerFunc {

@@ -5,15 +5,14 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	file "github.com/axlle-com/blog/pkg/file/provider"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	infoBlock "github.com/axlle-com/blog/pkg/info_block/provider"
 	"gorm.io/gorm"
 )
 
@@ -21,8 +20,8 @@ type TagService struct {
 	tagRepo           repository.PostTagRepository
 	resourceRepo      repository.PostTagResourceRepository
 	aliasProvider     alias.AliasProvider
-	galleryProvider   gallery.GalleryProvider
-	infoBlockProvider infoBlock.InfoBlockProvider
+	galleryProvider   appPovider.GalleryProvider
+	infoBlockProvider appPovider.InfoBlockProvider
 	fileProvider      file.FileProvider
 }
 
@@ -30,8 +29,8 @@ func NewTagService(
 	postTagRepo repository.PostTagRepository,
 	resourceRepo repository.PostTagResourceRepository,
 	aliasProvider alias.AliasProvider,
-	galleryProvider gallery.GalleryProvider,
-	infoBlockProvider infoBlock.InfoBlockProvider,
+	galleryProvider appPovider.GalleryProvider,
+	infoBlockProvider appPovider.InfoBlockProvider,
 	fileProvider file.FileProvider,
 ) *TagService {
 	return &TagService{
@@ -51,14 +50,14 @@ func (s *TagService) GetByID(id uint) (*models.PostTag, error) {
 func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
 	var wg sync.WaitGroup
 
-	var galleries = make([]contracts.Gallery, 0)
-	var infoBlocks = make([]contracts.InfoBlock, 0)
+	var galleries = make([]contract.Gallery, 0)
+	var infoBlocks = make([]contract.InfoBlock, 0)
 
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetForResource(post)
+		galleries = s.galleryProvider.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {
@@ -91,7 +90,7 @@ func (s *TagService) Update(postTag *models.PostTag) (*models.PostTag, error) {
 	return postTag, nil
 }
 
-func (s *TagService) Attach(resource contracts.Resource, postTag contracts.PostTag) error {
+func (s *TagService) Attach(resource contract.Resource, postTag contract.PostTag) error {
 	hasRepo, err := s.resourceRepo.GetByParams(resource.GetUUID(), postTag.GetID())
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -127,7 +126,7 @@ func (s *TagService) DeleteTags(postTags []*models.PostTag) (err error) {
 	return nil
 }
 
-func (s *TagService) SaveFromRequest(form *http.TagRequest, user contracts.User) (*models.PostTag, error) {
+func (s *TagService) SaveFromRequest(form *http.TagRequest, user contract.User) (*models.PostTag, error) {
 	tagForm := app.LoadStruct(&models.PostTag{}, form).(*models.PostTag)
 	model, err := s.Save(tagForm, user)
 	if err != nil {
@@ -163,7 +162,7 @@ func (s *TagService) SaveFromRequest(form *http.TagRequest, user contracts.User)
 	return model, nil
 }
 
-func (s *TagService) Save(tag *models.PostTag, user contracts.User) (*models.PostTag, error) {
+func (s *TagService) Save(tag *models.PostTag, user contract.User) (*models.PostTag, error) {
 	var newAlias string
 	if tag.Alias == "" {
 		newAlias = *tag.Title

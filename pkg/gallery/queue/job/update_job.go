@@ -7,14 +7,14 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
 )
 
 func NewGalleryJob(
 	collection *dto.Collection,
 	action string,
-) contracts.Job {
+) contract.Job {
 	return &UpdateGalleryJob{
 		collection: collection,
 		action:     action,

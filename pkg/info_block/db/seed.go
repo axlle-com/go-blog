@@ -7,7 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -25,7 +25,7 @@ func NewSeeder(
 	infoBlockService *service.InfoBlockService,
 	templateProvider template.TemplateProvider,
 	user user.UserProvider,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		infoBlockService: infoBlockService,
 		templateProvider: templateProvider,

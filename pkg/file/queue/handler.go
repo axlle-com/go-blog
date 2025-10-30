@@ -3,13 +3,13 @@ package queue
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/file/service"
 )
 
 func NewFileQueueHandler(
 	collectionService *service.CollectionService,
-) contracts.QueueHandler {
+) contract.QueueHandler {
 	return &queueHandler{
 		collectionService: collectionService,
 	}

@@ -3,7 +3,8 @@ package app
 import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/cache"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	apppPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/app/service/mailer"
 	mailerQueue "github.com/axlle-com/blog/app/service/mailer/queue"
 	"github.com/axlle-com/blog/app/service/migrate"
@@ -62,6 +63,9 @@ import (
 	messageQueue "github.com/axlle-com/blog/pkg/message/queue"
 	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
 	messageService "github.com/axlle-com/blog/pkg/message/service"
+	settingsMigrate "github.com/axlle-com/blog/pkg/settings/db/migrate"
+	settingsRepo "github.com/axlle-com/blog/pkg/settings/repository"
+	settingsService "github.com/axlle-com/blog/pkg/settings/service"
 	templateDB "github.com/axlle-com/blog/pkg/template/db"
 	templateMigrate "github.com/axlle-com/blog/pkg/template/db/migrate"
 	templateAdminAjax "github.com/axlle-com/blog/pkg/template/http/admin/handlers/ajax"
@@ -79,11 +83,11 @@ import (
 )
 
 type Container struct {
-	Config    contracts.Config
-	Queue     contracts.Queue
-	Cache     contracts.Cache
-	View      contracts.View
-	Scheduler contracts.Scheduler
+	Config    contract.Config
+	Queue     contract.Queue
+	Cache     contract.Cache
+	View      contract.View
+	Scheduler contract.Scheduler
 
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.FileService
@@ -93,18 +97,18 @@ type Container struct {
 	ImageRepo     galleryRepo.GalleryImageRepository
 	ImageEvent    *galleryService.ImageEvent
 	ImageService  *galleryService.ImageService
-	ImageProvider galleryProvider.ImageProvider
+	ImageProvider apppPovider.ImageProvider
 
 	GalleryRepo         galleryRepo.GalleryRepository
 	GalleryEvent        *galleryService.GalleryEvent
 	GalleryService      *galleryService.GalleryService
-	GalleryProvider     galleryProvider.GalleryProvider
+	GalleryProvider     apppPovider.GalleryProvider
 	GalleryResourceRepo galleryRepo.GalleryResourceRepository
 
 	PostRepo          postRepo.PostRepository
 	PostService       *postService.PostService
 	PostsService      *postService.PostCollectionService
-	PostProvider      contracts.PostProvider
+	PostProvider      contract.PostProvider
 	CategoryRepo      postRepo.CategoryRepository
 	CategoriesService *postService.CategoriesService
 	CategoryService   *postService.CategoryService
@@ -129,7 +133,7 @@ type Container struct {
 	InfoBlockRepo              infoBlockRepo.InfoBlockRepository
 	InfoBlockService           *infoBlockService.InfoBlockService
 	InfoBlockCollectionService *infoBlockService.InfoBlockCollectionService
-	InfoBlockProvider          infoBlockProvider.InfoBlockProvider
+	InfoBlockProvider          apppPovider.InfoBlockProvider
 
 	PostTagRepo              postRepo.PostTagRepository
 	PostTagResourceRepo      postRepo.PostTagResourceRepository
@@ -153,11 +157,15 @@ type Container struct {
 	MenuItemService           *menuService.MenuItemService
 	MenuItemCollectionService *menuService.MenuItemCollectionService
 
-	Migrator contracts.Migrator
-	Seeder   contracts.Seeder
+	// Settings
+	SettingsRepo    settingsRepo.Repository
+	SettingsService *settingsService.Service
+
+	Migrator contract.Migrator
+	Seeder   contract.Seeder
 }
 
-func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
+func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newQueue := queue.NewQueue()
 	newCache := cache.NewCache()
 	newView := view.NewView(config.Config())
@@ -199,6 +207,10 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
 	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
 	newMailService := messageService.NewMailService(cfg, newQueue, newMessageService, newMessageCollectionService, newUserProvider)
+
+	// Settings
+	newSettingsRepo := settingsRepo.NewRepository(db.PostgreSQL())
+	newSettingsService := settingsService.NewService(newSettingsRepo)
 
 	newAliasRepo := alias.NewAliasRepo(db.PostgreSQL())
 	newAliasProvider := alias.NewAliasProvider(newAliasRepo)
@@ -248,6 +260,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 	messageMigrator := messageMigrate.NewMigrator(db.PostgreSQL())
 	fileMigrator := fileMigrate.NewMigrator(db.PostgreSQL())
 	menuMigrator := menuMigrate.NewMigrator(db.PostgreSQL())
+	settingsMigrator := settingsMigrate.NewMigrator(db.PostgreSQL())
 
 	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
 	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, newUserProvider, newTemplateProvider)
@@ -268,6 +281,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		messageMigrator,
 		fileMigrator,
 		menuMigrator,
+		settingsMigrator,
 	)
 
 	newScheduler := scheduler.NewScheduler(
@@ -276,7 +290,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		fileProv,
 	)
 
-	newQueue.SetHandlers(map[string][]contracts.QueueHandler{
+	newQueue.SetHandlers(map[string][]contract.QueueHandler{
 		"messages": {
 			messageQueue.NewMessageQueueHandler(newMessageService, newMessageCollectionService),
 			mailerQueue.NewMailerQueueHandler(newMailer),
@@ -298,6 +312,7 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		},
 		"galleries": {
 			infoBlockQueue.NewGalleryQueueHandler(newBlockService, newBlockEventService),
+			postQueue.NewGalleryQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newGalleryProvider),
 		},
 	})
 
@@ -375,6 +390,10 @@ func NewContainer(cfg contracts.Config, db contracts.DB) *Container {
 		MenuItemRepo:              menuItemRepo,
 		MenuItemService:           menuItemService,
 		MenuItemCollectionService: menuItemCollectionService,
+
+		// Settings
+		SettingsRepo:    newSettingsRepo,
+		SettingsService: newSettingsService,
 
 		Migrator: newMigrator,
 		Seeder:   seeder,

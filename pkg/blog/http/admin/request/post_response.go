@@ -1,7 +1,7 @@
 package request
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	post "github.com/axlle-com/blog/pkg/blog/models"
 )
 
@@ -12,5 +12,5 @@ func NewPostResponse() *PostResponse {
 type PostResponse struct {
 	Post       *post.Post
 	Categories []*post.PostCategory
-	Templates  []contracts.Template
+	Templates  []contract.Template
 }

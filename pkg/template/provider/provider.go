@@ -2,18 +2,18 @@ package provider
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 )
 
 type TemplateProvider interface {
-	GetAll() []contracts.Template
-	GetByID(id uint) (contracts.Template, error)
+	GetAll() []contract.Template
+	GetByID(id uint) (contract.Template, error)
 	GetAllIds() []uint
-	GetByIDs(ids []uint) ([]contracts.Template, error)
-	GetMapByIDs(ids []uint) (map[uint]contracts.Template, error)
-	GetForResources(resource contracts.Resource) ([]contracts.Template, error)
+	GetByIDs(ids []uint) ([]contract.Template, error)
+	GetMapByIDs(ids []uint) (map[uint]contract.Template, error)
+	GetForResources(resource contract.Resource) ([]contract.Template, error)
 }
 
 func NewProvider(
@@ -28,10 +28,10 @@ type provider struct {
 	templateRepo repository.TemplateRepository
 }
 
-func (p *provider) GetAll() []contracts.Template {
+func (p *provider) GetAll() []contract.Template {
 	all, err := p.templateRepo.GetAll()
 	if err == nil {
-		collection := make([]contracts.Template, 0, len(all))
+		collection := make([]contract.Template, 0, len(all))
 		for _, t := range all {
 			collection = append(collection, t)
 		}
@@ -50,7 +50,7 @@ func (p *provider) GetAllIds() []uint {
 	return nil
 }
 
-func (p *provider) GetByID(id uint) (contracts.Template, error) {
+func (p *provider) GetByID(id uint) (contract.Template, error) {
 	model, err := p.templateRepo.GetByID(id)
 	if err == nil {
 		return model, nil
@@ -59,10 +59,10 @@ func (p *provider) GetByID(id uint) (contracts.Template, error) {
 	return nil, err
 }
 
-func (p *provider) GetByIDs(ids []uint) ([]contracts.Template, error) {
+func (p *provider) GetByIDs(ids []uint) ([]contract.Template, error) {
 	all, err := p.templateRepo.GetByIDs(ids)
 	if err == nil {
-		collection := make([]contracts.Template, 0, len(all))
+		collection := make([]contract.Template, 0, len(all))
 		for _, t := range all {
 			collection = append(collection, t)
 		}
@@ -72,10 +72,10 @@ func (p *provider) GetByIDs(ids []uint) ([]contracts.Template, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.Template, error) {
+func (p *provider) GetMapByIDs(ids []uint) (map[uint]contract.Template, error) {
 	all, err := p.templateRepo.GetByIDs(ids)
 	if err == nil {
-		collection := make(map[uint]contracts.Template, len(all))
+		collection := make(map[uint]contract.Template, len(all))
 		for _, template := range all {
 			collection[template.ID] = template
 		}
@@ -85,14 +85,14 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.Template, error) 
 	return nil, err
 }
 
-func (p *provider) GetForResources(resource contracts.Resource) ([]contracts.Template, error) {
+func (p *provider) GetForResources(resource contract.Resource) ([]contract.Template, error) {
 	all, err := p.templateRepo.Filter(models.NewTemplateFilter().SetResourceName(resource.GetName()))
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
 
-	collection := make([]contracts.Template, 0, len(all))
+	collection := make([]contract.Template, 0, len(all))
 	for _, t := range all {
 		collection = append(collection, t)
 	}

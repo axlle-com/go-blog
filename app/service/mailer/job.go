@@ -4,15 +4,14 @@ import (
 	"context"
 	"time"
 
-	"gopkg.in/gomail.v2"
-
 	appConfig "github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	"gopkg.in/gomail.v2"
 )
 
 func NewMailerJob(
-	message contracts.MailRequest,
-) contracts.Job {
+	message contract.MailRequest,
+) contract.Job {
 	return &MailerJob{
 		message: message,
 		start:   time.Now(),
@@ -20,7 +19,7 @@ func NewMailerJob(
 }
 
 type MailerJob struct {
-	message contracts.MailRequest
+	message contract.MailRequest
 	start   time.Time
 }
 

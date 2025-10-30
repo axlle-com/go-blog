@@ -3,11 +3,15 @@ package db
 import (
 	"fmt"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 	"github.com/bxcodec/faker/v3"
@@ -19,13 +23,101 @@ type seeder struct {
 
 func NewSeeder(
 	template repository.TemplateRepository,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		template: template,
 	}
 }
 
 func (s *seeder) Seed() error {
+	cfg := config.Config()
+
+	// templates/<layout>
+	layout := cfg.Layout()
+	templatesRoot := cfg.SrcFolderBuilder(filepath.Join("templates", layout))
+
+	// Если папки нет — ничего не делаем (не падаем)
+	if _, err := os.Stat(templatesRoot); err != nil {
+		if os.IsNotExist(err) {
+			logger.Infof("[template][seeder][Seed] templates root not found: %s", templatesRoot)
+			return nil
+		}
+		return err
+	}
+
+	// Обходим файлы темы и добавляем все .gohtml кроме default.gohtml
+	walkErr := filepath.Walk(templatesRoot, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		if filepath.Ext(path) != ".gohtml" {
+			return nil
+		}
+
+		base := filepath.Base(path)
+		if strings.EqualFold(base, "default.gohtml") {
+			return nil
+		}
+
+		// Имя шаблона = имя файла без расширения
+		name := strings.TrimSuffix(base, filepath.Ext(base))
+
+		// Ресурс — это директория сразу под layout, например: templates/<layout>/<resource>/<file>.gohtml
+		rel, err := filepath.Rel(templatesRoot, path)
+		if err != nil {
+			return err
+		}
+		// Получаем имя корневой папки ресурса
+		parts := strings.Split(rel, string(filepath.Separator))
+		if len(parts) < 2 {
+			// Файлы непосредственно в корне layout пропускаем
+			return nil
+		}
+		resourceName := parts[0]
+
+		// Читаем содержимое шаблона и сохраняем в HTML
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		html := string(data)
+
+		// Пытаемся извлечь заголовок из первой строки-комментария
+		title := extractTitleFromTemplate(html)
+		if title == "" {
+			title = fmt.Sprintf("%s/%s", resourceName, name)
+		}
+
+		now := time.Now()
+		tpl := models.Template{
+			Title:        title,
+			IsMain:       false,
+			Name:         name,
+			Theme:        db.StrPtr(layout),
+			ResourceName: db.StrPtr(resourceName),
+			HTML:         db.StrPtr(html),
+			CreatedAt:    &now,
+			UpdatedAt:    &now,
+		}
+
+		// Пытаемся создать; если уже есть (уникальный индекс по theme+name) — считаем всё ок
+		if err := s.template.Create(&tpl); err != nil {
+			// Пропускаем дубликаты по уникальному индексу name
+			// Не завязываемся на текст ошибки БД, просто логируем и идём дальше
+			logger.Infof("[template][seeder][Seed] skip create for %s: %v", tpl.Name, err)
+		}
+		return nil
+	})
+
+	if walkErr != nil {
+		return walkErr
+	}
+
+	logger.Info("[template][seeder][Seed] Database seeded Template from filesystem successfully!")
 	return nil
 }
 
@@ -57,6 +149,7 @@ func (s *seeder) SeedTest(n int) error {
 
 		template.Title = fmt.Sprintf("%s #%d", title, i)
 		template.Name = faker.Username()
+		template.Theme = db.StrPtr(config.Config().Layout())
 		template.ResourceName = db.StrPtr(resource)
 		template.CreatedAt = &now
 		template.UpdatedAt = &now
@@ -66,6 +159,26 @@ func (s *seeder) SeedTest(n int) error {
 		}
 	}
 
-	logger.Info("Database seeded Template successfully!")
+	logger.Info("[template][seeder][SeedTest] Database seeded Template successfully!")
 	return nil
+}
+
+// extractTitleFromTemplate возвращает текст из первой непустой строки-комментария
+// вида <!-- ... -->. Если такой строки нет — возвращает пустую строку.
+func extractTitleFromTemplate(content string) string {
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "<!--") && strings.Contains(trimmed, "-->") {
+			inner := strings.TrimPrefix(trimmed, "<!--")
+			inner = strings.TrimSuffix(inner, "-->")
+			return strings.TrimSpace(inner)
+		}
+		// первая непустая строка не комментарий — выходим
+		break
+	}
+	return ""
 }

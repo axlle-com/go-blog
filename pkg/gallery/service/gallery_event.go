@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/queue/job"
@@ -10,14 +10,14 @@ import (
 )
 
 type GalleryEvent struct {
-	queue        contracts.Queue
+	queue        contract.Queue
 	imageService *ImageService
 	galleryRepo  repository.GalleryRepository
 	resourceRepo repository.GalleryResourceRepository
 }
 
 func NewGalleryEvent(
-	queue contracts.Queue,
+	queue contract.Queue,
 	imageService *ImageService,
 	galleryRepo repository.GalleryRepository,
 	resource repository.GalleryResourceRepository,

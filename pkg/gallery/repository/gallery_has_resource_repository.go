@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -14,12 +14,12 @@ type GalleryResourceRepository interface {
 	WithTx(tx *gorm.DB) GalleryResourceRepository
 	GetByParams(resourceUUID uuid.UUID, galleryID uint) (*models.GalleryHasResource, error)
 	DeleteByParams(resourceUUID uuid.UUID, galleryID uint) error
-	GetForResource(contracts.Resource) ([]*models.GalleryHasResource, error)
+	GetForResource(contract.Resource) ([]*models.GalleryHasResource, error)
 	GetByGalleryID(uint) (*models.GalleryHasResource, error)
-	GetByResource(c contracts.Resource) ([]*models.GalleryHasResource, error)
+	GetByResource(c contract.Resource) ([]*models.GalleryHasResource, error)
 	Create(*models.GalleryHasResource) error
 	Delete(uint) error
-	DetachResource(contracts.Resource) error
+	DetachResource(contract.Resource) error
 }
 
 type galleryResourceRepository struct {
@@ -65,7 +65,7 @@ func (r *galleryResourceRepository) DeleteByParams(resourceUUID uuid.UUID, galle
 	return err
 }
 
-func (r *galleryResourceRepository) GetForResource(resource contracts.Resource) ([]*models.GalleryHasResource, error) {
+func (r *galleryResourceRepository) GetForResource(resource contract.Resource) ([]*models.GalleryHasResource, error) {
 	var galleryHasResource []*models.GalleryHasResource
 	err := r.db.
 		Where("resource_uuid = ?", resource.GetUUID()).
@@ -80,7 +80,7 @@ func (r *galleryResourceRepository) GetForResource(resource contracts.Resource) 
 	return galleryHasResource, nil
 }
 
-func (r *galleryResourceRepository) GetByResource(resource contracts.Resource) ([]*models.GalleryHasResource, error) {
+func (r *galleryResourceRepository) GetByResource(resource contract.Resource) ([]*models.GalleryHasResource, error) {
 	var galleryHasResource []*models.GalleryHasResource
 	err := r.db.
 		Where("resource_uuid = ?", resource.GetUUID()).
@@ -100,7 +100,7 @@ func (r *galleryResourceRepository) GetByResource(resource contracts.Resource) (
 	return galleryHasResource, nil
 }
 
-func (r *galleryResourceRepository) DetachResource(resource contracts.Resource) error {
+func (r *galleryResourceRepository) DetachResource(resource contract.Resource) error {
 	err := r.db.
 		Where("resource_uuid = ?", resource.GetUUID()).
 		Delete(&models.GalleryHasResource{}).Error

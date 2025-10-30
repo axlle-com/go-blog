@@ -7,7 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/blog/service"
@@ -31,7 +31,7 @@ func NewSeeder(
 	category repository.CategoryRepository,
 	user user.UserProvider,
 	template template.TemplateProvider,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		postRepo:         post,
 		postService:      postService,

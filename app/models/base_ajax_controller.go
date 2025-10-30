@@ -7,10 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	user "github.com/axlle-com/blog/pkg/user/models"
+	"github.com/gin-gonic/gin"
 )
 
 type BaseAjax struct {
@@ -25,7 +24,7 @@ func (c *BaseAjax) GetID(ctx *gin.Context) uint {
 	return uint(id)
 }
 
-func (c *BaseAjax) GetUser(ctx *gin.Context) contracts.User {
+func (c *BaseAjax) GetUser(ctx *gin.Context) contract.User {
 	userData, exists := ctx.Get("user")
 	if !exists {
 		ctx.Redirect(http.StatusFound, "/login")
@@ -62,6 +61,6 @@ func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
 	return strings.TrimSpace(compactHTML)
 }
 
-func (c *BaseAjax) PaginatorFromQuery(ctx *gin.Context) contracts.Paginator {
+func (c *BaseAjax) PaginatorFromQuery(ctx *gin.Context) contract.Paginator {
 	return PaginatorFromQuery(ctx.Request.URL.Query())
 }

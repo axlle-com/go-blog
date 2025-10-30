@@ -4,11 +4,11 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
@@ -18,14 +18,14 @@ type CategoriesService struct {
 	categoryRepo    repository.CategoryRepository
 	template        template.TemplateProvider
 	user            user.UserProvider
-	galleryProvider gallery.GalleryProvider
+	galleryProvider appPovider.GalleryProvider
 	aliasProvider   alias.AliasProvider
 }
 
 func NewCategoriesService(
 	categoryRepo repository.CategoryRepository,
 	aliasProvider alias.AliasProvider,
-	galleryProvider gallery.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	template template.TemplateProvider,
 	user user.UserProvider,
 ) *CategoriesService {
@@ -73,8 +73,8 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
+	var users map[uint]contract.User
+	var templates map[uint]contract.Template
 	var parents map[uint]*models.PostCategory
 
 	wg.Add(3)
@@ -137,7 +137,7 @@ func (s *CategoriesService) GetAllForParent(parent *models.PostCategory) ([]*mod
 	return s.categoryRepo.GetAllForParent(parent)
 }
 
-func (s *CategoriesService) WithPaginate(p contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
+func (s *CategoriesService) WithPaginate(p contract.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	return s.categoryRepo.WithPaginate(p, filter)
 }
 
@@ -153,6 +153,6 @@ func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*models.PostCatego
 	return collection, nil
 }
 
-func (s *CategoriesService) UpdateInfoBlockSnapshots(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+func (s *CategoriesService) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
 	return s.categoryRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

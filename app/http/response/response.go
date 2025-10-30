@@ -3,7 +3,7 @@ package response
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type Body map[string]any
@@ -14,7 +14,7 @@ func Message(message string) map[string]any {
 	}
 }
 
-func OK(data any, message string, pagination contracts.Paginator) map[string]any {
+func OK(data any, message string, pagination contract.Paginator) map[string]any {
 	return Successful(http.StatusOK, data, message, pagination)
 }
 
@@ -22,7 +22,7 @@ func Created(data any, message string) map[string]any {
 	return Successful(http.StatusCreated, data, message, nil)
 }
 
-func Successful(code int, data any, message string, pagination contracts.Paginator) map[string]any {
+func Successful(code int, data any, message string, pagination contract.Paginator) map[string]any {
 	result := Body{
 		"successful": true,
 		"code":       code,

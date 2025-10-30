@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
-
-	"github.com/axlle-com/blog/app/models/contracts"
 )
 
 type Menu struct {
@@ -22,8 +21,8 @@ type Menu struct {
 	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
-	Template  contracts.Template `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	MenuItems []*MenuItem        `gorm:"-" json:"menu_items" form:"menu_items" binding:"-" ignore:"true"`
+	Template  contract.Template `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	MenuItems []*MenuItem       `gorm:"-" json:"menu_items" form:"menu_items" binding:"-" ignore:"true"`
 }
 
 func (m *Menu) GetUUID() uuid.UUID {

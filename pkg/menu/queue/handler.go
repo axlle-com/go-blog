@@ -7,7 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/queue/model"
 	"github.com/axlle-com/blog/pkg/menu/service"
 )
@@ -15,7 +15,7 @@ import (
 func NewPublisherQueueHandler(
 	menuService *service.MenuService,
 	menuItemCollectionService *service.MenuItemCollectionService,
-) contracts.QueueHandler {
+) contract.QueueHandler {
 	return &queueHandler{
 		menuService:               menuService,
 		menuItemCollectionService: menuItemCollectionService,

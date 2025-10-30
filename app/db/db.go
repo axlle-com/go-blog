@@ -2,11 +2,11 @@ package db
 
 import (
 	"fmt"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"sync"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
@@ -30,7 +30,7 @@ func (r *db) Close() error {
 	return sqlDB.Close()
 }
 
-func SetupDB(config contracts.Config) (contracts.DB, error) {
+func SetupDB(config contract.Config) (contract.DB, error) {
 	var initErr error
 	once.Do(func() {
 		url := config.DBUrl()

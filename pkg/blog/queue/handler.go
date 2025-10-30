@@ -8,10 +8,10 @@ import (
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
+	"github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
@@ -20,8 +20,8 @@ func NewInfoBlockQueueHandler(
 	categoriesService *service.CategoriesService,
 	postCollectionService *service.PostCollectionService,
 	tagCollectionService *service.TagCollectionService,
-	infoBlockProvider infoBlockProvider.InfoBlockProvider,
-) contracts.QueueHandler {
+	infoBlockProvider provider.InfoBlockProvider,
+) contract.QueueHandler {
 	return &queueHandler{
 		categoriesService:     categoriesService,
 		postCollectionService: postCollectionService,
@@ -34,7 +34,7 @@ type queueHandler struct {
 	categoriesService     *service.CategoriesService
 	postCollectionService *service.PostCollectionService
 	tagCollectionService  *service.TagCollectionService
-	infoBlockProvider     infoBlockProvider.InfoBlockProvider
+	infoBlockProvider     provider.InfoBlockProvider
 }
 
 func (qh *queueHandler) Run(data []byte) {
@@ -106,13 +106,13 @@ func (qh *queueHandler) update(payload []byte) error {
 			"info_blocks_snapshot": datatypes.JSON(raw),
 		}
 
-		if _, err := qh.categoriesService.UpdateInfoBlockSnapshots(b.uuids, patch); err != nil {
+		if _, err := qh.categoriesService.UpdateFieldsByUUIDs(b.uuids, patch); err != nil {
 			agg.Add(err)
 		}
-		if _, err := qh.postCollectionService.UpdateInfoBlockSnapshots(b.uuids, patch); err != nil {
+		if _, err := qh.postCollectionService.UpdateFieldsByUUIDs(b.uuids, patch); err != nil {
 			agg.Add(err)
 		}
-		if _, err := qh.tagCollectionService.UpdateInfoBlockSnapshots(b.uuids, patch); err != nil {
+		if _, err := qh.tagCollectionService.UpdateFieldsByUUIDs(b.uuids, patch); err != nil {
 			agg.Add(err)
 		}
 	}

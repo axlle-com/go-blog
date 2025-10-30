@@ -1,7 +1,7 @@
 package contracts
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/models"
 )
 
@@ -11,7 +11,7 @@ type MessageCollectionService interface {
 	GetByIDs(ids []uint) ([]*models.Message, error)
 	CountByField(field string, value any) (int64, error)
 	Delete(messages []*models.Message) (err error)
-	WithPaginate(p contracts.Paginator, filter *models.MessageFilter) ([]*models.Message, error)
-	Paginator(p contracts.Paginator, filter *models.MessageFilter) (contracts.Paginator, error)
+	WithPaginate(p contract.Paginator, filter *models.MessageFilter) ([]*models.Message, error)
+	Paginator(p contract.Paginator, filter *models.MessageFilter) (contract.Paginator, error)
 	Aggregates(messages []*models.Message) []*models.Message
 }

@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/menu/http/request"
 	"github.com/axlle-com/blog/pkg/menu/models"
@@ -68,7 +68,7 @@ func (s *MenuService) Aggregate(model *models.Menu) (*models.Menu, error) {
 	return model, err
 }
 
-func (s *MenuService) SaveFromRequest(form *request.MenuRequest, found *models.Menu, user contracts.User) (*models.Menu, error) {
+func (s *MenuService) SaveFromRequest(form *request.MenuRequest, found *models.Menu, user contract.User) (*models.Menu, error) {
 	newMenu := app.LoadStruct(&models.Menu{}, form).(*models.Menu)
 
 	// 1) создаём/обновляем меню

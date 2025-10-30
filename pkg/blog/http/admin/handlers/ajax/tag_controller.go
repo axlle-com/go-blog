@@ -3,10 +3,10 @@ package ajax
 import (
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	infoBlock "github.com/axlle-com/blog/pkg/info_block/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func NewTagController(
 	tagCollectionService *service.TagCollectionService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	infoBlock infoBlock.InfoBlockProvider,
+	infoBlock appPovider.InfoBlockProvider,
 ) TagController {
 	return &tagController{
 		tagService:           tagService,
@@ -44,10 +44,10 @@ type tagController struct {
 	tagCollectionService *service.TagCollectionService
 	templateProvider     template.TemplateProvider
 	user                 user.UserProvider
-	infoBlock            infoBlock.InfoBlockProvider
+	infoBlock            appPovider.InfoBlockProvider
 }
 
-func (c *tagController) templates(ctx *gin.Context) []contracts.Template {
+func (c *tagController) templates(ctx *gin.Context) []contract.Template {
 	templates, err := c.templateProvider.GetForResources(&models.PostTag{})
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)

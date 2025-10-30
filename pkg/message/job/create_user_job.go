@@ -6,13 +6,13 @@ import (
 	"time"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/form"
 )
 
 func NewCreateUserJob(
 	form form.Form,
-) contracts.Job {
+) contract.Job {
 	return &CreateUserJob{
 		form:  form,
 		start: time.Now(),

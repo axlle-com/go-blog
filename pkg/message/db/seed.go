@@ -1,16 +1,17 @@
 package db
 
 import (
+	"math/rand"
+	"strconv"
+	"time"
+
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/axlle-com/blog/pkg/message/service"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
-	"math/rand"
-	"strconv"
-	"time"
 )
 
 type seeder struct {
@@ -21,7 +22,7 @@ type seeder struct {
 func NewMessageSeeder(
 	messageService *service.MessageService,
 	userProvider user.UserProvider,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		messageService: messageService,
 		userProvider:   userProvider,

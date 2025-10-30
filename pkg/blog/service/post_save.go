@@ -2,14 +2,14 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	app "github.com/axlle-com/blog/app/service"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/queue/job"
 )
 
-func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post, user contracts.User) (model *models.Post, err error) {
+func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post, user contract.User) (model *models.Post, err error) {
 	postForm := app.LoadStruct(&models.Post{}, form).(*models.Post)
 
 	if found != nil {
@@ -60,7 +60,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post
 	return model, nil
 }
 
-func (s *PostService) Create(post *models.Post, user contracts.User) (*models.Post, error) {
+func (s *PostService) Create(post *models.Post, user contract.User) (*models.Post, error) {
 	id := user.GetID()
 	post.UserID = &id
 	post.Alias = s.generateAlias(post)

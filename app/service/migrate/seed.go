@@ -1,14 +1,14 @@
 package migrate
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type seeder struct {
-	seeders []contracts.Seeder
+	seeders []contract.Seeder
 }
 
-func NewSeeder(arg ...contracts.Seeder) contracts.Seeder {
+func NewSeeder(arg ...contract.Seeder) contract.Seeder {
 	m := &seeder{}
 	m.seeders = append(m.seeders, arg...)
 	return m

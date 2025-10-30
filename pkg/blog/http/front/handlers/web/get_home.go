@@ -3,10 +3,9 @@ package web
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) GetHome(ctx *gin.Context) {
@@ -16,7 +15,8 @@ func (c *postController) GetHome(ctx *gin.Context) {
 		post = &models.Post{}
 	}
 
-	ctx.HTML(
+	c.RenderHTML(
+		ctx,
 		http.StatusOK,
 		c.view.View(nil),
 		gin.H{

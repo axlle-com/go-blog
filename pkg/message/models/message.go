@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -22,7 +22,7 @@ type Message struct {
 	UpdatedAt  *time.Time     `json:"updated_at" form:"updated_at" binding:"omitempty"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"omitempty"`
 
-	User contracts.User `gorm:"-" json:"user"`
+	User contract.User `gorm:"-" json:"user"`
 }
 
 func (m *Message) GetTable() string {

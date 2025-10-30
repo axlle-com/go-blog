@@ -11,7 +11,7 @@ import (
 func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -22,13 +22,13 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 
 	block, err := c.blockService.FindByID(id)
 	if err != nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	block.Galleries = c.galleryProvider.GetForResource(block)
+	block.Galleries = c.galleryProvider.GetForResourceUUID(block.UUID.String())
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{

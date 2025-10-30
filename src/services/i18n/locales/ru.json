@@ -1,0 +1,33 @@
+[
+  {
+    "id": "ui.button.save",
+    "other": "Сохранить"
+  },
+  {
+    "id": "ui.button.cancel",
+    "other": "Отмена"
+  },
+  {
+    "id": "ui.button.delete",
+    "other": "Удалить"
+  },
+  {
+    "id": "ui.button.edit",
+    "other": "Редактировать"
+  },
+  {
+    "id": "ui.button.create",
+    "other": "Создать"
+  },
+  {
+    "id": "auth.error.invalid_credentials",
+    "other": "Неверная почта или пароль."
+  },
+  {
+    "id": "cart.items",
+    "one": "{count} товар",
+    "few": "{count} товара",
+    "many": "{count} товаров",
+    "other": "{count} товаров"
+  }
+]

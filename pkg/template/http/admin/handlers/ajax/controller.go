@@ -50,14 +50,13 @@ func ShowIndexPageTest(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(
-		http.StatusOK,
-		"test",
-		gin.H{
-			"title":   "Home Page",
-			"payload": string(data),
-		},
-	)
+	var base app.BaseAjax
+	tFunc := base.BuildT(ctx)
+	templateData := app.PrepareTemplateData(ctx, gin.H{
+		"title":   "Home Page",
+		"payload": string(data),
+	}, tFunc)
+	ctx.HTML(http.StatusOK, "test", templateData)
 }
 
 func SavePageTest(ctx *gin.Context) {

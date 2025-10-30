@@ -4,26 +4,18 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	apppPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 	"github.com/google/uuid"
 )
 
-type InfoBlockProvider interface {
-	GetForResourceUUID(resourceUUID string) []contracts.InfoBlock
-	DetachResourceUUID(resourceUUID string) error
-	GetAll() []contracts.InfoBlock
-	Attach(id uint, resourceUUID string) (infoBlocks []contracts.InfoBlock, err error)
-	SaveForm(block any, resourceUUID string) (contracts.InfoBlock, error)
-	SaveFormBatch(blocks []any, resourceUUID string) (infoBlock []contracts.InfoBlock, err error)
-}
-
 func NewProvider(
 	blockService *service.InfoBlockService,
 	collectionService *service.InfoBlockCollectionService,
-) InfoBlockProvider {
+) apppPovider.InfoBlockProvider {
 	return &provider{
 		blockService:      blockService,
 		collectionService: collectionService,
@@ -35,7 +27,7 @@ type provider struct {
 	collectionService *service.InfoBlockCollectionService
 }
 
-func (p *provider) GetForResourceUUID(resourceUUID string) []contracts.InfoBlock {
+func (p *provider) GetForResourceUUID(resourceUUID string) []contract.InfoBlock {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
@@ -49,7 +41,7 @@ func (p *provider) GetForResourceUUID(resourceUUID string) []contracts.InfoBlock
 		return nil
 	}
 
-	collection := make([]contracts.InfoBlock, 0, len(infoBlocks))
+	collection := make([]contract.InfoBlock, 0, len(infoBlocks))
 	for _, infoBlock := range infoBlocks {
 		collection = append(collection, infoBlock)
 	}
@@ -71,8 +63,8 @@ func (p *provider) DetachResourceUUID(resourceUUID string) (err error) {
 	return nil
 }
 
-func (p *provider) GetAll() []contracts.InfoBlock {
-	var collection []contracts.InfoBlock
+func (p *provider) GetAll() []contract.InfoBlock {
+	var collection []contract.InfoBlock
 	infoBlocks, err := p.collectionService.GetAll()
 	if err == nil {
 		for _, infoBlock := range infoBlocks {
@@ -84,7 +76,7 @@ func (p *provider) GetAll() []contracts.InfoBlock {
 	return nil
 }
 
-func (p *provider) Attach(id uint, resourceUUID string) (infoBlocks []contracts.InfoBlock, err error) {
+func (p *provider) Attach(id uint, resourceUUID string) (infoBlocks []contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
@@ -105,7 +97,7 @@ func (p *provider) Attach(id uint, resourceUUID string) (infoBlocks []contracts.
 	return infoBlocks, nil
 }
 
-func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contracts.InfoBlock, err error) {
+func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
@@ -127,7 +119,7 @@ func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contracts
 	return ib, nil
 }
 
-func (p *provider) SaveFormBatch(blocks []any, resourceUUID string) (infoBlock []contracts.InfoBlock, err error) {
+func (p *provider) SaveFormBatch(blocks []any, resourceUUID string) (infoBlock []contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)

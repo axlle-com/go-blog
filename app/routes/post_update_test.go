@@ -3,17 +3,18 @@ package routes
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/axlle-com/blog/app"
-	"github.com/axlle-com/blog/app/config"
-	"github.com/axlle-com/blog/app/db"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/app/service"
-	"github.com/bxcodec/faker/v3"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
+
+	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/config"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
+	"github.com/bxcodec/faker/v3"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFailedUpdatePost(t *testing.T) {
@@ -182,7 +183,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 				t.Error(err)
 			}
 
-			gSlice := gProvider.GetForResource(model)
+			gSlice := gProvider.GetForResourceUUID(model.UUID.String())
 			if err != nil {
 				t.Error(err)
 			}
@@ -194,7 +195,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 			}
 
 			postMap := make(map[string]*ImageRequest)
-			modelMap := make(map[string]contracts.Image)
+			modelMap := make(map[string]contract.Image)
 
 			for _, gallery := range gSlice {
 				iSlice := iProvider.GetForGallery(gallery.GetID())

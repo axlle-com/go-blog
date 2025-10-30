@@ -1,13 +1,12 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-
 	app "github.com/axlle-com/blog/app/models"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
+	"github.com/gin-gonic/gin"
 )
 
 type Controller interface {
@@ -24,7 +23,7 @@ func New(
 	categories *service.CategoriesService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	gallery gallery.GalleryProvider,
+	gallery appPovider.GalleryProvider,
 ) Controller {
 	return &controller{
 		service:    service,
@@ -44,5 +43,5 @@ type controller struct {
 	categories *service.CategoriesService
 	template   template.TemplateProvider
 	user       user.UserProvider
-	gallery    gallery.GalleryProvider
+	gallery    appPovider.GalleryProvider
 }

@@ -15,7 +15,7 @@ func (c *infoBlockWebController) CreateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{

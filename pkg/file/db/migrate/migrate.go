@@ -1,17 +1,17 @@
 package migrate
 
 import (
-	"gorm.io/gorm"
-
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/file/models"
+	"gorm.io/gorm"
 )
 
 type migrator struct {
 	db *gorm.DB
 }
 
-func NewMigrator(db *gorm.DB) contracts.Migrator {
+func NewMigrator(db *gorm.DB) contract.Migrator {
 	return &migrator{db: db}
 }
 
@@ -23,8 +23,8 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_files_uuid ON files USING hash (uuid);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_files_file ON files USING hash (file);`)
+	m.db.Exec(db.CreateHashIndex("files", "uuid"))
+	m.db.Exec(db.CreateHashIndex("files", "file"))
 
 	return nil
 }

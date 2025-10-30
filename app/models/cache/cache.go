@@ -3,10 +3,10 @@ package cache
 import (
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
-func NewCache() contracts.Cache {
+func NewCache() contract.Cache {
 	cfg := config.Config()
 
 	if cfg.IsTest() || !cfg.StoreIsRedis() {

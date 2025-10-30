@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	appContracts "github.com/axlle-com/blog/app/models/contracts"
+	appContracts "github.com/axlle-com/blog/app/models/contract"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"

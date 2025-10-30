@@ -12,7 +12,7 @@ import (
 func (c *templateWebController) GetTemplate(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -23,17 +23,18 @@ func (c *templateWebController) GetTemplate(ctx *gin.Context) {
 
 	template, err := c.templateService.GetByID(id)
 	if err != nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
-
-	ctx.HTML(
+	resources := app.NewResources()
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.template",
 		gin.H{
 			"title":         "Страница шаблона",
 			"templateModel": template,
-			"resources":     app.NewResources().Resources(),
+			"resources":     resources.Resources(),
+			"themes":        resources.Themes(),
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

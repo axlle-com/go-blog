@@ -49,7 +49,7 @@ func (c *menuController) Update(ctx *gin.Context) {
 
 	menu, err = c.menuService.Aggregate(menu)
 	if err != nil {
-		ctx.HTML(http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
+		c.RenderHTML(ctx, http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
 		return
 	}
 

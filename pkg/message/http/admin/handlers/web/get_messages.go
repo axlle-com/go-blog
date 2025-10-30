@@ -46,7 +46,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 		logger.WithRequest(ctx).Errorf("[GetMessages] Error: %v", err)
 	}
 
-	ctx.HTML(http.StatusOK, "admin.messages", gin.H{
+	c.RenderHTML(ctx, http.StatusOK, "admin.messages", gin.H{
 		"title":     "Страница сообщений",
 		"message":   empty,
 		"messages":  messages,

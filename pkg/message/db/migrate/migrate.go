@@ -1,7 +1,8 @@
 package migrate
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,7 @@ type migrator struct {
 	db *gorm.DB
 }
 
-func NewMigrator(db *gorm.DB) contracts.Migrator {
+func NewMigrator(db *gorm.DB) contract.Migrator {
 	return &migrator{db: db}
 }
 
@@ -23,7 +24,7 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_messages_uuid ON messages USING hash (user_uuid);`)
+	m.db.Exec(db.CreateHashIndex("messages", "user_uuid"))
 
 	return nil
 }

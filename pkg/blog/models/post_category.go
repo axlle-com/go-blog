@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
@@ -37,11 +37,11 @@ type PostCategory struct {
 	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
 	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
 
-	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
-	Category   *PostCategory         `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
-	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
-	User       contracts.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
+	Galleries  []contract.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contract.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Category   *PostCategory        `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
+	Template   contract.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	User       contract.User        `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 }
 
 func (c *PostCategory) GetID() uint {

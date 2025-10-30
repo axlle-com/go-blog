@@ -1,10 +1,11 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
-	"net/http"
 )
 
 func (c *controller) Index(ctx *gin.Context) {
@@ -12,8 +13,7 @@ func (c *controller) Index(ctx *gin.Context) {
 	if user == nil {
 		return
 	}
-	ctx.HTML(
-		http.StatusOK,
+	c.RenderHTML(ctx, http.StatusOK,
 		"admin.index",
 		gin.H{
 			"title": "dashboard",

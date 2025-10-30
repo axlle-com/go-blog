@@ -27,8 +27,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	ctx.HTML(
-		http.StatusOK,
+	c.RenderHTML(ctx, http.StatusOK,
 		"admin.post",
 		gin.H{
 			"title":      "Страница поста",

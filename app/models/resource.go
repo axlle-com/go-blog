@@ -8,6 +8,7 @@ import (
 
 type Resources struct {
 	resources map[string]string
+	themes    map[string]string
 }
 
 func NewResources() *Resources {
@@ -17,12 +18,21 @@ func NewResources() *Resources {
 			"post_categories": "post_categories",
 			"post_tags":       "post_tags",
 			"info_blocks":     "info_blocks",
+			"menus":           "menus",
+		},
+		themes: map[string]string{
+			"default": "default",
+			"spring":  "spring",
 		},
 	}
 }
 
 func (r *Resources) Resources() map[string]string {
 	return r.resources
+}
+
+func (r *Resources) Themes() map[string]string {
+	return r.themes
 }
 
 func (r *Resources) ResourceTemplate(name string) string {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
@@ -28,9 +28,9 @@ type PostTag struct {
 	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
 	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
 
-	Galleries  []contracts.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
-	InfoBlocks []contracts.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
-	Template   contracts.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
+	Galleries  []contract.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
+	InfoBlocks []contract.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
+	Template   contract.Template    `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 }
 
 func (pt *PostTag) GetTable() string {
@@ -82,7 +82,7 @@ func (pt *PostTag) GetTemplateName() string {
 	return fmt.Sprintf("%s.default", pt.GetTable())
 }
 
-func (pt *PostTag) GetGalleries() []contracts.Gallery {
+func (pt *PostTag) GetGalleries() []contract.Gallery {
 	return pt.Galleries
 }
 

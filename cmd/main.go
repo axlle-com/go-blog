@@ -14,7 +14,7 @@ import (
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/routes"
 	"github.com/axlle-com/blog/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
@@ -77,7 +77,7 @@ func main() {
 	logger.Info("[Main] Graceful shutdown complete")
 }
 
-func Init(config contracts.Config, container *app.Container) *gin.Engine {
+func Init(config contract.Config, container *app.Container) *gin.Engine {
 	gob.Register(user.User{})
 
 	router := gin.Default()

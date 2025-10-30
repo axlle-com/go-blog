@@ -10,17 +10,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/gin-gonic/gin"
 )
 
 var dynamicTemplates = make(map[string]string)
 
 type Template struct {
-	config contracts.Config
+	config contract.Config
 	router *gin.Engine
 }
 

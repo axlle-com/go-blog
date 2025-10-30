@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/axlle-com/blog/pkg/blog/db/migrate"
-	"github.com/bxcodec/faker/v3"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/pkg/blog/db/migrate"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
+	"github.com/bxcodec/faker/v3"
+	"github.com/stretchr/testify/assert"
 )
 
-func setupTestDB() contracts.DB {
+func setupTestDB() contract.DB {
 	cnf := config.Config()
 	cnf.SetTestENV()
 	//mPost.NewMigrator().Migrate()
@@ -28,7 +27,7 @@ func setupTestDB() contracts.DB {
 	return newDB
 }
 
-func newTestRepo(db contracts.DB) repository.CategoryRepository {
+func newTestRepo(db contract.DB) repository.CategoryRepository {
 	return repository.NewCategoryRepo(db.PostgreSQL())
 }
 

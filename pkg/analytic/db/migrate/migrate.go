@@ -1,7 +1,7 @@
 package migrate
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +10,7 @@ type migrator struct {
 	db *gorm.DB
 }
 
-func NewMigrator(db *gorm.DB) contracts.Migrator {
+func NewMigrator(db *gorm.DB) contract.Migrator {
 	return &migrator{db: db}
 }
 

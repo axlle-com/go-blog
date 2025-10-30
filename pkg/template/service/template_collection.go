@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
@@ -47,7 +47,7 @@ func (s *TemplateCollectionService) DeleteTemplates(templates []*models.Template
 	return err
 }
 
-func (s *TemplateCollectionService) WithPaginate(p contracts.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
+func (s *TemplateCollectionService) WithPaginate(p contract.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
 	return s.templateRepo.WithPaginate(p, filter)
 }
 
@@ -68,7 +68,7 @@ func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
+	var users map[uint]contract.User
 
 	wg.Add(1)
 

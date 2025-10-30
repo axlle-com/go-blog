@@ -10,20 +10,19 @@ import (
 func (c *postController) GetPost(ctx *gin.Context) {
 	alias := ctx.Param("alias")
 	if !isValidAlias(alias) {
-		ctx.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
 		ctx.Abort()
 		return
 	}
 
 	post, err := c.postService.GetByParam("alias", alias)
 	if err != nil || post == nil {
-		ctx.HTML(http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
 		ctx.Abort()
 		return
 	}
 
-	ctx.HTML(
-		http.StatusOK,
+	c.RenderHTML(ctx, http.StatusOK,
 		c.view.View(post),
 		gin.H{
 			"title": "Home Page",

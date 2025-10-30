@@ -37,7 +37,7 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	ctx.HTML(http.StatusOK, "admin.menus", gin.H{
+	c.RenderHTML(ctx, http.StatusOK, "admin.menus", gin.H{
 		"title":     "Страница меню",
 		"menus":     menus,
 		"model":     empty,

@@ -25,8 +25,7 @@ func (c *controller) Login(ctx *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-	ctx.HTML(
-		http.StatusOK,
+	c.RenderHTML(ctx, http.StatusOK,
 		"admin.login",
 		gin.H{
 			"Title":  "Авторизация",

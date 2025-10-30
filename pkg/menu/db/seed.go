@@ -8,7 +8,7 @@ import (
 
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/repository"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -19,16 +19,16 @@ import (
 type seeder struct {
 	menuRepo         repository.MenuRepository
 	menuItemRepo     repository.MenuItemRepository
-	postProvider     contracts.PostProvider
+	postProvider     contract.PostProvider
 	templateProvider template.TemplateProvider
 }
 
 func NewMenuSeeder(
 	menu repository.MenuRepository,
 	menuItem repository.MenuItemRepository,
-	postProvider contracts.PostProvider,
+	postProvider contract.PostProvider,
 	template template.TemplateProvider,
-) contracts.Seeder {
+) contract.Seeder {
 	return &seeder{
 		menuRepo:         menu,
 		menuItemRepo:     menuItem,

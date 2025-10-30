@@ -17,13 +17,15 @@ func (c *templateWebController) CreateTemplate(ctx *gin.Context) {
 	}
 
 	template := &models.Template{}
-	ctx.HTML(
+	resources := app.NewResources()
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.template",
 		gin.H{
 			"title":         "Страница шаблона",
 			"templateModel": template,
-			"resources":     app.NewResources().Resources(),
+			"resources":     resources.Resources(),
+			"themes":        resources.Themes(),
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,

@@ -1,7 +1,8 @@
 package migrate
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,7 @@ type migrator struct {
 	db *gorm.DB
 }
 
-func NewMigrator(db *gorm.DB) contracts.Migrator {
+func NewMigrator(db *gorm.DB) contract.Migrator {
 	return &migrator{db: db}
 }
 
@@ -24,10 +25,9 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_menus_uuid ON menus USING hash (uuid);`)
-
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_menu_items_publisher_uuid ON menu_items USING hash (publisher_uuid);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS idx_menu_items_url ON menu_items USING hash (url);`)
+	m.db.Exec(db.CreateHashIndex("menus", "uuid"))
+	m.db.Exec(db.CreateHashIndex("menu_items", "publisher_uuid"))
+	m.db.Exec(db.CreateHashIndex("menu_items", "url"))
 
 	return nil
 }

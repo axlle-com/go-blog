@@ -6,7 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -22,7 +22,7 @@ type MenuItemRepository interface {
 	DetachPublisher(publisherUuid uuid.UUID) (int64, error)
 	DeleteByID(id uint) error
 	Delete(menuItem *models.MenuItem) error
-	GetByFilter(p contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error)
+	GetByFilter(p contract.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error)
 	GetByParams(params map[string]any) ([]*models.MenuItem, error)
 	GetAll() ([]*models.MenuItem, error)
 	GetAllForParent(parent *models.MenuItem) ([]*models.MenuItem, error)
@@ -91,7 +91,7 @@ func (r *menuItemRepository) GetByParams(params map[string]any) ([]*models.MenuI
 	return items, nil
 }
 
-func (r *menuItemRepository) GetByFilter(paginator contracts.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error) {
+func (r *menuItemRepository) GetByFilter(paginator contract.Paginator, filter *models.MenuItemFilter) ([]*models.MenuItem, error) {
 	var items []*models.MenuItem
 	model := models.MenuItem{}
 	var total int64

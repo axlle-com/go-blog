@@ -7,7 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
@@ -17,7 +17,7 @@ import (
 func NewGalleryQueueHandler(
 	infoBlockService *service.InfoBlockService,
 	infoBlockEventService *service.InfoBlockEventService,
-) contracts.QueueHandler {
+) contract.QueueHandler {
 	return &queueHandler{
 		infoBlockService:      infoBlockService,
 		infoBlockEventService: infoBlockEventService,

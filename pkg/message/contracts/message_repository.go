@@ -1,7 +1,7 @@
 package contracts
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"gorm.io/gorm"
 )
@@ -17,6 +17,6 @@ type MessageRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Message, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts.Paginator, filter *models.MessageFilter) ([]*models.Message, error)
-	Paginator(paginator contracts.Paginator, filter *models.MessageFilter) (contracts.Paginator, error)
+	WithPaginate(p contract.Paginator, filter *models.MessageFilter) ([]*models.Message, error)
+	Paginator(paginator contract.Paginator, filter *models.MessageFilter) (contract.Paginator, error)
 }

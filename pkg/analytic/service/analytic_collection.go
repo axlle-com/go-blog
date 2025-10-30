@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"github.com/axlle-com/blog/pkg/analytic/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"
@@ -53,7 +53,7 @@ func (s *AnalyticCollectionService) Delete(analytics []*models.Analytic) (err er
 	return err
 }
 
-func (s *AnalyticCollectionService) WithPaginate(p contracts.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
+func (s *AnalyticCollectionService) WithPaginate(p contract.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
 	return s.analyticRepo.WithPaginate(p, filter)
 }
 
@@ -71,7 +71,7 @@ func (s *AnalyticCollectionService) Aggregates(analytics []*models.Analytic) []*
 		}
 	}
 
-	var users map[uuid.UUID]contracts.User
+	var users map[uuid.UUID]contract.User
 
 	if len(userUUIDs) > 0 {
 		var err error

@@ -2,7 +2,7 @@ package web
 
 import (
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/service"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +18,7 @@ type Controller interface {
 func NewUserWebController(
 	userService *service.UserService,
 	authService *service.AuthService,
-	cache contracts.Cache,
+	cache contract.Cache,
 ) Controller {
 	return &controller{
 		userService: userService,
@@ -30,7 +30,7 @@ func NewUserWebController(
 type controller struct {
 	*app.BaseAjax
 
-	cache       contracts.Cache
+	cache       contract.Cache
 	userService *service.UserService
 	authService *service.AuthService
 }

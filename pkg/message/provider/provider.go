@@ -2,16 +2,16 @@ package provider
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/service"
 )
 
 type MessageProvider interface {
-	GetAll() []contracts.Message
-	GetByID(id uint) (contracts.Message, error)
+	GetAll() []contract.Message
+	GetByID(id uint) (contract.Message, error)
 	GetAllIds() []uint
-	GetByIDs(ids []uint) ([]contracts.Message, error)
-	GetMapByIDs(ids []uint) (map[uint]contracts.Message, error)
+	GetByIDs(ids []uint) ([]contract.Message, error)
+	GetMapByIDs(ids []uint) (map[uint]contract.Message, error)
 }
 
 func NewMessageProvider(
@@ -29,10 +29,10 @@ type provider struct {
 	messageCollectionService service.MessageCollectionService
 }
 
-func (p *provider) GetAll() []contracts.Message {
+func (p *provider) GetAll() []contract.Message {
 	all, err := p.messageCollectionService.GetAll()
 	if err == nil {
-		collection := make([]contracts.Message, 0, len(all))
+		collection := make([]contract.Message, 0, len(all))
 		for _, t := range all {
 			collection = append(collection, t)
 		}
@@ -51,7 +51,7 @@ func (p *provider) GetAllIds() []uint {
 	return nil
 }
 
-func (p *provider) GetByID(id uint) (contracts.Message, error) {
+func (p *provider) GetByID(id uint) (contract.Message, error) {
 	model, err := p.messageService.GetByID(id)
 	if err == nil {
 		return model, nil
@@ -60,10 +60,10 @@ func (p *provider) GetByID(id uint) (contracts.Message, error) {
 	return nil, err
 }
 
-func (p *provider) GetByIDs(ids []uint) ([]contracts.Message, error) {
+func (p *provider) GetByIDs(ids []uint) ([]contract.Message, error) {
 	all, err := p.messageCollectionService.GetByIDs(ids)
 	if err == nil {
-		collection := make([]contracts.Message, 0, len(all))
+		collection := make([]contract.Message, 0, len(all))
 		for _, t := range all {
 			collection = append(collection, t)
 		}
@@ -73,10 +73,10 @@ func (p *provider) GetByIDs(ids []uint) ([]contracts.Message, error) {
 	return nil, err
 }
 
-func (p *provider) GetMapByIDs(ids []uint) (map[uint]contracts.Message, error) {
+func (p *provider) GetMapByIDs(ids []uint) (map[uint]contract.Message, error) {
 	all, err := p.messageCollectionService.GetByIDs(ids)
 	if err == nil {
-		collection := make(map[uint]contracts.Message, len(all))
+		collection := make(map[uint]contract.Message, len(all))
 		for _, template := range all {
 			collection[template.ID] = template
 		}

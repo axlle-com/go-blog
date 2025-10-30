@@ -12,7 +12,7 @@ import (
 func (c *tagController) GetTag(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -24,7 +24,7 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 	temp, err := c.tagService.GetByID(id)
 	if err != nil {
 		logger.Error(err.Error())
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -33,11 +33,11 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 		logger.Error(err.Error())
 	}
 	if tag == nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.tag",
 		gin.H{

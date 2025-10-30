@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/repository"
 )
@@ -21,6 +21,6 @@ func NewMenuCollectionService(
 	}
 }
 
-func (s *MenuCollectionService) WithPaginate(p contracts.Paginator, filter *models.MenuFilter) ([]*models.Menu, error) {
+func (s *MenuCollectionService) WithPaginate(p contract.Paginator, filter *models.MenuFilter) ([]*models.Menu, error) {
 	return s.menuRepository.WithPaginate(p, filter)
 }

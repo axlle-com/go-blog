@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	client "github.com/go-redis/redis/v8"
 	"golang.org/x/net/context"
 )
 
-func NewRedisCache(cfg contracts.Config) contracts.Cache {
+func NewRedisCache(cfg contract.Config) contract.Cache {
 	logger.Info("[Cache] Redis is up, using Redis")
 	c := &redisClient{config: cfg}
 	c.client = client.NewClient(&client.Options{
@@ -21,7 +21,7 @@ func NewRedisCache(cfg contracts.Config) contracts.Cache {
 	return c
 }
 
-func PingRedisCache(cfg contracts.Config) error {
+func PingRedisCache(cfg contract.Config) error {
 	rdb := client.NewClient(&client.Options{
 		Addr:         cfg.RedisHost(),
 		Password:     cfg.RedisPassword(),
@@ -42,7 +42,7 @@ func PingRedisCache(cfg contracts.Config) error {
 
 type redisClient struct {
 	client *client.Client
-	config contracts.Config
+	config contract.Config
 }
 
 func (r *redisClient) AddCache(key, value string) {

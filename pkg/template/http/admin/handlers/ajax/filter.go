@@ -37,6 +37,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 	templates := c.templateCollectionService.Aggregates(temp)
 
 	users := c.userProvider.GetAll()
+	resources := app.NewResources()
 	data := response.Body{
 		"title":         "Страница шаблонов",
 		"templateModel": empty,
@@ -44,7 +45,8 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 		"users":         users,
 		"paginator":     paginator,
 		"filter":        filter,
-		"resources":     app.NewResources().Resources(),
+		"resources":     resources.Resources(),
+		"themes":        resources.Themes(),
 	}
 
 	ctx.JSON(

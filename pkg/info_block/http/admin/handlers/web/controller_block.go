@@ -3,8 +3,8 @@ package web
 import (
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -23,7 +23,7 @@ func NewInfoBlockWebController(
 	blockCollectionService *service.InfoBlockCollectionService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	galleryProvider provider.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 ) InfoBlockWebController {
 	return &infoBlockWebController{
 		blockService:           blockService,
@@ -41,10 +41,10 @@ type infoBlockWebController struct {
 	blockCollectionService *service.InfoBlockCollectionService
 	templateProvider       template.TemplateProvider
 	userProvider           user.UserProvider
-	galleryProvider        provider.GalleryProvider
+	galleryProvider        appPovider.GalleryProvider
 }
 
-func (c *infoBlockWebController) templates(ctx *gin.Context) []contracts.Template {
+func (c *infoBlockWebController) templates(ctx *gin.Context) []contract.Template {
 	templates, err := c.templateProvider.GetForResources(&models.InfoBlock{})
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)

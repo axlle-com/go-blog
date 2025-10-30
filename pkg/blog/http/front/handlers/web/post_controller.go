@@ -2,9 +2,9 @@ package web
 
 import (
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
 	template "github.com/axlle-com/blog/pkg/template/provider"
 	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
@@ -16,14 +16,14 @@ type PostController interface {
 }
 
 func NewFrontWebController(
-	view contracts.View,
+	view contract.View,
 	service *service.PostService,
 	services *service.PostCollectionService,
 	category *service.CategoryService,
 	categories *service.CategoriesService,
 	template template.TemplateProvider,
 	user user.UserProvider,
-	gallery gallery.GalleryProvider,
+	gallery appPovider.GalleryProvider,
 ) PostController {
 	return &postController{
 		view:                  view,
@@ -40,12 +40,12 @@ func NewFrontWebController(
 type postController struct {
 	*app.BaseAjax
 
-	view                  contracts.View
+	view                  contract.View
 	postService           *service.PostService
 	postCollectionService *service.PostCollectionService
 	categoryService       *service.CategoryService
 	categoriesService     *service.CategoriesService
 	template              template.TemplateProvider
 	user                  user.UserProvider
-	gallery               gallery.GalleryProvider
+	gallery               appPovider.GalleryProvider
 }

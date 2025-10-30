@@ -12,7 +12,7 @@ import (
 func (c *postController) GetPost(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -24,7 +24,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 	post, err := c.postService.GetAggregateByID(id)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err.Error())
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -39,7 +39,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 	}
 
 	infoBlocks := c.infoBlock.GetAll()
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.post",
 		gin.H{

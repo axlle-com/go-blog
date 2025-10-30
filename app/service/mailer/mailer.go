@@ -1,23 +1,23 @@
 package mailer
 
 import (
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"gopkg.in/gomail.v2"
 )
 
 type Smtp struct {
-	config contracts.Config
-	queue  contracts.Queue
+	config contract.Config
+	queue  contract.Queue
 }
 
-func NewMailer(config contracts.Config, queue contracts.Queue) contracts.Mailer {
+func NewMailer(config contract.Config, queue contract.Queue) contract.Mailer {
 	return &Smtp{
 		config: config,
 		queue:  queue,
 	}
 }
 
-func (s *Smtp) SendMail(message contracts.MailRequest) error {
+func (s *Smtp) SendMail(message contract.MailRequest) error {
 	if !s.config.SMTPActive() {
 		return nil
 	}

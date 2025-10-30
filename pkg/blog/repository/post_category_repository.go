@@ -6,7 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -25,7 +25,7 @@ type CategoryRepository interface {
 	GetAll() ([]*models.PostCategory, error)
 	GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(paginator contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error)
+	WithPaginate(paginator contract.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error)
 	GetRoots() ([]*models.PostCategory, error)
 	GetDescendants(category *models.PostCategory) ([]*models.PostCategory, error)
 	GetDescendantsByID(id uint) ([]*models.PostCategory, error)
@@ -113,7 +113,7 @@ func (r *categoryRepository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *categoryRepository) WithPaginate(p contracts.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
+func (r *categoryRepository) WithPaginate(p contract.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	var categories []*models.PostCategory
 	var total int64
 

@@ -9,6 +9,7 @@ import (
 	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/middleware"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/web"
@@ -82,6 +83,7 @@ func SetupTestRouter() *gin.Engine {
 
 		store := models.Store(cfg)
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
+		router.Use(middleware.Language(container.I18n))
 
 		web.NewTemplate(router)
 		InitApiRoutes(router, container)

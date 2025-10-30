@@ -7,7 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/analytic/queue/model"
 	"github.com/axlle-com/blog/pkg/analytic/service"
 )
@@ -15,7 +15,7 @@ import (
 func NewAnalyticQueueHandler(
 	analyticService *service.AnalyticService,
 	analyticCollectionService *service.AnalyticCollectionService,
-) contracts.QueueHandler {
+) contract.QueueHandler {
 	return &queueHandler{
 		analyticService:           analyticService,
 		analyticCollectionService: analyticCollectionService,

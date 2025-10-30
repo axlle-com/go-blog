@@ -42,9 +42,11 @@ func (c *templateController) UpdateTemplate(ctx *gin.Context) {
 		return
 	}
 
+	resources := app.NewResources()
 	data := gin.H{
 		"templateModel": template,
-		"resources":     app.NewResources().Resources(),
+		"resources":     resources.Resources(),
+		"themes":        resources.Themes(),
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

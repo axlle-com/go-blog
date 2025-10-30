@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 const staticPath = "/public/img/"
@@ -19,7 +19,7 @@ type LocalStorageService struct {
 	fsBase          string // абсолютный путь на диске, например: /abs/path/src/public/uploads
 }
 
-func NewLocalStorageService(cfg contracts.Config) contracts.Storage {
+func NewLocalStorageService(cfg contract.Config) contract.Storage {
 	fsBase := filepath.Join(cfg.SrcFolder(), cfg.UploadPath())
 
 	return &LocalStorageService{

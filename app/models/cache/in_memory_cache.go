@@ -6,16 +6,16 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type inMemoryCache struct {
 	mu     sync.RWMutex
 	data   map[string]string
-	config contracts.Config
+	config contract.Config
 }
 
-func NewInMemoryCache(cfg contracts.Config) contracts.Cache {
+func NewInMemoryCache(cfg contract.Config) contract.Cache {
 	logger.Info("[Cache] Using inMemoryCache")
 	return &inMemoryCache{
 		data:   make(map[string]string),

@@ -13,7 +13,7 @@ import (
 func (c *menuController) GetMenu(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -24,13 +24,13 @@ func (c *menuController) GetMenu(ctx *gin.Context) {
 
 	model, err := c.menuService.GetByID(id)
 	if err != nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
 	model, err = c.menuService.Aggregate(model)
 	if err != nil {
-		ctx.HTML(http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
+		c.RenderHTML(ctx, http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
 		return
 	}
 
@@ -39,7 +39,7 @@ func (c *menuController) GetMenu(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.menu",
 		gin.H{

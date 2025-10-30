@@ -7,14 +7,14 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/queue/model"
 	"github.com/axlle-com/blog/pkg/user/service"
 )
 
 func NewUserQueueHandler(
 	userService *service.UserService,
-) contracts.QueueHandler {
+) contract.QueueHandler {
 	return &queueHandler{
 		userService: userService,
 	}

@@ -16,7 +16,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 	}
 
 	template := &models.Template{}
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.template",
 		gin.H{

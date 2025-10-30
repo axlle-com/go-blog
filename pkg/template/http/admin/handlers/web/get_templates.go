@@ -42,11 +42,12 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 	templates := c.templateCollectionService.Aggregates(temp)
-
-	ctx.HTML(http.StatusOK, "admin.templates", gin.H{
+	resources := app.NewResources()
+	c.RenderHTML(ctx, http.StatusOK, "admin.templates", gin.H{
 		"title":         "Страница шаблонов",
 		"templateModel": empty,
-		"resources":     app.NewResources().Resources(),
+		"resources":     resources.Resources(),
+		"themes":        resources.Themes(),
 		"templates":     templates,
 		"users":         users,
 		"paginator":     paginator,

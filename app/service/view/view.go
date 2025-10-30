@@ -3,18 +3,18 @@ package view
 import (
 	"fmt"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type view struct {
-	config contracts.Config
+	config contract.Config
 }
 
-func NewView(config contracts.Config) contracts.View {
+func NewView(config contract.Config) contract.View {
 	return &view{config: config}
 }
 
-func (v *view) View(resource contracts.Resource) string {
+func (v *view) View(resource contract.Resource) string {
 	tpl := "index"
 	if resource != nil {
 		tpl = resource.GetTemplateName()

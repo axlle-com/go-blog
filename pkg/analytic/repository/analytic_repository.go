@@ -5,7 +5,7 @@ import (
 	"log"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"gorm.io/gorm"
 )
@@ -20,7 +20,7 @@ type AnalyticRepository interface {
 	DeleteByIDs(ids []uint) (err error)
 	GetAll() ([]*models.Analytic, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(p contracts.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error)
+	WithPaginate(p contract.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error)
 }
 
 type repository struct {
@@ -86,7 +86,7 @@ func (r *repository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *repository) WithPaginate(paginator contracts.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
+func (r *repository) WithPaginate(paginator contract.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
 	var items []*models.Analytic
 	var total int64
 

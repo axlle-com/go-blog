@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 )
 
@@ -60,8 +60,8 @@ func (g *GalleryResponse) GetDate() *time.Time {
 	return g.CreatedAt
 }
 
-func (g *GalleryResponse) GetImages() []contracts.Image {
-	images := make([]contracts.Image, len(g.Images))
+func (g *GalleryResponse) GetImages() []contract.Image {
+	images := make([]contract.Image, len(g.Images))
 	for i, image := range g.Images {
 		images[i] = image
 	}

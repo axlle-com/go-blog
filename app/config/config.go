@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
@@ -140,7 +140,7 @@ func LoadConfig() (err error) {
 	return
 }
 
-func Config() contracts.Config {
+func Config() contract.Config {
 	if instance == nil {
 		if err := LoadConfig(); err != nil {
 			log.Fatalf("\x1b[1;91m%s\x1b[0m", "Ошибка загрузки конфигурации: "+err.Error())

@@ -5,10 +5,10 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service"
 	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
-	"github.com/axlle-com/blog/pkg/gallery/provider"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	tProvider "github.com/axlle-com/blog/pkg/template/provider"
@@ -22,7 +22,7 @@ type InfoBlockService struct {
 	infoBlockCollection   *InfoBlockCollectionService
 	resourceRepo          repository.InfoBlockHasResourceRepository
 	infoBlockEventService *InfoBlockEventService
-	galleryProvider       provider.GalleryProvider
+	galleryProvider       appPovider.GalleryProvider
 	templateProvider      tProvider.TemplateProvider
 	userProvider          provider2.UserProvider
 	fileProvider          fileProvider.FileProvider
@@ -33,7 +33,7 @@ func NewInfoBlockService(
 	infoBlockCollection *InfoBlockCollectionService,
 	resourceRepo repository.InfoBlockHasResourceRepository,
 	infoBlockEventService *InfoBlockEventService,
-	galleryProvider provider.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	templateProvider tProvider.TemplateProvider,
 	userProvider provider2.UserProvider,
 	fileProvider fileProvider.FileProvider,
@@ -84,7 +84,7 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 	go func() {
 		defer wg.Done()
 		var err error
-		infoBlock.Galleries = s.galleryProvider.GetForResource(infoBlock)
+		infoBlock.Galleries = s.galleryProvider.GetForResourceUUID(infoBlock.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}
@@ -108,7 +108,7 @@ func (s *InfoBlockService) GetForResourceByFilter(filter *models.InfoBlockFilter
 	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
 }
 
-func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *models.InfoBlock, user contracts.User) (infoBlock *models.InfoBlock, err error) {
+func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *models.InfoBlock, user contract.User) (infoBlock *models.InfoBlock, err error) {
 	blockForm := app.LoadStruct(&models.InfoBlock{}, form).(*models.InfoBlock)
 
 	if found == nil {
@@ -124,7 +124,7 @@ func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *mod
 	}
 
 	if len(form.Galleries) > 0 {
-		slice := make([]contracts.Gallery, 0)
+		slice := make([]contract.Gallery, 0)
 		for _, gRequest := range form.Galleries {
 			if gRequest == nil {
 				continue
@@ -141,7 +141,7 @@ func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *mod
 	return
 }
 
-func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contracts.User) (*models.InfoBlock, error) {
+func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contract.User) (*models.InfoBlock, error) {
 	if user != nil {
 		id := user.GetID()
 		infoBlock.UserID = &id
@@ -170,7 +170,7 @@ func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBloc
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contracts.InfoBlock) error {
+func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.InfoBlock) error {
 	hasRepo, err := s.resourceRepo.FindByID(infoBlock.GetRelationID())
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err

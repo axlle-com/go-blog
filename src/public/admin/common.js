@@ -523,8 +523,8 @@ const _menu = {
         $(document)
             .off('select2:select.menuurl select2:clear.menuurl', sel)
             .on('select2:select.menuurl', sel, function (e) {
-                const select   = e.target;
-                const url      = select.options[select.selectedIndex]?.dataset.url || '';
+                const select = e.target;
+                const url = select.options[select.selectedIndex]?.dataset.url || '';
 
                 const fieldset = select.closest('.form-block.js-menu-items-publisher-url');
                 if (!fieldset) return;
@@ -538,7 +538,7 @@ const _menu = {
                 linkInput.value = url;
             })
             .on('select2:clear.menuurl', sel, function (e) {
-                const select   = e.target;
+                const select = e.target;
                 const fieldset = select.closest('.form-block.js-menu-items-publisher-url');
                 if (!fieldset) return;
 
@@ -574,9 +574,25 @@ const _template = {
         });
     },
     run: function () {
-        MyCodeMirror6.createEditor(document.getElementById('HTML'), `<div></div>`);
-        MyCodeMirror6.createEditor(document.getElementById('JS'), ``);
-        MyCodeMirror6.createEditor(document.getElementById('CSS'), ``);
+        const htmlInit = $('#HTML_container').html();
+        $('#HTML_container').html('');
+        const jsInit = $('#JS_container').html();
+        $('#JS_container').html('');
+        const cssInit = $('#CSS_container').html();
+        $('#CSS_container').html('');
+
+        MyCodeMirror6.createEditor(document.getElementById('HTML_container'), htmlInit);
+        MyCodeMirror6.createEditor(document.getElementById('JS_container'), jsInit);
+        MyCodeMirror6.createEditor(document.getElementById('CSS_container'), cssInit);
+
+        // перед сабмитом копируем значения в textarea
+        $('body').on('click', '.js-save-button', () => {
+            $('#HTML').val(document.getElementById('HTML_container').getValue());
+            $('#JS').val(document.getElementById('JS_container').getValue());
+            $('#CSS').val(document.getElementById('CSS_container').getValue());
+            $('#global-form').trigger('submit');
+        });
+
         this.add();
     }
 };

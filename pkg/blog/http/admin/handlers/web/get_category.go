@@ -12,7 +12,7 @@ import (
 func (c *categoryController) GetCategory(ctx *gin.Context) {
 	id := c.GetID(ctx)
 	if id == 0 {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
@@ -23,18 +23,18 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 
 	category, err := c.categoryService.GetAggregateByID(id)
 	if err != nil {
-		ctx.HTML(http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
+		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})
 		return
 	}
 
-	category.Galleries = c.galleryProvider.GetForResource(category)
+	category.Galleries = c.galleryProvider.GetForResourceUUID(category.UUID.String())
 
 	categories, err := c.categoriesService.GetAllForParent(category)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.category",
 		gin.H{

@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
-	"github.com/axlle-com/blog/pkg/gallery/provider"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	template "github.com/axlle-com/blog/pkg/template/provider"
@@ -16,7 +16,7 @@ import (
 type InfoBlockCollectionService struct {
 	infoBlockRepo    repository.InfoBlockRepository
 	resourceRepo     repository.InfoBlockHasResourceRepository
-	galleryProvider  provider.GalleryProvider
+	galleryProvider  appPovider.GalleryProvider
 	templateProvider template.TemplateProvider
 	userProvider     user.UserProvider
 }
@@ -24,7 +24,7 @@ type InfoBlockCollectionService struct {
 func NewInfoBlockCollectionService(
 	infoBlockRepo repository.InfoBlockRepository,
 	resourceRepo repository.InfoBlockHasResourceRepository,
-	galleryProvider provider.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	templateProvider template.TemplateProvider,
 	userProvider user.UserProvider,
 ) *InfoBlockCollectionService {
@@ -41,7 +41,7 @@ func (s *InfoBlockCollectionService) GetAll() ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetAll()
 }
 
-func (s *InfoBlockCollectionService) WithPaginate(paginator contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
+func (s *InfoBlockCollectionService) WithPaginate(paginator contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.WithPaginate(paginator, filter)
 }
 
@@ -71,8 +71,8 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
+	var users map[uint]contract.User
+	var templates map[uint]contract.Template
 
 	wg.Add(2)
 
@@ -118,7 +118,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 
 	templateIDsMap := make(map[uint]bool)
 	userIDsMap := make(map[uint]bool)
-	infoBlocksInterface := make([]contracts.Resource, 0, len(infoBlocks))
+	infoBlocksInterface := make([]contract.Resource, 0, len(infoBlocks))
 
 	for _, infoBlock := range infoBlocks {
 		infoBlocksInterface = append(infoBlocksInterface, infoBlock)
@@ -140,9 +140,9 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 
 	var wg sync.WaitGroup
 
-	var users map[uint]contracts.User
-	var templates map[uint]contracts.Template
-	var galleries map[uuid.UUID][]contracts.Gallery
+	var users map[uint]contract.User
+	var templates map[uint]contract.Template
+	var galleries map[uuid.UUID][]contract.Gallery
 
 	wg.Add(3)
 

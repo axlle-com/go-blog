@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/user/models"
 	"github.com/axlle-com/blog/pkg/user/repository"
 	"github.com/google/uuid"
@@ -47,7 +47,7 @@ func (s *UserService) Create(user *models.User) error {
 	return s.userRepo.Create(user)
 }
 
-func (s *UserService) CreateFromInterface(user contracts.User) (*models.User, error) {
+func (s *UserService) CreateFromInterface(user contract.User) (*models.User, error) {
 	if user == nil {
 		return nil, nil
 	}

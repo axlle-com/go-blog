@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -17,10 +17,10 @@ type PostTagResourceRepository interface {
 	DeleteByIDs(postTagIDs []uint) error
 	GetForResource(resourceUUID uuid.UUID) ([]*models.PostTagHasResource, error)
 	GetByPostTagID(uint) (*models.PostTagHasResource, error)
-	GetByResource(c contracts.Resource) ([]*models.PostTagHasResource, error)
+	GetByResource(c contract.Resource) ([]*models.PostTagHasResource, error)
 	Create(*models.PostTagHasResource) error
 	Delete(uint) error
-	DetachResource(contracts.Resource) error
+	DetachResource(contract.Resource) error
 }
 
 type postTagResourceRepository struct {
@@ -92,7 +92,7 @@ func (r *postTagResourceRepository) GetForResource(resourceUUID uuid.UUID) ([]*m
 	return postTagHasResource, nil
 }
 
-func (r *postTagResourceRepository) GetByResource(resource contracts.Resource) ([]*models.PostTagHasResource, error) {
+func (r *postTagResourceRepository) GetByResource(resource contract.Resource) ([]*models.PostTagHasResource, error) {
 	var postTagHasResource []*models.PostTagHasResource
 	err := r.db.
 		Where("resource_uuid = ?", resource.GetUUID()).
@@ -112,7 +112,7 @@ func (r *postTagResourceRepository) GetByResource(resource contracts.Resource) (
 	return postTagHasResource, nil
 }
 
-func (r *postTagResourceRepository) DetachResource(resource contracts.Resource) error {
+func (r *postTagResourceRepository) DetachResource(resource contract.Resource) error {
 	err := r.db.
 		Where("resource_uuid = ?", resource.GetUUID()).
 		Delete(&models.PostTagHasResource{}).Error

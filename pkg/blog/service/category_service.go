@@ -5,32 +5,31 @@ import (
 	"sync"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
+	appPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/alias"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/file/provider"
-	gallery "github.com/axlle-com/blog/pkg/gallery/provider"
-	infoBlockProvider "github.com/axlle-com/blog/pkg/info_block/provider"
 	"gorm.io/gorm"
 )
 
 type CategoryService struct {
 	categoryRepo      repository.CategoryRepository
-	galleryProvider   gallery.GalleryProvider
+	galleryProvider   appPovider.GalleryProvider
 	fileProvider      provider.FileProvider
 	aliasProvider     alias.AliasProvider
-	infoBlockProvider infoBlockProvider.InfoBlockProvider
+	infoBlockProvider appPovider.InfoBlockProvider
 }
 
 func NewCategoryService(
 	categoryRepo repository.CategoryRepository,
 	aliasProvider alias.AliasProvider,
-	galleryProvider gallery.GalleryProvider,
+	galleryProvider appPovider.GalleryProvider,
 	fileProvider provider.FileProvider,
-	infoBlockProvider infoBlockProvider.InfoBlockProvider,
+	infoBlockProvider appPovider.InfoBlockProvider,
 ) *CategoryService {
 	return &CategoryService{
 		categoryRepo:      categoryRepo,
@@ -52,14 +51,14 @@ func (s *CategoryService) GetAggregateByID(id uint) (*models.PostCategory, error
 func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.PostCategory, error) {
 	var wg sync.WaitGroup
 
-	var galleries = make([]contracts.Gallery, 0)
-	var infoBlocks = make([]contracts.InfoBlock, 0)
+	var galleries = make([]contract.Gallery, 0)
+	var infoBlocks = make([]contract.InfoBlock, 0)
 
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetForResource(category)
+		galleries = s.galleryProvider.GetForResourceUUID(category.UUID.String())
 	}()
 
 	go func() {
@@ -78,7 +77,7 @@ func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.Post
 func (s *CategoryService) SaveFromRequest(
 	form *http.CategoryRequest,
 	found *models.PostCategory,
-	user contracts.User,
+	user contract.User,
 ) (model *models.PostCategory, err error) {
 	categoryForm := app.LoadStruct(&models.PostCategory{}, form).(*models.PostCategory)
 
@@ -136,7 +135,7 @@ func (s *CategoryService) Delete(category *models.PostCategory) error {
 	return s.categoryRepo.Delete(category)
 }
 
-func (s *CategoryService) Create(category *models.PostCategory, user contracts.User) (*models.PostCategory, error) {
+func (s *CategoryService) Create(category *models.PostCategory, user contract.User) (*models.PostCategory, error) {
 	id := user.GetID()
 	category.UserID = &id
 	if err := s.categoryRepo.Create(category); err != nil {
@@ -145,7 +144,7 @@ func (s *CategoryService) Create(category *models.PostCategory, user contracts.U
 	return category, nil
 }
 
-func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contracts.User) (*models.PostCategory, error) {
+func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contract.User) (*models.PostCategory, error) {
 	tx := s.categoryRepo.Tx()
 
 	defer func() {

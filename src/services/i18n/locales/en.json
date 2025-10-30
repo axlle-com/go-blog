@@ -1,0 +1,31 @@
+[
+  {
+    "id": "ui.button.save",
+    "other": "Save"
+  },
+  {
+    "id": "ui.button.cancel",
+    "other": "Cancel"
+  },
+  {
+    "id": "ui.button.delete",
+    "other": "Delete"
+  },
+  {
+    "id": "ui.button.edit",
+    "other": "Edit"
+  },
+  {
+    "id": "ui.button.create",
+    "other": "Create"
+  },
+  {
+    "id": "auth.error.invalid_credentials",
+    "other": "Email or password is incorrect."
+  },
+  {
+    "id": "cart.items",
+    "one": "{count} item",
+    "other": "{count} items"
+  }
+]

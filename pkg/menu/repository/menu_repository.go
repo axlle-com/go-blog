@@ -6,7 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"gorm.io/gorm"
 )
@@ -21,7 +21,7 @@ type MenuRepository interface {
 	Delete(menu *models.Menu) error
 	GetAll() ([]*models.Menu, error)
 	GetAllIds() ([]uint, error)
-	WithPaginate(paginator contracts.Paginator, filter *models.MenuFilter) ([]*models.Menu, error)
+	WithPaginate(paginator contract.Paginator, filter *models.MenuFilter) ([]*models.Menu, error)
 }
 
 type menuRepository struct {
@@ -86,7 +86,7 @@ func (r *menuRepository) GetAllIds() ([]uint, error) {
 	return ids, nil
 }
 
-func (r *menuRepository) WithPaginate(p contracts.Paginator, filter *models.MenuFilter) ([]*models.Menu, error) {
+func (r *menuRepository) WithPaginate(p contract.Paginator, filter *models.MenuFilter) ([]*models.Menu, error) {
 	var menus []*models.Menu
 	var total int64
 

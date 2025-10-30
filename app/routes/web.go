@@ -46,7 +46,7 @@ func InitWebRoutes(r *gin.Engine, container *app.Container) {
 		ctx.String(http.StatusOK, "OK")
 	})
 	r.Use(middleware.Main())
-	r.Use(middleware.Language())
+	r.Use(middleware.Language(container.I18n))
 	r.Use(middleware.Error())
 	r.Use(analytic.Handler())
 	r.GET("/", postFrontWebController.GetHome)

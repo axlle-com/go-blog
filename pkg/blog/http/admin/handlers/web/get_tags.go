@@ -42,7 +42,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 	}
 	tags := c.tagCollectionService.Aggregates(tagsTemp)
 
-	ctx.HTML(http.StatusOK, "admin.tags", gin.H{
+	c.RenderHTML(ctx, http.StatusOK, "admin.tags", gin.H{
 		"title":     "Страница тэгов",
 		"tag":       empty,
 		"tags":      tags,

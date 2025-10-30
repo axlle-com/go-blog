@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 )
 
@@ -34,7 +34,7 @@ type Analytic struct {
 	UTMSource        string     `json:"utm_source,omitempty"`
 	UTMMedium        string     `json:"utm_medium,omitempty"`
 
-	User contracts.User `gorm:"-" json:"user"`
+	User contract.User `gorm:"-" json:"user"`
 }
 
 func (a *Analytic) GetTable() string {

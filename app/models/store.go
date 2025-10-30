@@ -2,13 +2,13 @@ package models
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-contrib/sessions/redis"
 )
 
-func Store(cfg contracts.Config) redis.Store {
+func Store(cfg contract.Config) redis.Store {
 	var store sessions.Store
 	var err error
 	if cfg.IsTest() || !cfg.StoreIsRedis() {

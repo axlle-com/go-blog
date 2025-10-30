@@ -5,7 +5,7 @@ import (
 	"log"
 
 	app "github.com/axlle-com/blog/app/models"
-	appContracts "github.com/axlle-com/blog/app/models/contracts"
+	appContracts "github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"gorm.io/gorm"

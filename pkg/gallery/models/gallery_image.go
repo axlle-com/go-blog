@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 	"time"
 
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 )
 
 type Image struct {
@@ -55,6 +55,6 @@ func (i *Image) GetDate() *time.Time {
 	return i.CreatedAt
 }
 
-func (i *Image) GetGallery() contracts.Gallery {
+func (i *Image) GetGallery() contract.Gallery {
 	return i.Gallery
 }

@@ -23,7 +23,7 @@ func (c *tagController) CreateTag(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.tag",
 		gin.H{

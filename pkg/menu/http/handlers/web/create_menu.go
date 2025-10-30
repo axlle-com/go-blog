@@ -14,7 +14,7 @@ func (c *menuController) CreateMenu(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.menu",
 		gin.H{

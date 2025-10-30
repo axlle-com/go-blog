@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	app "github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"gorm.io/gorm"
 )
@@ -18,7 +18,7 @@ type InfoBlockRepository interface {
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
 	GetForResourceByFilter(filter *models.InfoBlockFilter) ([]*models.InfoBlockResponse, error)
 	FindByID(id uint) (*models.InfoBlock, error)
-	WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
+	WithPaginate(p contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
 	Delete(infoBlock *models.InfoBlock) error
 	DeleteByIDs(ids []uint) (err error)
 }
@@ -50,7 +50,7 @@ func (r *infoBlockRepository) FindByID(id uint) (*models.InfoBlock, error) {
 	return &model, nil
 }
 
-func (r *infoBlockRepository) WithPaginate(p contracts.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
+func (r *infoBlockRepository) WithPaginate(p contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
 	var infoBlocks []*models.InfoBlock
 	var total int64
 

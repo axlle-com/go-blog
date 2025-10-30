@@ -2,7 +2,7 @@ package provider
 
 import (
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/service"
 )
 
@@ -11,7 +11,7 @@ func NewPostProvider(
 	postCollectionService *service.PostCollectionService,
 	categoriesService *service.CategoriesService,
 	tagCollectionService *service.TagCollectionService,
-) contracts.PostProvider {
+) contract.PostProvider {
 	return &provider{
 		postService:           postService,
 		postCollectionService: postCollectionService,
@@ -27,8 +27,8 @@ type provider struct {
 	tagCollectionService  *service.TagCollectionService
 }
 
-func (p *provider) GetPosts() []contracts.Post {
-	var collection []contracts.Post
+func (p *provider) GetPosts() []contract.Post {
+	var collection []contract.Post
 	posts, err := p.postCollectionService.GetAll()
 	if err == nil {
 		for _, post := range posts {
@@ -40,8 +40,8 @@ func (p *provider) GetPosts() []contracts.Post {
 	return nil
 }
 
-func (p *provider) GetPublishers() ([]contracts.Publisher, error) { // @todo paginate!!!
-	var collection []contracts.Publisher
+func (p *provider) GetPublishers() ([]contract.Publisher, error) { // @todo paginate!!!
+	var collection []contract.Publisher
 
 	posts, err := p.postCollectionService.GetAll()
 	if err != nil {

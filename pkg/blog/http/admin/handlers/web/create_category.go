@@ -22,7 +22,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 		logger.Error(err)
 	}
 
-	ctx.HTML(
+	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.category",
 		gin.H{

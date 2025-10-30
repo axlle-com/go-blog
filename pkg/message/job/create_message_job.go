@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/contracts"
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/form"
 )
 
 func NewCreateMessageJob(
 	form form.Form,
-) contracts.Job {
+) contract.Job {
 	return &CreateMessageJob{
 		form:  form,
 		start: time.Now(),

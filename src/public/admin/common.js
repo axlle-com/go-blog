@@ -16,22 +16,22 @@ const _auth = {
 };
 const _form = {
     _block: {},
-    confirm: function (button, title, confirmButtonText = 'Сохранить') {
+    confirm: function (button, title, confirmButtonText = 'Save') {
         const _this = this;
         _this._block.on('click', button, function (e) {
             const saveButton = $(this);
             Swal.fire({
                 icon: 'warning',
                 title: title,
-                text: 'Изменения нельзя будет отменить',
+                text: 'You will not be able to undo this action',
                 showDenyButton: true,
                 confirmButtonText: confirmButtonText,
-                denyButtonText: 'Отменить',
+                denyButtonText: 'Cancel',
             }).then((result) => {
                 if (result.isConfirmed) {
                     _this.send(saveButton);
                 } else if (result.isDenied) {
-                    Swal.fire('Изменения не сохранены', '', 'info');
+                    Swal.fire('Changes not saved', '', 'info');
                 }
             });
         });
@@ -50,15 +50,15 @@ const _form = {
                 _this._block.html(html);
                 _glob.images = {};
                 _config.run();
-                Swal.fire('Сохранено', '', 'success');
+                Swal.fire('Saved', '', 'success');
             });
         }
     },
     run: function (selector) {
         this._block = $(selector);
         if (this._block.length) {
-            this.confirm('.js-save-button', 'Вы уверены что хотите сохранить все изменения?');
-            this.confirm('.js-delete-button', 'Вы уверены что хотите удалить?', 'Удалить');
+            this.confirm('.js-save-button', 'Are you sure you want to save all changes?');
+            this.confirm('.js-delete-button', 'Are you sure you want to delete?', 'Delete');
         }
     }
 };
@@ -69,28 +69,28 @@ const _filterApi = {
             send: function (target) {
                 const $list = (target && target.jquery) ? target : $(target);
                 if (!$list.length) {
-                    console.warn(`_filterApi: элементов по селектору "${target}" не найдено`);
+                    console.warn(`_filterApi: no elements found for selector "${target}"`);
                     return;
                 }
 
                 $list.each(function () {
                     const $el = $(this);
 
-                    // свой URL для КАЖДОГО select’а
+                    // custom URL for each select
                     const getUrl = () => $el.data('action') || $el.attr('data-action');
                     const url = getUrl();
                     if (!url) {
-                        console.warn('select2: data-action не задан у', $el[0]);
+                        console.warn('select2: data-action not set for', $el[0]);
                         return;
                     }
 
-                    // если уже инициализирован — пересоздаём
+                    // if already initialized — recreate
                     if ($el.hasClass('select2-hidden-accessible')) {
                         $el.select2('destroy');
                     }
 
                     $el.select2({
-                        placeholder: $el.data('placeholder') || 'Выберите...',
+                        placeholder: $el.data('placeholder') || 'Select...',
                         allowClear: true,
                         minimumInputLength: 0,
                         width: '100%',
@@ -161,11 +161,11 @@ const _image = {
     confirm: (obj, image) => {
         Swal.fire({
             icon: 'warning',
-            title: 'Вы уверены что хотите удалить изображение?',
-            text: 'Изменения нельзя будет отменить',
+            title: 'Are you sure you want to delete the image?',
+            text: 'You will not be able to undo this action',
             showDenyButton: true,
-            confirmButtonText: 'Удалить',
-            denyButtonText: 'Отменить',
+            confirmButtonText: 'Delete',
+            denyButtonText: 'Cancel',
         }).then((result) => {
             if (result.isConfirmed) {
                 const request = new _glob.request(obj).setMethod('delete').setPreloader('.js-product');
@@ -173,12 +173,12 @@ const _image = {
                     if (response.message) {
                         _glob.noty.success(response.message);
                     } else {
-                        _glob.noty.success('Изображение удалено');
+                        _glob.noty.success('Image deleted');
                     }
                     image.remove();
                 });
             } else if (result.isDenied) {
-                Swal.fire('Изображение не удалено', '', 'info');
+                Swal.fire('Image not deleted', '', 'info');
             }
         })
     },
@@ -210,7 +210,7 @@ const _image = {
                 if (response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success('Изображение загружено');
+                    _glob.noty.success('Image uploaded');
                 }
             });
         });
@@ -239,7 +239,7 @@ const _image = {
                 if (response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success('Изображение удалено');
+                    _glob.noty.success('Image deleted');
                 }
             });
             input.val('');
@@ -272,7 +272,7 @@ const _image = {
                 if (response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success('Изображение загружено');
+                    _glob.noty.success('Image uploaded');
                 }
             });
         });
@@ -313,15 +313,15 @@ const _image = {
                                     <input type="hidden" name="galleries[${idGallery}][images][${number}][gallery_id]" value="${_glob.isEmpty(id) ? '' : id}">
                                     <input type="hidden" name="galleries[${idGallery}][images][${number}][file]" value="${url}">
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Заголовок" name="galleries[${idGallery}][images][${number}][title]" value="">
+                                        <input class="form-control form-shadow" placeholder="Title" name="galleries[${idGallery}][images][${number}][title]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" placeholder="Описание" name="galleries[${idGallery}][images][${number}][description]" value="">
+                                        <input class="form-control form-shadow" placeholder="Description" name="galleries[${idGallery}][images][${number}][description]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group small">
-                                        <input class="form-control form-shadow" type="number" placeholder="Сортировка" name="galleries[${idGallery}][images][${number}][sort]" value="">
+                                        <input class="form-control form-shadow" type="number" placeholder="Sort" name="galleries[${idGallery}][images][${number}][sort]" value="">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </div>
@@ -343,7 +343,7 @@ const _image = {
                 if (response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success('Изображение удалено');
+                    _glob.noty.success('Image deleted');
                 }
             });
             image.remove();
@@ -404,7 +404,7 @@ const _image = {
             <div class="form-group js-image-block-empty">
                 <label class="control-label button-100" for="js-image-upload">
                     <a type="button" class="btn btn-primary button-image">
-                        Загрузить фото
+                        Upload photo
                     </a>
                 </label>
                 <input
@@ -449,7 +449,7 @@ const _infoBlock = {
             const select = $(this).closest('.js-info-blocks-general-block').find('.js-info-blocks-select');
             const action = select.find('option:selected').data('action');
             if (!action) {
-                _glob.console.error('Пустой идентификатор')
+                _glob.console.error('Empty identifier')
                 return
             }
             const request = new _glob.request({action});
@@ -519,7 +519,7 @@ const _menu = {
         const _this = this;
         const sel = 'select[name^="menu_items"][name$="[publisher_uuid]"]';
 
-        // снимаем возможные старые обработчики и навешиваем заново
+        // remove old handlers and attach new ones
         $(document)
             .off('select2:select.menuurl select2:clear.menuurl', sel)
             .on('select2:select.menuurl', sel, function (e) {
@@ -533,7 +533,7 @@ const _menu = {
                 if (!linkInput) return;
 
                 if (!linkInput.dataset.oldUrl) {
-                    linkInput.dataset.oldUrl = linkInput.value; // запомним «исходник»
+                    linkInput.dataset.oldUrl = linkInput.value; // remember original
                 }
                 linkInput.value = url;
             })
@@ -585,7 +585,7 @@ const _template = {
         MyCodeMirror6.createEditor(document.getElementById('JS_container'), jsInit);
         MyCodeMirror6.createEditor(document.getElementById('CSS_container'), cssInit);
 
-        // перед сабмитом копируем значения в textarea
+        // before submit copy values to textarea
         $('body').on('click', '.js-save-button', () => {
             $('#HTML').val(document.getElementById('HTML_container').getValue());
             $('#JS').val(document.getElementById('JS_container').getValue());

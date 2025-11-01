@@ -87,7 +87,7 @@ func (q *Queue) Close() {
 	q.mu.Unlock()
 
 	q.wg.Wait()
-	logger.Info("[queue] Close")
+	logger.Info("[queue][Close]")
 }
 
 func (q *Queue) next() (*queueItem, bool) {
@@ -98,7 +98,7 @@ func (q *Queue) next() (*queueItem, bool) {
 }
 
 func (q *Queue) worker(ctx context.Context) {
-	logger.Info("[queue][worker] Start")
+	logger.Info("[queue][worker] starting")
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Errorf("[queue][worker] panic: %v\n%s", r, debug.Stack())
@@ -142,7 +142,7 @@ func (q *Queue) worker(ctx context.Context) {
 
 		handlers := q.safeHandlersFor(item.job.GetQueue())
 		if len(handlers) == 0 {
-			logger.Errorf("[queue][%s] handlers not found, Data: %s", item.job.GetName(), string(item.job.GetData()))
+			logger.Errorf("[queue][worker] handlers not found for %s, Data: %s", item.job.GetName(), string(item.job.GetData()))
 			continue
 		}
 
@@ -154,13 +154,13 @@ func (q *Queue) worker(ctx context.Context) {
 			// Таймаут на каждый handler короче общего
 			perHandlerTimeout := 15 * time.Second
 			if err := runHandlerSafe(jobContext, handler, item.job.GetData(), perHandlerTimeout); err != nil {
-				logger.Errorf("[queue][%s] handler error: %v", item.job.GetName(), err)
+				logger.Errorf("[queue][worker] handler error for %s: %v", item.job.GetName(), err)
 				// Здесь нужно включить retry/Backoff/DLQ (см. комментарии ниже)
 			}
 		}
 		cancel()
 
-		logger.Debugf("[queue][%s] Duration: %.2fms", item.job.GetName(), item.job.Duration())
+		logger.Debugf("[queue][worker] queue: %s, action: %s, duration: %.2fms", item.job.GetQueue(), item.job.GetAction(), item.job.Duration())
 	}
 }
 

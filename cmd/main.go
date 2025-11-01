@@ -49,32 +49,32 @@ func main() {
 	}
 
 	go func() {
-		logger.Infof("[Main] Listening on %s and on [::]%s", "0.0.0.0"+cfg.Port(), cfg.Port())
+		logger.Infof("[main][main] listening on %s and on [::]%s", "0.0.0.0"+cfg.Port(), cfg.Port())
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Errorf("[Main] server error: %v", err)
+			logger.Errorf("[main][main] server error: %v", err)
 		}
 	}()
 
 	// ждём сигнал остановки
 	<-ctx.Done()
-	logger.Info("[Main] Shutdown signal caught")
+	logger.Info("[main][main] shutdown signal caught")
 
 	// даём 5 секунд на корректное завершение активных запросов
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Errorf("[Main] HTTP shutdown: %v", err)
+		logger.Errorf("[main][main] HTTP shutdown error: %v", err)
 	}
 
 	container.Queue.Close()
 	container.Scheduler.Stop()
 
 	if err = newDB.Close(); err != nil {
-		logger.Errorf("[Main] DB close: %v", err)
+		logger.Errorf("[main][main] DB close error: %v", err)
 	}
 
-	logger.Info("[Main] Graceful shutdown complete")
+	logger.Info("[main][main] graceful shutdown complete")
 }
 
 func Init(config contract.Config, container *app.Container) *gin.Engine {
@@ -99,12 +99,12 @@ func Init(config contract.Config, container *app.Container) *gin.Engine {
 
 	err = container.Migrator.Migrate()
 	if err != nil {
-		logger.Errorf("[Main][Init] Migrate error: %v", err)
+		logger.Errorf("[main][Init] migrate error: %v", err)
 	}
 
 	err = container.Seeder.Seed()
 	if err != nil {
-		logger.Errorf("[Main][Init] Seed error: %v", err)
+		logger.Errorf("[main][Init] seed error: %v", err)
 	}
 
 	web.Minify(config)

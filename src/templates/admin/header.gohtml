@@ -42,7 +42,7 @@
         <form class="ml-3 d-md-flex">
                 <span class="input-icon">
                     <i class="material-icons">search</i>
-                    <input type="text" placeholder="Поиск..."
+                    <input type="text" placeholder="{{ call .T "ui.placeholder.search" nil }}"
                            class="form-control bg-gray-200 border-gray-200 rounded-lg form-shadow">
                 </span>
         </form>
@@ -82,13 +82,13 @@
                         </div>
                     </div>
                     <a class="dropdown-item has-icon" href="/admin/user/profile">
-                        <i class="mr-2" data-feather="user"></i>Профиль
+                        <i class="mr-2" data-feather="user"></i>{{ call .T "ui.label.profile" nil }}
                     </a>
                     <a class="dropdown-item has-icon" href="javascript:void(0)">
                         <i class="mr-2" data-feather="settings"></i>Settings
                     </a>
                     <a class="dropdown-item has-icon text-danger" href="/admin/logout">
-                        <i class="mr-2" data-feather="log-out"></i>Выход
+                        <i class="mr-2" data-feather="log-out"></i>{{ call .T "ui.button.logout" nil }}
                     </a>
                 </div>
             </li>

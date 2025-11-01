@@ -14,7 +14,7 @@ import (
 
 func Minify(config contract.Config) {
 	if !config.IsLocal() {
-		logger.Info("[Minify] Running on the staging environment; we don’t build the HTML files")
+		logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
 		return
 	}
 
@@ -119,7 +119,7 @@ func mergeAndMinifyFiles(minifyTool *minify.M, mediaType string, inputPaths []st
 	for _, inputPath := range inputPaths {
 		input, err := os.ReadFile(inputPath)
 		if err != nil {
-			logger.Fatalf("[Minify][mergeAndMinifyFiles] Error reading file %s: %v", inputPath, err)
+			logger.Fatalf("[web][mergeAndMinifyFiles] error reading file %s: %v", inputPath, err)
 		}
 		buffer.Write(input)
 		buffer.WriteString("\n")
@@ -127,44 +127,44 @@ func mergeAndMinifyFiles(minifyTool *minify.M, mediaType string, inputPaths []st
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		log.Fatalf("[Minify][mergeAndMinifyFiles] Ошибка создания файла %s: %v", outputPath, err)
+		log.Fatalf("[web][mergeAndMinifyFiles] error creating file %s: %v", outputPath, err)
 	}
 	defer func(output *os.File) {
 		err := output.Close()
 		if err != nil {
-			logger.Errorf("[Minify][mergeAndMinifyFiles] Error: %v", err)
+			logger.Errorf("[web][mergeAndMinifyFiles] close error: %v", err)
 		}
 	}(output)
 
 	if err := minifyTool.Minify(mediaType, output, &buffer); err != nil {
-		logger.Fatalf("[Minify][mergeAndMinifyFiles] Error minifying file %s: %v", outputPath, err)
+		logger.Fatalf("[web][mergeAndMinifyFiles] minify error for file %s: %v", outputPath, err)
 	}
 }
 
 func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
 	input, err := os.Open(inputPath)
 	if err != nil {
-		logger.Fatalf("[Minify][minifyFile] Error opening file %s: %v", inputPath, err)
+		logger.Fatalf("[web][minifyFile] open error for file %s: %v", inputPath, err)
 	}
 	defer func(input *os.File) {
 		err := input.Close()
 		if err != nil {
-			logger.Errorf("[Minify][minifyFile] Error: %v", err)
+			logger.Errorf("[web][minifyFile] close error: %v", err)
 		}
 	}(input)
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		logger.Fatalf("Error creating file %s: %v", outputPath, err)
+		logger.Fatalf("[web][minifyFile] create error for file %s: %v", outputPath, err)
 	}
 	defer func(output *os.File) {
 		err := output.Close()
 		if err != nil {
-			logger.Errorf("[Minify][minifyFile] Error: %v", err)
+			logger.Errorf("[web][minifyFile] close error: %v", err)
 		}
 	}(output)
 
 	if err := m.Minify(mediaType, output, input); err != nil {
-		logger.Fatalf("[Minify][minifyFile] Error minifying file %s: %v", inputPath, err)
+		logger.Fatalf("[web][minifyFile] minify error for file %s: %v", inputPath, err)
 	}
 }

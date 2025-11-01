@@ -1,7 +1,7 @@
 package service
 
 import (
-	app "github.com/axlle-com/blog/app/service"
+	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"github.com/axlle-com/blog/pkg/analytic/repository"
 	userProvider "github.com/axlle-com/blog/pkg/user/provider"

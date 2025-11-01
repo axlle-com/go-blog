@@ -15,18 +15,18 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="list-with-gap mb-2">
-                            <button type="button" class="btn btn-success js-save-button">Сохранить</button>
-                            <a type="button" class="btn btn-secondary" href="/admin/menus">Выйти</a>
+                            <button type="button" class="btn btn-success js-save-button">{{ call .T "ui.button.save" nil }}</button>
+                            <a type="button" class="btn btn-secondary" href="/admin/menus">{{ call .T "ui.button.exit" nil }}</a>
                         </div>
 
                         <div class="row">
                             <div class="col-md-8">
                                 <fieldset class="form-block">
-                                    <legend>Связь данных</legend>
+                                    <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
                                     <div class="form-group small">
-                                        <label>Шаблон</label>
+                                        <label>{{ call .T "ui.label.template" nil }}</label>
                                         <select class="form-control select2"
-                                                data-placeholder="Шаблон"
+                                                data-placeholder="{{ call .T "ui.label.template" nil }}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
                                                 name="template_id"
@@ -44,11 +44,11 @@
                                 </fieldset>
 
                                 <fieldset class="form-block">
-                                    <legend>Заголовок</legend>
+                                    <legend>{{ call .T "ui.label.title" nil }}</legend>
                                     <div class="form-group small">
-                                        <label>Обычный</label>
+                                        <label>{{ call .T "ui.placeholder.normal" nil }}</label>
                                         <input class="form-control form-shadow"
-                                               placeholder="Обычный"
+                                               placeholder="{{ call .T "ui.placeholder.normal" nil }}"
                                                name="title"
                                                id="title"
                                                value="{{ .model.Title }}"
@@ -70,7 +70,8 @@
                 "item"        .
                 "parent"      $rootID
                 "prefix"      $prefix
-                "publishers"  $.publishers  }}
+                "publishers"  $.publishers
+                "T"           $.T  }}
             {{ end }}
         </div>
     </form>
@@ -83,6 +84,7 @@
         {{- $hasKids := gt (len $it.Children) 0 -}}
         {{- $cid := collapseID $prefix $it.ID -}}
         {{- $childAccID := printf "%s-child-%d" $prefix $it.ID -}}
+        {{- $T := .T -}}
 
         <div class="card">
             <div class="card-header">
@@ -98,25 +100,25 @@
                     <div class="row">
                         <div class="col-md-6">
                             <fieldset class="form-block js-menu-items-publisher-url">
-                                <legend>Параметры пункта</legend>
+                                <legend>{{ call $T "ui.label.menu_item_params" nil }}</legend>
 
                                 <!-- скрытые поля плоского объекта -->
                                 <input type="hidden" name="menu_items[{{ $it.ID }}][id]" value="{{ $it.ID }}">
                                 <input type="hidden" name="menu_items[{{ $it.ID }}][menu_id]" value="{{ $it.MenuID }}">
 
                                 <div class="form-group small">
-                                    <label>Заголовок</label>
+                                    <label>{{ call $T "ui.label.title" nil }}</label>
                                     <input class="form-control form-shadow"
                                            name="menu_items[{{ $it.ID }}][title]"
                                            value="{{ $it.Title }}"
-                                           placeholder="Заголовок">
+                                           placeholder="{{ call $T "ui.label.title" nil }}">
                                     <div class="invalid-feedback"></div>
                                 </div>
 
                                 <div class="form-group small">
-                                    <label>Паблишер</label>
+                                    <label>{{ call $T "ui.label.publisher" nil }}</label>
                                     <select class="form-control select2"
-                                            data-placeholder="Паблишер"
+                                            data-placeholder="{{ call $T "ui.label.publisher" nil }}"
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             name="menu_items[{{ $it.ID }}][publisher_uuid]"
@@ -134,11 +136,11 @@
                                 </div>
 
                                 <div class="form-group small">
-                                    <label>Произвольная ссылка</label>
+                                    <label>{{ call $T "ui.label.custom_link" nil }}</label>
                                     <input class="form-control form-shadow"
                                            name="menu_items[{{ $it.ID }}][url]"
                                            value="{{ $it.URL }}"
-                                           placeholder="Произвольная ссылка">
+                                           placeholder="{{ call $T "ui.label.custom_link" nil }}">
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </fieldset>
@@ -146,12 +148,12 @@
 
                         <div class="col-md-6">
                             <fieldset class="form-block">
-                                <legend>Иерархия и сортировка</legend>
+                                <legend>{{ call $T "ui.label.hierarchy_sort" nil }}</legend>
 
                                 <div class="form-group small">
-                                    <label>Родительский пункт меню</label>
+                                    <label>{{ call $T "ui.label.parent_menu_item" nil }}</label>
                                     <select class="form-control select2 select2-search"
-                                            data-placeholder="Родитель"
+                                            data-placeholder="{{ call $T "ui.placeholder.parent" nil }}"
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             data-action="{{ $it.AdminAjaxFilterURL }}?for_not_menu_item_id={{ $it.ID }}&menu_id={{ $it.MenuID }}"
@@ -167,12 +169,12 @@
                                 </div>
 
                                 <div class="form-group small">
-                                    <label>Сортировка</label>
+                                    <label>{{ call $T "ui.placeholder.sort" nil }}</label>
                                     <input class="form-control form-shadow"
                                            type="number"
                                            name="menu_items[{{ $it.ID }}][sort]"
                                            value="{{ $it.Sort }}"
-                                           placeholder="Сортировка">
+                                           placeholder="{{ call $T "ui.placeholder.sort" nil }}">
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </fieldset>
@@ -186,7 +188,8 @@
                                 "item"        .
                                 "parent"      $childAccID
                                 "prefix"      $prefix
-                                "publishers"  $.publishers }}
+                                "publishers"  $.publishers
+                                "T"           $.T }}
                             {{- end }}
                         </div>
                     {{ end }}

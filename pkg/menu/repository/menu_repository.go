@@ -67,7 +67,7 @@ func (r *menuRepository) Delete(menu *models.Menu) error {
 	if menu.Deleting() {
 		return r.db.Delete(&models.Menu{}, menu.ID).Error
 	}
-	return errors.New("при удалении произошли ошибки")
+	return errors.New("deletion errors occurred")
 }
 
 func (r *menuRepository) GetAll() ([]*models.Menu, error) {

@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	app "github.com/axlle-com/blog/app/service"
+	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"

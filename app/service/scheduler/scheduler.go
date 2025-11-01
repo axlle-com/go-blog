@@ -30,11 +30,11 @@ func NewScheduler(
 }
 
 func (s *Scheduler) Start() {
-	logger.Info("[Scheduler] Start")
+	logger.Info("[scheduler] Start")
 
-	addFunc, err := s.cron.AddFunc("@every 1m", s.enqueueDeleteFiles)
+	addFunc, err := s.cron.AddFunc("@every 1h", s.enqueueDeleteFiles)
 	if err != nil {
-		logger.Errorf("[Scheduler][Start] Func : %v,Error : %v", addFunc, err)
+		logger.Errorf("[scheduler][Start] Func : %v,Error : %v", addFunc, err)
 	}
 
 	s.cron.Start()
@@ -42,7 +42,7 @@ func (s *Scheduler) Start() {
 
 func (s *Scheduler) Stop() {
 	s.cron.Stop()
-	logger.Info("[Scheduler] Stop")
+	logger.Info("[scheduler][Stop] Stop")
 }
 
 func (s *Scheduler) enqueueDeleteFiles() {

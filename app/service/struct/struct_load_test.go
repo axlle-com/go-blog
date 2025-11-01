@@ -1,10 +1,11 @@
-package service
+package _struct
 
 import (
-	"github.com/axlle-com/blog/app/db"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/axlle-com/blog/app/db"
 )
 
 // TODO протестировать формат времени

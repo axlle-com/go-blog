@@ -10,8 +10,8 @@
                 <div class="card-body">
                     <input type="hidden" name="resource" value="{{ .post.GetName }}">
                     <div class="list-with-gap mb-2">
-                        <button type="button" class="btn btn-success js-save-button">Сохранить</button>
-                        <a type="button" class="btn btn-secondary" href="/admin/posts">Выйти</a>
+                        <button type="button" class="btn btn-success js-save-button">{{ call .T "ui.button.save" nil }}</button>
+                        <a type="button" class="btn btn-secondary" href="/admin/posts">{{ call .T "ui.button.exit" nil }}</a>
                     </div>
                     <div class="list-with-gap mb-2">
                         <ul class="nav nav-gap-x-1 mt-3" role="tablist">
@@ -22,7 +22,7 @@
                                    href="#home-page"
                                    role="tab"
                                    aria-controls="home-page"
-                                   aria-selected="false">Основное</a>
+                                   aria-selected="false">{{ call .T "ui.tab.main" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -31,7 +31,7 @@
                                    href="#tab2Faded"
                                    role="tab"
                                    aria-controls="tab2Faded"
-                                   aria-selected="false">Галерея</a>
+                                   aria-selected="false">{{ call .T "ui.tab.gallery" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -40,7 +40,7 @@
                                    href="#tab3Faded"
                                    role="tab"
                                    aria-controls="tab3Faded"
-                                   aria-selected="true">Инфо-блоки</a>
+                                   aria-selected="true">{{ call .T "ui.tab.info_blocks" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -49,7 +49,7 @@
                                    href="#tab4Faded"
                                    role="tab"
                                    aria-controls="tab4Faded"
-                                   aria-selected="true">Настройки</a>
+                                   aria-selected="true">{{ call .T "ui.tab.settings" nil }}</a>
                             </li>
                         </ul>
                     </div>
@@ -61,12 +61,12 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <fieldset class="form-block">
-                                        <legend>Связь данных</legend>
+                                        <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Категория</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.category" nil }}</label>
                                             <select
                                                     class="form-control select2"
-                                                    data-placeholder="Категория"
+                                                    data-placeholder="{{ call .T "ui.label.category" nil }}"
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="post_category_id"
@@ -82,10 +82,10 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Шаблон</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.template" nil }}</label>
                                             <select
                                                     class="form-control select2"
-                                                    data-placeholder="Шаблон"
+                                                    data-placeholder="{{ call .T "ui.label.template" nil }}"
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="template_id"
@@ -102,12 +102,12 @@
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>Ссылка</legend>
+                                        <legend>{{ call .T "ui.fieldset.link" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Алиас</label>
+                                            <label for="blogTitle">{{ call .T "ui.placeholder.alias" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Алиас"
+                                                    placeholder="{{ call .T "ui.placeholder.alias" nil }}"
                                                     name="alias"
                                                     id="alias"
                                                     value="{{ .post.Alias }}"
@@ -115,10 +115,10 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Ссылка</label>
+                                            <label for="blogTitle">{{ call .T "ui.placeholder.link" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Ссылка"
+                                                    placeholder="{{ call .T "ui.placeholder.link" nil }}"
                                                     name="url"
                                                     id="url"
                                                     value="{{ .post.URL }}"
@@ -127,12 +127,12 @@
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>Заголовок</legend>
+                                        <legend>{{ call .T "ui.label.title" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Обычный</label>
+                                            <label for="blogTitle">{{ call .T "ui.placeholder.normal" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Обычный"
+                                                    placeholder="{{ call .T "ui.placeholder.normal" nil }}"
                                                     name="title"
                                                     id="title"
                                                     value="{{ .post.Title }}"
@@ -141,10 +141,10 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Короткий</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.title_short" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Короткий"
+                                                    placeholder="{{ call .T "ui.placeholder.short" nil }}"
                                                     name="title_short"
                                                     id="title_short"
                                                     value="{{ ptrStr .post.TitleShort }}"
@@ -152,10 +152,10 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Короткое описание</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.short_description" nil }}</label>
                                             <textarea
                                                     class="form-control form-shadow"
-                                                    placeholder="Короткое описание"
+                                                    placeholder="{{ call .T "ui.placeholder.short_description" nil }}"
                                                     name="description_preview"
                                                     id="description_preview"
                                                     data-validator="description_preview">{{ ptrStr .post.DescriptionPreview }}</textarea>
@@ -163,12 +163,12 @@
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>SEO</legend>
+                                        <legend>{{ call .T "ui.fieldset.seo" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Заголовок SEO</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.seo_title" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Заголовок SEO"
+                                                    placeholder="{{ call .T "ui.placeholder.seo_title" nil }}"
                                                     name="meta_title"
                                                     id="meta_title"
                                                     value="{{ ptrStr .post.MetaTitle }}"
@@ -177,10 +177,10 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
-                                            <label for="blogTitle">Описание SEO</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.seo_description" nil }}</label>
                                             <textarea
                                                     class="form-control form-shadow"
-                                                    placeholder="Описание SEO"
+                                                    placeholder="{{ call .T "ui.placeholder.seo_description" nil }}"
                                                     name="meta_description"
                                                     id="meta_description"
                                                     data-validator-required
@@ -197,9 +197,9 @@
                                 </div>
                                 <div class="col-md-4">
                                     <fieldset class="form-block">
-                                        <legend>Изображение</legend>
+                                        <legend>{{ call .T "ui.fieldset.image" nil }}</legend>
                                         {{ template "admin.image" .post }}
-                                        {{ template "admin.image_empty" .post }}
+                                        {{ template "admin.image_empty" . }}
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox">
                                                 <input
@@ -212,7 +212,7 @@
                                                         {{ end }}
                                                         value="1">
                                                 <label class="custom-control-label" for="show_image_post">
-                                                    Отобразить изображение
+                                                    {{ call .T "ui.checkbox.show_image" nil }}
                                                 </label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -227,21 +227,21 @@
                                                         {{ end }}
                                                         value="1">
                                                 <label class="custom-control-label" for="show_image_category">
-                                                    Отобразить изображение в категории
+                                                    {{ call .T "ui.checkbox.show_image_in_category" nil }}
                                                 </label>
                                             </div>
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>Публикация</legend>
+                                        <legend>{{ call .T "ui.fieldset.publication" nil }}</legend>
                                         <div class="input-group datepicker-wrap form-group">
-                                            <label for="blogTitle">Дата публикации</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.publication_date" nil }}</label>
                                             <input
                                                     type="text"
                                                     class="form-control"
                                                     name="date_pub"
                                                     value="{{ .post.DatePub | date }}"
-                                                    placeholder="Укажите дату"
+                                                    placeholder="{{ call .T "ui.placeholder.specify_date" nil }}"
                                                     autocomplete="off"
                                                     data-input>
                                             <div class="input-group-append">
@@ -260,13 +260,13 @@
                                             </div>
                                         </div>
                                         <div class="input-group datepicker-wrap form-group">
-                                            <label for="blogTitle">Дата окончания публикации</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.publication_end_date" nil }}</label>
                                             <input
                                                     type="text"
                                                     class="form-control"
                                                     name="date_end"
                                                     value="{{ .post.DateEnd | date }}"
-                                                    placeholder="Укажите дату"
+                                                    placeholder="{{ call .T "ui.placeholder.specify_date" nil }}"
                                                     autocomplete="off"
                                                     data-input>
                                             <div class="input-group-append">
@@ -292,7 +292,7 @@
                                                         {{ end }}
                                                         value="1">
                                                 <label class="custom-control-label" for="show_date">
-                                                    Показывать дату в посте
+                                                    {{ call .T "ui.checkbox.show_date_in_post" nil }}
                                                 </label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -308,7 +308,7 @@
                                                     {{ end }}
                                                     value="1">
                                             <label class="custom-control-label" for="is_main">
-                                                Вывести на главную
+                                                {{ call .T "ui.checkbox.display_on_main" nil }}
                                             </label>
                                         </div>
                                         <div class="custom-control custom-checkbox">
@@ -322,7 +322,7 @@
                                                     {{ end }}
                                                     value="1">
                                             <label class="custom-control-label" for="has_comments">
-                                                Подключить комментарии
+                                                {{ call .T "ui.checkbox.enable_comments" nil }}
                                             </label>
                                         </div>
                                         <div class="custom-control custom-checkbox">
@@ -336,7 +336,7 @@
                                                     {{ end }}
                                                     value="1">
                                             <label class="custom-control-label"
-                                                   for="is_published">Опубликовано</label>
+                                                   for="is_published">{{ call .T "ui.checkbox.published" nil }}</label>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group">
@@ -351,18 +351,18 @@
                                                         {{ end }}
                                                         value="1">
                                                 <label class="custom-control-label"
-                                                       for="is_favourites">Избранное</label>
+                                                       for="is_favourites">{{ call .T "ui.checkbox.favorites" nil }}</label>
                                                 <div class="invalid-feedback"></div>
                                             </div>
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>Сортировка</legend>
+                                        <legend>{{ call .T "ui.fieldset.sort" nil }}</legend>
                                         <div class="form-group">
                                             <input
                                                     type="number"
                                                     class="form-control form-shadow"
-                                                    placeholder="Сортировка"
+                                                    placeholder="{{ call .T "ui.placeholder.sort" nil }}"
                                                     name="sort"
                                                     value="{{ .post.Sort }}">
                                             <div class="invalid-feedback"></div>
@@ -370,7 +370,7 @@
                                     </fieldset>
 
                                     <fieldset class="form-block">
-                                        <legend>Меню</legend>
+                                        <legend>{{ call .T "ui.fieldset.menu" nil }}</legend>
                                         <div class="form-group">
                                             <select
                                                     class="form-control select2"
@@ -378,7 +378,7 @@
                                                     id="menu"
                                                     data-validator="menus"
                                                     multiple
-                                                    data-placeholder="Выберете меню">
+                                                    data-placeholder="{{ call .T "ui.placeholder.select_menu" nil }}">
                                                 <option value=""></option>
                                             </select>
                                             <div class="invalid-feedback"></div>
@@ -386,7 +386,7 @@
                                     </fieldset>
 
                                     <fieldset class="form-block">
-                                        <legend>Тэги</legend>
+                                        <legend>{{ call .T "ui.fieldset.tags" nil }}</legend>
                                         <div class="form-group">
                                             <select
                                                     class="form-control select2"
@@ -395,7 +395,7 @@
                                                     data-validator="tags"
                                                     data-tags="true"
                                                     multiple
-                                                    data-placeholder="Выберете тэг">
+                                                    data-placeholder="{{ call .T "ui.placeholder.select_tag" nil }}">
                                                 <option value=""></option>
                                                 {{ range .tags}}
                                                     {{ $tag := . }}
@@ -417,11 +417,11 @@
                         </div>
                         <div class="tab-pane fade" id="tab2Faded" role="tabpanel"
                              aria-labelledby="profile-tab-faded">
-                            {{ template "admin.gallery_in_item" .post }}
+                            {{ template "admin.gallery_in_item" . }}
                         </div>
                         <div class="tab-pane fade" id="tab3Faded" role="tabpanel"
                              aria-labelledby="info-block-tab-faded">
-                            {{ template "admin.info_block_in_item" .collection }}
+                            {{ template "admin.info_block_in_item" . }}
                         </div>
                     </div>
                 </div>

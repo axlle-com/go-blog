@@ -2,8 +2,8 @@ const _cl_ = (p) => {
     console.log(p);
 }
 const _glob = {
-    ERROR_MESSAGE: 'Произошла ошибка, попробуйте позднее!',
-    ERROR_FIELD: 'Поле обязательное для заполнения',
+    ERROR_MESSAGE: 'An error occurred, please try again later!',
+    ERROR_FIELD: 'Field is required',
     spareParts: [],
     images: {},
     path: null,
@@ -25,7 +25,7 @@ const _glob = {
     noty: {
         config: function (type, message) {
             if (typeof Noty !== 'undefined') {
-                const text = '<h5>Внимание</h5>' + message;
+                const text = '<h5>Attention</h5>' + message;
                 const _config = {type, text, timeout: 4000, theme: 'relax'};
                 new Noty(_config).show();
             } else {
@@ -33,13 +33,13 @@ const _glob = {
                 alert(message);
             }
         },
-        error: function (message = 'Произошла ошибка!') {
+        error: function (message = 'An error occurred!') {
             this.config('error', message);
         },
-        success: function (message = 'Все прошло успешно!') {
+        success: function (message = 'Operation completed successfully!') {
             this.config('success', message);
         },
-        info: function (message = 'Обратите внимание!') {
+        info: function (message = 'Please note!') {
             this.config('info', message);
         }
     },

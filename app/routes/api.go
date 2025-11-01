@@ -6,7 +6,7 @@ import (
 )
 
 func InitApiRoutes(r *gin.Engine, container *app.Container) {
-	controller := container.PostApiController()
+	controller := container.AdminApiPostController
 
 	r.POST("/api/posts", controller.CreatePost)
 	r.GET("/api/posts", controller.GetPosts)

@@ -20,8 +20,8 @@
             <div class="col-md-auto d-flex justify-content-center">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white flex-column">
-                        <h4 class="text-center mb-0">Вход</h4>
-                        <div class="text-center opacity-50 font-italic">в ваш аккаунт</div>
+                        <h4 class="text-center mb-0">{{ call .T "ui.button.login" nil }}</h4>
+                        <div class="text-center opacity-50 font-italic">{{ call .T "ui.label.to_account" nil }}</div>
                     </div>
                     <div class="card-body p-4">
                         <form action="/auth" method="post">
@@ -31,11 +31,11 @@
                                     <i class="material-icons">person_outline</i>
                                     <input type="text"
                                            class="form-control form-shadow"
-                                           placeholder="Логин"
+                                           placeholder="{{ call .T "ui.label.login" nil }}"
                                            name="email"
                                            value=""
                                            data-validator-required>
-                                    <label for="username">Логин</label>
+                                    <label for="username">{{ call .T "ui.label.login" nil }}</label>
                                     <div class="invalid-feedback">
                                         {{if $err := index .Errors "Email"}}
                                             <span style="color:red;">{{ $err.Message }}</span>
@@ -48,11 +48,11 @@
                                     <i class="material-icons">lock_open</i>
                                     <input type="password"
                                            class="form-control form-shadow"
-                                           placeholder="Пароль"
+                                           placeholder="{{ call .T "ui.label.password" nil }}"
                                            name="password"
                                            value=""
                                            data-validator-required>
-                                    <label for="password">Пароль</label>
+                                    <label for="password">{{ call .T "ui.label.password" nil }}</label>
                                     <div class="invalid-feedback">
                                         {{if $err := index .Errors "Password"}}
                                             <span style="color:red;">{{ $err.Message }}</span>
@@ -66,10 +66,10 @@
                                            value="0">
                                     <input type="checkbox" class="custom-control-input" id="remember" name="remember"
                                            value="1">
-                                    <label class="custom-control-label" for="remember">Запомнить</label>
+                                    <label class="custom-control-label" for="remember">{{ call .T "ui.button.remember" nil }}</label>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                            <button type="submit" class="btn btn-primary btn-block">{{ call .T "ui.button.login" nil }}</button>
                         </form>
                     </div>
                 </div>

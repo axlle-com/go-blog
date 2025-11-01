@@ -195,7 +195,7 @@ func (s *GalleryService) galleryImageUpdate(gallery *models.Gallery) error {
 	}
 
 	if len(errSlice) > 0 {
-		err = errors.New("были ошибки при сохранении изображения")
+		err = errors.New("image saving errors occurred")
 	}
 
 	gallery.Images = slice

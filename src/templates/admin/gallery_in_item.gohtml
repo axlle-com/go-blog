@@ -1,8 +1,10 @@
 {{ define "admin.gallery_in_item" }}
+    {{ $root := . }}
+    {{ $model := or .infoBlock .post .category .tag }}
     <div class="catalog-tabs">
-        {{ if .Galleries }}
+        {{ if $model.Galleries }}
             {{ $index := 0 }}
-            {{ range .Galleries }}
+            {{ range $model.Galleries }}
                 <div class="js-galleries-general-block">
                     <input
                             type="hidden"
@@ -12,7 +14,7 @@
                         <div class="col-md-12">
                             <label class="control-label button-100" for="js-gallery-input-{{ .GetID }}">
                                 <a type="button" class="btn btn-primary catalog-tabs-add">
-                                    Загрузить фото
+                                    {{ call $root.T "ui.label.upload_photo" nil }}
                                 </a>
                             </label>
                             <input
@@ -52,7 +54,7 @@
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Заголовок"
+                                                    placeholder="{{ call $root.T "ui.label.title" nil }}"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][title]"
                                                     value="{{ ptrStr .GetTitle }}">
                                             <div class="invalid-feedback"></div>
@@ -60,7 +62,7 @@
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Описание"
+                                                    placeholder="{{ call $root.T "ui.placeholder.description" nil }}"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][description]"
                                                     value="{{ ptrStr .GetDescription }}">
                                             <div class="invalid-feedback"></div>
@@ -68,7 +70,7 @@
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="Сортировка"
+                                                    placeholder="{{ call $root.T "ui.placeholder.sort" nil }}"
                                                     type="number"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][sort]"
                                                     value="{{ .GetSort }}">
@@ -90,7 +92,7 @@
                     <div class="col-md-12">
                         <label class="control-label button-100" for="js-gallery-input-0">
                             <a type="button" class="btn btn-primary catalog-tabs-add">
-                                Загрузить фото
+                                {{ call $root.T "ui.label.upload_photo" nil }}
                             </a>
                         </label>
                         <input

@@ -7,7 +7,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
-	app "github.com/axlle-com/blog/app/service"
+	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"

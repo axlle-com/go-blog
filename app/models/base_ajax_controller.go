@@ -123,19 +123,43 @@ func PrepareTemplateData(ctx *gin.Context, obj any, fallbackT func(id string, da
 		tFunc = fallbackT
 	}
 
-	// Добавляем T в данные
+	// Добавляем T в данные и во вложенные settings
 	switch v := obj.(type) {
 	case gin.H:
 		v["T"] = tFunc
+		// Добавляем T и Title во вложенные settings, если они есть
+		addTToSettings(v, tFunc)
 		return v
 	case map[string]any:
 		v["T"] = tFunc
+		// Добавляем T и Title во вложенные settings, если они есть
+		addTToSettings(v, tFunc)
 		return v
 	default:
 		// Если obj не map, создаём новый gin.H
 		return gin.H{
 			"T":    tFunc,
 			"data": obj,
+		}
+	}
+}
+
+// addTToSettings добавляет T и Title во вложенные объекты settings
+func addTToSettings(data map[string]any, tFunc func(id string, data map[string]any, n ...int) string) {
+	if settings, ok := data["settings"]; ok {
+		switch s := settings.(type) {
+		case gin.H:
+			s["T"] = tFunc
+			// Добавляем Title из корневого контекста, если он есть
+			if title, ok := data["title"]; ok {
+				s["Title"] = title
+			}
+		case map[string]any:
+			s["T"] = tFunc
+			// Добавляем Title из корневого контекста, если он есть
+			if title, ok := data["title"]; ok {
+				s["Title"] = title
+			}
 		}
 	}
 }

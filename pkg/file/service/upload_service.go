@@ -34,7 +34,7 @@ func NewUploadService(
 func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder string, user contract.User) (path string, err error) {
 	ext, contentType := s.safeExt(file)
 	if !s.isImage(contentType) {
-		return "", fmt.Errorf("файл:%s не является изображением", file.Filename)
+		return "", fmt.Errorf("[file][UploadService][SaveUploadedFile] file:%s is not an image", file.Filename)
 	}
 
 	newUUID := uuid.New()

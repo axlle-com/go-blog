@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	i18nsvc "github.com/axlle-com/blog/app/services/i18n"
+	i18nsvc "github.com/axlle-com/blog/app/service/i18n"
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
@@ -13,7 +13,17 @@ const CtxLocKey = "loc"
 
 func Language(i18n *i18nsvc.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		loc := i18n.Localizer(c.Request)
+		request := c.Request
+
+		accept := request.Header.Get("Accept-Language")
+		lang := request.URL.Query().Get("lang")
+		if lang == "" {
+			if c, err := request.Cookie("lang"); err == nil {
+				lang = c.Value
+			}
+		}
+
+		loc := i18n.Localizer(lang, accept)
 
 		// Если пришёл ?lang=xx — обновим cookie, чтобы закрепить язык
 		if lang := c.Query("lang"); lang != "" {

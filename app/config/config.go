@@ -70,13 +70,13 @@ func LoadConfig() (err error) {
 		var rootDir string
 		rootDir, err = instance.root()
 		if err != nil {
-			err = fmt.Errorf("ошибка определения корневой директории: %w", err)
+			err = fmt.Errorf("error determining root directory: %w", err)
 			return
 		}
 
 		err = godotenv.Load(filepath.Join(rootDir, ".env"))
 		if err != nil {
-			err = fmt.Errorf("ошибка при загрузке .env файла: %v. Скопируйте файл .env.example в .env", err)
+			err = fmt.Errorf("error loading .env file: %v. Copy .env.example to .env", err)
 			return
 		}
 
@@ -143,7 +143,7 @@ func LoadConfig() (err error) {
 func Config() contract.Config {
 	if instance == nil {
 		if err := LoadConfig(); err != nil {
-			log.Fatalf("\x1b[1;91m%s\x1b[0m", "Ошибка загрузки конфигурации: "+err.Error())
+			log.Fatalf("\x1b[1;91m%s\x1b[0m", "[config][Config] configuration loading error: "+err.Error())
 		}
 	}
 	return instance
@@ -387,7 +387,7 @@ func (c *config) root() (string, error) {
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return "", fmt.Errorf("не удалось найти корневую директорию модуля")
+			return "", fmt.Errorf("failed to find module root directory")
 		}
 		dir = parent
 	}

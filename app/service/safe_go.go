@@ -13,7 +13,7 @@ func SafeGo(wg *sync.WaitGroup, fn func()) {
 		defer wg.Done()
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Errorf("goroutine panic: %v\n%s", r, debug.Stack())
+				logger.Errorf("[service][SafeGo] goroutine panic: %v\n%s", r, debug.Stack())
 			}
 		}()
 		fn()

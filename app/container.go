@@ -5,6 +5,7 @@ import (
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
+	i18nsvc "github.com/axlle-com/blog/app/service/i18n"
 	"github.com/axlle-com/blog/app/service/mailer"
 	mailerQueue "github.com/axlle-com/blog/app/service/mailer/queue"
 	"github.com/axlle-com/blog/app/service/migrate"
@@ -12,7 +13,6 @@ import (
 	"github.com/axlle-com/blog/app/service/scheduler"
 	"github.com/axlle-com/blog/app/service/storage"
 	"github.com/axlle-com/blog/app/service/view"
-	i18nsvc "github.com/axlle-com/blog/app/services/i18n"
 	"github.com/axlle-com/blog/pkg/alias"
 	analyticMigrate "github.com/axlle-com/blog/pkg/analytic/db/migrate"
 	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
@@ -167,6 +167,29 @@ type Container struct {
 
 	Migrator contract.Migrator
 	Seeder   contract.Seeder
+
+	// Controllers
+	AdminWebPostController       postAdminWeb.PostController
+	AdminAjaxPostController      postAjax.PostController
+	AdminApiPostController       postApi.Controller
+	AdminWebCategoryController   postAdminWeb.CategoryController
+	AdminAjaxCategoryController  postAjax.CategoryController
+	AdminWebTagController        postAdminWeb.TagController
+	AdminAjaxTagController       postAjax.TagController
+	AdminWebInfoBlockController  infoBlockAdminWeb.InfoBlockWebController
+	AdminAjaxInfoBlockController infoBlockAdminAjax.InfoBlockController
+	AdminWebTemplateController   templateAdminWeb.TemplateWebController
+	AdminAjaxTemplateController  templateAdminAjax.TemplateController
+	AdminWebMessageController    messageAdminWeb.MessageWebController
+	AdminAjaxMessageController   messageAdminAjax.MessageController
+	AdminAjaxGalleryController   galleryAjax.Controller
+	AdminWebMenuController       menuAdminWeb.Controller
+	AdminAjaxMenuController      menuAdminAjax.ControllerMenu
+	AdminAjaxMenuItemController  menuAdminAjax.ControllerMenuItem
+	AdminWebFileController       fileAdminWeb.Controller
+	FrontWebPostController       postFrontWeb.PostController
+	FrontAjaxMessageController   messageFrontWeb.MessageController
+	FrontWebUserController       userFrontWeb.Controller
 }
 
 func NewContainer(cfg contract.Config, db contract.DB) *Container {
@@ -323,6 +346,165 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		},
 	})
 
+	// Initialize Controllers
+	adminWebPostController := postAdminWeb.NewWebPostController(
+		newPostService,
+		newPostCollectionService,
+		categoryService,
+		newCategoriesService,
+		postTagCollectionService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+		newBlockProvider,
+	)
+
+	adminAjaxPostController := postAjax.NewPostController(
+		newPostService,
+		newPostCollectionService,
+		categoryService,
+		postTagCollectionService,
+		newCategoriesService,
+		newTemplateProvider,
+		newUserProvider,
+		newBlockProvider,
+	)
+
+	adminApiPostController := postApi.New(
+		newPostService,
+		categoryService,
+		newCategoriesService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+	)
+
+	adminWebCategoryController := postAdminWeb.NewWebCategoryController(
+		newCategoriesService,
+		categoryService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+		newBlockProvider,
+	)
+
+	adminAjaxCategoryController := postAjax.NewCategoryController(
+		newCategoriesService,
+		categoryService,
+		newTemplateProvider,
+		newUserProvider,
+		newBlockProvider,
+	)
+
+	adminWebTagController := postAdminWeb.NewWebTagController(
+		postTagService,
+		postTagCollectionService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+		newBlockProvider,
+	)
+
+	adminAjaxTagController := postAjax.NewTagController(
+		postTagService,
+		postTagCollectionService,
+		newTemplateProvider,
+		newUserProvider,
+		newBlockProvider,
+	)
+
+	adminWebInfoBlockController := infoBlockAdminWeb.NewInfoBlockWebController(
+		newBlockService,
+		newBlockCollectionService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+	)
+
+	adminAjaxInfoBlockController := infoBlockAdminAjax.NewInfoBlockController(
+		newBlockService,
+		newBlockCollectionService,
+		newTemplateProvider,
+		newUserProvider,
+	)
+
+	adminWebTemplateController := templateAdminWeb.NewTemplateWebController(
+		newTemplateService,
+		newTemplateCollectionService,
+		newUserProvider,
+	)
+
+	adminAjaxTemplateController := templateAdminAjax.NewTemplateController(
+		newTemplateService,
+		newTemplateCollectionService,
+		newUserProvider,
+	)
+
+	adminWebMessageController := messageAdminWeb.NewMessageWebController(
+		newMessageService,
+		newMessageCollectionService,
+		newUserProvider,
+	)
+
+	adminAjaxMessageController := messageAdminAjax.NewMessageController(
+		newMessageService,
+		newMessageCollectionService,
+		newUserProvider,
+	)
+
+	adminAjaxGalleryController := galleryAjax.New(
+		newGalleryRepo,
+		newImageRepo,
+		newImageService,
+	)
+
+	adminWebMenuController := menuAdminWeb.NewMenuWebController(
+		newMenuService,
+		newMenuCollectionService,
+		menuItemService,
+		menuItemCollectionService,
+		newTemplateProvider,
+		newPostProvider,
+	)
+
+	adminAjaxMenuController := menuAdminAjax.NewMenuAjaxController(
+		newMenuService,
+		newMenuCollectionService,
+		newTemplateProvider,
+		newPostProvider,
+	)
+
+	adminAjaxMenuItemController := menuAdminAjax.NewMenuItemAjaxController(
+		menuItemService,
+		menuItemCollectionService,
+	)
+
+	adminWebFileController := fileAdminWeb.NewFileController(
+		uploadService,
+		newFileService,
+	)
+
+	frontWebPostController := postFrontWeb.NewFrontWebController(
+		newView,
+		newPostService,
+		newPostCollectionService,
+		categoryService,
+		newCategoriesService,
+		newTemplateProvider,
+		newUserProvider,
+		newGalleryProvider,
+	)
+
+	frontAjaxMessageController := messageFrontWeb.NewMessageController(
+		newMailService,
+	)
+
+	frontWebUserController := userFrontWeb.NewUserWebController(
+		newUserService,
+		newAuthService,
+		newCache,
+	)
+
 	return &Container{
 		Config:    cfg,
 		Queue:     newQueue,
@@ -407,205 +589,28 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 		Migrator: newMigrator,
 		Seeder:   seeder,
+
+		// Controllers
+		AdminWebPostController:       adminWebPostController,
+		AdminAjaxPostController:      adminAjaxPostController,
+		AdminApiPostController:       adminApiPostController,
+		AdminWebCategoryController:   adminWebCategoryController,
+		AdminAjaxCategoryController:  adminAjaxCategoryController,
+		AdminWebTagController:        adminWebTagController,
+		AdminAjaxTagController:       adminAjaxTagController,
+		AdminWebInfoBlockController:  adminWebInfoBlockController,
+		AdminAjaxInfoBlockController: adminAjaxInfoBlockController,
+		AdminWebTemplateController:   adminWebTemplateController,
+		AdminAjaxTemplateController:  adminAjaxTemplateController,
+		AdminWebMessageController:    adminWebMessageController,
+		AdminAjaxMessageController:   adminAjaxMessageController,
+		AdminAjaxGalleryController:   adminAjaxGalleryController,
+		AdminWebMenuController:       adminWebMenuController,
+		AdminAjaxMenuController:      adminAjaxMenuController,
+		AdminAjaxMenuItemController:  adminAjaxMenuItemController,
+		AdminWebFileController:       adminWebFileController,
+		FrontWebPostController:       frontWebPostController,
+		FrontAjaxMessageController:   frontAjaxMessageController,
+		FrontWebUserController:       frontWebUserController,
 	}
-}
-
-func (c *Container) PostApiController() postApi.Controller {
-	return postApi.New(
-		c.PostService,
-		c.CategoryService,
-		c.CategoriesService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-	)
-}
-
-func (c *Container) PostController() postAjax.PostController {
-	return postAjax.NewPostController(
-		c.PostService,
-		c.PostsService,
-		c.CategoryService,
-		c.PostTagCollectionService,
-		c.CategoriesService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) PostWebController() postAdminWeb.PostController {
-	return postAdminWeb.NewWebPostController(
-		c.PostService,
-		c.PostsService,
-		c.CategoryService,
-		c.CategoriesService,
-		c.PostTagCollectionService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) PostTagWebController() postAdminWeb.TagController {
-	return postAdminWeb.NewWebTagController(
-		c.PostTagService,
-		c.PostTagCollectionService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) PostTagAjaxController() postAjax.TagController {
-	return postAjax.NewTagController(
-		c.PostTagService,
-		c.PostTagCollectionService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) CategoryWebController() postAdminWeb.CategoryController {
-	return postAdminWeb.NewWebCategoryController(
-		c.CategoriesService,
-		c.CategoryService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) CategoryController() postAjax.CategoryController {
-	return postAjax.NewCategoryController(
-		c.CategoriesService,
-		c.CategoryService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.InfoBlockProvider,
-	)
-}
-
-func (c *Container) GalleryAjaxController() galleryAjax.Controller {
-	return galleryAjax.New(
-		c.GalleryRepo,
-		c.ImageRepo,
-		c.ImageService,
-	)
-}
-
-func (c *Container) InfoBlockController() infoBlockAdminAjax.InfoBlockController {
-	return infoBlockAdminAjax.NewInfoBlockController(
-		c.InfoBlockService,
-		c.InfoBlockCollectionService,
-		c.TemplateProvider,
-		c.UserProvider,
-	)
-}
-
-func (c *Container) InfoBlockWebController() infoBlockAdminWeb.InfoBlockWebController {
-	return infoBlockAdminWeb.NewInfoBlockWebController(
-		c.InfoBlockService,
-		c.InfoBlockCollectionService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-	)
-}
-
-func (c *Container) PostFrontWebController() postFrontWeb.PostController {
-	return postFrontWeb.NewFrontWebController(
-		c.View,
-		c.PostService,
-		c.PostsService,
-		c.CategoryService,
-		c.CategoriesService,
-		c.TemplateProvider,
-		c.UserProvider,
-		c.GalleryProvider,
-	)
-}
-
-func (c *Container) TemplateWebController() templateAdminWeb.TemplateWebController {
-	return templateAdminWeb.NewTemplateWebController(
-		c.TemplateService,
-		c.TemplateCollectionService,
-		c.UserProvider,
-	)
-}
-
-func (c *Container) TemplateController() templateAdminAjax.TemplateController {
-	return templateAdminAjax.NewTemplateController(
-		c.TemplateService,
-		c.TemplateCollectionService,
-		c.UserProvider,
-	)
-}
-
-func (c *Container) MessageController() messageAdminWeb.MessageWebController {
-	return messageAdminWeb.NewMessageWebController(
-		c.MessageService,
-		c.MessageCollectionService,
-		c.UserProvider,
-	)
-}
-
-func (c *Container) MessageAjaxController() messageAdminAjax.MessageController {
-	return messageAdminAjax.NewMessageController(
-		c.MessageService,
-		c.MessageCollectionService,
-		c.UserProvider,
-	)
-}
-
-func (c *Container) MessageFrontController() messageFrontWeb.MessageController {
-	return messageFrontWeb.NewMessageController(
-		c.MailService,
-	)
-}
-
-func (c *Container) UserFrontController() userFrontWeb.Controller {
-	return userFrontWeb.NewUserWebController(
-		c.UserService,
-		c.UserAuthService,
-		c.Cache,
-	)
-}
-
-func (c *Container) FileController() fileAdminWeb.Controller {
-	return fileAdminWeb.NewFileController(
-		c.FileUploadService,
-		c.FileService,
-	)
-}
-
-func (c *Container) MenuController() menuAdminWeb.Controller {
-	return menuAdminWeb.NewMenuWebController(
-		c.MenuService,
-		c.MenuCollectionService,
-		c.MenuItemService,
-		c.MenuItemCollectionService,
-		c.TemplateProvider,
-		c.PostProvider,
-	)
-}
-
-func (c *Container) MenuItemAjaxController() menuAdminAjax.ControllerMenuItem {
-	return menuAdminAjax.NewMenuItemAjaxController(
-		c.MenuItemService,
-		c.MenuItemCollectionService,
-	)
-}
-
-func (c *Container) MenuAjaxController() menuAdminAjax.ControllerMenu {
-	return menuAdminAjax.NewMenuAjaxController(
-		c.MenuService,
-		c.MenuCollectionService,
-		c.TemplateProvider,
-		c.PostProvider,
-	)
 }

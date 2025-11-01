@@ -2,7 +2,6 @@ package i18n
 
 import (
 	"encoding/json"
-	"net/http"
 	"path/filepath"
 
 	"github.com/axlle-com/blog/app/logger"
@@ -16,8 +15,8 @@ type Service struct {
 }
 
 func New(cfg contract.Config) *Service {
-	b := i18n.NewBundle(language.English)
-	b.RegisterUnmarshalFunc("json", json.Unmarshal)
+	newBundle := i18n.NewBundle(language.English)
+	newBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
 	// Используем конфиг для получения пути к файлам локализации
 	localesDir := cfg.SrcFolderBuilder("services/i18n/locales")
@@ -25,33 +24,24 @@ func New(cfg contract.Config) *Service {
 	// Загружаем файлы из файловой системы
 	for _, lang := range []string{"en", "ru"} {
 		path := filepath.Join(localesDir, lang+".json")
-		if _, err := b.LoadMessageFile(path); err != nil {
+		if _, err := newBundle.LoadMessageFile(path); err != nil {
 			logger.Errorf("[I18n] Failed to load locale file %s: %v", path, err)
 			panic(err)
 		}
 		logger.Infof("[I18n] Loaded locale file: %s", path)
 	}
-	return &Service{bundle: b}
+	return &Service{bundle: newBundle}
 }
 
-// Localizer строит локализатор по приоритету: query?lang → cookie(lang) → Accept-Language → en.
-func (s *Service) Localizer(r *http.Request) *i18n.Localizer {
-	accept := r.Header.Get("Accept-Language")
-	lang := r.URL.Query().Get("lang")
-	if lang == "" {
-		if c, err := r.Cookie("lang"); err == nil {
-			lang = c.Value
+func (s *Service) Localizer(langs ...string) *i18n.Localizer {
+	var tags []string
+
+	for _, lang := range langs {
+		if lang != "" {
+			tags = append(tags, lang)
 		}
 	}
-
-	var tags []string
-	if lang != "" {
-		tags = append(tags, lang)
-	}
-	if accept != "" {
-		tags = append(tags, accept)
-	}
-	tags = append(tags, "en")
+	tags = []string{"en"}
 
 	return i18n.NewLocalizer(s.bundle, tags...)
 }

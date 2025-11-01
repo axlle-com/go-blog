@@ -169,7 +169,7 @@ func (r *categoryRepository) Create(category *models.PostCategory) error {
 	// Если есть родитель, получаем его данные.
 	var parent models.PostCategory
 	if err := r.db.First(&parent, *category.PostCategoryID).Error; err != nil {
-		return fmt.Errorf("не найден родитель: %w", err)
+		return fmt.Errorf("parent not found: %w", err)
 	}
 
 	if err := r.db.Create(category).Error; err != nil {
@@ -234,7 +234,7 @@ func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCa
 	var newParentCategory models.PostCategory
 	if newParent != 0 {
 		if err := r.db.First(&newParentCategory, newParent).Error; err != nil {
-			return fmt.Errorf("не найден новый родитель: %w", err)
+			return fmt.Errorf("new parent not found: %w", err)
 		}
 	}
 

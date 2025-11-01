@@ -6,7 +6,7 @@
             <div class="col-md-6 mb-3">
                 <div class="card">
                     <div class="card-header">
-                        Инфо-блок
+                        {{ call $.T "ui.label.info_block" nil }}
                         <div class="btn-group btn-group-sm ml-auto" role="group">
                             <button type="button" class="btn btn-light btn-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -98,10 +98,10 @@
                             </div>
                             <div>
                                 <div class="form-group small">
-                                    <label for="blogTitle">Позиция</label>
+                                    <label for="blogTitle">{{ call $.T "ui.label.position" nil }}</label>
                                     <select
                                             class="form-control select2"
-                                            data-placeholder="Позиция"
+                                            data-placeholder="{{ call $.T "ui.label.position" nil }}"
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             name="info_blocks[{{ $index }}][position]"
@@ -118,7 +118,7 @@
                                 <div class="form-group small">
                                     <input
                                             class="form-control form-shadow"
-                                            placeholder="Сортировка"
+                                            placeholder="{{ call $.T "ui.placeholder.sort" nil }}"
                                             type="number"
                                             name="info_blocks[{{ $index }}][sort]"
                                             value="{{ .GetSort }}">

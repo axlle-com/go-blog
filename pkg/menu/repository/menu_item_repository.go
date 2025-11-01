@@ -179,7 +179,7 @@ func (r *menuItemRepository) Create(menuItem *models.MenuItem) error {
 	// Если есть родитель, получаем его данные.
 	var parent models.MenuItem
 	if err := r.db.First(&parent, *menuItem.MenuItemID).Error; err != nil {
-		return fmt.Errorf("не найден родитель: %w", err)
+		return fmt.Errorf("parent not found: %w", err)
 	}
 
 	if err := r.db.Create(menuItem).Error; err != nil {
@@ -245,7 +245,7 @@ func (r *menuItemRepository) Update(new *models.MenuItem, old *models.MenuItem) 
 	var newParentMenuItem models.MenuItem
 	if newParent != 0 {
 		if err := r.db.First(&newParentMenuItem, newParent).Error; err != nil {
-			return fmt.Errorf("не найден новый родитель: %w", err)
+			return fmt.Errorf("new parent not found: %w", err)
 		}
 	}
 

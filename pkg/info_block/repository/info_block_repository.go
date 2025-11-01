@@ -97,7 +97,7 @@ func (r *infoBlockRepository) Delete(infoBlock *models.InfoBlock) error {
 	if infoBlock.Deleting() {
 		return r.db.Delete(&models.InfoBlock{}, infoBlock.ID).Error
 	}
-	return errors.New("при удалении произошли ошибки")
+	return errors.New("deletion errors occurred")
 }
 
 func (r *infoBlockRepository) GetAll() ([]*models.InfoBlock, error) {

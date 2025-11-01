@@ -1,7 +1,7 @@
 {{ define "default.footer" }}
     <footer class="bg-dark text-white text-center py-3">
         <div class="container">
-            <p>&copy; 2024 Визитка. Все права защищены.</p>
+            <p>&copy; 2024 {{ call .T "front.label.business_card" nil }}. {{ call .T "front.label.all_rights_reserved" nil }}</p>
         </div>
     </footer>
     <script src="/public/app.js"></script>

@@ -87,7 +87,7 @@ func (r *postRepository) Delete(post *models.Post) error {
 	if post.Deleting() {
 		return r.db.Delete(&models.Post{}, post.ID).Error
 	}
-	return errors.New("при удалении произошли ошибки")
+	return errors.New("deletion errors occurred")
 }
 
 func (r *postRepository) GetAll() ([]*models.Post, error) {

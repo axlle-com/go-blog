@@ -67,7 +67,7 @@ func (s *ImageService) DeleteImages(images []*models.Image) (err error) {
 			}
 
 			if err = errCollection.Error(); err != nil {
-				return errors.New("ошибки при удалении изображений")
+				return errors.New("image deletion errors occurred")
 			}
 		}
 	}

@@ -3,13 +3,13 @@
         <div class="card-body">
             <div class="btn-group btn-group-sm mb-3" role="group">
                 <a class="btn btn-light has-icon" href="{{ .templateModel.AdminURL }}/form">
-                    <i class="material-icons mr-1">add_circle_outline</i>Новая
+                    <i class="material-icons mr-1">add_circle_outline</i>{{ call .T "ui.button.new" nil }}
                 </a>
                 <a type="button" class="btn btn-light has-icon" href="{{ .templateModel.AdminURL }}">
-                    <i class="material-icons mr-1">refresh</i>Обновить
+                    <i class="material-icons mr-1">refresh</i>{{ call .T "ui.button.refresh" nil }}
                 </a>
                 <button type="button" class="btn btn-light has-icon">
-                    <i class="mr-1" data-feather="paperclip"></i>Export
+                    <i class="mr-1" data-feather="paperclip"></i>{{ call .T "ui.button.export" nil }}
                 </button>
             </div>
             <div class="table-responsive">
@@ -18,7 +18,7 @@
                         class="table table-bordered table-sm has-checkAll mb-0 fixed-table"
                         data-bulk-target="#bulk-dropdown"
                         data-checked-class="table-warning">
-                    <caption class="p-0 text-right"><small>Показано 1 to 5 из 57 строк</small></caption>
+                    <caption class="p-0 text-right"><small>{{ call .T "ui.paginator.showing" (dict "from" "1" "to" "5" "total" "57") }}</small></caption>
                     <thead class="thead-primary">
                     <tr class="column-filter">
                         <th colspan="2" class="width-5"></th>
@@ -30,7 +30,7 @@
                                         value="{{ .filter.PrintID }}"
                                         name="id"
                                         class="form-control form-control-sm border-primary"
-                                        placeholder="Номер">
+                                        placeholder="{{ call .T "ui.label.number" nil }}">
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
@@ -42,7 +42,7 @@
                                         value="{{ ptrStr .filter.Title }}"
                                         type="text"
                                         class="form-control form-control-sm border-primary"
-                                        placeholder="Заголовок">
+                                        placeholder="{{ call .T "ui.label.title" nil }}">
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
@@ -54,7 +54,7 @@
                                         value="{{ ptrStr .filter.Name }}"
                                         type="text"
                                         class="form-control form-control-sm border-primary"
-                                        placeholder="Заголовок">
+                                        placeholder="{{ call .T "ui.label.title" nil }}">
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
                         </th>
@@ -64,7 +64,7 @@
                                         form="index-form-filter"
                                         class="form-control select2"
                                         data-allow-clear="true"
-                                        data-placeholder="Ресурс"
+                                        data-placeholder="{{ call .T "ui.label.resource" nil }}"
                                         data-select2-search="true"
                                         name="resource_name">
                                     <option></option>
@@ -85,7 +85,7 @@
                                         form="index-form-filter"
                                         class="form-control select2"
                                         data-allow-clear="true"
-                                        data-placeholder="Автор"
+                                        data-placeholder="{{ call .T "ui.label.author" nil }}"
                                         data-select2-search="true"
                                         name="user_id">
                                     <option></option>
@@ -108,7 +108,7 @@
                                         name="date"
                                         value="{{ ptrStr .filter.Date }}"
                                         class="form-control form-control-sm border-primary date-range-picker flatpickr-input"
-                                        placeholder="Дата создания"
+                                        placeholder="{{ call .T "ui.label.creation_date" nil }}"
                                         readonly="readonly">
                                 <i data-toggle="clear" class="material-icons">clear</i>
                             </label>
@@ -126,14 +126,14 @@
                                 <label class="custom-control-label" for="checkAll"></label>
                             </div>
                         </th>
-                        <th scope="col" class="text-center">Детали</th>
+                        <th scope="col" class="text-center">{{ call .T "ui.label.details" nil }}</th>
                         <th scope="col"><a href="javascript:void(0)" class="sorting asc">ID</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Заголовок</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Название</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Ресурс</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Автор</a></th>
-                        <th scope="col"><a href="javascript:void(0)" class="sorting">Дата создания</a></th>
-                        <th scope="col" class="text-center">Действие</th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">{{ call .T "ui.label.title" nil }}</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">{{ call .T "ui.label.name" nil }}</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">{{ call .T "ui.label.resource" nil }}</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">{{ call .T "ui.label.author" nil }}</a></th>
+                        <th scope="col"><a href="javascript:void(0)" class="sorting">{{ call .T "ui.label.creation_date" nil }}</a></th>
+                        <th scope="col" class="text-center">{{ call .T "ui.label.action" nil }}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -183,8 +183,8 @@
                         <tr class="detail-row collapse" id="detail-{{.ID}}">
                             <td colspan="10">
                                 <ul class="data-detail ml-5">
-                                    <li><span>Заголовок: </span> <span>{{ .Title }}</span></li>
-                                    <li><span>Описание короткое: </span>
+                                    <li><span>{{ call $.T "ui.detail.title" nil }}</span> <span>{{ .Title }}</span></li>
+                                    <li><span>{{ call $.T "ui.detail.short_description" nil }}</span>
                                         <span>{{ .Name }}</span>
                                     </li>
                                 </ul>
@@ -207,14 +207,14 @@
                     </button>
                     <div class="dropdown-menu">
                         <button class="dropdown-item has-icon" type="button">
-                            <i class="mr-2" data-feather="copy"></i>Копировать
+                            <i class="mr-2" data-feather="copy"></i>{{ call .T "ui.button.copy" nil }}
                         </button>
                         <button class="dropdown-item has-icon" type="button">
-                            <i class="mr-2" data-feather="archive"></i>В архив
+                            <i class="mr-2" data-feather="archive"></i>{{ call .T "ui.button.archive" nil }}
                         </button>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item has-icon text-danger" type="button">
-                            <i class="mr-2" data-feather="trash"></i>Удалить
+                            <i class="mr-2" data-feather="trash"></i>{{ call .T "ui.button.delete" nil }}
                         </button>
                     </div>
                 </div>

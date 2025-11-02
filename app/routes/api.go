@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/gin-gonic/gin"
 )
 
-func InitApiRoutes(r *gin.Engine, container *app.Container) {
+func InitApiRoutes(r *gin.Engine, container *di.Container) {
 	controller := container.AdminApiPostController
 
 	r.POST("/api/posts", controller.CreatePost)

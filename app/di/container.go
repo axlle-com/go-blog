@@ -1,4 +1,4 @@
-package app
+package di
 
 import (
 	"github.com/axlle-com/blog/app/config"

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/logger"
 )
 
-var container *app.Container
+var container *di.Container
 
 func main() {
 	var command string
@@ -23,7 +23,7 @@ func main() {
 		panic("db not initialized")
 	}
 
-	container = app.NewContainer(cfg, newDB)
+	container = di.NewContainer(cfg, newDB)
 
 	flag.StringVar(&command, "command", "", "Command to execute")
 	flag.Parse()

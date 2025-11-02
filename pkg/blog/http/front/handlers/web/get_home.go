@@ -11,7 +11,7 @@ import (
 func (c *postController) GetHome(ctx *gin.Context) {
 	post, err := c.postService.GetByParam("is_main", true)
 	if err != nil || post == nil {
-		logger.Debugf("[PostController][GetHome] Error: %v", err)
+		logger.Debugf("[blog][postController][GetHome] Error: %v", err)
 		post = &models.Post{}
 	}
 

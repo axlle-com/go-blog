@@ -13,10 +13,10 @@ import (
 )
 
 func Minify(config contract.Config) {
-	if !config.IsLocal() {
-		logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
-		return
-	}
+	//if !config.IsLocal() {
+	//	logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
+	//	return
+	//}
 
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
@@ -63,7 +63,6 @@ func minifyAdmin(minify *minify.M) {
 		"src/resources/plugins/sortablejs/Sortable.min.js",
 		"src/resources/plugins/js/script.min.js",
 		"src/resources/plugins/date-format/date-format.js",
-		"src/resources/plugins/npm/codemirror-bundle.js",
 	}
 
 	mergeAndMinifyFiles(minify, "text/css", adminCSS, "src/public/admin/app.css")
@@ -93,12 +92,13 @@ func minifySpring(minify *minify.M) {
 		"src/resources/spring/css/animate.css",
 		"src/resources/spring/css/owl.css",
 		"src/resources/spring/css/jquery.fancybox.css",
-		"src/resources/spring/css/responsive.css",
 		"src/resources/spring/css/style.css",
+		"src/resources/spring/css/responsive.css",
 	}
 	JS := []string{
 		"src/resources/spring/js/jquery.js",
 		"src/resources/spring/js/bootstrap.min.js",
+		"src/resources/spring/js/appear.js",
 		"src/resources/spring/js/pagenav.js",
 		"src/resources/spring/js/jquery.scrollTo.js",
 		"src/resources/spring/js/jquery.fancybox.pack.js",

@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/service"
 	"github.com/bxcodec/faker/v3"
@@ -103,7 +103,7 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 
 	cfg := config.Config()
 	newDB, _ := db.SetupDB(cfg)
-	container := app.NewContainer(cfg, newDB)
+	container := di.NewContainer(cfg, newDB)
 
 	err := container.Migrator.Rollback()
 	if err != nil {
@@ -324,7 +324,7 @@ func TestSuccessfulUpdatePostAlias(t *testing.T) {
 
 	cfg := config.Config()
 	newDB, _ := db.SetupDB(cfg)
-	container := app.NewContainer(cfg, newDB)
+	container := di.NewContainer(cfg, newDB)
 
 	err := container.Migrator.Rollback()
 	if err != nil {

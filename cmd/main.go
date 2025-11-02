@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -38,7 +38,7 @@ func main() {
 		panic("db not initialized")
 	}
 
-	container := app.NewContainer(cfg, newDB)
+	container := di.NewContainer(cfg, newDB)
 	router := Init(cfg, container)
 	container.Queue.Start(ctx, 5)
 	container.Scheduler.Start()
@@ -77,7 +77,7 @@ func main() {
 	logger.Info("[main][main] graceful shutdown complete")
 }
 
-func Init(config contract.Config, container *app.Container) *gin.Engine {
+func Init(config contract.Config, container *di.Container) *gin.Engine {
 	gob.Register(user.User{})
 
 	router := gin.Default()

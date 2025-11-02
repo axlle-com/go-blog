@@ -23,7 +23,7 @@ func (c *postController) DeletePostImage(ctx *gin.Context) {
 
 	err = c.postService.DeleteImageFile(post)
 	if err != nil {
-		logger.WithRequest(ctx).Errorf("[postController][DeletePostImage] Error: %v", err)
+		logger.WithRequest(ctx).Errorf("[blog][postController][DeletePostImage] Error: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		ctx.Abort()
 		return

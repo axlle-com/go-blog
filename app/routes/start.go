@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/axlle-com/blog/app"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/middleware"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/cache"
@@ -65,7 +65,7 @@ func SetupTestRouter() *gin.Engine {
 			panic("db not initialized")
 		}
 
-		container := app.NewContainer(cfg, newDB)
+		container := di.NewContainer(cfg, newDB)
 
 		err = container.Migrator.Migrate()
 		if err != nil {

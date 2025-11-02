@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/axlle-com/blog/app"
+	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/middleware"
 	analyticMiddleware "github.com/axlle-com/blog/app/middleware/analytic"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 )
 
-func InitWebRoutes(r *gin.Engine, container *app.Container) {
+func InitWebRoutes(r *gin.Engine, container *di.Container) {
 	analytic := analyticMiddleware.NewAnalytic(container.Queue)
 
 	r.GET("/health", func(ctx *gin.Context) {

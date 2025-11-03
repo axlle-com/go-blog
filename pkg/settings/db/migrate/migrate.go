@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/settings/models"
 	"gorm.io/gorm"
@@ -15,10 +16,11 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS ux_settings_ns_key_scope ON settings(namespace, key, scope);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS ix_settings_ns_scope ON settings(namespace, scope);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS ix_settings_value_gin ON settings USING gin(value jsonb_path_ops);`)
-	m.db.Exec(`CREATE INDEX IF NOT EXISTS ix_settings_sort ON settings(sort);`)
+	m.db.Exec(db.UniqueIndex("settings", "namespace", "key", "scope"))
+	m.db.Exec(db.CompositeIndex("settings", "namespace", "scope"))
+	m.db.Exec(db.GinIndex("settings", "value"))
+	m.db.Exec(db.CompositeIndex("settings", "sort"))
+
 	return nil
 }
 

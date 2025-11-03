@@ -25,9 +25,9 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.CreateHashIndex("menus", "uuid"))
-	m.db.Exec(db.CreateHashIndex("menu_items", "publisher_uuid"))
-	m.db.Exec(db.CreateHashIndex("menu_items", "url"))
+	m.db.Exec(db.HashIndex("menus", "uuid"))
+	m.db.Exec(db.HashIndex("menu_items", "publisher_uuid"))
+	m.db.Exec(db.HashIndex("menu_items", "url"))
 
 	return nil
 }

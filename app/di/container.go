@@ -192,6 +192,18 @@ type Container struct {
 	FrontWebUserController       userFrontWeb.Controller
 }
 
+type Api struct {
+	File      fileProvider.FileProvider
+	Image     apppPovider.ImageProvider
+	Gallery   apppPovider.GalleryProvider
+	Post      contract.PostProvider
+	Template  templateProvider.TemplateProvider
+	User      userProvider.UserProvider
+	Alias     alias.AliasProvider
+	InfoBlock apppPovider.InfoBlockProvider
+	Analytic  analyticProvider.AnalyticProvider
+}
+
 func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newQueue := queue.NewQueue()
 	newCache := cache.NewCache()
@@ -261,7 +273,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newCategoriesService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
 	categoryService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
 
-	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider)
+	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider, newTemplateProvider)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
 	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
@@ -293,12 +305,12 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	settingsMigrator := settingsMigrate.NewMigrator(db.PostgreSQL())
 
 	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
-	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, newUserProvider, newTemplateProvider)
+	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, newUserProvider, newTemplateProvider, newBlockProvider, cfg)
 	templateSeeder := templateDB.NewSeeder(newTemplateRepo)
-	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider)
+	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider, cfg)
 	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newUserProvider)
 
-	seeder := migrate.NewSeeder(userSeeder, templateSeeder, postSeeder, infoBlockSeeder, messageSeeder, menuSeeder)
+	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder)
 
 	newMigrator := migrate.NewMigrator(
 		db.PostgreSQL(),

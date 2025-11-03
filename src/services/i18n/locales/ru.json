@@ -1,23 +1,39 @@
 [
   {
-    "id": "ui.button.save",
-    "other": "Сохранить"
+    "id": "front.label.all_rights_reserved",
+    "other": "Все права защищены"
   },
   {
-    "id": "ui.button.cancel",
-    "other": "Отмена"
+    "id": "front.label.business_card",
+    "other": "Визитка"
+  },
+  {
+    "id": "ui.button.archive",
+    "other": "В архив"
+  },
+  {
+    "id": "ui.button.copy",
+    "other": "Копировать"
   },
   {
     "id": "ui.button.delete",
     "other": "Удалить"
   },
   {
-    "id": "ui.button.edit",
-    "other": "Редактировать"
+    "id": "ui.button.exit",
+    "other": "Выйти"
   },
   {
-    "id": "ui.button.create",
-    "other": "Создать"
+    "id": "ui.button.export",
+    "other": "Export"
+  },
+  {
+    "id": "ui.button.login",
+    "other": "Войти"
+  },
+  {
+    "id": "ui.button.logout",
+    "other": "Выход"
   },
   {
     "id": "ui.button.new",
@@ -28,344 +44,12 @@
     "other": "Обновить"
   },
   {
-    "id": "ui.button.export",
-    "other": "Export"
-  },
-  {
-    "id": "ui.button.exit",
-    "other": "Выйти"
-  },
-  {
-    "id": "ui.button.login",
-    "other": "Войти"
-  },
-  {
     "id": "ui.button.remember",
     "other": "Запомнить"
   },
   {
-    "id": "ui.button.copy",
-    "other": "Копировать"
-  },
-  {
-    "id": "ui.button.archive",
-    "other": "В архив"
-  },
-  {
-    "id": "ui.label.number",
-    "other": "Номер"
-  },
-  {
-    "id": "ui.label.title",
-    "other": "Заголовок"
-  },
-  {
-    "id": "ui.label.category",
-    "other": "Категория"
-  },
-  {
-    "id": "ui.label.template",
-    "other": "Шаблон"
-  },
-  {
-    "id": "ui.label.author",
-    "other": "Автор"
-  },
-  {
-    "id": "ui.label.resource",
-    "other": "Ресурс"
-  },
-  {
-    "id": "ui.label.name",
-    "other": "Название"
-  },
-  {
-    "id": "ui.label.details",
-    "other": "Детали"
-  },
-  {
-    "id": "ui.label.action",
-    "other": "Действие"
-  },
-  {
-    "id": "ui.label.creation_date",
-    "other": "Дата создания"
-  },
-  {
-    "id": "ui.label.login",
-    "other": "Логин"
-  },
-  {
-    "id": "ui.label.password",
-    "other": "Пароль"
-  },
-  {
-    "id": "ui.label.to_account",
-    "other": "в ваш аккаунт"
-  },
-  {
-    "id": "ui.tab.main",
-    "other": "Основное"
-  },
-  {
-    "id": "ui.tab.settings",
-    "other": "Настройки"
-  },
-  {
-    "id": "ui.tab.gallery",
-    "other": "Галерея"
-  },
-  {
-    "id": "ui.tab.info_blocks",
-    "other": "Инфо-блоки"
-  },
-  {
-    "id": "ui.fieldset.data_link",
-    "other": "Связь данных"
-  },
-  {
-    "id": "ui.fieldset.identification",
-    "other": "Идентификация"
-  },
-  {
-    "id": "ui.fieldset.link",
-    "other": "Ссылка"
-  },
-  {
-    "id": "ui.fieldset.seo",
-    "other": "SEO"
-  },
-  {
-    "id": "ui.fieldset.image",
-    "other": "Изображение"
-  },
-  {
-    "id": "ui.fieldset.publication",
-    "other": "Публикация"
-  },
-  {
-    "id": "ui.fieldset.sort",
-    "other": "Сортировка"
-  },
-  {
-    "id": "ui.fieldset.menu",
-    "other": "Меню"
-  },
-  {
-    "id": "ui.fieldset.tags",
-    "other": "Тэги"
-  },
-  {
-    "id": "ui.fieldset.widgets",
-    "other": "Виджеты"
-  },
-  {
-    "id": "ui.placeholder.select_widget",
-    "other": "Выберете виджет"
-  },
-  {
-    "id": "ui.checkbox.in_sitemap",
-    "other": "В карту сайта"
-  },
-  {
-    "id": "ui.placeholder.name",
-    "other": "Имя"
-  },
-  {
-    "id": "ui.label.publisher",
-    "other": "Паблишер"
-  },
-  {
-    "id": "ui.label.custom_link",
-    "other": "Произвольная ссылка"
-  },
-  {
-    "id": "ui.label.hierarchy_sort",
-    "other": "Иерархия и сортировка"
-  },
-  {
-    "id": "ui.label.parent_menu_item",
-    "other": "Родительский пункт меню"
-  },
-  {
-    "id": "ui.placeholder.parent",
-    "other": "Родитель"
-  },
-  {
-    "id": "ui.label.menu_item_params",
-    "other": "Параметры пункта"
-  },
-  {
-    "id": "ui.label.position",
-    "other": "Позиция"
-  },
-  {
-    "id": "ui.label.info_block",
-    "other": "Инфо-блок"
-  },
-  {
-    "id": "ui.label.inbox",
-    "other": "Входящие"
-  },
-  {
-    "id": "ui.placeholder.search",
-    "other": "Поиск..."
-  },
-  {
-    "id": "ui.label.profile",
-    "other": "Профиль"
-  },
-  {
-    "id": "ui.button.logout",
-    "other": "Выход"
-  },
-  {
-    "id": "ui.label.upload_photo",
-    "other": "Загрузить фото"
-  },
-  {
-    "id": "ui.placeholder.description",
-    "other": "Описание"
-  },
-  {
-    "id": "front.label.business_card",
-    "other": "Визитка"
-  },
-  {
-    "id": "front.label.about",
-    "other": "О себе"
-  },
-  {
-    "id": "front.label.services",
-    "other": "Услуги"
-  },
-  {
-    "id": "front.label.contacts",
-    "other": "Контакты"
-  },
-  {
-    "id": "front.label.login",
-    "other": "Вход"
-  },
-  {
-    "id": "front.label.welcome",
-    "other": "Добро пожаловать!"
-  },
-  {
-    "id": "front.label.post",
-    "other": "Пост"
-  },
-  {
-    "id": "front.label.email",
-    "other": "Email"
-  },
-  {
-    "id": "front.label.phone",
-    "other": "Телефон"
-  },
-  {
-    "id": "front.label.social_networks",
-    "other": "Социальные сети"
-  },
-  {
-    "id": "front.label.contact_me",
-    "other": "Свяжитесь со мной через один из следующих способов:"
-  },
-  {
-    "id": "front.label.all_rights_reserved",
-    "other": "Все права защищены"
-  },
-  {
-    "id": "front.label.about_description",
-    "other": "Я опытный разработчик веб-приложений с многолетним опытом работы в различных областях. Мои навыки включают создание эффективных решений и высококачественный дизайн."
-  },
-  {
-    "id": "front.label.welcome_description",
-    "other": "Я ваш лучший партнер в создании удивительных решений."
-  },
-  {
-    "id": "front.label.service",
-    "other": "Услуга"
-  },
-  {
-    "id": "ui.placeholder.normal",
-    "other": "Обычный"
-  },
-  {
-    "id": "ui.placeholder.short",
-    "other": "Короткий"
-  },
-  {
-    "id": "ui.placeholder.alias",
-    "other": "Алиас"
-  },
-  {
-    "id": "ui.placeholder.link",
-    "other": "Ссылка"
-  },
-  {
-    "id": "ui.placeholder.short_description",
-    "other": "Короткое описание"
-  },
-  {
-    "id": "ui.placeholder.seo_title",
-    "other": "Заголовок SEO"
-  },
-  {
-    "id": "ui.placeholder.seo_description",
-    "other": "Описание SEO"
-  },
-  {
-    "id": "ui.placeholder.specify_date",
-    "other": "Укажите дату"
-  },
-  {
-    "id": "ui.placeholder.sort",
-    "other": "Сортировка"
-  },
-  {
-    "id": "ui.placeholder.select_menu",
-    "other": "Выберете меню"
-  },
-  {
-    "id": "ui.placeholder.select_tag",
-    "other": "Выберете тэг"
-  },
-  {
-    "id": "ui.label.title_short",
-    "other": "Короткий"
-  },
-  {
-    "id": "ui.label.short_description",
-    "other": "Короткое описание"
-  },
-  {
-    "id": "ui.label.seo_title",
-    "other": "Заголовок SEO"
-  },
-  {
-    "id": "ui.label.seo_description",
-    "other": "Описание SEO"
-  },
-  {
-    "id": "ui.label.publication_date",
-    "other": "Дата публикации"
-  },
-  {
-    "id": "ui.label.publication_end_date",
-    "other": "Дата окончания публикации"
-  },
-  {
-    "id": "ui.checkbox.show_image",
-    "other": "Отобразить изображение"
-  },
-  {
-    "id": "ui.checkbox.show_image_in_category",
-    "other": "Отобразить изображение в категории"
-  },
-  {
-    "id": "ui.checkbox.show_date_in_post",
-    "other": "Показывать дату в посте"
+    "id": "ui.button.save",
+    "other": "Сохранить"
   },
   {
     "id": "ui.checkbox.display_on_main",
@@ -376,54 +60,243 @@
     "other": "Подключить комментарии"
   },
   {
+    "id": "ui.checkbox.favorites",
+    "other": "Избранное"
+  },
+  {
+    "id": "ui.checkbox.in_sitemap",
+    "other": "В карту сайта"
+  },
+  {
     "id": "ui.checkbox.published",
     "other": "Опубликовано"
   },
   {
-    "id": "ui.checkbox.favorites",
-    "other": "Избранное"
+    "id": "ui.checkbox.show_date_in_post",
+    "other": "Показывать дату в посте"
+  },
+  {
+    "id": "ui.checkbox.show_image",
+    "other": "Отобразить изображение"
+  },
+  {
+    "id": "ui.checkbox.show_image_in_category",
+    "other": "Отобразить изображение в категории"
   },
   {
     "id": "ui.checkbox.template_for_all",
     "other": "Шаблон для всех"
   },
   {
-    "id": "ui.detail.title",
-    "other": "Заголовок: "
+    "id": "ui.fieldset.data_link",
+    "other": "Связь данных"
   },
   {
-    "id": "ui.detail.short_description",
-    "other": "Описание короткое: "
+    "id": "ui.fieldset.identification",
+    "other": "Идентификация"
   },
   {
-    "id": "ui.detail.seo_title",
-    "other": "Заголовок SEO: "
+    "id": "ui.fieldset.image",
+    "other": "Изображение"
   },
   {
-    "id": "ui.detail.seo_description",
-    "other": "Описание SEO: "
+    "id": "ui.fieldset.link",
+    "other": "Ссылка"
+  },
+  {
+    "id": "ui.fieldset.menu",
+    "other": "Меню"
+  },
+  {
+    "id": "ui.fieldset.publication",
+    "other": "Публикация"
+  },
+  {
+    "id": "ui.fieldset.seo",
+    "other": "SEO"
+  },
+  {
+    "id": "ui.fieldset.sort",
+    "other": "Сортировка"
+  },
+  {
+    "id": "ui.fieldset.tags",
+    "other": "Тэги"
+  },
+  {
+    "id": "ui.fieldset.widgets",
+    "other": "Виджеты"
+  },
+  {
+    "id": "ui.label.action",
+    "other": "Действие"
+  },
+  {
+    "id": "ui.label.author",
+    "other": "Автор"
+  },
+  {
+    "id": "ui.label.category",
+    "other": "Категория"
+  },
+  {
+    "id": "ui.label.creation_date",
+    "other": "Дата создания"
+  },
+  {
+    "id": "ui.label.details",
+    "other": "Детали"
+  },
+  {
+    "id": "ui.label.inbox",
+    "other": "Входящие"
+  },
+  {
+    "id": "ui.label.info_block",
+    "other": "Инфо-блок"
+  },
+  {
+    "id": "ui.label.login",
+    "other": "Логин"
+  },
+  {
+    "id": "ui.label.name",
+    "other": "Название"
+  },
+  {
+    "id": "ui.label.number",
+    "other": "Номер"
+  },
+  {
+    "id": "ui.label.password",
+    "other": "Пароль"
+  },
+  {
+    "id": "ui.label.position",
+    "other": "Позиция"
+  },
+  {
+    "id": "ui.label.profile",
+    "other": "Профиль"
+  },
+  {
+    "id": "ui.label.publication_date",
+    "other": "Дата публикации"
+  },
+  {
+    "id": "ui.label.publication_end_date",
+    "other": "Дата окончания публикации"
+  },
+  {
+    "id": "ui.label.resource",
+    "other": "Ресурс"
+  },
+  {
+    "id": "ui.label.seo_description",
+    "other": "Описание SEO"
+  },
+  {
+    "id": "ui.label.seo_title",
+    "other": "Заголовок SEO"
+  },
+  {
+    "id": "ui.label.short_description",
+    "other": "Короткое описание"
+  },
+  {
+    "id": "ui.label.template",
+    "other": "Шаблон"
+  },
+  {
+    "id": "ui.label.title",
+    "other": "Заголовок"
+  },
+  {
+    "id": "ui.label.title_short",
+    "other": "Короткий"
+  },
+  {
+    "id": "ui.label.to_account",
+    "other": "в ваш аккаунт"
+  },
+  {
+    "id": "ui.label.upload_photo",
+    "other": "Загрузить фото"
   },
   {
     "id": "ui.paginator.showing",
     "other": "Показано {from} to {to} из {total} строк"
   },
   {
-    "id": "ui.button.add_block",
-    "other": "Добавить блок"
+    "id": "ui.placeholder.alias",
+    "other": "Алиас"
   },
   {
-    "id": "ui.placeholder.select_info_blocks",
+    "id": "ui.placeholder.link",
+    "other": "Ссылка"
+  },
+  {
+    "id": "ui.placeholder.name",
+    "other": "Имя"
+  },
+  {
+    "id": "ui.placeholder.normal",
+    "other": "Обычный"
+  },
+  {
+    "id": "ui.placeholder.search",
+    "other": "Поиск..."
+  },
+  {
+    "id": "ui.placeholder.select_menu",
+    "other": "Выберете меню"
+  },
+  {
+    "id": "ui.placeholder.select_tag",
+    "other": "Выберете тэг"
+  },
+  {
+    "id": "ui.placeholder.select_widget",
+    "other": "Выберете виджет"
+  },
+  {
+    "id": "ui.placeholder.seo_description",
+    "other": "Описание SEO"
+  },
+  {
+    "id": "ui.placeholder.seo_title",
+    "other": "Заголовок SEO"
+  },
+  {
+    "id": "ui.placeholder.short",
+    "other": "Короткий"
+  },
+  {
+    "id": "ui.placeholder.short_description",
+    "other": "Короткое описание"
+  },
+  {
+    "id": "ui.placeholder.sort",
+    "other": "Сортировка"
+  },
+  {
+    "id": "ui.placeholder.specify_date",
+    "other": "Укажите дату"
+  },
+  {
+    "id": "ui.tab.gallery",
+    "other": "Галерея"
+  },
+  {
+    "id": "ui.tab.info_blocks",
     "other": "Инфо-блоки"
   },
   {
-    "id": "auth.error.invalid_credentials",
-    "other": "Неверная почта или пароль."
+    "id": "ui.tab.main",
+    "other": "Основное"
   },
   {
-    "id": "cart.items",
-    "one": "{count} товар",
-    "few": "{count} товара",
-    "many": "{count} товаров",
-    "other": "{count} товаров"
+    "id": "ui.tab.settings",
+    "other": "Настройки"
   }
 ]

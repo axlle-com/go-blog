@@ -45,8 +45,8 @@ type Post struct {
 	UpdatedAt          *time.Time `gorm:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
 	DeletedAt          *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
-	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
-	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
+	GalleriesSnapshot  *datatypes.JSON `gorm:"type:jsonb" json:"galleries_snapshot"`
+	InfoBlocksSnapshot *datatypes.JSON `gorm:"type:jsonb" json:"info_blocks_snapshot"`
 
 	Category *PostCategory `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`
 	PostTags []*PostTag    `gorm:"-" json:"tags" form:"tags" binding:"-" ignore:"true"`

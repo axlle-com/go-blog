@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"gorm.io/gorm"
@@ -23,7 +24,7 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_templates_theme_name ON templates (theme, name);`)
+	m.db.Exec(db.UniqueIndex("templates", "theme", "name", "resource_name"))
 
 	return nil
 }

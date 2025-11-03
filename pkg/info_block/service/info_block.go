@@ -99,6 +99,10 @@ func (s *InfoBlockService) GetByIDs(ids []uint) ([]*models.InfoBlock, error) {
 	return s.infoBlockRepo.GetByIDs(ids)
 }
 
+func (s *InfoBlockService) FindByFilter(filter *models.InfoBlockFilter) (*models.InfoBlock, error) {
+	return s.infoBlockRepo.FindByFilter(filter)
+}
+
 func (s *InfoBlockService) GetForResourceByFilter(filter *models.InfoBlockFilter) []*models.InfoBlockResponse {
 	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
@@ -203,7 +207,7 @@ func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.Inf
 		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
 	}
 
-	s.infoBlockEventService.StartJob(collection)
+	s.infoBlockEventService.StartJob(collection) // @todo новый экшен attach нужен, не дело что в update запихал
 
 	return nil
 }

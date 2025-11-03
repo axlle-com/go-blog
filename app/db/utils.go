@@ -163,9 +163,27 @@ func IndexName(table string, columns ...string) string {
 	return "idx_" + strings.Join(parts, "_")
 }
 
-// CreateHashIndex создаёт HASH индекс по колонке: CREATE INDEX IF NOT EXISTS idx_<table>_<col> ON <table> USING hash (<col>);
+// HashIndex создаёт HASH индекс по колонке: CREATE INDEX IF NOT EXISTS idx_<table>_<col> ON <table> USING hash (<col>);
 // Важно: HASH индексы в PostgreSQL применяются к одной колонке. Для нескольких колонок создавайте отдельные индексы.
-func CreateHashIndex(table string, column string) string {
+func HashIndex(table string, column string) string {
 	name := IndexName(table, column)
 	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING hash (%s);", name, table, column)
+}
+
+func UniqueIndex(table string, columns ...string) string {
+	name := IndexName(table, columns...)
+	columnsStr := strings.Join(columns, ", ")
+	return fmt.Sprintf("CREATE UNIQUE INDEX IF NOT EXISTS %s ON %s (%s);", name, table, columnsStr)
+}
+
+func CompositeIndex(table string, columns ...string) string {
+	name := IndexName(table, columns...)
+	columnsStr := strings.Join(columns, ", ")
+	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s);", name, table, columnsStr)
+}
+
+// GinIndex создаёт GIN индекс для JSONB полей: CREATE INDEX IF NOT EXISTS idx_<table>_<col> ON <table> USING gin(<col> jsonb_path_ops);
+func GinIndex(table string, column string) string {
+	name := IndexName(table, column)
+	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING gin(%s jsonb_path_ops);", name, table, column)
 }

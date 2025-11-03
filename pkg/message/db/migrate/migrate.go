@@ -24,7 +24,7 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.CreateHashIndex("messages", "user_uuid"))
+	m.db.Exec(db.HashIndex("messages", "user_uuid"))
 
 	return nil
 }

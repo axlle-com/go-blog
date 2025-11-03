@@ -1,23 +1,39 @@
 [
   {
-    "id": "ui.button.save",
-    "other": "Save"
+    "id": "front.label.all_rights_reserved",
+    "other": "All rights reserved"
   },
   {
-    "id": "ui.button.cancel",
-    "other": "Cancel"
+    "id": "front.label.business_card",
+    "other": "Business Card"
+  },
+  {
+    "id": "ui.button.archive",
+    "other": "Archive"
+  },
+  {
+    "id": "ui.button.copy",
+    "other": "Copy"
   },
   {
     "id": "ui.button.delete",
     "other": "Delete"
   },
   {
-    "id": "ui.button.edit",
-    "other": "Edit"
+    "id": "ui.button.exit",
+    "other": "Exit"
   },
   {
-    "id": "ui.button.create",
-    "other": "Create"
+    "id": "ui.button.export",
+    "other": "Export"
+  },
+  {
+    "id": "ui.button.login",
+    "other": "Log in"
+  },
+  {
+    "id": "ui.button.logout",
+    "other": "Logout"
   },
   {
     "id": "ui.button.new",
@@ -28,344 +44,12 @@
     "other": "Refresh"
   },
   {
-    "id": "ui.button.export",
-    "other": "Export"
-  },
-  {
-    "id": "ui.button.exit",
-    "other": "Exit"
-  },
-  {
-    "id": "ui.button.login",
-    "other": "Log in"
-  },
-  {
     "id": "ui.button.remember",
     "other": "Remember"
   },
   {
-    "id": "ui.button.copy",
-    "other": "Copy"
-  },
-  {
-    "id": "ui.button.archive",
-    "other": "Archive"
-  },
-  {
-    "id": "ui.label.number",
-    "other": "Number"
-  },
-  {
-    "id": "ui.label.title",
-    "other": "Title"
-  },
-  {
-    "id": "ui.label.category",
-    "other": "Category"
-  },
-  {
-    "id": "ui.label.template",
-    "other": "Template"
-  },
-  {
-    "id": "ui.label.author",
-    "other": "Author"
-  },
-  {
-    "id": "ui.label.resource",
-    "other": "Resource"
-  },
-  {
-    "id": "ui.label.name",
-    "other": "Name"
-  },
-  {
-    "id": "ui.label.details",
-    "other": "Details"
-  },
-  {
-    "id": "ui.label.action",
-    "other": "Action"
-  },
-  {
-    "id": "ui.label.creation_date",
-    "other": "Creation date"
-  },
-  {
-    "id": "ui.label.login",
-    "other": "Login"
-  },
-  {
-    "id": "ui.label.password",
-    "other": "Password"
-  },
-  {
-    "id": "ui.label.to_account",
-    "other": "to your account"
-  },
-  {
-    "id": "ui.tab.main",
-    "other": "Main"
-  },
-  {
-    "id": "ui.tab.settings",
-    "other": "Settings"
-  },
-  {
-    "id": "ui.tab.gallery",
-    "other": "Gallery"
-  },
-  {
-    "id": "ui.tab.info_blocks",
-    "other": "Info blocks"
-  },
-  {
-    "id": "ui.fieldset.data_link",
-    "other": "Data link"
-  },
-  {
-    "id": "ui.fieldset.identification",
-    "other": "Identification"
-  },
-  {
-    "id": "ui.fieldset.link",
-    "other": "Link"
-  },
-  {
-    "id": "ui.fieldset.seo",
-    "other": "SEO"
-  },
-  {
-    "id": "ui.fieldset.image",
-    "other": "Image"
-  },
-  {
-    "id": "ui.fieldset.publication",
-    "other": "Publication"
-  },
-  {
-    "id": "ui.fieldset.sort",
-    "other": "Sort"
-  },
-  {
-    "id": "ui.fieldset.menu",
-    "other": "Menu"
-  },
-  {
-    "id": "ui.fieldset.tags",
-    "other": "Tags"
-  },
-  {
-    "id": "ui.fieldset.widgets",
-    "other": "Widgets"
-  },
-  {
-    "id": "ui.placeholder.select_widget",
-    "other": "Select widget"
-  },
-  {
-    "id": "ui.checkbox.in_sitemap",
-    "other": "In sitemap"
-  },
-  {
-    "id": "ui.placeholder.name",
-    "other": "Name"
-  },
-  {
-    "id": "ui.label.publisher",
-    "other": "Publisher"
-  },
-  {
-    "id": "ui.label.custom_link",
-    "other": "Custom link"
-  },
-  {
-    "id": "ui.label.hierarchy_sort",
-    "other": "Hierarchy and sort"
-  },
-  {
-    "id": "ui.label.parent_menu_item",
-    "other": "Parent menu item"
-  },
-  {
-    "id": "ui.placeholder.parent",
-    "other": "Parent"
-  },
-  {
-    "id": "ui.label.menu_item_params",
-    "other": "Menu item parameters"
-  },
-  {
-    "id": "ui.label.position",
-    "other": "Position"
-  },
-  {
-    "id": "ui.label.info_block",
-    "other": "Info block"
-  },
-  {
-    "id": "ui.label.inbox",
-    "other": "Inbox"
-  },
-  {
-    "id": "ui.placeholder.search",
-    "other": "Search..."
-  },
-  {
-    "id": "ui.label.profile",
-    "other": "Profile"
-  },
-  {
-    "id": "ui.button.logout",
-    "other": "Logout"
-  },
-  {
-    "id": "ui.label.upload_photo",
-    "other": "Upload photo"
-  },
-  {
-    "id": "ui.placeholder.description",
-    "other": "Description"
-  },
-  {
-    "id": "front.label.business_card",
-    "other": "Business Card"
-  },
-  {
-    "id": "front.label.about",
-    "other": "About"
-  },
-  {
-    "id": "front.label.services",
-    "other": "Services"
-  },
-  {
-    "id": "front.label.contacts",
-    "other": "Contacts"
-  },
-  {
-    "id": "front.label.login",
-    "other": "Login"
-  },
-  {
-    "id": "front.label.welcome",
-    "other": "Welcome!"
-  },
-  {
-    "id": "front.label.post",
-    "other": "Post"
-  },
-  {
-    "id": "front.label.email",
-    "other": "Email"
-  },
-  {
-    "id": "front.label.phone",
-    "other": "Phone"
-  },
-  {
-    "id": "front.label.social_networks",
-    "other": "Social Networks"
-  },
-  {
-    "id": "front.label.contact_me",
-    "other": "Contact me through one of the following ways:"
-  },
-  {
-    "id": "front.label.all_rights_reserved",
-    "other": "All rights reserved"
-  },
-  {
-    "id": "front.label.about_description",
-    "other": "I am an experienced web application developer with years of experience in various fields. My skills include creating efficient solutions and high-quality design."
-  },
-  {
-    "id": "front.label.welcome_description",
-    "other": "I am your best partner in creating amazing solutions."
-  },
-  {
-    "id": "front.label.service",
-    "other": "Service"
-  },
-  {
-    "id": "ui.placeholder.normal",
-    "other": "Normal"
-  },
-  {
-    "id": "ui.placeholder.short",
-    "other": "Short"
-  },
-  {
-    "id": "ui.placeholder.alias",
-    "other": "Alias"
-  },
-  {
-    "id": "ui.placeholder.link",
-    "other": "Link"
-  },
-  {
-    "id": "ui.placeholder.short_description",
-    "other": "Short description"
-  },
-  {
-    "id": "ui.placeholder.seo_title",
-    "other": "SEO title"
-  },
-  {
-    "id": "ui.placeholder.seo_description",
-    "other": "SEO description"
-  },
-  {
-    "id": "ui.placeholder.specify_date",
-    "other": "Specify date"
-  },
-  {
-    "id": "ui.placeholder.sort",
-    "other": "Sort"
-  },
-  {
-    "id": "ui.placeholder.select_menu",
-    "other": "Select menu"
-  },
-  {
-    "id": "ui.placeholder.select_tag",
-    "other": "Select tag"
-  },
-  {
-    "id": "ui.label.title_short",
-    "other": "Short"
-  },
-  {
-    "id": "ui.label.short_description",
-    "other": "Short description"
-  },
-  {
-    "id": "ui.label.seo_title",
-    "other": "SEO title"
-  },
-  {
-    "id": "ui.label.seo_description",
-    "other": "SEO description"
-  },
-  {
-    "id": "ui.label.publication_date",
-    "other": "Publication date"
-  },
-  {
-    "id": "ui.label.publication_end_date",
-    "other": "Publication end date"
-  },
-  {
-    "id": "ui.checkbox.show_image",
-    "other": "Show image"
-  },
-  {
-    "id": "ui.checkbox.show_image_in_category",
-    "other": "Show image in category"
-  },
-  {
-    "id": "ui.checkbox.show_date_in_post",
-    "other": "Show date in post"
+    "id": "ui.button.save",
+    "other": "Save"
   },
   {
     "id": "ui.checkbox.display_on_main",
@@ -376,52 +60,243 @@
     "other": "Enable comments"
   },
   {
+    "id": "ui.checkbox.favorites",
+    "other": "Favorites"
+  },
+  {
+    "id": "ui.checkbox.in_sitemap",
+    "other": "In sitemap"
+  },
+  {
     "id": "ui.checkbox.published",
     "other": "Published"
   },
   {
-    "id": "ui.checkbox.favorites",
-    "other": "Favorites"
+    "id": "ui.checkbox.show_date_in_post",
+    "other": "Show date in post"
+  },
+  {
+    "id": "ui.checkbox.show_image",
+    "other": "Show image"
+  },
+  {
+    "id": "ui.checkbox.show_image_in_category",
+    "other": "Show image in category"
   },
   {
     "id": "ui.checkbox.template_for_all",
     "other": "Template for all"
   },
   {
-    "id": "ui.detail.title",
-    "other": "Title: "
+    "id": "ui.fieldset.data_link",
+    "other": "Data link"
   },
   {
-    "id": "ui.detail.short_description",
-    "other": "Short description: "
+    "id": "ui.fieldset.identification",
+    "other": "Identification"
   },
   {
-    "id": "ui.detail.seo_title",
-    "other": "SEO title: "
+    "id": "ui.fieldset.image",
+    "other": "Image"
   },
   {
-    "id": "ui.detail.seo_description",
-    "other": "SEO description: "
+    "id": "ui.fieldset.link",
+    "other": "Link"
+  },
+  {
+    "id": "ui.fieldset.menu",
+    "other": "Menu"
+  },
+  {
+    "id": "ui.fieldset.publication",
+    "other": "Publication"
+  },
+  {
+    "id": "ui.fieldset.seo",
+    "other": "SEO"
+  },
+  {
+    "id": "ui.fieldset.sort",
+    "other": "Sort"
+  },
+  {
+    "id": "ui.fieldset.tags",
+    "other": "Tags"
+  },
+  {
+    "id": "ui.fieldset.widgets",
+    "other": "Widgets"
+  },
+  {
+    "id": "ui.label.action",
+    "other": "Action"
+  },
+  {
+    "id": "ui.label.author",
+    "other": "Author"
+  },
+  {
+    "id": "ui.label.category",
+    "other": "Category"
+  },
+  {
+    "id": "ui.label.creation_date",
+    "other": "Creation date"
+  },
+  {
+    "id": "ui.label.details",
+    "other": "Details"
+  },
+  {
+    "id": "ui.label.inbox",
+    "other": "Inbox"
+  },
+  {
+    "id": "ui.label.info_block",
+    "other": "Info block"
+  },
+  {
+    "id": "ui.label.login",
+    "other": "Login"
+  },
+  {
+    "id": "ui.label.name",
+    "other": "Name"
+  },
+  {
+    "id": "ui.label.number",
+    "other": "Number"
+  },
+  {
+    "id": "ui.label.password",
+    "other": "Password"
+  },
+  {
+    "id": "ui.label.position",
+    "other": "Position"
+  },
+  {
+    "id": "ui.label.profile",
+    "other": "Profile"
+  },
+  {
+    "id": "ui.label.publication_date",
+    "other": "Publication date"
+  },
+  {
+    "id": "ui.label.publication_end_date",
+    "other": "Publication end date"
+  },
+  {
+    "id": "ui.label.resource",
+    "other": "Resource"
+  },
+  {
+    "id": "ui.label.seo_description",
+    "other": "SEO description"
+  },
+  {
+    "id": "ui.label.seo_title",
+    "other": "SEO title"
+  },
+  {
+    "id": "ui.label.short_description",
+    "other": "Short description"
+  },
+  {
+    "id": "ui.label.template",
+    "other": "Template"
+  },
+  {
+    "id": "ui.label.title",
+    "other": "Title"
+  },
+  {
+    "id": "ui.label.title_short",
+    "other": "Short"
+  },
+  {
+    "id": "ui.label.to_account",
+    "other": "to your account"
+  },
+  {
+    "id": "ui.label.upload_photo",
+    "other": "Upload photo"
   },
   {
     "id": "ui.paginator.showing",
     "other": "Showing {from} to {to} of {total} rows"
   },
   {
-    "id": "ui.button.add_block",
-    "other": "Add block"
+    "id": "ui.placeholder.alias",
+    "other": "Alias"
   },
   {
-    "id": "ui.placeholder.select_info_blocks",
+    "id": "ui.placeholder.link",
+    "other": "Link"
+  },
+  {
+    "id": "ui.placeholder.name",
+    "other": "Name"
+  },
+  {
+    "id": "ui.placeholder.normal",
+    "other": "Normal"
+  },
+  {
+    "id": "ui.placeholder.search",
+    "other": "Search..."
+  },
+  {
+    "id": "ui.placeholder.select_menu",
+    "other": "Select menu"
+  },
+  {
+    "id": "ui.placeholder.select_tag",
+    "other": "Select tag"
+  },
+  {
+    "id": "ui.placeholder.select_widget",
+    "other": "Select widget"
+  },
+  {
+    "id": "ui.placeholder.seo_description",
+    "other": "SEO description"
+  },
+  {
+    "id": "ui.placeholder.seo_title",
+    "other": "SEO title"
+  },
+  {
+    "id": "ui.placeholder.short",
+    "other": "Short"
+  },
+  {
+    "id": "ui.placeholder.short_description",
+    "other": "Short description"
+  },
+  {
+    "id": "ui.placeholder.sort",
+    "other": "Sort"
+  },
+  {
+    "id": "ui.placeholder.specify_date",
+    "other": "Specify date"
+  },
+  {
+    "id": "ui.tab.gallery",
+    "other": "Gallery"
+  },
+  {
+    "id": "ui.tab.info_blocks",
     "other": "Info blocks"
   },
   {
-    "id": "auth.error.invalid_credentials",
-    "other": "Email or password is incorrect."
+    "id": "ui.tab.main",
+    "other": "Main"
   },
   {
-    "id": "cart.items",
-    "one": "{count} item",
-    "other": "{count} items"
+    "id": "ui.tab.settings",
+    "other": "Settings"
   }
 ]

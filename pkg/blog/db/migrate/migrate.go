@@ -27,19 +27,19 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.CreateHashIndex("posts", "uuid"))
-	m.db.Exec(db.CreateHashIndex("posts", "alias"))
-	m.db.Exec(db.CreateHashIndex("posts", "url"))
+	m.db.Exec(db.HashIndex("posts", "uuid"))
+	m.db.Exec(db.HashIndex("posts", "alias"))
+	m.db.Exec(db.HashIndex("posts", "url"))
 
-	m.db.Exec(db.CreateHashIndex("post_categories", "uuid"))
-	m.db.Exec(db.CreateHashIndex("post_categories", "alias"))
-	m.db.Exec(db.CreateHashIndex("post_categories", "url"))
+	m.db.Exec(db.HashIndex("post_categories", "uuid"))
+	m.db.Exec(db.HashIndex("post_categories", "alias"))
+	m.db.Exec(db.HashIndex("post_categories", "url"))
 
-	m.db.Exec(db.CreateHashIndex("post_tags", "name"))
-	m.db.Exec(db.CreateHashIndex("post_tags", "alias"))
-	m.db.Exec(db.CreateHashIndex("post_tags", "url"))
+	m.db.Exec(db.HashIndex("post_tags", "name"))
+	m.db.Exec(db.HashIndex("post_tags", "alias"))
+	m.db.Exec(db.HashIndex("post_tags", "url"))
 
-	m.db.Exec(db.CreateHashIndex("post_tag_has_resources", "resource_uuid"))
+	m.db.Exec(db.HashIndex("post_tag_has_resources", "resource_uuid"))
 
 	return nil
 }

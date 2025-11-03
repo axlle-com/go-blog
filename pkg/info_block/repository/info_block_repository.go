@@ -18,6 +18,7 @@ type InfoBlockRepository interface {
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
 	GetForResourceByFilter(filter *models.InfoBlockFilter) ([]*models.InfoBlockResponse, error)
 	FindByID(id uint) (*models.InfoBlock, error)
+	FindByFilter(filter *models.InfoBlockFilter) (*models.InfoBlock, error)
 	WithPaginate(p contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
 	Delete(infoBlock *models.InfoBlock) error
 	DeleteByIDs(ids []uint) (err error)
@@ -45,6 +46,33 @@ func (r *infoBlockRepository) Create(infoBlock *models.InfoBlock) error {
 func (r *infoBlockRepository) FindByID(id uint) (*models.InfoBlock, error) {
 	var model models.InfoBlock
 	if err := r.db.First(&model, id).Error; err != nil {
+		return nil, err
+	}
+	return &model, nil
+}
+
+func (r *infoBlockRepository) FindByFilter(filter *models.InfoBlockFilter) (*models.InfoBlock, error) {
+	var model models.InfoBlock
+	query := r.db.Model(&model)
+
+	// Применяем фильтры напрямую из полей структуры
+	if filter.Title != nil {
+		query = query.Where("title = ?", *filter.Title)
+	}
+
+	if filter.TemplateID != nil {
+		query = query.Where("template_id = ?", *filter.TemplateID)
+	}
+
+	if filter.ID != nil {
+		query = query.Where("id = ?", *filter.ID)
+	}
+
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+
+	if err := query.First(&model).Error; err != nil {
 		return nil, err
 	}
 	return &model, nil
@@ -144,8 +172,12 @@ func (r *infoBlockRepository) GetForResourceByFilter(filter *models.InfoBlockFil
 		query = query.Where("info_blocks.id = ?", filter.ID)
 	}
 
-	if filter.InfoBlockIDs != nil && len(filter.InfoBlockIDs) > 0 {
-		query = query.Where("info_blocks.id IN ?", filter.InfoBlockIDs)
+	if filter.IDs != nil && len(filter.IDs) > 0 {
+		query = query.Where("info_blocks.id IN ?", filter.IDs)
+	}
+
+	if filter.UUIDs != nil && len(filter.UUIDs) > 0 {
+		query = query.Where("info_blocks.uuid IN ?", filter.UUIDs)
 	}
 
 	query = query.Order("r.sort ASC").

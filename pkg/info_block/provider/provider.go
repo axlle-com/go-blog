@@ -76,14 +76,14 @@ func (p *provider) GetAll() []contract.InfoBlock {
 	return nil
 }
 
-func (p *provider) Attach(id uint, resourceUUID string) (infoBlocks []contract.InfoBlock, err error) {
+func (p *provider) Attach(infoBlockID uint, resourceUUID string) (infoBlocks []contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
 		return
 	}
 
-	infoBlock, err := p.blockService.FindByID(id)
+	infoBlock, err := p.blockService.FindByID(infoBlockID)
 	if err != nil {
 		return nil, err
 	}
@@ -144,4 +144,14 @@ func (p *provider) SaveFormBatch(blocks []any, resourceUUID string) (infoBlock [
 
 	infoBlocks := p.GetForResourceUUID(resourceUUID)
 	return infoBlocks, nil
+}
+
+func (p *provider) FindByTitle(title string) (contract.InfoBlock, error) {
+	filter := models.NewInfoBlockFilter()
+	filter.Title = &title
+	infoBlock, err := p.blockService.FindByFilter(filter)
+	if err != nil {
+		return nil, err
+	}
+	return infoBlock, nil
 }

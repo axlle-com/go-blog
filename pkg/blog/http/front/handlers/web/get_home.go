@@ -1,27 +1,42 @@
 package web
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/axlle-com/blog/app/models/dto"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
 )
 
 func (c *postController) GetHome(ctx *gin.Context) {
-	post, err := c.postService.GetByParam("is_main", true)
-	if err != nil || post == nil {
-		logger.Debugf("[blog][postController][GetHome] Error: %v", err)
-		post = &models.Post{}
+	post := &models.Post{}
+	var blocks []dto.InfoBlock
+
+	post, err := c.postService.FindByParam("is_main", true)
+	if post != nil {
+		post, err = c.postService.View(post)
+		if post != nil {
+			if post.InfoBlocksSnapshot != nil && len(*post.InfoBlocksSnapshot) > 0 {
+				err = json.Unmarshal(*post.InfoBlocksSnapshot, &blocks)
+			}
+		}
 	}
 
+	if err != nil {
+		logger.Errorf("[blog][postController][GetHome] Error: %v", err)
+	}
+
+	logger.Dump(post.GetTemplateName())
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
-		c.view.View(nil),
+		c.view.View(post),
 		gin.H{
-			"title": "Home Page",
-			"post":  post,
+			"title":  "Home Page",
+			"post":   post,
+			"blocks": blocks,
 		},
 	)
 }

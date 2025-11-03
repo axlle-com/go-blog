@@ -25,8 +25,8 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.CreateHashIndex("info_blocks", "uuid"))
-	m.db.Exec(db.CreateHashIndex("info_block_has_resources", "resource_uuid"))
+	m.db.Exec(db.HashIndex("info_blocks", "uuid"))
+	m.db.Exec(db.HashIndex("info_block_has_resources", "resource_uuid"))
 
 	return nil
 }

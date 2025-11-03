@@ -21,7 +21,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.postService.GetAggregateByID(id)
+	post, err := c.postService.FindAggregateByID(id)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err.Error())
 		c.RenderHTML(ctx, http.StatusNotFound, "admin.404", gin.H{"title": "404 Not Found"})

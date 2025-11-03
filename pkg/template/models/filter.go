@@ -9,6 +9,7 @@ type TemplateFilter struct {
 	UserID       *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
 	Title        *string `json:"title" form:"title" binding:"omitempty"`
 	Name         *string `json:"name" form:"name" binding:"omitempty"`
+	Theme        *string `json:"theme" form:"theme" binding:"omitempty"`
 	ResourceName *string `json:"resource_name" form:"resource_name" binding:"omitempty"`
 	Date         *string `json:"date" form:"date" binding:"omitempty"`
 }

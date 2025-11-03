@@ -13,6 +13,7 @@ func NewInfoBlockFilter() *InfoBlockFilter {
 
 type InfoBlockFilter struct {
 	ID             *uint       `json:"id" form:"id" binding:"omitempty"`
+	IDs            []uint      `json:"ids" form:"ids" binding:"omitempty"`
 	UUIDs          []uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
 	TemplateID     *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
 	UserID         *uint       `json:"user_id" form:"user_id" binding:"omitempty"`
@@ -22,7 +23,6 @@ type InfoBlockFilter struct {
 	ResourceUUID   *uuid.UUID  `json:"resource_uuid" form:"resource_uuid" binding:"omitempty"`
 	RelationID     *uint       `json:"relation_id" form:"relation_id" binding:"omitempty"`
 	RelationIDs    []uint      `json:"relation_ids" form:"relation_ids" binding:"omitempty"`
-	InfoBlockIDs   []uint      `json:"info_block_ids" form:"info_block_ids" binding:"omitempty"`
 	models.Filter
 }
 

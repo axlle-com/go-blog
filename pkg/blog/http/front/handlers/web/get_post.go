@@ -15,7 +15,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 		return
 	}
 
-	post, err := c.postService.GetByParam("alias", alias)
+	post, err := c.postService.FindByParam("alias", alias)
 	if err != nil || post == nil {
 		c.RenderHTML(ctx, http.StatusNotFound, "404", gin.H{"title": "404 Not Found"})
 		ctx.Abort()

@@ -23,8 +23,8 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.CreateHashIndex("files", "uuid"))
-	m.db.Exec(db.CreateHashIndex("files", "file"))
+	m.db.Exec(db.HashIndex("files", "uuid"))
+	m.db.Exec(db.HashIndex("files", "file"))
 
 	return nil
 }

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -70,7 +71,9 @@ func (t *Template) AddTemplateFromString(name, tmplStr string) error {
 }
 
 func (t *Template) loadTemplates(templatesDir string) *template.Template {
-	tmpl := template.New("").Funcs(template.FuncMap{
+	tmpl := template.New("")
+
+	funcMap := template.FuncMap{
 		"add":        add,
 		"sub":        sub,
 		"mul":        mul,
@@ -81,14 +84,25 @@ func (t *Template) loadTemplates(templatesDir string) *template.Template {
 		"ptrUint":    ptrUint,
 		"json":       jsonFunc,
 		"collapseID": collapseID,
-	})
+
+		"render": func(name string, data any) template.HTML {
+			var buf bytes.Buffer
+			if err := tmpl.ExecuteTemplate(&buf, name, data); err != nil {
+				logger.Errorf("[app][template][loadTemplates] render template %q failed: %v", name, err)
+				return template.HTML(fmt.Sprintf("<!-- render %q error: %v -->", name, err))
+			}
+			return template.HTML(buf.String())
+		},
+	}
+
+	tmpl = tmpl.Funcs(funcMap)
+
 	err := filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() && filepath.Ext(path) == ".gohtml" {
-			_, err = tmpl.ParseFiles(path)
-			if err != nil {
+			if _, err = tmpl.ParseFiles(path); err != nil {
 				return err
 			}
 		}

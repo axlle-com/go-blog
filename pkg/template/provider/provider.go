@@ -14,6 +14,7 @@ type TemplateProvider interface {
 	GetByIDs(ids []uint) ([]contract.Template, error)
 	GetMapByIDs(ids []uint) (map[uint]contract.Template, error)
 	GetForResources(resource contract.Resource) ([]contract.Template, error)
+	GetByNameAndResource(name string, resourceName string) (contract.Template, error)
 }
 
 func NewProvider(
@@ -97,4 +98,12 @@ func (p *provider) GetForResources(resource contract.Resource) ([]contract.Templ
 		collection = append(collection, t)
 	}
 	return collection, nil
+}
+
+func (p *provider) GetByNameAndResource(name string, resourceName string) (contract.Template, error) {
+	model, err := p.templateRepo.GetByNameAndResource(name, resourceName)
+	if err == nil {
+		return model, nil
+	}
+	return nil, err
 }

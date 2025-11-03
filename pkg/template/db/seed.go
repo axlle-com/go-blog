@@ -34,7 +34,7 @@ func (s *seeder) Seed() error {
 
 	// templates/<layout>
 	layout := cfg.Layout()
-	templatesRoot := cfg.SrcFolderBuilder(filepath.Join("templates", layout))
+	templatesRoot := cfg.SrcFolderBuilder(filepath.Join("templates", "front", layout))
 
 	// Если папки нет — ничего не делаем (не падаем)
 	if _, err := os.Stat(templatesRoot); err != nil {
@@ -92,6 +92,18 @@ func (s *seeder) Seed() error {
 			title = fmt.Sprintf("%s/%s", resourceName, name)
 		}
 
+		// Сначала проверяем существование шаблона по theme, name и resource_name через фильтр
+		filter := models.NewTemplateFilter()
+		filter.Theme = &layout
+		filter.Name = &name
+		filter.ResourceName = &resourceName
+		existing, err := s.template.FindByFilter(filter)
+		if err == nil && existing != nil {
+			// Шаблон уже существует, пропускаем без ошибки
+			logger.Infof("[template][seeder][Seed] template with theme=%s, name=%s and resource_name=%s already exists (ID=%d), skipping", layout, name, resourceName, existing.ID)
+			return nil
+		}
+
 		now := time.Now()
 		tpl := models.Template{
 			Title:        title,
@@ -104,11 +116,10 @@ func (s *seeder) Seed() error {
 			UpdatedAt:    &now,
 		}
 
-		// Пытаемся создать; если уже есть (уникальный индекс по theme+name) — считаем всё ок
+		// Создаем шаблон, если он не найден
 		if err := s.template.Create(&tpl); err != nil {
-			// Пропускаем дубликаты по уникальному индексу name
-			// Не завязываемся на текст ошибки БД, просто логируем и идём дальше
-			logger.Infof("[template][seeder][Seed] skip create for %s: %v", tpl.Name, err)
+			logger.Errorf("[template][seeder][Seed] error creating template %s: %v", tpl.Name, err)
+			return err
 		}
 		return nil
 	})

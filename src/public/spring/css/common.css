@@ -1,4 +1,73 @@
-/* Background Colors */
+/* Services top slider styles */
+.services-hero-section {padding: 80px 0;}
+.services-top-slider-wrapper {position: relative; padding-top: 0;}
+.services-top-slider {padding-top: 50px;}
+.services-top-slider-wrapper .owl-dots {position: absolute; top: 0; left: 50%; transform: translateX(-50%); margin-top: 0;}
+.services-top-slide img {display: block; max-width: 100%; height: auto; margin: 0 auto;}
+/* Slide text layout */
+.service-slide-row {display:flex; align-items:center;}
+.service-slide-text h3 {color:#3b566e;font-size:28px;font-weight:600;margin-bottom:10px;}
+.service-slide-text h4 {color:#1f8ceb;font-size:18px;font-weight:600;margin-bottom:14px;position:relative;display:inline-block;}
+.service-slide-text p {color:#6f8ba4;line-height:1.8;}
+.service-slide-text .see-more {display:inline-block;margin-top:10px;color:#6f8ba4;}
+@media (max-width: 768px) {
+    .services-hero-section {padding: 40px 0;}
+    .services-top-slider-wrapper {padding-top: 35px;}
+    .service-slide-row {display:block;}
+    .service-slide-text h3 {font-size:24px;}
+    .service-slide-text h4 {font-size:16px;}
+}
+
+
+
+.modal-header { position: relative; }
+
+/* Абсолютно позиционируем крест и даём приоритет клику */
+.modal-header .modal-close-abs {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    z-index: 5;                /* выше заголовка */
+    pointer-events: auto;      /* на случай глобальных стилей */
+}
+
+/* чтобы заголовок не наезжал визуально */
+.modal-title { margin-right: 36px; }
+
+
+.modal-dialog.modal-md {
+    margin: 30px auto;
+    max-width: 95%;
+}
+
+@media (min-width: 768px) {
+    .modal-dialog.modal-md { width: 720px; }
+}
+
+@media (min-width: 992px) {
+    .modal-dialog.modal-md { width: 760px; }
+}
+
+@media (min-width: 1200px) {
+    .modal-dialog.modal-md { width: 800px; }
+}
+
+
+.view-link:link,
+.view-link:visited {
+    color: #1f8ceb;
+    text-decoration: none;
+}
+
+.view-link:hover,
+.view-link:focus {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+}
+
+/* Backgrounds */
 .bg-light-blue {
     background: #f9fbfd;
 }
@@ -7,27 +76,6 @@
     background: #1f8ceb;
     padding: 40px 20px;
     border-radius: 10px;
-}
-
-/* Spacing */
-.mt-40 {
-    margin-top: 40px;
-}
-
-.mt-60 {
-    margin-top: 60px;
-}
-
-.mb-20 {
-    margin-bottom: 20px;
-}
-
-.mb-30 {
-    margin-bottom: 30px;
-}
-
-.mb-60 {
-    margin-bottom: 60px;
 }
 
 /* Typography */
@@ -68,34 +116,31 @@
     margin-bottom: 10px;
 }
 
-/* Icons and Images */
-.icon-about {
-    width: 60px;
-    height: auto;
-    margin: 0 auto 15px;
-    display: block;
-    opacity: 0.7;
+/* Utilities: Spacing */
+.mt-40 {
+    margin-top: 40px;
 }
 
-.service-icon-img {
-    width: auto;
-    height: auto;
-    max-width: 25%;
+.mt-60 {
+    margin-top: 60px;
 }
 
-.owl-carousel .owl-item .service-icon-img {
-    width: auto !important;
-    height: auto !important;
-    max-width: 25% !important;
+.mb-20 {
+    margin-bottom: 20px;
 }
 
-.client-icon-small {
-    width: 60px;
-    height: auto;
-    opacity: 0.5;
+.mb-30 {
+    margin-bottom: 30px;
 }
 
-/* Layout */
+.mb-60 {
+    margin-bottom: 60px;
+}
+
+/* =========================================
+   Layout / Sections
+   ========================================= */
+
 .flex-center {
     display: flex;
     justify-content: center;
@@ -103,13 +148,116 @@
     flex-wrap: wrap;
 }
 
+.section-about {
+    padding: 60px 0 30px;
+}
+
+.section-about h2 {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.section-about .about-body {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.section-about .about-body p {
+    margin: 0 0 12px;
+    line-height: 1.5;
+    color: inherit;
+    font: inherit;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+}
+
+/* Sections (统一ли брейдинг и фон) */
+.features-section {
+    position: relative;
+    background: #f4f9fe;
+    padding: 80px 0;
+}
+
+.products-section {
+    position: relative;
+    padding: 80px 0;
+}
+
+.services-page-section { /* NOTE: был дубликат; оставил унифицированный вариант */
+    position: relative;
+    background: #f4f9fe;
+    padding: 80px 0;
+}
+
+/* Contact page tweaks */
+.contact-page-section .inner-column {
+    padding-top: 75px !important;
+}
+
+/* Clients section */
+.clients-bg {
+    background: #f9fbfd;
+}
+
+.clients-title-margin {
+    margin-bottom: 30px;
+}
+
+.clients-icon-margin {
+    margin-bottom: 20px;
+}
+
+.clients-icon {
+    width: 90px;
+    height: auto;
+    opacity: 0.5;
+}
+
+.clients-desc {
+    font-size: 16px;
+    color: #466077;
+    line-height: 1.8;
+    margin: 0 auto 60px;
+    max-width: 800px;
+}
+
+.clients-text-mt {
+    margin-top: 15px;
+}
+
+/* Equal-height client cards per row */
+.features-section.alternate.clients-bg .row.clearfix {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.features-section.alternate.clients-bg .row.clearfix > [class*="col-"] {
+    display: flex;
+}
+
+.features-section.alternate.clients-bg .inner-box.client-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+/* Optional utility if h-100 is used on card */
+.h-100 {
+    height: 100%;
+}
+
+/* =========================================
+   Components
+   ========================================= */
+
 /* Client Cards */
 .client-card {
     background: #fff;
     text-align: center;
     padding: 40px 30px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -162,74 +310,41 @@
     margin-right: 8px;
 }
 
-/* Clients Section */
-.clients-bg {
-    background: #f9fbfd;
+/* Service card (внутреннее выравнивание) */
+.service-style-one .inner-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    border: 1px solid #deeefc;
 }
 
-.clients-title-margin {
-    margin-bottom: 30px;
+.service-style-one .inner-box .content {
+    flex: 1 1 auto; /* растягивает содержимое */
 }
 
-.clients-icon-margin {
-    margin-bottom: 20px;
+/* Icons and Images */
+.icon-about {
+    width: 60px;
+    height: auto;
+    margin: 0 auto 15px;
+    display: block;
+    opacity: 0.7;
 }
 
-.clients-icon {
-    width: 90px;
+.service-icon-img {
+    width: auto;
+    height: auto;
+    max-width: 25%;
+}
+
+.client-icon-small {
+    width: 60px;
     height: auto;
     opacity: 0.5;
 }
 
-.clients-desc {
-    font-size: 16px;
-    color: #466077;
-    line-height: 1.8;
-    margin-bottom: 60px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.clients-text-mt {
-    margin-top: 15px;
-}
-
-/***** index *****/
-.section-about {
-    padding: 60px 0 30px;
-}
-
-.section-about h2 {
-    margin-bottom: 24px;
-    text-align: center;
-}
-
-.section-about .about-body {
-    margin: 0 auto;
-    text-align: center;
-}
-
-.section-about .about-body p {
-    margin: 0 0 12px;
-    line-height: 1.5;
-    color: inherit;
-    font: inherit;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    -ms-hyphens: auto;
-}
-
-.services-page-section {
-    position: relative;
-    background: #f4f9fe;
-    padding: 130px 0 150px;
-}
-
-.contact-page-section .inner-column {
-    padding-top: 75px !important;
-}
-
+/* Owl Carousel */
 .owl-stage-outer {
     padding-left: 3px;
     padding-right: 3px;
@@ -244,41 +359,6 @@
     display: flex;
 }
 
-.service-style-one .inner-box {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    border: 1px solid #deeefc;
-}
-
-.service-style-one .inner-box .content {
-    flex: 1 1 auto; /* растягивает содержимое */
-}
-
-/*.contact-page-section .inner-column .image{*/
-/*    -webkit-box-shadow: 0px 0px 5px 1px rgba(34, 60, 80, 0.28);*/
-/*    -moz-box-shadow: 0px 0px 5px 1px rgba(34, 60, 80, 0.28);*/
-/*    box-shadow: 0px 0px 5px 1px rgba(34, 60, 80, 0.28);*/
-/*}*/
-
-@media (max-width: 767px) {
-    .section-about {
-        padding: 40px 0 20px;
-    }
-
-    .section-about .about-body {
-        max-width: 100%;
-        padding: 0 15px;
-        text-align: left;
-    }
-
-    .section-about .about-body p {
-        line-height: 1.5;
-    }
-}
-
-/* Owl Carousel Dots */
 .owl-nav {
     display: none;
 }
@@ -294,9 +374,9 @@
     height: 12px;
     margin: 0 6px;
     border-radius: 50%;
-    background: rgba(31, 140, 235, 0.3);
+    background: rgba(31, 140, 235, .3);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all .3s ease;
 }
 
 .owl-dots .owl-dot.active {
@@ -306,10 +386,14 @@
 }
 
 .owl-dots .owl-dot:hover {
-    background: rgba(31, 140, 235, 0.6);
+    background: rgba(31, 140, 235, .6);
 }
 
-/* Mobile Responsive Styles */
+/* =========================================
+   Responsive
+   ========================================= */
+
+/* <= 768px */
 @media (max-width: 768px) {
     body {
         font-size: 18px !important;
@@ -320,7 +404,7 @@
         font-size: 18px !important;
     }
 
-    /* Hero Section */
+    /* Hero */
     .main-banner h2 {
         font-size: 28px !important;
         line-height: 1.4;
@@ -335,7 +419,7 @@
         font-size: 18px !important;
     }
 
-    /* All Headings */
+    /* Headings */
     h2 {
         font-size: 32px !important;
     }
@@ -353,35 +437,23 @@
         font-size: 18px !important;
     }
 
-    /* Text Content */
-    .text {
+    /* Text */
+    .text, p {
         font-size: 18px !important;
         line-height: 1.8;
     }
 
-    p {
-        font-size: 18px !important;
-    }
-
-    /* Service Cards on Mobile */
+    /* Service Cards */
     .service-style-one .inner-box h3 {
         font-size: 24px !important;
-        margin-bottom: 12px;
     }
 
-    .service-style-one .inner-box h3 a {
-        font-size: 24px !important;
-    }
-
-    .service-style-one .inner-box .text {
-        font-size: 16px !important;
-    }
-
+    .service-style-one .inner-box .text,
     .service-style-one .link-box a {
         font-size: 16px !important;
     }
 
-    /* Client Cards on Mobile */
+    /* Generic inner-box */
     .inner-box h3 {
         font-size: 22px !important;
     }
@@ -390,7 +462,7 @@
         font-size: 16px !important;
     }
 
-    /* Contact Form */
+    /* Contact form */
     .contact-section .sec-title h2 {
         font-size: 32px !important;
     }
@@ -420,7 +492,7 @@
         font-size: 16px !important;
     }
 
-    /* Full Width Sections on Mobile */
+    /* Sections */
     section {
         padding: 60px 0 !important;
     }
@@ -429,8 +501,24 @@
         padding-left: 15px;
         padding-right: 15px;
     }
+
+    /* Section About (ранее было @media 767px — унифицировал) */
+    .section-about {
+        padding: 40px 0 20px;
+    }
+
+    .section-about .about-body {
+        max-width: 100%;
+        padding: 0 15px;
+        text-align: left;
+    }
+
+    .section-about .about-body p {
+        line-height: 1.5;
+    }
 }
 
+/* <= 480px */
 @media (max-width: 480px) {
     body {
         font-size: 16px !important;
@@ -460,42 +548,4 @@
     .main-header .navigation li a {
         font-size: 18px !important;
     }
-}
-
-.features-section {
-    position: relative;
-    background: #f4f9fe;
-    padding: 80px 0;
-}
-
-.products-section {
-    position: relative;
-    padding: 80px 0;
-}
-
-.services-page-section {
-    position: relative;
-    background: #f4f9fe;
-    padding: 80px 0;
-}
-
-/* Equal-height client cards per row */
-.features-section.alternate.clients-bg .row.clearfix {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.features-section.alternate.clients-bg .row.clearfix > [class*="col-"] {
-    display: flex;
-}
-
-.features-section.alternate.clients-bg .inner-box.client-card {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-}
-
-/* Optional utility if h-100 is used on card */
-.h-100 {
-    height: 100%;
 }

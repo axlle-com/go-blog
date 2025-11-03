@@ -16,6 +16,8 @@ type TemplateRepository interface {
 	Create(template *models.Template) error
 	GetByID(id uint) (*models.Template, error)
 	GetByIDs(ids []uint) ([]*models.Template, error)
+	GetByNameAndResource(name string, resourceName string) (*models.Template, error)
+	FindByFilter(filter *models.TemplateFilter) (*models.Template, error)
 	Update(template *models.Template) error
 	Delete(*models.Template) error
 	DeleteByIDs(ids []uint) (err error)
@@ -59,6 +61,59 @@ func (r *repository) GetByIDs(ids []uint) ([]*models.Template, error) {
 		return nil, err
 	}
 	return templates, nil
+}
+
+func (r *repository) GetByNameAndResource(name string, resourceName string) (*models.Template, error) {
+	var template models.Template
+	query := r.db.Where("name = ?", name)
+	if resourceName != "" {
+		query = query.Where("resource_name = ?", resourceName)
+	} else {
+		query = query.Where("resource_name IS NULL OR resource_name = ''")
+	}
+	if err := query.First(&template).Error; err != nil {
+		return nil, err
+	}
+	return &template, nil
+}
+
+func (r *repository) FindByFilter(filter *models.TemplateFilter) (*models.Template, error) {
+	var template models.Template
+	query := r.db.Model(&template)
+
+	// Применяем фильтры напрямую из полей структуры, если они не nil
+	if filter.ID != nil {
+		query = query.Where("id = ?", *filter.ID)
+	}
+
+	if filter.Name != nil {
+		query = query.Where("name = ?", *filter.Name)
+	}
+
+	if filter.Theme != nil {
+		query = query.Where("theme = ?", *filter.Theme)
+	}
+
+	if filter.ResourceName != nil {
+		if *filter.ResourceName != "" {
+			query = query.Where("resource_name = ?", *filter.ResourceName)
+		} else {
+			query = query.Where("resource_name IS NULL OR resource_name = ''")
+		}
+	}
+
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+
+	if filter.Title != nil {
+		query = query.Where("title = ?", *filter.Title)
+	}
+
+	if err := query.First(&template).Error; err != nil {
+		return nil, err
+	}
+	return &template, nil
 }
 
 func (r *repository) Update(template *models.Template) error {
@@ -137,8 +192,29 @@ func (r *repository) Filter(filter *models.TemplateFilter) ([]*models.Template, 
 
 	query := r.db.Model(&template)
 
+	// Применяем фильтры, если они не nil
+	if filter.ID != nil {
+		query = query.Where("id = ?", *filter.ID)
+	}
+
+	if filter.Name != nil {
+		query = query.Where("name = ?", *filter.Name)
+	}
+
+	if filter.Theme != nil {
+		query = query.Where("theme = ?", *filter.Theme)
+	}
+
 	if filter.ResourceName != nil && *filter.ResourceName != "" {
 		query = query.Where("resource_name = ?", *filter.ResourceName)
+	}
+
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+
+	if filter.Title != nil {
+		query = query.Where("title = ?", *filter.Title)
 	}
 
 	err := query.Order(fmt.Sprintf("%s.id ASC", template.GetTable())).Find(&templates).Error

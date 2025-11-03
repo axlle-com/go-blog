@@ -14,8 +14,8 @@ import (
 type PostRepository interface {
 	WithTx(tx *gorm.DB) PostRepository
 	Create(post *models.Post) error
-	GetByID(id uint) (*models.Post, error)
-	GetByParam(field string, value any) (*models.Post, error)
+	FindByID(id uint) (*models.Post, error)
+	FindByParam(field string, value any) (*models.Post, error)
 	GetByParams(params map[string]any) ([]*models.Post, error)
 	Update(post *models.Post) error
 	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
@@ -45,7 +45,7 @@ func (r *postRepository) Create(post *models.Post) error {
 	return r.db.Create(post).Error
 }
 
-func (r *postRepository) GetByID(id uint) (*models.Post, error) {
+func (r *postRepository) FindByID(id uint) (*models.Post, error) {
 	var model models.Post
 	if err := r.db.First(&model, id).Error; err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (r *postRepository) WithPaginate(p contract.Paginator, filter *models.PostF
 	return posts, nil
 }
 
-func (r *postRepository) GetByParam(field string, value any) (*models.Post, error) {
+func (r *postRepository) FindByParam(field string, value any) (*models.Post, error) {
 	var post models.Post
 	condition := map[string]any{
 		field: value,

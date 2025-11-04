@@ -43,7 +43,7 @@ func (c *tagController) Update(ctx *gin.Context) {
 		return
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := gin.H{
 		"templates": c.templates(ctx),

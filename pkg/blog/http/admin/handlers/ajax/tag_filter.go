@@ -34,7 +34,7 @@ func (c *tagController) Filter(ctx *gin.Context) {
 	}
 	tags := c.tagCollectionService.Aggregates(temp)
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 
 	data := gin.H{
 		"title":     "Страница тэгов",

@@ -34,7 +34,7 @@ func (c *tagController) GetTags(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 
 	tagsTemp, err := c.tagCollectionService.WithPaginate(paginator, filter)
 	if err != nil {

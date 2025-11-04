@@ -32,7 +32,7 @@ func (c *tagController) CreateTag(ctx *gin.Context) {
 			"templates": c.templates(ctx),
 			"tag":       tag,
 			"collection": gin.H{
-				"infoBlocks":          c.infoBlock.GetAll(),
+				"infoBlocks":          c.api.InfoBlock.GetAll(),
 				"infoBlockCollection": tag.InfoBlocks,
 				"relationURL":         tag.AdminURL(),
 			},

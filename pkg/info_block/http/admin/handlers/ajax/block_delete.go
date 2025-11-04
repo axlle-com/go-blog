@@ -48,7 +48,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/models-blocks")
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 
 	blocksTemp, err := c.blockCollectionService.WithPaginate(paginator, filter.ToFilter())
 	if err != nil {

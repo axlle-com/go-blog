@@ -27,7 +27,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/post/categories")
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)

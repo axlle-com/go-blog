@@ -47,7 +47,7 @@ func (c *postController) DeletePost(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL("/admin/posts")
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {

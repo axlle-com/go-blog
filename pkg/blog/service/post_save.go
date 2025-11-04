@@ -28,7 +28,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post
 			interfaceSlice[i] = gallery
 		}
 
-		slice, err := s.galleryProvider.SaveFormBatch(interfaceSlice, model)
+		slice, err := s.api.Gallery.SaveFormBatch(interfaceSlice, model)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -41,7 +41,7 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model.UUID.String())
+		slice, err := s.api.InfoBlock.SaveFormBatch(interfaceSlice, model.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}

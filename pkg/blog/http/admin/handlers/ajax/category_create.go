@@ -38,7 +38,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlockProvider.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := response.Body{
 		"categories": categories,

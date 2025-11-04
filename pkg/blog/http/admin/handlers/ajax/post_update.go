@@ -53,7 +53,7 @@ func (c *postController) UpdatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := gin.H{
 		"tags":       tags,

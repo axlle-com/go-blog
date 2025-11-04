@@ -3,37 +3,29 @@ package service
 import (
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type InfoBlockCollectionService struct {
-	infoBlockRepo    repository.InfoBlockRepository
-	resourceRepo     repository.InfoBlockHasResourceRepository
-	galleryProvider  appPovider.GalleryProvider
-	templateProvider template.TemplateProvider
-	userProvider     user.UserProvider
+	infoBlockRepo repository.InfoBlockRepository
+	resourceRepo  repository.InfoBlockHasResourceRepository
+	api           *api.Api
 }
 
 func NewInfoBlockCollectionService(
 	infoBlockRepo repository.InfoBlockRepository,
 	resourceRepo repository.InfoBlockHasResourceRepository,
-	galleryProvider appPovider.GalleryProvider,
-	templateProvider template.TemplateProvider,
-	userProvider user.UserProvider,
+	api *api.Api,
 ) *InfoBlockCollectionService {
 	return &InfoBlockCollectionService{
-		infoBlockRepo:    infoBlockRepo,
-		resourceRepo:     resourceRepo,
-		galleryProvider:  galleryProvider,
-		templateProvider: templateProvider,
-		userProvider:     userProvider,
+		infoBlockRepo: infoBlockRepo,
+		resourceRepo:  resourceRepo,
+		api:           api,
 	}
 }
 
@@ -80,7 +72,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 		defer wg.Done()
 		if len(templateIDs) > 0 {
 			var err error
-			templates, err = s.templateProvider.GetMapByIDs(templateIDs)
+			templates, err = s.api.Template.GetMapByIDs(templateIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -91,7 +83,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 		defer wg.Done()
 		if len(userIDs) > 0 {
 			var err error
-			users, err = s.userProvider.GetMapByIDs(userIDs)
+			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -150,7 +142,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 		defer wg.Done()
 		if len(templateIDs) > 0 {
 			var err error
-			templates, err = s.templateProvider.GetMapByIDs(templateIDs)
+			templates, err = s.api.Template.GetMapByIDs(templateIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -161,7 +153,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 		defer wg.Done()
 		if len(userIDs) > 0 {
 			var err error
-			users, err = s.userProvider.GetMapByIDs(userIDs)
+			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -170,7 +162,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetIndexesForResources(infoBlocksInterface)
+		galleries = s.api.Gallery.GetIndexesForResources(infoBlocksInterface)
 	}()
 
 	wg.Wait()

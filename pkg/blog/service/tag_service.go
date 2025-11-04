@@ -4,42 +4,31 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service/struct"
-	"github.com/axlle-com/blog/pkg/alias"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	file "github.com/axlle-com/blog/pkg/file/provider"
 	"gorm.io/gorm"
 )
 
 type TagService struct {
-	tagRepo           repository.PostTagRepository
-	resourceRepo      repository.PostTagResourceRepository
-	aliasProvider     alias.AliasProvider
-	galleryProvider   appPovider.GalleryProvider
-	infoBlockProvider appPovider.InfoBlockProvider
-	fileProvider      file.FileProvider
+	tagRepo      repository.PostTagRepository
+	resourceRepo repository.PostTagResourceRepository
+	api          *api.Api
 }
 
 func NewTagService(
 	postTagRepo repository.PostTagRepository,
 	resourceRepo repository.PostTagResourceRepository,
-	aliasProvider alias.AliasProvider,
-	galleryProvider appPovider.GalleryProvider,
-	infoBlockProvider appPovider.InfoBlockProvider,
-	fileProvider file.FileProvider,
+	api *api.Api,
 ) *TagService {
 	return &TagService{
-		tagRepo:           postTagRepo,
-		resourceRepo:      resourceRepo,
-		aliasProvider:     aliasProvider,
-		galleryProvider:   galleryProvider,
-		infoBlockProvider: infoBlockProvider,
-		fileProvider:      fileProvider,
+		tagRepo:      postTagRepo,
+		resourceRepo: resourceRepo,
+		api:          api,
 	}
 }
 
@@ -57,12 +46,12 @@ func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetForResourceUUID(post.UUID.String())
+		galleries = s.api.Gallery.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.infoBlockProvider.GetForResourceUUID(post.UUID.String())
+		infoBlocks = s.api.InfoBlock.GetForResourceUUID(post.UUID.String())
 	}()
 
 	wg.Wait()
@@ -74,7 +63,7 @@ func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
 }
 
 func (s *TagService) Create(postTag *models.PostTag) (*models.PostTag, error) {
-	postTag.Alias = s.aliasProvider.Generate(postTag, postTag.Name)
+	postTag.Alias = s.api.Alias.Generate(postTag, postTag.Name)
 	if err := s.tagRepo.Create(postTag); err != nil {
 		return nil, err
 	}
@@ -139,7 +128,7 @@ func (s *TagService) SaveFromRequest(form *http.TagRequest, user contract.User) 
 			interfaceSlice[i] = galleryRequest
 		}
 
-		slice, err := s.galleryProvider.SaveFormBatch(interfaceSlice, model)
+		slice, err := s.api.Gallery.SaveFormBatch(interfaceSlice, model)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -152,7 +141,7 @@ func (s *TagService) SaveFromRequest(form *http.TagRequest, user contract.User) 
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.infoBlockProvider.SaveFormBatch(interfaceSlice, model.UUID.String())
+		slice, err := s.api.InfoBlock.SaveFormBatch(interfaceSlice, model.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}
@@ -170,7 +159,7 @@ func (s *TagService) Save(tag *models.PostTag, user contract.User) (*models.Post
 		newAlias = tag.Alias
 	}
 
-	tag.Alias = s.aliasProvider.Generate(tag, newAlias)
+	tag.Alias = s.api.Alias.Generate(tag, newAlias)
 	if tag.ID == 0 {
 		if err := s.tagRepo.Create(tag); err != nil {
 			return nil, err
@@ -182,7 +171,7 @@ func (s *TagService) Save(tag *models.PostTag, user contract.User) (*models.Post
 	}
 
 	if tag.Image != nil && *tag.Image != "" {
-		err := s.fileProvider.Received([]string{*tag.Image})
+		err := s.api.File.Received([]string{*tag.Image})
 		if err != nil {
 			return tag, err
 		}
@@ -195,7 +184,7 @@ func (s *TagService) DeleteImageFile(tag *models.PostTag) error {
 	if tag.Image == nil {
 		return nil
 	}
-	err := s.fileProvider.DeleteFile(*tag.Image)
+	err := s.api.File.DeleteFile(*tag.Image)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err

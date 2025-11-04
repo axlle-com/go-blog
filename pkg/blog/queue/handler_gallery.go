@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
-	"github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -20,13 +20,13 @@ func NewGalleryQueueHandler(
 	categoriesService *service.CategoriesService,
 	postCollectionService *service.PostCollectionService,
 	tagCollectionService *service.TagCollectionService,
-	galleryProvider provider.GalleryProvider,
+	api *api.Api,
 ) contract.QueueHandler {
 	return &queueGalleryHandler{
 		categoriesService:     categoriesService,
 		postCollectionService: postCollectionService,
 		tagCollectionService:  tagCollectionService,
-		galleryProvider:       galleryProvider,
+		api:                   api,
 	}
 }
 
@@ -34,7 +34,7 @@ type queueGalleryHandler struct {
 	categoriesService     *service.CategoriesService
 	postCollectionService *service.PostCollectionService
 	tagCollectionService  *service.TagCollectionService
-	galleryProvider       provider.GalleryProvider
+	api                   *api.Api
 }
 
 func (qh *queueGalleryHandler) Run(data []byte) {
@@ -85,7 +85,7 @@ func (qh *queueGalleryHandler) update(payload []byte) error {
 			continue
 		}
 
-		blocks := qh.galleryProvider.GetForResourceUUID(resUUID)
+		blocks := qh.api.Gallery.GetForResourceUUID(resUUID)
 
 		byRes[resUUID] = &bundle{
 			uuids:    []uuid.UUID{newUUID},

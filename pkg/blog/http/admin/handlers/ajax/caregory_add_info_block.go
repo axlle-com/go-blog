@@ -28,13 +28,13 @@ func (c *categoryController) AddPostInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	infoBlockCollection, err := c.infoBlockProvider.Attach(uint(infoBlockId), found.UUID.String())
+	infoBlockCollection, err := c.api.InfoBlock.Attach(uint(infoBlockId), found.UUID.String())
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
 		return
 	}
 
-	infoBlocks := c.infoBlockProvider.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 	data := gin.H{
 		"infoBlocks":          infoBlocks,
 		"infoBlockCollection": infoBlockCollection,

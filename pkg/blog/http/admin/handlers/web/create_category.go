@@ -31,7 +31,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 			"templates":  c.templates(ctx),
 			"category":   category,
 			"collection": gin.H{
-				"infoBlocks":          c.infoBlockProvider.GetAll(),
+				"infoBlocks":          c.api.InfoBlock.GetAll(),
 				"infoBlockCollection": category.InfoBlocks,
 				"relationURL":         category.AdminURL(),
 			},

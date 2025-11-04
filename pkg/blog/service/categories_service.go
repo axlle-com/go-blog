@@ -3,38 +3,26 @@ package service
 import (
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
-	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type CategoriesService struct {
-	categoryRepo    repository.CategoryRepository
-	template        template.TemplateProvider
-	user            user.UserProvider
-	galleryProvider appPovider.GalleryProvider
-	aliasProvider   alias.AliasProvider
+	categoryRepo repository.CategoryRepository
+	api          *api.Api
 }
 
 func NewCategoriesService(
 	categoryRepo repository.CategoryRepository,
-	aliasProvider alias.AliasProvider,
-	galleryProvider appPovider.GalleryProvider,
-	template template.TemplateProvider,
-	user user.UserProvider,
+	api *api.Api,
 ) *CategoriesService {
 	return &CategoriesService{
-		categoryRepo:    categoryRepo,
-		template:        template,
-		user:            user,
-		galleryProvider: galleryProvider,
-		aliasProvider:   aliasProvider,
+		categoryRepo: categoryRepo,
+		api:          api,
 	}
 }
 
@@ -83,7 +71,7 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 		defer wg.Done()
 		if len(templateIDs) > 0 {
 			var err error
-			templates, err = s.template.GetMapByIDs(templateIDs)
+			templates, err = s.api.Template.GetMapByIDs(templateIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -94,7 +82,7 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 		defer wg.Done()
 		if len(userIDs) > 0 {
 			var err error
-			users, err = s.user.GetMapByIDs(userIDs)
+			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
 				logger.Error(err)
 			}

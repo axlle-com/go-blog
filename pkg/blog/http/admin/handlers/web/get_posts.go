@@ -31,7 +31,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL((&models.Post{}).AdminURL())
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 	categories, err := c.categoriesService.GetAll()
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)

@@ -48,7 +48,7 @@ func (c *categoryController) UpdateCategory(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlockProvider.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := gin.H{
 		"categories": categories,

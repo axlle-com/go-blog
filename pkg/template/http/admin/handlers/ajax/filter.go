@@ -36,7 +36,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 	}
 	templates := c.templateCollectionService.Aggregates(temp)
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 	resources := app.NewResources()
 	data := response.Body{
 		"title":         "Страница шаблонов",

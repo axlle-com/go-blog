@@ -50,7 +50,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 
 	temp, err := c.templateCollectionService.WithPaginate(paginator, filter)
 	if err != nil {

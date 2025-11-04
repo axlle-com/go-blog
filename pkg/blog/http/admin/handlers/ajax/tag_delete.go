@@ -54,7 +54,7 @@ func (c *tagController) Delete(ctx *gin.Context) {
 	}
 	tags := c.tagCollectionService.Aggregates(temp)
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 
 	data := response.Body{
 		"title":     "Страница тэгов",

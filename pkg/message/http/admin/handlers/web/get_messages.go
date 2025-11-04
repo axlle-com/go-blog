@@ -33,7 +33,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 	paginator := c.PaginatorFromQuery(ctx)
 	paginator.SetURL(empty.AdminURL())
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 
 	temp, err := c.messageCollectionService.WithPaginate(paginator, filter)
 	if err != nil {

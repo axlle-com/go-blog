@@ -1,6 +1,7 @@
 package di
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -190,18 +191,8 @@ type Container struct {
 	FrontWebPostController       postFrontWeb.PostController
 	FrontAjaxMessageController   messageFrontWeb.MessageController
 	FrontWebUserController       userFrontWeb.Controller
-}
 
-type Api struct {
-	File      fileProvider.FileProvider
-	Image     apppPovider.ImageProvider
-	Gallery   apppPovider.GalleryProvider
-	Post      contract.PostProvider
-	Template  templateProvider.TemplateProvider
-	User      userProvider.UserProvider
-	Alias     alias.AliasProvider
-	InfoBlock apppPovider.InfoBlockProvider
-	Analytic  analyticProvider.AnalyticProvider
+	Api *api.Api
 }
 
 func NewContainer(cfg contract.Config, db contract.DB) *Container {
@@ -260,26 +251,50 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db.PostgreSQL())
 	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
-	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newGalleryProvider, newTemplateProvider, newUserProvider)
+	// Initialize Api with available providers (before creating services that use Api)
+	// Some providers will be added later (Post, Analytic, InfoBlock)
+	newApi := &api.Api{
+		File:      fileProv,
+		Image:     newImageProvider,
+		Gallery:   newGalleryProvider,
+		Post:      nil, // Will be set later
+		Template:  newTemplateProvider,
+		User:      newUserProvider,
+		Alias:     newAliasProvider,
+		InfoBlock: nil, // Will be set later
+		Analytic:  nil, // Will be set later
+	}
+
+	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newApi)
 	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue)
-	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newGalleryProvider, newTemplateProvider, newUserProvider, fileProv)
+	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newApi)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
+
+	// Update Api with InfoBlock provider
+	newApi.InfoBlock = newBlockProvider
 
 	postTagRepo := postRepo.NewPostTagRepo(db.PostgreSQL())
 	postTagResourceRepo := postRepo.NewResourceRepo(db.PostgreSQL())
-	postTagService := postService.NewTagService(postTagRepo, postTagResourceRepo, newAliasProvider, newGalleryProvider, newBlockProvider, fileProv)
-	postTagCollectionService := postService.NewTagCollectionService(postTagService, postTagRepo, postTagResourceRepo, newTemplateProvider)
+	postTagService := postService.NewTagService(postTagRepo, postTagResourceRepo, newApi)
+	postTagCollectionService := postService.NewTagCollectionService(postTagService, postTagRepo, postTagResourceRepo, newApi)
 
-	newCategoriesService := postService.NewCategoriesService(newCategoryRepo, newAliasProvider, newGalleryProvider, newTemplateProvider, newUserProvider)
-	categoryService := postService.NewCategoryService(newCategoryRepo, newAliasProvider, newGalleryProvider, fileProv, newBlockProvider)
+	newCategoriesService := postService.NewCategoriesService(newCategoryRepo, newApi)
+	categoryService := postService.NewCategoryService(newCategoryRepo, newApi)
 
-	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newGalleryProvider, fileProv, newAliasProvider, newBlockProvider, newTemplateProvider)
-	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newGalleryProvider, fileProv, newAliasProvider, newUserProvider, newTemplateProvider, newBlockProvider)
+	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newApi)
+	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newApi)
 	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
+
+	// Update Api with Post provider
+	newApi.Post = newPostProvider
+
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
+
+	// Update Api with Analytic provider
+	newApi.Analytic = newAnalyticProvider
 
 	menuRepo := menuRepository.NewMenuRepo(db.PostgreSQL())
 	menuItemRepo := menuRepository.NewMenuItemRepo(db.PostgreSQL())
@@ -350,11 +365,11 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 			menuQueue.NewPublisherQueueHandler(newMenuService, menuItemCollectionService),
 		},
 		"info_blocks": {
-			postQueue.NewInfoBlockQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newBlockProvider),
+			postQueue.NewInfoBlockQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newApi),
 		},
 		"galleries": {
 			infoBlockQueue.NewGalleryQueueHandler(newBlockService, newBlockEventService),
-			postQueue.NewGalleryQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newGalleryProvider),
+			postQueue.NewGalleryQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newApi),
 		},
 	})
 
@@ -365,10 +380,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		categoryService,
 		newCategoriesService,
 		postTagCollectionService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminAjaxPostController := postAjax.NewPostController(
@@ -377,91 +389,74 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		categoryService,
 		postTagCollectionService,
 		newCategoriesService,
-		newTemplateProvider,
-		newUserProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminApiPostController := postApi.New(
 		newPostService,
 		categoryService,
 		newCategoriesService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
+		newApi,
 	)
 
 	adminWebCategoryController := postAdminWeb.NewWebCategoryController(
 		newCategoriesService,
 		categoryService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminAjaxCategoryController := postAjax.NewCategoryController(
 		newCategoriesService,
 		categoryService,
-		newTemplateProvider,
-		newUserProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminWebTagController := postAdminWeb.NewWebTagController(
 		postTagService,
 		postTagCollectionService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminAjaxTagController := postAjax.NewTagController(
 		postTagService,
 		postTagCollectionService,
-		newTemplateProvider,
-		newUserProvider,
-		newBlockProvider,
+		newApi,
 	)
 
 	adminWebInfoBlockController := infoBlockAdminWeb.NewInfoBlockWebController(
 		newBlockService,
 		newBlockCollectionService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
+		newApi,
 	)
 
 	adminAjaxInfoBlockController := infoBlockAdminAjax.NewInfoBlockController(
 		newBlockService,
 		newBlockCollectionService,
-		newTemplateProvider,
-		newUserProvider,
+		newApi,
 	)
 
 	adminWebTemplateController := templateAdminWeb.NewTemplateWebController(
 		newTemplateService,
 		newTemplateCollectionService,
-		newUserProvider,
+		newApi,
 	)
 
 	adminAjaxTemplateController := templateAdminAjax.NewTemplateController(
 		newTemplateService,
 		newTemplateCollectionService,
-		newUserProvider,
+		newApi,
 	)
 
 	adminWebMessageController := messageAdminWeb.NewMessageWebController(
 		newMessageService,
 		newMessageCollectionService,
-		newUserProvider,
+		newApi,
 	)
 
 	adminAjaxMessageController := messageAdminAjax.NewMessageController(
 		newMessageService,
 		newMessageCollectionService,
-		newUserProvider,
+		newApi,
 	)
 
 	adminAjaxGalleryController := galleryAjax.New(
@@ -475,15 +470,13 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		newMenuCollectionService,
 		menuItemService,
 		menuItemCollectionService,
-		newTemplateProvider,
-		newPostProvider,
+		newApi,
 	)
 
 	adminAjaxMenuController := menuAdminAjax.NewMenuAjaxController(
 		newMenuService,
 		newMenuCollectionService,
-		newTemplateProvider,
-		newPostProvider,
+		newApi,
 	)
 
 	adminAjaxMenuItemController := menuAdminAjax.NewMenuItemAjaxController(
@@ -502,9 +495,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		newPostCollectionService,
 		categoryService,
 		newCategoriesService,
-		newTemplateProvider,
-		newUserProvider,
-		newGalleryProvider,
+		newApi,
 	)
 
 	frontAjaxMessageController := messageFrontWeb.NewMessageController(
@@ -624,5 +615,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		FrontWebPostController:       frontWebPostController,
 		FrontAjaxMessageController:   frontAjaxMessageController,
 		FrontWebUserController:       frontWebUserController,
+
+		Api: newApi,
 	}
 }

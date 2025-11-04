@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
-	"github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -20,13 +20,13 @@ func NewInfoBlockQueueHandler(
 	categoriesService *service.CategoriesService,
 	postCollectionService *service.PostCollectionService,
 	tagCollectionService *service.TagCollectionService,
-	infoBlockProvider provider.InfoBlockProvider,
+	api *api.Api,
 ) contract.QueueHandler {
 	return &queueHandler{
 		categoriesService:     categoriesService,
 		postCollectionService: postCollectionService,
 		tagCollectionService:  tagCollectionService,
-		infoBlockProvider:     infoBlockProvider,
+		api:                   api,
 	}
 }
 
@@ -34,7 +34,7 @@ type queueHandler struct {
 	categoriesService     *service.CategoriesService
 	postCollectionService *service.PostCollectionService
 	tagCollectionService  *service.TagCollectionService
-	infoBlockProvider     provider.InfoBlockProvider
+	api                   *api.Api
 }
 
 func (qh *queueHandler) Run(data []byte) {
@@ -85,7 +85,7 @@ func (qh *queueHandler) update(payload []byte) error {
 			continue
 		}
 
-		blocks := qh.infoBlockProvider.GetForResourceUUID(resUUID)
+		blocks := qh.api.InfoBlock.GetForResourceUUID(resUUID)
 
 		byRes[resUUID] = &bundle{
 			uuids:    []uuid.UUID{newUUID},

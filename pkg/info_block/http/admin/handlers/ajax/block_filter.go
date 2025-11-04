@@ -34,7 +34,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 	}
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
-	users := c.userProvider.GetAll()
+	users := c.api.User.GetAll()
 	data := response.Body{
 		"title":      "Страница инфо блоков",
 		"infoBlocks": blocks,

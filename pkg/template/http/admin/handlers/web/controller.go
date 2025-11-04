@@ -1,9 +1,9 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/template/service"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +16,12 @@ type TemplateWebController interface {
 func NewTemplateWebController(
 	templateService *service.TemplateService,
 	templateCollectionService *service.TemplateCollectionService,
-	userProvider userProvider.UserProvider,
+	api *api.Api,
 ) TemplateWebController {
 	return &templateWebController{
 		templateService:           templateService,
 		templateCollectionService: templateCollectionService,
-		userProvider:              userProvider,
+		api:                       api,
 	}
 }
 
@@ -30,5 +30,5 @@ type templateWebController struct {
 
 	templateService           *service.TemplateService
 	templateCollectionService *service.TemplateCollectionService
-	userProvider              userProvider.UserProvider
+	api                       *api.Api
 }

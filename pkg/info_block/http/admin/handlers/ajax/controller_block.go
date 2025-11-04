@@ -1,13 +1,12 @@
 package ajax
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,14 +24,12 @@ type InfoBlockController interface {
 func NewInfoBlockController(
 	blockService *service.InfoBlockService,
 	blockCollectionService *service.InfoBlockCollectionService,
-	template template.TemplateProvider,
-	user user.UserProvider,
+	api *api.Api,
 ) InfoBlockController {
 	return &blockController{
 		blockService:           blockService,
 		blockCollectionService: blockCollectionService,
-		templateProvider:       template,
-		userProvider:           user,
+		api:                    api,
 	}
 }
 
@@ -41,12 +38,11 @@ type blockController struct {
 
 	blockService           *service.InfoBlockService
 	blockCollectionService *service.InfoBlockCollectionService
-	templateProvider       template.TemplateProvider
-	userProvider           user.UserProvider
+	api                    *api.Api
 }
 
 func (c *blockController) templates(ctx *gin.Context) []contract.Template {
-	templates, err := c.templateProvider.GetForResources(&models.InfoBlock{})
+	templates, err := c.api.Template.GetForResources(&models.InfoBlock{})
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

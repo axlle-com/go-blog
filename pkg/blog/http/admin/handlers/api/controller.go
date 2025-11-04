@@ -1,11 +1,9 @@
 package api
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/models"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,17 +19,13 @@ func New(
 	service *service.PostService,
 	category *service.CategoryService,
 	categories *service.CategoriesService,
-	template template.TemplateProvider,
-	user user.UserProvider,
-	gallery appPovider.GalleryProvider,
+	api *api.Api,
 ) Controller {
 	return &controller{
 		service:    service,
 		category:   category,
 		categories: categories,
-		template:   template,
-		user:       user,
-		gallery:    gallery,
+		api:        api,
 	}
 }
 
@@ -41,7 +35,5 @@ type controller struct {
 	service    *service.PostService
 	category   *service.CategoryService
 	categories *service.CategoriesService
-	template   template.TemplateProvider
-	user       user.UserProvider
-	gallery    appPovider.GalleryProvider
+	api        *api.Api
 }

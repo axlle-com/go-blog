@@ -3,15 +3,11 @@ package service
 import (
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
-	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	file "github.com/axlle-com/blog/pkg/file/provider"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
@@ -19,35 +15,20 @@ type PostCollectionService struct {
 	postRepo          repository.PostRepository
 	categoriesService *CategoriesService
 	categoryService   *CategoryService
-	galleryProvider   appPovider.GalleryProvider
-	fileProvider      file.FileProvider
-	aliasProvider     alias.AliasProvider
-	userProvider      user.UserProvider
-	templateProvider  template.TemplateProvider
-	infoBlockProvider appPovider.InfoBlockProvider
+	api               *api.Api
 }
 
 func NewPostCollectionService(
 	postRepo repository.PostRepository,
 	categoriesService *CategoriesService,
 	categoryService *CategoryService,
-	galleryProvider appPovider.GalleryProvider,
-	fileProvider file.FileProvider,
-	aliasProvider alias.AliasProvider,
-	userProvider user.UserProvider,
-	templateProvider template.TemplateProvider,
-	infoBlockProvider appPovider.InfoBlockProvider,
+	api *api.Api,
 ) *PostCollectionService {
 	return &PostCollectionService{
 		postRepo:          postRepo,
 		categoriesService: categoriesService,
 		categoryService:   categoryService,
-		galleryProvider:   galleryProvider,
-		fileProvider:      fileProvider,
-		aliasProvider:     aliasProvider,
-		userProvider:      userProvider,
-		templateProvider:  templateProvider,
-		infoBlockProvider: infoBlockProvider,
+		api:               api,
 	}
 }
 
@@ -96,7 +77,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 		defer wg.Done()
 		if len(templateIDs) > 0 {
 			var err error
-			templates, err = s.templateProvider.GetMapByIDs(templateIDs)
+			templates, err = s.api.Template.GetMapByIDs(templateIDs)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -107,7 +88,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 		defer wg.Done()
 		if len(userIDs) > 0 {
 			var err error
-			users, err = s.userProvider.GetMapByIDs(userIDs)
+			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
 				logger.Error(err)
 			}

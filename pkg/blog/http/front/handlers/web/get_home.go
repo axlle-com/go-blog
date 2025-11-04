@@ -28,7 +28,6 @@ func (c *postController) GetHome(ctx *gin.Context) {
 		logger.Errorf("[blog][postController][GetHome] Error: %v", err)
 	}
 
-	logger.Dump(post.GetTemplateName())
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,

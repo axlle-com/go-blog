@@ -3,32 +3,32 @@ package service
 import (
 	"strings"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	"github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/google/uuid"
 )
 
 type TagCollectionService struct {
-	tagService       *TagService
-	tagRepo          repository.PostTagRepository
-	resourceRepo     repository.PostTagResourceRepository
-	templateProvider provider.TemplateProvider
+	tagService   *TagService
+	tagRepo      repository.PostTagRepository
+	resourceRepo repository.PostTagResourceRepository
+	api          *api.Api
 }
 
 func NewTagCollectionService(
 	tagService *TagService,
 	postTagRepo repository.PostTagRepository,
 	resourceRepo repository.PostTagResourceRepository,
-	templateProvider provider.TemplateProvider,
+	api *api.Api,
 ) *TagCollectionService {
 	return &TagCollectionService{
-		tagService:       tagService,
-		tagRepo:          postTagRepo,
-		resourceRepo:     resourceRepo,
-		templateProvider: templateProvider,
+		tagService:   tagService,
+		tagRepo:      postTagRepo,
+		resourceRepo: resourceRepo,
+		api:          api,
 	}
 }
 
@@ -55,7 +55,7 @@ func (s *TagCollectionService) Aggregates(tags []*models.PostTag) []*models.Post
 
 	if len(templateIDs) > 0 {
 		var err error
-		templates, err = s.templateProvider.GetMapByIDs(templateIDs)
+		templates, err = s.api.Template.GetMapByIDs(templateIDs)
 		if err != nil {
 			logger.Error(err)
 		}

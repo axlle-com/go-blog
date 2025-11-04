@@ -27,7 +27,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 		return
 	}
 
-	category.Galleries = c.galleryProvider.GetForResourceUUID(category.UUID.String())
+	category.Galleries = c.api.Gallery.GetForResourceUUID(category.UUID.String())
 
 	categories, err := c.categoriesService.GetAllForParent(category)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 			"templates":  c.templates(ctx),
 			"category":   category,
 			"collection": gin.H{
-				"infoBlocks":          c.infoBlockProvider.GetAll(),
+				"infoBlocks":          c.api.InfoBlock.GetAll(),
 				"infoBlockCollection": category.InfoBlocks,
 				"relationURL":         category.AdminURL(),
 			},

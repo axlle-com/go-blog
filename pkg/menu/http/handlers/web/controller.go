@@ -1,12 +1,12 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,16 +21,14 @@ func NewMenuWebController(
 	menuCollectionService *service.MenuCollectionService,
 	menuItemService *service.MenuItemService,
 	menuItemCollectionService *service.MenuItemCollectionService,
-	templateProvider template.TemplateProvider,
-	postProvider contract.PostProvider,
+	api *api.Api,
 ) Controller {
 	return &menuController{
 		menuService:               menuService,
 		menuCollectionService:     menuCollectionService,
 		menuItemService:           menuItemService,
 		menuItemCollectionService: menuItemCollectionService,
-		templateProvider:          templateProvider,
-		postProvider:              postProvider,
+		api:                       api,
 	}
 }
 
@@ -41,12 +39,11 @@ type menuController struct {
 	menuCollectionService     *service.MenuCollectionService
 	menuItemService           *service.MenuItemService
 	menuItemCollectionService *service.MenuItemCollectionService
-	templateProvider          template.TemplateProvider
-	postProvider              contract.PostProvider
+	api                       *api.Api
 }
 
 func (c *menuController) templates(ctx *gin.Context) []contract.Template {
-	templates, err := c.templateProvider.GetForResources(&models.Menu{})
+	templates, err := c.api.Template.GetForResources(&models.Menu{})
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

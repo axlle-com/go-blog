@@ -1,9 +1,9 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/message/service"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,12 +16,12 @@ type MessageWebController interface {
 func NewMessageWebController(
 	messageService *service.MessageService,
 	messageCollectionService *service.MessageCollectionService,
-	userProvider userProvider.UserProvider,
+	api *api.Api,
 ) MessageWebController {
 	return &messageController{
 		messageService:           messageService,
 		messageCollectionService: messageCollectionService,
-		userProvider:             userProvider,
+		api:                      api,
 	}
 }
 
@@ -30,5 +30,5 @@ type messageController struct {
 
 	messageService           *service.MessageService
 	messageCollectionService *service.MessageCollectionService
-	userProvider             userProvider.UserProvider
+	api                      *api.Api
 }

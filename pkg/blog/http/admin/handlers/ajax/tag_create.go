@@ -32,7 +32,7 @@ func (c *tagController) Create(ctx *gin.Context) {
 		return
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := response.Body{
 		"templates": c.templates(ctx),

@@ -44,7 +44,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 
 	data := response.Body{
 		"tags":       tags,

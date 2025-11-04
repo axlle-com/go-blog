@@ -38,7 +38,7 @@ func (c *postController) FilterPosts(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	users := c.user.GetAll()
+	users := c.api.User.GetAll()
 	data := gin.H{
 		"title":      "Страница постов",
 		"post":       &models.Post{},

@@ -1,12 +1,10 @@
 package web
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,9 +19,7 @@ func NewFrontWebController(
 	services *service.PostCollectionService,
 	category *service.CategoryService,
 	categories *service.CategoriesService,
-	template template.TemplateProvider,
-	user user.UserProvider,
-	gallery appPovider.GalleryProvider,
+	api *api.Api,
 ) PostController {
 	return &postController{
 		view:                  view,
@@ -31,9 +27,7 @@ func NewFrontWebController(
 		postCollectionService: services,
 		categoryService:       category,
 		categoriesService:     categories,
-		template:              template,
-		user:                  user,
-		gallery:               gallery,
+		api:                   api,
 	}
 }
 
@@ -45,7 +39,5 @@ type postController struct {
 	postCollectionService *service.PostCollectionService
 	categoryService       *service.CategoryService
 	categoriesService     *service.CategoriesService
-	template              template.TemplateProvider
-	user                  user.UserProvider
-	gallery               appPovider.GalleryProvider
+	api                   *api.Api
 }

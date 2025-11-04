@@ -4,15 +4,12 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service/struct"
-	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
-	tProvider "github.com/axlle-com/blog/pkg/template/provider"
-	provider2 "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -22,10 +19,7 @@ type InfoBlockService struct {
 	infoBlockCollection   *InfoBlockCollectionService
 	resourceRepo          repository.InfoBlockHasResourceRepository
 	infoBlockEventService *InfoBlockEventService
-	galleryProvider       appPovider.GalleryProvider
-	templateProvider      tProvider.TemplateProvider
-	userProvider          provider2.UserProvider
-	fileProvider          fileProvider.FileProvider
+	api                   *api.Api
 }
 
 func NewInfoBlockService(
@@ -33,20 +27,14 @@ func NewInfoBlockService(
 	infoBlockCollection *InfoBlockCollectionService,
 	resourceRepo repository.InfoBlockHasResourceRepository,
 	infoBlockEventService *InfoBlockEventService,
-	galleryProvider appPovider.GalleryProvider,
-	templateProvider tProvider.TemplateProvider,
-	userProvider provider2.UserProvider,
-	fileProvider fileProvider.FileProvider,
+	api *api.Api,
 ) *InfoBlockService {
 	return &InfoBlockService{
 		infoBlockRepo:         infoBlockRepo,
 		infoBlockCollection:   infoBlockCollection,
 		resourceRepo:          resourceRepo,
 		infoBlockEventService: infoBlockEventService,
-		galleryProvider:       galleryProvider,
-		templateProvider:      templateProvider,
-		userProvider:          userProvider,
-		fileProvider:          fileProvider,
+		api:                   api,
 	}
 }
 
@@ -63,7 +51,7 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 		defer wg.Done()
 		if infoBlock.TemplateID != nil && *infoBlock.TemplateID != 0 {
 			var err error
-			infoBlock.Template, err = s.templateProvider.GetByID(*infoBlock.TemplateID)
+			infoBlock.Template, err = s.api.Template.GetByID(*infoBlock.TemplateID)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -74,7 +62,7 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 		defer wg.Done()
 		if infoBlock.UserID != nil && *infoBlock.UserID != 0 {
 			var err error
-			infoBlock.User, err = s.userProvider.GetByID(*infoBlock.UserID)
+			infoBlock.User, err = s.api.User.GetByID(*infoBlock.UserID)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -83,11 +71,7 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 
 	go func() {
 		defer wg.Done()
-		var err error
-		infoBlock.Galleries = s.galleryProvider.GetForResourceUUID(infoBlock.UUID.String())
-		if err != nil {
-			logger.Error(err)
-		}
+		infoBlock.Galleries = s.api.Gallery.GetForResourceUUID(infoBlock.UUID.String())
 	}()
 
 	wg.Wait()
@@ -134,7 +118,7 @@ func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *mod
 				continue
 			}
 
-			g, err := s.galleryProvider.SaveForm(gRequest, infoBlock)
+			g, err := s.api.Gallery.SaveForm(gRequest, infoBlock)
 			if err != nil || g == nil {
 				continue
 			}
@@ -274,7 +258,7 @@ func (s *InfoBlockService) DeleteImageFile(infoBlock *models.InfoBlock) (*models
 		return infoBlock, nil
 	}
 
-	err := s.fileProvider.DeleteFile(*infoBlock.Image)
+	err := s.api.File.DeleteFile(*infoBlock.Image)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return infoBlock, err

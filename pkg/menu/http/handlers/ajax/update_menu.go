@@ -53,7 +53,7 @@ func (c *menuController) Update(ctx *gin.Context) {
 		return
 	}
 
-	publishers, err := c.postProvider.GetPublishers()
+	publishers, err := c.api.Post.GetPublishers()
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
 	}

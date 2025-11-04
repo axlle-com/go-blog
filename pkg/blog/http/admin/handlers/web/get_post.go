@@ -38,7 +38,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.infoBlock.GetAll()
+	infoBlocks := c.api.InfoBlock.GetAll()
 	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.post",

@@ -5,17 +5,14 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
-	appPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/app/service"
-	"github.com/axlle-com/blog/pkg/alias"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	"github.com/axlle-com/blog/pkg/file/provider"
-	template "github.com/axlle-com/blog/pkg/template/provider"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
@@ -26,11 +23,7 @@ type PostService struct {
 	categoriesService    *CategoriesService
 	categoryService      *CategoryService
 	tagCollectionService *TagCollectionService
-	galleryProvider      appPovider.GalleryProvider
-	fileProvider         provider.FileProvider
-	aliasProvider        alias.AliasProvider
-	infoBlockProvider    appPovider.InfoBlockProvider
-	templateProvider     template.TemplateProvider
+	api                  *api.Api
 }
 
 func NewPostService(
@@ -39,11 +32,7 @@ func NewPostService(
 	categoriesService *CategoriesService,
 	categoryService *CategoryService,
 	tagCollectionService *TagCollectionService,
-	galleryProvider appPovider.GalleryProvider,
-	fileProvider provider.FileProvider,
-	aliasProvider alias.AliasProvider,
-	infoBlockProvider appPovider.InfoBlockProvider,
-	templateProvider template.TemplateProvider,
+	api *api.Api,
 ) *PostService {
 	return &PostService{
 		queue:                queue,
@@ -51,11 +40,7 @@ func NewPostService(
 		categoriesService:    categoriesService,
 		categoryService:      categoryService,
 		tagCollectionService: tagCollectionService,
-		galleryProvider:      galleryProvider,
-		fileProvider:         fileProvider,
-		aliasProvider:        aliasProvider,
-		infoBlockProvider:    infoBlockProvider,
-		templateProvider:     templateProvider,
+		api:                  api,
 	}
 }
 
@@ -79,12 +64,12 @@ func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 
 	go func() {
 		defer wg.Done()
-		galleries = s.galleryProvider.GetForResourceUUID(post.UUID.String())
+		galleries = s.api.Gallery.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.infoBlockProvider.GetForResourceUUID(post.UUID.String())
+		infoBlocks = s.api.InfoBlock.GetForResourceUUID(post.UUID.String())
 	}()
 
 	go func() {
@@ -112,12 +97,10 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 	if post.InfoBlocksSnapshot == nil {
 		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
 			return func() {
-				blocks := s.infoBlockProvider.GetForResourceUUID(id.String())
+				blocks := s.api.InfoBlock.GetForResourceUUID(id.String())
 				if len(blocks) == 0 {
 					return
 				}
-
-				logger.Dump(blocks)
 
 				raw, e := json.Marshal(dto.MapInfoBlocks(blocks))
 				if e != nil {
@@ -141,7 +124,7 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 	if post.GalleriesSnapshot == nil {
 		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
 			return func() {
-				galleries := s.galleryProvider.GetForResourceUUID(id.String())
+				galleries := s.api.Gallery.GetForResourceUUID(id.String())
 				if len(galleries) == 0 {
 					return
 				}
@@ -179,7 +162,7 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 	// --- template ---
 	service.SafeGo(&wg, func(p *models.Post) func() {
 		return func() {
-			tpl, e := s.templateProvider.GetByID(*p.TemplateID)
+			tpl, e := s.api.Template.GetByID(*p.TemplateID)
 			if e != nil {
 				agg.Add(fmt.Errorf("get template: %w", e))
 				return
@@ -209,12 +192,12 @@ func (s *PostService) generateAlias(post *models.Post) string {
 		newAlias = post.Alias
 	}
 
-	return s.aliasProvider.Generate(post, newAlias)
+	return s.api.Alias.Generate(post, newAlias)
 }
 
 func (s *PostService) receivedImage(post *models.Post) error {
 	if post.Image != nil && *post.Image != "" {
-		return s.fileProvider.Received([]string{*post.Image})
+		return s.api.File.Received([]string{*post.Image})
 	}
 
 	return nil

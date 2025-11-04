@@ -26,7 +26,7 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 		return
 	}
 
-	block.Galleries = c.galleryProvider.GetForResourceUUID(block.UUID.String())
+	block.Galleries = c.api.Gallery.GetForResourceUUID(block.UUID.String())
 
 	c.RenderHTML(ctx,
 		http.StatusOK,

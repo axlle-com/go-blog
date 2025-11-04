@@ -6,12 +6,12 @@ import (
 )
 
 func (s *PostService) PostDelete(post *models.Post) error {
-	err := s.galleryProvider.DetachResource(post)
+	err := s.api.Gallery.DetachResource(post)
 	if err != nil {
 		return err
 	}
 
-	err = s.infoBlockProvider.DetachResourceUUID(post.UUID.String())
+	err = s.api.InfoBlock.DetachResourceUUID(post.UUID.String())
 	if err != nil {
 		return err
 	}

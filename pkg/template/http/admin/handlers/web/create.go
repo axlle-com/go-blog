@@ -29,7 +29,7 @@ func (c *templateWebController) CreateTemplate(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      menu.NewMenu(ctx.FullPath()),
+				"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

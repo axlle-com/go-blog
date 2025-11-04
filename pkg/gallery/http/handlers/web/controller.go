@@ -1,12 +1,14 @@
 package web
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/axlle-com/blog/app/errutil"
+	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/axlle-com/blog/pkg/gallery/service"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type Controller interface {
@@ -26,6 +28,8 @@ func New(
 }
 
 type controller struct {
+	*app.BaseAjax
+
 	gallery      repository.GalleryRepository
 	image        repository.GalleryImageRepository
 	imageService *service.ImageService

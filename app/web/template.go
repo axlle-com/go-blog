@@ -46,10 +46,19 @@ func NewTemplate(router *gin.Engine) *Template {
 }
 
 func (t *Template) init() {
-	t.router.StaticFile("/favicon.ico", "./"+t.config.SrcFolderBuilder("public/favicon.ico"))
-	t.router.Static("/public", "./"+t.config.SrcFolderBuilder("public"))
 	templates := t.loadTemplates(t.config.SrcFolderBuilder("templates"))
 	t.router.SetHTMLTemplate(templates)
+
+	t.router.Use(func(c *gin.Context) {
+		p := c.Request.URL.Path
+		if strings.HasPrefix(p, "/public/") || p == "/favicon.ico" {
+			c.Header("Cache-Control", "public, max-age=31536000, immutable")
+		}
+		c.Next()
+	})
+
+	t.router.StaticFile("/favicon.ico", "./"+t.config.SrcFolderBuilder("public/favicon.ico"))
+	t.router.Static("/public", "./"+t.config.SrcFolderBuilder("public"))
 	//router.LoadHTMLGlob("templates/**/**/*")
 }
 
@@ -93,6 +102,7 @@ func (t *Template) loadTemplates(templatesDir string) *template.Template {
 		"asset":      t.asset,
 		"css":        t.css,
 		"js":         t.js,
+		"hasPrefix":  strings.HasPrefix,
 
 		"render": func(name string, data any) template.HTML {
 			var buf bytes.Buffer

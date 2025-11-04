@@ -24,7 +24,7 @@ func (c *menuController) CreateMenu(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models.NewMenu(ctx.FullPath()),
+				"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

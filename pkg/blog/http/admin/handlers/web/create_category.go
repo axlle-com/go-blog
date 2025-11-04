@@ -5,7 +5,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/pkg/blog/models"
-	models2 "github.com/axlle-com/blog/pkg/menu/models"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
 )
@@ -26,7 +26,6 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":      "Страница категории",
 			"categories": categories,
 			"templates":  c.templates(ctx),
 			"category":   category,
@@ -36,9 +35,10 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 				"relationURL":         category.AdminURL(),
 			},
 			"settings": gin.H{
+				"title":     "Страница категории",
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models2.NewMenu(ctx.FullPath()),
+				"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

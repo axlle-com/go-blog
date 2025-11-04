@@ -25,7 +25,7 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
 		return
 	}
 	empty := &models.Menu{}
@@ -45,9 +45,10 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 		"paginator": paginator,
 		"filter":    filter,
 		"settings": gin.H{
+			"title":     "Страница меню",
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      models.NewMenu(ctx.FullPath()),
+			"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 		},
 	})
 }

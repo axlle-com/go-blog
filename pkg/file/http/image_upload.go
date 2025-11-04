@@ -16,7 +16,7 @@ func (c *controller) UploadImage(ctx *gin.Context) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Форма не валидная!",
+			"message": c.T(ctx, "ui.error.form_invalid"),
 		})
 		ctx.Abort()
 		return
@@ -42,7 +42,7 @@ func (c *controller) UploadImage(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Изображение прикреплено",
+		"message": c.T(ctx, "ui.success.image_attached"),
 		"data": gin.H{
 			"image": path,
 		},
@@ -58,7 +58,7 @@ func (c *controller) UploadImages(ctx *gin.Context) {
 	err := ctx.Request.ParseMultipartForm(32 << 20)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "Форма не валидная!",
+			"message": c.T(ctx, "ui.error.form_invalid"),
 		})
 		ctx.Abort()
 		return
@@ -91,7 +91,7 @@ func (c *controller) UploadImages(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Изображения прикреплены",
+		"message": c.T(ctx, "ui.success.images_attached"),
 		"data": gin.H{
 			"images": paths,
 		},

@@ -35,10 +35,15 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 			"tags":       tags,
 			"templates":  c.templates(ctx),
 			"post":       post,
+			"collection": gin.H{
+				"infoBlocks":          c.api.InfoBlock.GetAll(),
+				"infoBlockCollection": post.InfoBlocks,
+				"relationURL":         post.AdminURL(),
+			},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      menu.NewMenu(ctx.FullPath()),
+				"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

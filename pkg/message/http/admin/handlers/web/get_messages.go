@@ -25,7 +25,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Ошибка сервера"})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 		"settings": gin.H{
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      menu.NewMenu(ctx.FullPath()),
+			"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 		},
 	})
 }

@@ -35,5 +35,5 @@ func (c *tagController) DeleteImage(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Изображение удалено"})
+	ctx.JSON(http.StatusOK, gin.H{"message": c.T(ctx, "ui.success.image_deleted")})
 }

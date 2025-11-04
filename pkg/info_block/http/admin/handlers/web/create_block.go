@@ -25,7 +25,7 @@ func (c *infoBlockWebController) CreateInfoBlock(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models2.NewMenu(ctx.FullPath()),
+				"menu":      models2.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

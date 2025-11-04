@@ -38,7 +38,6 @@ func (c *postController) GetPost(ctx *gin.Context) {
 		logger.WithRequest(ctx).Error(err)
 	}
 
-	infoBlocks := c.api.InfoBlock.GetAll()
 	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.post",
@@ -49,14 +48,14 @@ func (c *postController) GetPost(ctx *gin.Context) {
 			"templates":  c.templates(ctx),
 			"post":       post,
 			"collection": gin.H{
-				"infoBlocks":          infoBlocks,
+				"infoBlocks":          c.api.InfoBlock.GetAll(),
 				"infoBlockCollection": post.InfoBlocks,
 				"relationURL":         post.AdminURL(),
 			},
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models.NewMenu(ctx.FullPath()),
+				"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

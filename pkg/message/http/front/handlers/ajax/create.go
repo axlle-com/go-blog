@@ -18,7 +18,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 
 	var name form.Name
 	if err := ctx.ShouldBindBodyWith(&name, binding.JSON); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "поле form_name: " + err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": c.T(ctx, "ui.error.field_form_name") + ": " + err.Error()})
 		return
 	}
 
@@ -46,5 +46,5 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unexpected form type"})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Сообщение успешно отправлено"})
+	ctx.JSON(http.StatusOK, gin.H{"message": c.T(ctx, "ui.success.message_sent")})
 }

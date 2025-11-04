@@ -111,7 +111,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 		if strings.HasPrefix(path, "/admin") {
 			ctx.HTML(http.StatusNotFound, "admin.404", gin.H{
 				"title": "Админка — 404",
-				"menu":  menu.NewMenu(ctx.FullPath()),
+				"menu":  menu.NewMenu(ctx.FullPath(), nil),
 			})
 		} else {
 			ctx.HTML(http.StatusNotFound, "404", gin.H{

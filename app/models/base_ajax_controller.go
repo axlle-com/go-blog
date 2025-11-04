@@ -107,6 +107,25 @@ func (c *BaseAjax) BuildT(ctx *gin.Context) func(id string, data map[string]any,
 	}
 }
 
+// T возвращает переведенную строку по ключу. Удобный метод для простых переводов.
+// Если требуется передать данные или использовать плюрализацию, используйте BuildT.
+func (c *BaseAjax) T(ctx *gin.Context, id string, data ...map[string]any) string {
+	loc := getLoc(ctx)
+	if loc == nil {
+		return id
+	}
+	var templateData map[string]any
+	if len(data) > 0 {
+		templateData = data[0]
+	}
+	cfg := &i18n.LocalizeConfig{MessageID: id, TemplateData: templateData}
+	s, err := loc.Localize(cfg)
+	if err != nil || s == "" {
+		return id
+	}
+	return s
+}
+
 // PrepareTemplateData - универсальная функция для подготовки данных шаблона с автоматическим добавлением T
 // Можно использовать в любых контроллерах, даже если они не наследуются от BaseAjax
 func PrepareTemplateData(ctx *gin.Context, obj any, fallbackT func(id string, data map[string]any, n ...int) string) any {
@@ -124,17 +143,17 @@ func PrepareTemplateData(ctx *gin.Context, obj any, fallbackT func(id string, da
 	}
 
 	// Добавляем T в данные и во вложенные settings
-	switch v := obj.(type) {
+	switch result := obj.(type) {
 	case gin.H:
-		v["T"] = tFunc
+		result["T"] = tFunc
 		// Добавляем T и Title во вложенные settings, если они есть
-		addTToSettings(v, tFunc)
-		return v
+		addTToSettings(result, tFunc)
+		return result
 	case map[string]any:
-		v["T"] = tFunc
+		result["T"] = tFunc
 		// Добавляем T и Title во вложенные settings, если они есть
-		addTToSettings(v, tFunc)
-		return v
+		addTToSettings(result, tFunc)
+		return result
 	default:
 		// Если obj не map, создаём новый gin.H
 		return gin.H{
@@ -150,16 +169,8 @@ func addTToSettings(data map[string]any, tFunc func(id string, data map[string]a
 		switch s := settings.(type) {
 		case gin.H:
 			s["T"] = tFunc
-			// Добавляем Title из корневого контекста, если он есть
-			if title, ok := data["title"]; ok {
-				s["Title"] = title
-			}
 		case map[string]any:
 			s["T"] = tFunc
-			// Добавляем Title из корневого контекста, если он есть
-			if title, ok := data["title"]; ok {
-				s["Title"] = title
-			}
 		}
 	}
 }

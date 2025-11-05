@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -56,7 +55,7 @@ func (s *seeder) Seed() error {
 
 func (s *seeder) seedFromJSON(moduleName string) error {
 	layout := s.config.Layout()
-	seedPath := s.config.SrcFolderBuilder(filepath.Join("resources", layout, "seed", fmt.Sprintf("%s.json", moduleName)))
+	seedPath := s.config.SrcFolderBuilder("db", layout, "seed", fmt.Sprintf("%s.json", moduleName))
 
 	// Проверяем существование файла
 	if _, err := os.Stat(seedPath); os.IsNotExist(err) {

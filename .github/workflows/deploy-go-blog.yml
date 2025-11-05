@@ -1,0 +1,117 @@
+name: deploy-go-blog
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "**/*.go"
+      - "**/*.gohtml"
+      - "go.mod"
+      - "go.sum"
+      - "Dockerfile"
+      - "templates/**"
+      - "posts/**"
+      - "static/**"
+      - "assets/**"
+      - "migrations/**"
+      - ".github/workflows/deploy-go-blog.yml"
+  workflow_dispatch: {}
+
+env:
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---------- APP ----------
+      - name: Build & push app
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: app
+          push: true
+          tags: |
+            ${{ env.IMAGE_BASE }}:latest
+            ${{ env.IMAGE_BASE }}:app-${{ github.sha }}
+          platforms: linux/amd64
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+
+      # ---------- CLI (если нужен) ----------
+      - name: Build & push cli
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: cli
+          push: true
+          tags: |
+            ${{ env.IMAGE_BASE }}:cli-latest
+            ${{ env.IMAGE_BASE }}:cli-${{ github.sha }}
+          platforms: linux/amd64
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+
+      # ---------- DEPLOY ----------
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy (compose pull & up)
+        env:
+          GHCR_USER: ${{ secrets.GHCR_USER }}    # нужно только если пакет приватный
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}  # нужно только если пакет приватный
+        run: |
+          ssh -p ${{ secrets.DEPLOY_PORT }} ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} '
+            set -e
+
+            # логин в GHCR (если заданы креды)
+            if [ -n "${GHCR_USER:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            fi
+
+            cd /opt/go-app
+
+            # тянем app
+            docker compose pull app || true
+
+            # если в compose есть cli — тянем и его (например, под профилем cli)
+            if docker compose config --services | grep -qx cli; then
+              docker compose --profile cli pull cli || true
+            fi
+
+            # поднимаем app
+            docker compose up -d app
+
+            # если есть cli-сервис, поднимем его (обычно он под профилем и запускается точечно)
+            if docker compose config --services | grep -qx cli; then
+              docker compose --profile cli up -d cli || true
+            fi
+
+            docker image prune -f
+          '

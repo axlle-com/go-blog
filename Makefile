@@ -1,5 +1,6 @@
 # Имя сети и файл docker-compose
 NETWORK?=projects_network
+#traefik
 COMPOSE_FILE?=docker-compose.yml
 SERVICES?=postgres redis
 # elasticsearch app cli
@@ -17,10 +18,12 @@ rebuild: env network
 	@docker compose -f $(COMPOSE_FILE) build --no-cache $(SERVICES)
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
 
+re-up: env network
+	@docker compose -f $(COMPOSE_FILE) down -v
+	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
+
 down:
 	@docker compose -f $(COMPOSE_FILE) down -v
-
-dev-file=docker-compose.dev.yml
 
 up-dev: COMPOSE_FILE = docker-compose.dev.yml
 up-dev: SERVICES = app postgres redis
@@ -29,6 +32,10 @@ up-dev: up
 rebuild-dev: COMPOSE_FILE = docker-compose.dev.yml
 rebuild-dev: SERVICES = app postgres redis
 rebuild-dev: rebuild
+
+re-up-dev: COMPOSE_FILE = docker-compose.dev.yml
+re-up-dev: SERVICES = app postgres redis
+re-up-dev: re-up
 
 down-dev: COMPOSE_FILE = docker-compose.dev.yml
 down-dev: SERVICES = app postgres redis

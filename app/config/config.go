@@ -290,22 +290,34 @@ func (c *config) UploadPath() string {
 	return path
 }
 
-func (c *config) RuntimeFolder(s string) string {
-	if s != "" {
-		return c.runtimeFolder + "/" + strings.Trim(s, " /")
+func (c *config) RuntimeFolder(folder string) string {
+	base := filepath.Clean(c.runtimeFolder)
+
+	folder = strings.TrimSpace(folder)
+	if folder == "" {
+		return base
 	}
-	return c.runtimeFolder
+
+	folder = strings.TrimLeft(folder, `/\`)
+
+	return filepath.Join(base, folder)
 }
 
 func (c *config) SrcFolder() string {
+	if c.srcFolder == "" {
+		return ""
+	}
+
 	if c.IsTest() {
 		root, err := c.root()
-		if err != nil {
+		if err != nil || root == "" {
 			return ""
 		}
-		return root + "/" + c.srcFolder
+
+		return filepath.Clean(filepath.Join(root, c.srcFolder))
 	}
-	return c.srcFolder
+
+	return filepath.Clean(c.srcFolder)
 }
 
 func (c *config) Layout() string {
@@ -315,8 +327,36 @@ func (c *config) Layout() string {
 	return c.layout
 }
 
-func (c *config) SrcFolderBuilder(s string) string {
-	return c.SrcFolder() + "/" + strings.TrimLeft(s, " /")
+func (c *config) SrcFolderBuilder(parts ...string) string {
+	elems := []string{filepath.Clean(c.SrcFolder())}
+
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+
+		p = strings.TrimLeft(p, `/\`)
+		elems = append(elems, p)
+	}
+
+	return filepath.Join(elems...)
+}
+
+func (c *config) PublicFolderBuilder(parts ...string) string {
+	elems := []string{filepath.Clean(c.SrcFolder()), "public"}
+
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+
+		p = strings.TrimLeft(p, `/\`)
+		elems = append(elems, p)
+	}
+
+	return filepath.Join(elems...)
 }
 
 func (c *config) UserSessionKey(s string) string {
@@ -375,20 +415,51 @@ func (c *config) root() (string, error) {
 		return c.rootDir, nil
 	}
 
-	dir, err := os.Getwd()
-	if err != nil {
-		return "", err
+	// 1) Явно задано — используем без условий
+	if dir := os.Getenv("APP_ROOT"); dir != "" {
+		c.rootDir = dir
+		return dir, nil
 	}
 
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+	// helper: поиск модуля вверх от start
+	findModuleRoot := func(start string) (string, bool) {
+		if start == "" {
+			return "", false
+		}
+		dir := start
+		for {
+			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+				return dir, true
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				return "", false
+			}
+			dir = parent
+		}
+	}
+
+	// 2) DEV-приоритет: ищем модуль от текущей директории (go run из корня — ок)
+	if cwd, err := os.Getwd(); err == nil {
+		if dir, ok := findModuleRoot(cwd); ok {
 			c.rootDir = dir
 			return dir, nil
 		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return "", fmt.Errorf("failed to find module root directory")
-		}
-		dir = parent
 	}
+
+	// 3) PROD-фоллбек: каталог бинарника (в контейнере он стабильный, /app)
+	if exe, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exe)
+		c.rootDir = exeDir
+		return exeDir, nil
+	}
+
+	// 4) Последний шанс: если хотя бы CWD известен — вернём его, без ошибки
+	if cwd, err := os.Getwd(); err == nil {
+		c.rootDir = cwd
+		return cwd, nil
+	}
+
+	// Если вообще ничего не удалось определить — сообщим явно
+	return "", fmt.Errorf("cannot determine app root; set APP_ROOT")
 }

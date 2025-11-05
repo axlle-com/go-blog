@@ -13,10 +13,10 @@ import (
 )
 
 func Minify(config contract.Config) {
-	//if !config.IsLocal() {
-	//	logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
-	//	return
-	//}
+	if !config.IsLocal() {
+		logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
+		return
+	}
 
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
@@ -85,6 +85,7 @@ func minifyFront(minify *minify.M) {
 
 func minifySpring(minify *minify.M) {
 	CSS := []string{
+		"src/public/spring/css/font.css",
 		"src/resources/spring/css/bootstrap.css",
 		"src/resources/spring/css/font-awesome.css",
 		"src/resources/spring/css/themify-icons.css",
@@ -94,6 +95,7 @@ func minifySpring(minify *minify.M) {
 		"src/resources/spring/css/jquery.fancybox.css",
 		"src/resources/spring/css/style.css",
 		"src/resources/spring/css/responsive.css",
+		"src/public/spring/css/common.css",
 	}
 	JS := []string{
 		"src/resources/spring/js/jquery.js",

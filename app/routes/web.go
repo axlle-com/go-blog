@@ -21,7 +21,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 	r.Use(middleware.Language(container.I18n))
 	r.Use(middleware.Error())
 	r.Use(analytic.Handler())
-	r.GET("/", container.FrontWebPostController.GetHome)
+	r.GET("/", container.FrontWebPostController.RenderHome)
 	r.GET("/login", container.FrontWebUserController.Login)
 	r.POST("/auth", container.FrontWebUserController.Auth)
 	r.POST("/messages", container.FrontAjaxMessageController.CreateMessage)
@@ -103,7 +103,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 		protected.PUT("/menus/:id", container.AdminAjaxMenuController.Update)
 	}
 
-	r.GET("/:alias", container.FrontWebPostController.GetPost)
+	r.GET("/:alias", container.FrontWebPostController.FindByAlias)
 
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
@@ -114,9 +114,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 				"menu":  menu.NewMenu(ctx.FullPath(), nil),
 			})
 		} else {
-			ctx.HTML(http.StatusNotFound, "404", gin.H{
-				"title": "Страница не найдена",
-			})
+			ctx.HTML(http.StatusNotFound, container.View.ViewStatic("404"), gin.H{"title": "404", "error": "Page not found"})
 		}
 	})
 }

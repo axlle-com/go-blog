@@ -19,3 +19,9 @@ go test -count=1 -race ./...
 
 staticcheck ./...
 ```
+
+### deploy
+```bash
+
+chmod +x deploy.sh
+```

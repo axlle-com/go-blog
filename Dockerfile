@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ---- Build stage ----
-ARG GO_VERSION=1.24
+ARG GO_VERSION=1.25
 FROM golang:${GO_VERSION}-alpine AS builder
 
 # Опционально: включить BuildKit-кэш для модулей и сборки

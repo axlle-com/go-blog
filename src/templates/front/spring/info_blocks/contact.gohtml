@@ -1,0 +1,76 @@
+{{ define "spring.info_blocks.contact" }}
+    <!--Contact Form Section-->
+    <section class="contact-page-section" id="contact">
+        <div class="auto-container">
+            <div class="upper-section">
+                <div class="row clearfix">
+                    <!--Form Column-->
+                    <div class="col-md-6 col-sm-12 col-xs-12">
+                        <div class="sec-title">
+                            <h2>Хотите обсудить ваш проект?</h2>
+                            <div class="desc-text">Оставьте заявку и мы свяжемся с вами в ближайшее время</div>
+                        </div>
+
+                        <!--Contact Form-->
+                        <div class="default-form">
+                            <form method="post" action="index.html">
+                                <div class="form-group">
+                                    <input type="text" name="fullname" value="" placeholder="Full Name" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="text" name="email" value="" placeholder="Your Email" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <textarea name="message" placeholder="Message" rows="4" required></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="theme-btn btn-style-two">Submit <span class="icon ti-arrow-circle-right"></span></button>
+                                </div>
+
+                            </form>
+                        </div>
+
+                    </div>
+                    <!--Image Column-->
+                    <div class="map-column col-md-6 col-sm-12 col-xs-12">
+                        <div class="inner-column">
+                            <figure class="image"><img src="/public/spring/images/girls.webp" loading="lazy" decoding="async" fetchpriority="low" alt="Contact"></figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="lower-section">
+                <div class="row clearfix">
+
+                    <div class="column col-md-4 col-sm-6 col-xs-12">
+                        <ul class="contact-info-list">
+                            <span class="icon fa fa-send"></span>
+                            <li><strong>Location</strong></li>
+                            <li>046 Rowena Meadows, Schoenside, Costa Rica</li>
+                        </ul>
+                    </div>
+
+                    <div class="column col-md-4 col-sm-6 col-xs-12">
+                        <ul class="contact-info-list">
+                            <span class="icon fa fa-envelope"></span>
+                            <li><strong>Email</strong></li>
+                            <li>adderss@domain.com</li>
+                        </ul>
+                    </div>
+
+                    <div class="column col-md-4 col-sm-6 col-xs-12">
+                        <ul class="contact-info-list">
+                            <span class="icon fa fa-phone"></span>
+                            <li><strong>Phone</strong></li>
+                            <li>+880 100 030 6005</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{{ end }}

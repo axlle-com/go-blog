@@ -1,38 +1,126 @@
+.clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.default-form .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-header, .modal-body, .modal-footer {
+    padding: 15px 30px;
+}
+
+/* на md и выше начинаем новую строку каждые 3 плитки */
+@media (min-width: 992px) {
+    .services-page-section .service-style-three:nth-child(3n+1) {
+        clear: both;
+    }
+}
+
 /* Services top slider styles */
-.services-hero-section {padding: 80px 0;}
-.services-top-slider-wrapper {position: relative; padding-top: 0;}
-.services-top-slider {padding-top: 50px;}
-.services-top-slider-wrapper .owl-dots {position: absolute; top: 0; left: 50%; transform: translateX(-50%); margin-top: 0;}
-.services-top-slide img {display: block; max-width: 100%; height: auto; margin: 0 auto;}
+.services-hero-section {
+    padding: 80px 0;
+}
+
+.services-top-slider-wrapper {
+    position: relative;
+    padding-top: 0;
+}
+
+.services-top-slider {
+    padding-top: 50px;
+}
+
+.services-top-slider-wrapper .owl-dots {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0;
+}
+
+.services-top-slide img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
 /* Slide text layout */
-.service-slide-row {display:flex; align-items:center;}
-.service-slide-text h3 {color:#3b566e;font-size:28px;font-weight:600;margin-bottom:10px;}
-.service-slide-text h4 {color:#1f8ceb;font-size:18px;font-weight:600;margin-bottom:14px;position:relative;display:inline-block;}
-.service-slide-text p {color:#6f8ba4;line-height:1.8;}
-.service-slide-text .see-more {display:inline-block;margin-top:10px;color:#6f8ba4;}
+.service-slide-row {
+    display: flex;
+    align-items: center;
+}
+
+.service-slide-text h3 {
+    color: #3b566e;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.service-slide-text h4 {
+    color: #1f8ceb;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    position: relative;
+    display: inline-block;
+}
+
+.service-slide-text p {
+    color: #6f8ba4;
+    line-height: 1.8;
+}
+
+.service-slide-text .see-more {
+    display: inline-block;
+    margin-top: 10px;
+    color: #6f8ba4;
+}
+
 @media (max-width: 768px) {
-    .services-hero-section {padding: 40px 0;}
-    .services-top-slider-wrapper {padding-top: 35px;}
-    .service-slide-row {display:block;}
-    .service-slide-text h3 {font-size:24px;}
-    .service-slide-text h4 {font-size:16px;}
+    .services-hero-section {
+        padding: 40px 0;
+    }
+
+    .services-top-slider-wrapper {
+        padding-top: 35px;
+    }
+
+    .service-slide-row {
+        display: block;
+    }
+
+    .service-slide-text h3 {
+        font-size: 24px;
+    }
+
+    .service-slide-text h4 {
+        font-size: 16px;
+    }
 }
 
 
-
-.modal-header { position: relative; }
+.modal-header {
+    position: relative;
+}
 
 /* Абсолютно позиционируем крест и даём приоритет клику */
 .modal-header .modal-close-abs {
     position: absolute;
     top: 12px;
     right: 15px;
-    z-index: 5;                /* выше заголовка */
-    pointer-events: auto;      /* на случай глобальных стилей */
+    z-index: 5; /* выше заголовка */
+    pointer-events: auto; /* на случай глобальных стилей */
 }
 
 /* чтобы заголовок не наезжал визуально */
-.modal-title { margin-right: 36px; }
+.modal-title {
+    margin-right: 36px;
+}
 
 
 .modal-dialog.modal-md {
@@ -41,15 +129,21 @@
 }
 
 @media (min-width: 768px) {
-    .modal-dialog.modal-md { width: 720px; }
+    .modal-dialog.modal-md {
+        width: 720px;
+    }
 }
 
 @media (min-width: 992px) {
-    .modal-dialog.modal-md { width: 760px; }
+    .modal-dialog.modal-md {
+        width: 760px;
+    }
 }
 
 @media (min-width: 1200px) {
-    .modal-dialog.modal-md { width: 800px; }
+    .modal-dialog.modal-md {
+        width: 800px;
+    }
 }
 
 
@@ -325,7 +419,7 @@
 
 /* Icons and Images */
 .icon-about {
-    width: 60px;
+    width: 160px;
     height: auto;
     margin: 0 auto 15px;
     display: block;
@@ -548,4 +642,10 @@
     .main-header .navigation li a {
         font-size: 18px !important;
     }
+}
+
+/********** main-service **********/
+.main-service {
+    position: relative;
+    padding: 50px 0px;
 }

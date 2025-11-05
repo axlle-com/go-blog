@@ -2,7 +2,7 @@ package web
 
 import (
 	"bytes"
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/axlle-com/blog/app/logger"
@@ -12,24 +12,46 @@ import (
 	"github.com/tdewolff/minify/js"
 )
 
-func Minify(config contract.Config) {
-	//if !config.IsLocal() {
-	//	logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
-	//	return
-	//}
+type WebMinifier struct {
+	cfg contract.Config
+	m   *minify.M
+}
 
+func NewWebMinifier(cfg contract.Config) *WebMinifier {
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("application/javascript", js.Minify)
-	minifyAdmin(m)
-	if config.Layout() == "spring" {
-		minifySpring(m)
-	} else {
-		minifyFront(m)
+
+	return &WebMinifier{
+		cfg: cfg,
+		m:   m,
 	}
 }
 
-func minifyAdmin(minify *minify.M) {
+func (w *WebMinifier) Run() error {
+	if !w.cfg.IsLocal() {
+		logger.Info("[web][Minify] running on non-local environment; skipping HTML build")
+		return nil
+	}
+
+	if err := w.minifyAdmin(); err != nil {
+		return fmt.Errorf("minify admin: %w", err)
+	}
+
+	if w.cfg.Layout() == "spring" {
+		if err := w.minifySpring(); err != nil {
+			return fmt.Errorf("minify spring: %w", err)
+		}
+	} else {
+		if err := w.minifyFront(); err != nil {
+			return fmt.Errorf("minify front: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (w *WebMinifier) minifyAdmin() error {
 	adminCSS := []string{
 		"src/resources/font/inter/inter.min.css",
 		"src/resources/font/play/play.css",
@@ -65,11 +87,18 @@ func minifyAdmin(minify *minify.M) {
 		"src/resources/plugins/date-format/date-format.js",
 	}
 
-	mergeAndMinifyFiles(minify, "text/css", adminCSS, "src/public/admin/app.css")
-	mergeAndMinifyFiles(minify, "application/javascript", adminJS, "src/public/admin/app.js")
+	if err := w.mergeAndMinifyFiles("text/css", adminCSS, "src/public/admin/app.css"); err != nil {
+		return err
+	}
+
+	if err := w.mergeAndMinifyFiles("application/javascript", adminJS, "src/public/admin/app.js"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func minifyFront(minify *minify.M) {
+func (w *WebMinifier) minifyFront() error {
 	CSS := []string{
 		"src/resources/plugins/bootstrap-5.0.2-dist/css/bootstrap.min.css",
 	}
@@ -79,12 +108,18 @@ func minifyFront(minify *minify.M) {
 		"src/public/admin/glob.js",
 	}
 
-	mergeAndMinifyFiles(minify, "text/css", CSS, "src/public/app.css")
-	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/app.js")
+	if err := w.mergeAndMinifyFiles("text/css", CSS, "src/public/app.css"); err != nil {
+		return err
+	}
+	if err := w.mergeAndMinifyFiles("application/javascript", JS, "src/public/app.js"); err != nil {
+		return err
+	}
+	return nil
 }
 
-func minifySpring(minify *minify.M) {
+func (w *WebMinifier) minifySpring() error {
 	CSS := []string{
+		"src/public/spring/css/font.css",
 		"src/resources/spring/css/bootstrap.css",
 		"src/resources/spring/css/font-awesome.css",
 		"src/resources/spring/css/themify-icons.css",
@@ -94,6 +129,7 @@ func minifySpring(minify *minify.M) {
 		"src/resources/spring/css/jquery.fancybox.css",
 		"src/resources/spring/css/style.css",
 		"src/resources/spring/css/responsive.css",
+		"src/public/spring/css/common.css",
 	}
 	JS := []string{
 		"src/resources/spring/js/jquery.js",
@@ -109,62 +145,44 @@ func minifySpring(minify *minify.M) {
 		"src/public/admin/glob.js",
 	}
 
-	mergeAndMinifyFiles(minify, "text/css", CSS, "src/public/spring/css/app.css")
-	mergeAndMinifyFiles(minify, "application/javascript", JS, "src/public/spring/js/app.js")
+	if err := w.mergeAndMinifyFiles("text/css", CSS, "src/public/spring/css/app.css"); err != nil {
+		return err
+	}
+
+	if err := w.mergeAndMinifyFiles("application/javascript", JS, "src/public/spring/js/app.js"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func mergeAndMinifyFiles(minifyTool *minify.M, mediaType string, inputPaths []string, outputPath string) {
+func (w *WebMinifier) mergeAndMinifyFiles(mediaType string, inputPaths []string, outputPath string) error {
 	var buffer bytes.Buffer
 
 	for _, inputPath := range inputPaths {
 		input, err := os.ReadFile(inputPath)
 		if err != nil {
-			logger.Fatalf("[web][mergeAndMinifyFiles] error reading file %s: %v", inputPath, err)
+			return fmt.Errorf("[mergeAndMinifyFiles] read %s: %w", inputPath, err)
 		}
+
 		buffer.Write(input)
 		buffer.WriteString("\n")
 	}
 
 	output, err := os.Create(outputPath)
 	if err != nil {
-		log.Fatalf("[web][mergeAndMinifyFiles] error creating file %s: %v", outputPath, err)
+		return err
 	}
-	defer func(output *os.File) {
-		err := output.Close()
-		if err != nil {
-			logger.Errorf("[web][mergeAndMinifyFiles] close error: %v", err)
+
+	defer func() {
+		if cerr := output.Close(); cerr != nil {
+			logger.Errorf("[mergeAndMinifyFiles] close %s: %v", outputPath, cerr)
 		}
-	}(output)
+	}()
 
-	if err := minifyTool.Minify(mediaType, output, &buffer); err != nil {
-		logger.Fatalf("[web][mergeAndMinifyFiles] minify error for file %s: %v", outputPath, err)
+	if err := w.m.Minify(mediaType, output, &buffer); err != nil {
+		return fmt.Errorf("[mergeAndMinifyFiles] minify %s: %w", outputPath, err)
 	}
-}
 
-func minifyFile(m *minify.M, mediaType, inputPath, outputPath string) {
-	input, err := os.Open(inputPath)
-	if err != nil {
-		logger.Fatalf("[web][minifyFile] open error for file %s: %v", inputPath, err)
-	}
-	defer func(input *os.File) {
-		err := input.Close()
-		if err != nil {
-			logger.Errorf("[web][minifyFile] close error: %v", err)
-		}
-	}(input)
-
-	output, err := os.Create(outputPath)
-	if err != nil {
-		logger.Fatalf("[web][minifyFile] create error for file %s: %v", outputPath, err)
-	}
-	defer func(output *os.File) {
-		err := output.Close()
-		if err != nil {
-			logger.Errorf("[web][minifyFile] close error: %v", err)
-		}
-	}(output)
-
-	if err := m.Minify(mediaType, output, input); err != nil {
-		logger.Fatalf("[web][minifyFile] minify error for file %s: %v", inputPath, err)
-	}
+	return nil
 }

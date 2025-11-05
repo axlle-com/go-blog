@@ -29,7 +29,8 @@ type Config interface {
 	UploadPath() string
 	RuntimeFolder(s string) string
 	SrcFolder() string
-	SrcFolderBuilder(string) string
+	SrcFolderBuilder(...string) string
+	PublicFolderBuilder(parts ...string) string
 	Layout() string
 
 	SMTPActive() bool

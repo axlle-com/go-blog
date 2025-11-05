@@ -63,6 +63,11 @@ func (c *BaseAjax) RenderHTML(ctx *gin.Context, code int, name string, obj any) 
 	ctx.HTML(code, name, data)
 }
 
+func (c *BaseAjax) Render404(ctx *gin.Context, tplName string, obj any) {
+	c.RenderHTML(ctx, http.StatusNotFound, tplName, gin.H{"title": "404", "error": "Page not found"})
+	ctx.Abort()
+}
+
 // prepareTemplateData добавляет T в данные шаблона, если obj - это gin.H или map
 func (c *BaseAjax) prepareTemplateData(ctx *gin.Context, obj any) any {
 	return PrepareTemplateData(ctx, obj, c.BuildT(ctx))

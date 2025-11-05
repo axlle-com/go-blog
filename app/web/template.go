@@ -261,7 +261,7 @@ func (t *Template) asset(path string) string {
 	version, exists := t.assetVersions[normalizedPath]
 	if !exists {
 		// Если файл не найден в кеше, возвращаем путь без версии
-		logger.Errorf("[template][asset] file not found in cache: %s", normalizedPath)
+		logger.Debugf("[template][asset] file not found in cache: %s", normalizedPath)
 		return normalizedPath
 	}
 
@@ -269,12 +269,20 @@ func (t *Template) asset(path string) string {
 	return fmt.Sprintf("%s?v=%d", normalizedPath, version)
 }
 
-// css возвращает путь к CSS файлу с версией (для использования в href)
-func (t *Template) css(path string) string {
-	return t.asset(path)
+func (t *Template) css(path string) template.HTML {
+	href := t.asset(path)
+
+	return template.HTML(
+		`<link rel="preload" href="` + href + `" as="style" ` +
+			`onload="this.onload=null;this.rel='stylesheet'">` +
+			`<noscript><link rel="stylesheet" href="` + href + `"></noscript>`,
+	)
 }
 
-// js возвращает путь к JS файлу с версией (для использования в src)
-func (t *Template) js(path string) string {
-	return t.asset(path)
+func (t *Template) js(path string) template.HTML {
+	href := t.asset(path)
+
+	return template.HTML(
+		`<script src="` + href + `" defer></script>`,
+	)
 }

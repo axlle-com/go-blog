@@ -1,0 +1,36 @@
+[
+  {
+    "user_id": 1,
+    "template": "index",
+    "is_published": true,
+    "in_sitemap": true,
+    "is_main": true,
+    "title": "Home",
+    "info_blocks": [
+      "Блок clients",
+      "Блок contact",
+      "Блок services",
+      "Блок about"
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "services",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "services",
+    "info_blocks": [
+      "Блок contact"
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "service",
+    "info_blocks": [
+      "Блок contact"
+    ]
+  }
+]

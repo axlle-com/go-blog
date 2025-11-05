@@ -8,7 +8,7 @@ services:
       - projects_network
       - traefik
     ports:
-      - "8070:3000"
+      - "8000:3000"
     volumes:
       - ./docker/.env:/app/.env
       - ./docker/.env:/.env

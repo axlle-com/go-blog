@@ -34,7 +34,7 @@ func (s *seeder) Seed() error {
 
 	// templates/<layout>
 	layout := cfg.Layout()
-	templatesRoot := cfg.SrcFolderBuilder(filepath.Join("templates", "front", layout))
+	templatesRoot := cfg.SrcFolderBuilder("templates", "front", layout)
 
 	// Если папки нет — ничего не делаем (не падаем)
 	if _, err := os.Stat(templatesRoot); err != nil {

@@ -9,8 +9,8 @@ import (
 )
 
 type PostController interface {
-	GetHome(*gin.Context)
-	GetPost(*gin.Context)
+	RenderHome(*gin.Context)
+	FindByAlias(ctx *gin.Context)
 }
 
 func NewFrontWebController(

@@ -99,15 +99,19 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 
 	err = container.Migrator.Migrate()
 	if err != nil {
-		logger.Errorf("[main][Init] migrate error: %v", err)
+		logger.Errorf("[main][Init][Migrator] migrate error: %v", err)
 	}
 
 	err = container.Seeder.Seed()
 	if err != nil {
-		logger.Errorf("[main][Init] seed error: %v", err)
+		logger.Errorf("[main][Init][Seeder] seed error: %v", err)
 	}
 
-	web.Minify(config)
+	err = web.NewWebMinifier(config).Run()
+	if err != nil {
+		logger.Errorf("[main][Init][WebMinifier] error: %v", err)
+	}
+
 	web.NewTemplate(router)
 	routes.InitApiRoutes(router, container)
 	routes.InitWebRoutes(router, container)

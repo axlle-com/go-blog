@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -86,7 +85,7 @@ func (s *seeder) Seed() error {
 
 func (s *seeder) seedFromJSON(moduleName string) error {
 	layout := s.config.Layout()
-	seedPath := s.config.SrcFolderBuilder(filepath.Join("resources", layout, "seed", fmt.Sprintf("%s.json", moduleName)))
+	seedPath := s.config.SrcFolderBuilder("db", layout, "seed", fmt.Sprintf("%s.json", moduleName))
 
 	// Проверяем существование файла
 	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
@@ -112,8 +111,9 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 
 	for _, postData := range postsData {
 		found, err := s.postService.FindByParam("title", postData.Title)
+		var existingPost *models.Post
 		if found != nil {
-			continue
+			existingPost = found
 		}
 
 		// Ищем шаблон по name и resource_name
@@ -128,6 +128,46 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 			}
 			id := tpl.GetID()
 			templateID = &id
+		}
+
+		// Если пост уже существует, проверяем инфоблоки
+		if existingPost != nil {
+			// Получаем уже привязанные инфоблоки
+			attachedInfoBlocks := s.infoBlockProvider.GetForResourceUUID(existingPost.UUID.String())
+			attachedTitles := make(map[string]bool)
+			for _, ib := range attachedInfoBlocks {
+				attachedTitles[ib.GetTitle()] = true
+			}
+
+			// Привязываем недостающие инфоблоки
+			if len(postData.InfoBlocks) > 0 {
+				for _, infoBlockTitle := range postData.InfoBlocks {
+					if infoBlockTitle == "" {
+						continue
+					}
+
+					// Пропускаем, если инфоблок уже привязан
+					if attachedTitles[infoBlockTitle] {
+						continue
+					}
+
+					// Ищем инфоблок по title
+					infoBlock, err := s.infoBlockProvider.FindByTitle(infoBlockTitle)
+					if err != nil || infoBlock == nil {
+						logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockTitle, postData.Title)
+						continue
+					}
+
+					// Привязываем инфоблок к посту
+					_, err = s.infoBlockProvider.Attach(infoBlock.GetID(), existingPost.UUID.String())
+					if err != nil {
+						logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockTitle, postData.Title, err)
+						continue
+					}
+					logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d) to existing post '%s'", infoBlockTitle, infoBlock.GetID(), postData.Title)
+				}
+			}
+			continue
 		}
 
 		// Парсим даты

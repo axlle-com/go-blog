@@ -1,0 +1,26 @@
+[
+  {
+    "user_id": 1,
+    "template": "about",
+    "title": "Блок about",
+    "image": "/public/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "services",
+    "title": "Блок services",
+    "image": "/public/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "contact",
+    "title": "Блок contact",
+    "image": "/public/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "clients",
+    "title": "Блок clients",
+    "image": "/public/img/404.svg"
+  }
+]

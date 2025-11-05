@@ -25,3 +25,15 @@ func (v *view) View(resource contract.Resource) string {
 	}
 	return fmt.Sprintf("%s.%s", v.config.Layout(), tpl)
 }
+
+func (v *view) ViewStatic(name string) string {
+	if name == "" {
+		name = "index"
+	}
+
+	if v.config.Layout() == "" {
+		return fmt.Sprintf("default.%s", name)
+	}
+
+	return fmt.Sprintf("%s.%s", v.config.Layout(), name)
+}

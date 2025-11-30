@@ -303,7 +303,7 @@
 }
 
 .clients-icon {
-    width: 90px;
+    width: 60px;
     height: auto;
     opacity: 0.5;
 }
@@ -363,7 +363,7 @@
 }
 
 .client-card-icon img {
-    width: 60px;
+    width: 50px;
     height: auto;
     display: block;
     margin: 0 auto;
@@ -419,7 +419,7 @@
 
 /* Icons and Images */
 .icon-about {
-    width: 160px;
+    width: 100px;
     height: auto;
     margin: 0 auto 15px;
     display: block;

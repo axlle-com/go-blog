@@ -4,11 +4,15 @@
 ARG GO_VERSION=1.25
 FROM golang:${GO_VERSION}-alpine AS builder
 
-# Опционально: включить BuildKit-кэш для модулей и сборки
+# Базовые пакеты
 RUN --mount=type=cache,target=/var/cache/apk \
     apk add --no-cache git ca-certificates
 
 WORKDIR /src
+
+# Меньше параллелизма и без CGO, чтобы не упираться в память
+ENV CGO_ENABLED=0 \
+    GOMAXPROCS=1
 
 # Сначала модули — лучше кэшируется
 COPY go.mod go.sum ./
@@ -20,19 +24,13 @@ COPY . .
 # .env в бинарник не нужен — читай его в рантайме из /app/.env
 # COPY .env .env  # <-- обычно НЕ надо в билд-стадию
 
-# Сборка (по умолчанию на musl, без CGO)
-ENV CGO_ENABLED=0
-# если используешь buildx и multi-arch:
-# ARG TARGETOS TARGETARCH
-# ENV GOOS=$TARGETOS GOARCH=$TARGETARCH
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -p 1 -trimpath -ldflags="-s -w" -o /go-app ./cmd/main.go
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -trimpath -ldflags="-s -w" -o /go-app ./cmd/main.go
-
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    go build -trimpath -ldflags="-s -w" -o /go-cli ./cmd/cli/cli.go
+    go build -p 1 -trimpath -ldflags="-s -w" -o /go-cli ./cmd/cli/cli.go
 
 # ---- Runtime (app) ----
 FROM alpine:latest AS app

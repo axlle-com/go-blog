@@ -52,10 +52,15 @@ func (t *Template) GetName() string {
 	return t.Name
 }
 
+func (t *Template) GetFullName(resourceName string) string {
+	return fmt.Sprintf("%s.%s", resourceName, t.GetName())
+}
+
 func (t *Template) GetResourceName() string {
 	if t.ResourceName != nil {
 		return *t.ResourceName
 	}
+
 	return ""
 }
 
@@ -63,7 +68,8 @@ func (t *Template) GetThemeName() string {
 	if t.Theme != nil {
 		return *t.Theme
 	}
-	return ""
+
+	return "default"
 }
 
 func (t *Template) UserLastName() string {

@@ -30,7 +30,7 @@ func (c *postController) RenderPost(ctx *gin.Context, post *models.Post) {
 
 	c.RenderHTML(ctx,
 		http.StatusOK,
-		c.view.View(post),
+		c.view.View(post.GetTemplateName()),
 		gin.H{
 			"title":  "Home Page",
 			"blocks": blocks,

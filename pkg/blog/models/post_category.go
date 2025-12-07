@@ -73,8 +73,9 @@ func (c *PostCategory) GetTitle() string {
 
 func (c *PostCategory) GetTemplateName() string {
 	if c.Template != nil {
-		return fmt.Sprintf("%s.%s", c.GetTable(), c.Template.GetName())
+		return c.Template.GetFullName(c.GetTable())
 	}
+
 	return fmt.Sprintf("%s.default", c.GetTable())
 }
 

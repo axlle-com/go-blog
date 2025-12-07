@@ -31,8 +31,9 @@ func (m *Menu) GetUUID() uuid.UUID {
 
 func (m *Menu) GetTemplateName() string {
 	if m.Template != nil {
-		return fmt.Sprintf("%s.%s", m.GetTable(), m.Template.GetName())
+		return m.Template.GetFullName(m.GetTable())
 	}
+
 	return fmt.Sprintf("%s.default", m.GetTable())
 }
 

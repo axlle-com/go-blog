@@ -1,6 +1,12 @@
 package contract
 
+import "github.com/gin-gonic/gin"
+
 type View interface {
-	View(resource Resource) string
+	SetRouter(router *gin.Engine)
+	Load()
+	SetStatic()
+	RenderToString(name string, data any) (string, error)
+	View(name string) string
 	ViewStatic(name string) string
 }

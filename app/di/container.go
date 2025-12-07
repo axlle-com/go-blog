@@ -53,6 +53,7 @@ import (
 	menuMigrate "github.com/axlle-com/blog/pkg/menu/db/migrate"
 	menuAdminAjax "github.com/axlle-com/blog/pkg/menu/http/handlers/ajax"
 	menuAdminWeb "github.com/axlle-com/blog/pkg/menu/http/handlers/web"
+	provider2 "github.com/axlle-com/blog/pkg/menu/provider"
 	menuQueue "github.com/axlle-com/blog/pkg/menu/queue"
 	menuRepository "github.com/axlle-com/blog/pkg/menu/repository"
 	menuService "github.com/axlle-com/blog/pkg/menu/service"
@@ -90,6 +91,7 @@ type Container struct {
 	Cache     contract.Cache
 	View      contract.View
 	Scheduler contract.Scheduler
+	Template  contract.Scheduler
 
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.FileService
@@ -158,6 +160,7 @@ type Container struct {
 	MenuItemRepo              menuRepository.MenuItemRepository
 	MenuItemService           *menuService.MenuItemService
 	MenuItemCollectionService *menuService.MenuItemCollectionService
+	MenuProvider              apppPovider.MenuProvider
 
 	// Settings
 	SettingsRepo    settingsRepo.Repository
@@ -254,15 +257,16 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	// Initialize Api with available providers (before creating services that use Api)
 	// Some providers will be added later (Post, Analytic, InfoBlock)
 	newApi := &api.Api{
-		File:      fileProv,
-		Image:     newImageProvider,
-		Gallery:   newGalleryProvider,
-		Post:      nil, // Will be set later
-		Template:  newTemplateProvider,
-		User:      newUserProvider,
-		Alias:     newAliasProvider,
-		InfoBlock: nil, // Will be set later
-		Analytic:  nil, // Will be set later
+		File:         fileProv,
+		Image:        newImageProvider,
+		Gallery:      newGalleryProvider,
+		Post:         nil, // Will be set later
+		Template:     newTemplateProvider,
+		User:         newUserProvider,
+		Alias:        newAliasProvider,
+		InfoBlock:    nil, // Will be set later
+		Analytic:     nil, // Will be set later
+		MenuProvider: nil, // Will be set later
 	}
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newApi)
@@ -302,6 +306,9 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	menuItemCollectionService := menuService.NewMenuItemCollectionService(menuItemRepo, menuItemService)
 	newMenuService := menuService.NewMenuService(menuRepo, menuItemService, menuItemCollectionService)
 	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
+	newMenuProvider := provider2.NewMenuProvider(newView, newMenuService)
+
+	newApi.MenuProvider = newMenuProvider
 
 	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newPostProvider, newTemplateProvider)
 
@@ -582,6 +589,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		MenuItemRepo:              menuItemRepo,
 		MenuItemService:           menuItemService,
 		MenuItemCollectionService: menuItemCollectionService,
+		MenuProvider:              newMenuProvider,
 
 		// Settings
 		SettingsRepo:    newSettingsRepo,

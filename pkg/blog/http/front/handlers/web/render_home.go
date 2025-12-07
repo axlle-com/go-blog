@@ -31,10 +31,12 @@ func (c *postController) RenderHome(ctx *gin.Context) {
 		err = json.Unmarshal(*post.InfoBlocksSnapshot, &blocks)
 	}
 
+	logger.Dump(c.api.MenuProvider.GetMenuString(1, ""))
+
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
-		c.view.View(post),
+		c.view.View(post.GetTemplateName()),
 		gin.H{
 			"title":  "Home Page",
 			"post":   post,

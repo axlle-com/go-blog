@@ -112,7 +112,10 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 		logger.Errorf("[main][Init][WebMinifier] error: %v", err)
 	}
 
-	web.NewTemplate(router)
+	container.View.SetRouter(router)
+	container.View.Load()
+	container.View.SetStatic()
+
 	routes.InitApiRoutes(router, container)
 	routes.InitWebRoutes(router, container)
 	return router

@@ -1,0 +1,32 @@
+{{define "spring.menus.default"}}
+    <div class="navbar-collapse collapse scroll-nav clearfix">
+        <ul class="navigation clearfix">
+            {{template "spring.menus.menu_items" .Menu.MenuItems}}
+        </ul>
+    </div>
+{{end}}
+
+{{define "spring.menus.menu_items"}}
+    {{range .}}
+        {{ $hasChildren := gt (len .Children) 0 }}
+        {{ $isCurrent := eq $.CurrentURL .URL }}
+
+        <li
+                {{- if or $hasChildren $isCurrent -}}
+            class="
+            {{- if $hasChildren -}}dropdown{{end}}
+            {{- if and $hasChildren $isCurrent -}} {{end}}
+            {{- if $isCurrent -}}current{{end}}
+            "
+                {{- end }}>
+            <a href="{{.URL}}">{{.Title}}</a>
+
+            {{if $hasChildren}}
+                <ul>
+                    {{template "spring.menus.menu_items" .Children}}
+                </ul>
+                <div class="dropdown-btn"><span class="fa fa-angle-down"></span></div>
+            {{end}}
+        </li>
+    {{end}}
+{{end}}

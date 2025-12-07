@@ -12,7 +12,6 @@ import (
 	"github.com/axlle-com/blog/app/middleware"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/cache"
-	"github.com/axlle-com/blog/app/web"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -85,7 +84,10 @@ func SetupTestRouter() *gin.Engine {
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
 		router.Use(middleware.Language(container.I18n))
 
-		web.NewTemplate(router)
+		container.View.SetRouter(router)
+		container.View.Load()
+		container.View.SetStatic()
+
 		InitApiRoutes(router, container)
 		InitWebRoutes(router, container)
 		cache.NewCache().ResetUsersSession()

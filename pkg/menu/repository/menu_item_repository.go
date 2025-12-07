@@ -301,17 +301,3 @@ func (r *menuItemRepository) DetachPublisher(publisherUuid uuid.UUID) (int64, er
 		})
 	return res.RowsAffected, res.Error
 }
-
-func (r *menuItemRepository) ReassignPublisher(oldPub uuid.UUID, newPub uuid.UUID, newURL string) (int64, error) {
-	updates := map[string]any{
-		"publisher_uuid": newPub,
-	}
-	if newURL != "" {
-		updates["url"] = newURL
-	}
-	res := r.db.Model(&models.MenuItem{}).
-		Where("publisher_uuid = ?", oldPub).
-		Updates(updates)
-
-	return res.RowsAffected, res.Error
-}

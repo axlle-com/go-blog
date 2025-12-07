@@ -38,9 +38,10 @@ func (i *InfoBlockResponse) GetName() string {
 
 func (i *InfoBlockResponse) GetTemplateName() string {
 	if i.Template != nil {
-		return fmt.Sprintf("%s.%s.%s", i.Template.GetThemeName(), i.GetName(), i.Template.GetName())
+		return i.Template.GetFullName(i.GetName())
 	}
-	return fmt.Sprintf("default.%s.default", i.GetName())
+
+	return fmt.Sprintf("%s.default", i.GetName())
 }
 
 func (i *InfoBlockResponse) GetPosition() string {

@@ -91,8 +91,9 @@ func (p *Post) GetName() string {
 
 func (p *Post) GetTemplateName() string {
 	if p.Template != nil {
-		return fmt.Sprintf("%s.%s", p.GetTable(), p.Template.GetName())
+		return p.Template.GetFullName(p.GetTable())
 	}
+
 	return fmt.Sprintf("%s.default", p.GetTable())
 }
 

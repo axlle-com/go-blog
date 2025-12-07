@@ -77,8 +77,9 @@ func (pt *PostTag) GetTemplateID() uint {
 
 func (pt *PostTag) GetTemplateName() string {
 	if pt.Template != nil {
-		return fmt.Sprintf("%s.%s", pt.GetTable(), pt.Template.GetName())
+		return pt.Template.GetFullName(pt.GetTable())
 	}
+
 	return fmt.Sprintf("%s.default", pt.GetTable())
 }
 

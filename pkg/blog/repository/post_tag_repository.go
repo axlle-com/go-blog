@@ -51,13 +51,28 @@ func (r *postTagRepository) WithPaginate(p contract.Paginator, filter *models.Ta
 
 	query := r.db.Model(&tag)
 
-	// TODO WHERE IN; LIKE
-	for col, val := range filter.GetMap() {
-		if col == "title" {
-			query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
-			continue
+	if filter != nil {
+		if filter.ID != nil {
+			query = query.Where(fmt.Sprintf("%s.id = ?", table), *filter.ID)
 		}
-		query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
+		if filter.TemplateID != nil {
+			query = query.Where(fmt.Sprintf("%s.template_id = ?", table), *filter.TemplateID)
+		}
+		if filter.Name != nil && *filter.Name != "" {
+			query = query.Where(fmt.Sprintf("%s.name = ?", table), *filter.Name)
+		}
+		if filter.Title != nil && *filter.Title != "" {
+			query = query.Where(fmt.Sprintf("%s.title ilike ?", table), fmt.Sprintf("%%%s%%", *filter.Title))
+		}
+		if filter.Query != nil && *filter.Query != "" {
+			query = query.Where(fmt.Sprintf("(%s.title ilike ? OR %s.name ilike ?)", table, table), fmt.Sprintf("%%%s%%", *filter.Query), fmt.Sprintf("%%%s%%", *filter.Query))
+		}
+		if filter.Date != nil && *filter.Date != "" {
+			query = query.Where(fmt.Sprintf("DATE(%s.created_at) = ?", table), *filter.Date)
+		}
+		if len(filter.UUIDs) > 0 {
+			query = query.Where(fmt.Sprintf("%s.uuid IN ?", table), filter.UUIDs)
+		}
 	}
 
 	query.Count(&total)

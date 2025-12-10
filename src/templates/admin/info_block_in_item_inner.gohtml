@@ -105,7 +105,7 @@
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             name="info_blocks[{{ $index }}][position]"
-                                            data-validator="position">
+                                            data-validator-name="position">
                                         <option></option>
                                         {{ range $key, $pos := .GetPositions }}
                                             <option value="{{ $pos }}" {{ if eq $pos $block.GetPosition }} selected{{ end }}>

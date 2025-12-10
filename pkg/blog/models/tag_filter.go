@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/axlle-com/blog/app/models"
+	"github.com/google/uuid"
 )
 
 func NewTagFilter() *TagFilter {
@@ -14,11 +15,13 @@ func NewTagFilter() *TagFilter {
 }
 
 type TagFilter struct {
-	ID         *uint   `json:"id" form:"id" binding:"omitempty"`
-	TemplateID *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
-	Name       *string `json:"name" form:"name" binding:"omitempty"`
-	Title      *string `json:"title" form:"title" binding:"omitempty"`
-	Date       *string `json:"date" form:"date" binding:"omitempty"`
+	ID         *uint       `json:"id" form:"id" binding:"omitempty"`
+	TemplateID *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
+	Name       *string     `json:"name" form:"name" binding:"omitempty"`
+	Title      *string     `json:"title" form:"title" binding:"omitempty"`
+	Date       *string     `json:"date" form:"date" binding:"omitempty"`
+	UUIDs      []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
+	Query      *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
 	models.Filter
 }
 

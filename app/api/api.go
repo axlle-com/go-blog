@@ -11,14 +11,15 @@ import (
 )
 
 type Api struct {
-	File         fileProvider.FileProvider
-	Image        apppPovider.ImageProvider
-	Gallery      apppPovider.GalleryProvider
-	Post         contract.PostProvider
-	Template     templateProvider.TemplateProvider
-	User         userProvider.UserProvider
-	Alias        alias.AliasProvider
-	InfoBlock    apppPovider.InfoBlockProvider
-	Analytic     analyticProvider.AnalyticProvider
-	MenuProvider apppPovider.MenuProvider
+	File      fileProvider.FileProvider
+	Image     apppPovider.ImageProvider
+	Gallery   apppPovider.GalleryProvider
+	Blog      contract.BlogProvider
+	Template  templateProvider.TemplateProvider
+	User      userProvider.UserProvider
+	Alias     alias.AliasProvider
+	InfoBlock apppPovider.InfoBlockProvider
+	Analytic  analyticProvider.AnalyticProvider
+	Menu      apppPovider.MenuProvider
+	Publisher apppPovider.PublisherProvider
 }

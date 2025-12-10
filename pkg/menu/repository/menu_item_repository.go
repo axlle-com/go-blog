@@ -155,6 +155,10 @@ func (r *menuItemRepository) GetAllIds() ([]uint, error) {
 }
 
 func (r *menuItemRepository) Delete(menuItem *models.MenuItem) error {
+	if menuItem == nil {
+		return fmt.Errorf("menuItem is nil")
+	}
+
 	likePattern := fmt.Sprintf("%s%%", menuItem.Path)
 	return r.db.Where("path LIKE ?", likePattern).Delete(&models.MenuItem{}).Error
 }

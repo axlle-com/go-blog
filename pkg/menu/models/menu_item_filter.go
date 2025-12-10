@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 func NewMenuItemFilter() *MenuItemFilter {
 	return &MenuItemFilter{}
 }
@@ -11,6 +13,9 @@ type MenuItemFilter struct {
 	Title            *string `json:"title" form:"title" binding:"omitempty"`
 	ForNotMenuItemID *uint   `json:"for_not_menu_item_id" form:"for_not_menu_item_id" binding:"omitempty"`
 	IDs              []uint  `json:"ids" form:"ids" binding:"omitempty"`
+
+	UUIDs []uuid.UUID
+	Query string
 
 	array map[string]string // TODO map[string][]string
 }
@@ -34,4 +39,20 @@ func (f *MenuItemFilter) GetMap() map[string]string {
 		return nil
 	}
 	return f.array
+}
+
+func (f *MenuItemFilter) GetUUIDs() []uuid.UUID {
+	return f.UUIDs
+}
+
+func (f *MenuItemFilter) GetQuery() string {
+	return f.Query
+}
+
+func (f *MenuItemFilter) SetUUIDs(uuids []uuid.UUID) {
+	f.UUIDs = uuids
+}
+
+func (f *MenuItemFilter) SetQuery(query string) {
+	f.Query = query
 }

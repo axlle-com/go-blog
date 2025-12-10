@@ -36,6 +36,8 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 		protected.POST("/file/images", container.AdminWebFileController.UploadImages)
 		protected.DELETE("/file/image/*filePath", container.AdminWebFileController.DeleteImage)
 
+		protected.GET("/publishers", container.AdminAjaxPublisherController.Filter)
+
 		protected.GET("/posts", container.AdminWebPostController.GetPosts)
 		protected.GET("/posts/:id", container.AdminWebPostController.GetPost)
 		protected.GET("/posts/form", container.AdminWebPostController.CreatePost)
@@ -99,6 +101,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 		protected.GET("/menus/form", container.AdminWebMenuController.CreateMenu)
 		protected.GET("/menus/:id", container.AdminWebMenuController.GetMenu)
 		protected.GET("/ajax/menus/menus-items", container.AdminAjaxMenuItemController.GetMenuItems)
+		protected.DELETE("/ajax/menus/menus-items/:id", container.AdminAjaxMenuItemController.DeleteMenuItem)
 		protected.POST("/menus", container.AdminAjaxMenuController.Create)
 		protected.PUT("/menus/:id", container.AdminAjaxMenuController.Update)
 	}

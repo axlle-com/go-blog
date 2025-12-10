@@ -5,7 +5,6 @@ import (
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/http/response"
-	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/menu/http/request"
 	"github.com/gin-gonic/gin"
@@ -49,30 +48,27 @@ func (c *menuController) Update(ctx *gin.Context) {
 
 	menu, err = c.menuService.Aggregate(menu)
 	if err != nil {
-		c.RenderHTML(ctx, http.StatusInternalServerError, "admin.404", gin.H{"title": err.Error()})
+		ctx.JSON(
+			http.StatusInternalServerError,
+			response.Fail(http.StatusInternalServerError, err.Error(), nil),
+		)
 		return
 	}
 
-	publishers, err := c.api.Post.GetPublishers()
-	if err != nil {
-		logger.WithRequest(ctx).Error(err)
-	}
-
 	data := response.Body{
-		"model":      menu,
-		"templates":  c.templates(ctx),
-		"publishers": publishers,
-		"resources":  app.NewResources().Resources(),
+		"model":     menu,
+		"templates": c.templates(ctx),
+		"resources": app.NewResources().Resources(),
 	}
 	ctx.JSON(
-		http.StatusCreated,
+		http.StatusOK,
 		response.Created(
 			response.Body{
 				"view": c.RenderView("admin.menu_inner", data, ctx),
 				"url":  menu.AdminURL(),
 				"menu": menu,
 			},
-			"Запись создана",
+			"Запись обновлена",
 		),
 	)
 }

@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 )
 
@@ -20,8 +21,9 @@ type MenuItem struct {
 	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
 	DeletedAt     *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
-	Children []*MenuItem
-	Parent   *MenuItem
+	Children  []*MenuItem
+	Parent    *MenuItem
+	Publisher contract.Publisher `gorm:"-" json:"publisher,omitempty"`
 }
 
 func (mi *MenuItem) GetTable() string {

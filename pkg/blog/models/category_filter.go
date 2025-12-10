@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func NewCategoryFilterFilter() *CategoryFilter {
@@ -13,12 +14,14 @@ func NewCategoryFilterFilter() *CategoryFilter {
 }
 
 type CategoryFilter struct {
-	ID             *uint   `json:"id" form:"id" binding:"omitempty"`
-	TemplateID     *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
-	UserID         *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
-	PostCategoryID *uint   `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
-	Title          *string `json:"title" form:"title" binding:"omitempty"`
-	Date           *string `json:"date" form:"date" binding:"omitempty"`
+	ID             *uint       `json:"id" form:"id" binding:"omitempty"`
+	TemplateID     *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
+	UserID         *uint       `json:"user_id" form:"user_id" binding:"omitempty"`
+	PostCategoryID *uint       `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
+	Title          *string     `json:"title" form:"title" binding:"omitempty"`
+	Date           *string     `json:"date" form:"date" binding:"omitempty"`
+	UUIDs          []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
+	Query          *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
 	models.Filter
 }
 

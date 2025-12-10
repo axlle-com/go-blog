@@ -70,7 +70,7 @@
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="post_category_id"
-                                                    data-validator="post_category_id">
+                                                    data-validator-name="post_category_id">
                                                 <option></option>
                                                 {{ range .categories}}
                                                     <option value="{{ .ID }}"
@@ -89,7 +89,7 @@
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="template_id"
-                                                    data-validator="template_id">
+                                                    data-validator-name="template_id">
                                                 <option></option>
                                                 {{ range .templates}}
                                                     <option value="{{ .ID }}"
@@ -111,7 +111,7 @@
                                                     name="alias"
                                                     id="alias"
                                                     value="{{ .post.Alias }}"
-                                                    data-validator="alias">
+                                                    data-validator-name="alias">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -122,7 +122,7 @@
                                                     name="url"
                                                     id="url"
                                                     value="{{ .post.URL }}"
-                                                    data-validator="url" disabled>
+                                                    data-validator-name="url" disabled>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -137,7 +137,7 @@
                                                     id="title"
                                                     value="{{ .post.Title }}"
                                                     data-validator-required
-                                                    data-validator="title">
+                                                    data-validator-name="title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -148,7 +148,7 @@
                                                     name="title_short"
                                                     id="title_short"
                                                     value="{{ ptrStr .post.TitleShort }}"
-                                                    data-validator="title_short">
+                                                    data-validator-name="title_short">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -158,7 +158,7 @@
                                                     placeholder="{{ call .T "ui.placeholder.short_description" nil }}"
                                                     name="description_preview"
                                                     id="description_preview"
-                                                    data-validator="description_preview">{{ ptrStr .post.DescriptionPreview }}</textarea>
+                                                    data-validator-name="description_preview">{{ ptrStr .post.DescriptionPreview }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -173,7 +173,7 @@
                                                     id="meta_title"
                                                     value="{{ ptrStr .post.MetaTitle }}"
                                                     data-validator-required
-                                                    data-validator="meta_title">
+                                                    data-validator-name="meta_title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -184,7 +184,7 @@
                                                     name="meta_description"
                                                     id="meta_description"
                                                     data-validator-required
-                                                    data-validator="meta_description">{{ ptrStr .post.MetaDescription }}</textarea>
+                                                    data-validator-name="meta_description">{{ ptrStr .post.MetaDescription }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -376,7 +376,7 @@
                                                     class="form-control select2"
                                                     name="menus[]"
                                                     id="menu"
-                                                    data-validator="menus"
+                                                    data-validator-name="menus"
                                                     multiple
                                                     data-placeholder="{{ call .T "ui.placeholder.select_menu" nil }}">
                                                 <option value=""></option>
@@ -392,7 +392,7 @@
                                                     class="form-control select2"
                                                     name="tags[]"
                                                     id="tags"
-                                                    data-validator="tags"
+                                                    data-validator-name="tags"
                                                     data-tags="true"
                                                     multiple
                                                     data-placeholder="{{ call .T "ui.placeholder.select_tag" nil }}">

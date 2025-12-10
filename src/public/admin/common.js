@@ -112,10 +112,14 @@ const _filterApi = {
                                 const page = Number(p.page || params.page || 1);
                                 const total = Number(p.total || 0);
 
-                                const results = items.map(it => ({
-                                    id: it.id ?? it.ID ?? it.value,
-                                    text: it.text ?? it.title ?? it.Name
-                                })).filter(o => o.id != null && o.text != null);
+                                const results = items
+                                    .map(it => ({
+                                        id: it.uuid ?? it.id,
+                                        text: it.text ?? it.title ?? it.name,
+                                        url: it.url || null,
+                                        // raw: it
+                                    }))
+                                    .filter(o => o.id != null && o.text != null);
 
                                 const more = page * pageSize < total;
                                 return {results, pagination: {more}};
@@ -519,12 +523,19 @@ const _menu = {
         const _this = this;
         const sel = 'select[name^="menu_items"][name$="[publisher_uuid]"]';
 
-        // remove old handlers and attach new ones
         $(document)
             .off('select2:select.menuurl select2:clear.menuurl', sel)
             .on('select2:select.menuurl', sel, function (e) {
                 const select = e.target;
-                const url = select.options[select.selectedIndex]?.dataset.url || '';
+
+                // 1) url из select2 (AJAX)
+                const data = e.params && e.params.data ? e.params.data : null;
+                let url = data && data.url ? data.url : '';
+
+                // 2) fallback: data-url на option (для статичных селектов)
+                if (!url) {
+                    url = select.options[select.selectedIndex]?.dataset.url || '';
+                }
 
                 const fieldset = select.closest('.form-block.js-menu-items-publisher-url');
                 if (!fieldset) return;
@@ -535,7 +546,9 @@ const _menu = {
                 if (!linkInput.dataset.oldUrl) {
                     linkInput.dataset.oldUrl = linkInput.value; // remember original
                 }
-                linkInput.value = url;
+                if (url) {
+                    linkInput.value = url;
+                }
             })
             .on('select2:clear.menuurl', sel, function (e) {
                 const select = e.target;
@@ -549,11 +562,165 @@ const _menu = {
                 delete linkInput.dataset.oldUrl;
             });
     },
+    add: function () {
+        const _this = this;
+        $('body').on('click', '.menu .js-add-button', function (evt) {
+            const block = $('.js-block-menu-items');
+            const menuId = $('input[name="id"]').val();
+            const count = block.find('.js-block-menu-item').length + 1;
+            const html = `
+            <div class="card js-block-menu-item active">
+                <div class="card-header">
+                    <button class="btn dropdown-toggle collapsed" type="button"
+                            data-toggle="collapse" data-target="#collapse-menu-item-${count}"
+                            aria-expanded="false" aria-controls="collapse-menu-item-${count}">
+                        New menu item
+                    </button>
+                    <button type="button" 
+                            class="btn btn-link btn-icon text-danger js-menu-item-delete" 
+                            data-id="0"
+                            data-action=""
+                            title="Удалить элемент меню">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
+                <div id="collapse-menu-item-${count}" class="collapse show" data-parent=".js-block-menu-items">
+                    <div class="card-body text-secondary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <fieldset class="form-block js-menu-items-publisher-url">
+                                    <legend>Menu item parameters</legend>
+                                    <input type="hidden" name="menu_items[${count}][menu_id]" value="${menuId}">
+        
+                                    <div class="form-group small">
+                                        <label>Title</label>
+                                        <input 
+                                            class="form-control form-shadow"
+                                            data-validator-required
+                                            data-validator-name="title"
+                                            name="menu_items[${count}][title]" 
+                                            value="" 
+                                            placeholder="Title">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+        
+                                    <div class="form-group small">
+                                        <label>Publisher</label>
+                                        <select class="form-control select2 select2-search"
+                                                data-placeholder="..."
+                                                data-select2-search="true"
+                                                data-allow-clear="true"
+                                                data-action="/admin/publishers"
+                                                name="menu_items[${count}][publisher_uuid]"
+                                                data-validator-name="publisher_uuid">
+                                            <option></option>
+                                        </select>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+        
+                                    <div class="form-group small">
+                                        <label>Custom link</label>
+                                        <input 
+                                            class="form-control form-shadow" 
+                                            name="menu_items[${count}][url]" 
+                                            data-validator-name="url"
+                                            value="" 
+                                            placeholder="Custom link">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+        
+                            <div class="col-md-6">
+                                <fieldset class="form-block">
+                                    <legend>Hierarchy and sort</legend>
+                                    <div class="form-group small">
+                                        <label>Parent menu item</label>
+                                        <select class="form-control select2 select2-search"
+                                                data-placeholder="Parent menu item"
+                                                data-select2-search="true"
+                                                data-allow-clear="true"
+                                                data-action="/admin/ajax/menus/menus-items?menu_id=${menuId}"
+                                                name="menu_items[${count}][menu_item_id]"
+                                                data-validator-name="menu_item_id">
+                                            <option></option>
+                                        </select>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+        
+                                    <div class="form-group small">
+                                        <label>Sort</label>
+                                        <input class="form-control form-shadow" type="number" name="menu_items[${count}][sort]" value="0" placeholder="Sort">
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            block.append(html);
+            _this.setUrl();
+            _this.search();
+        });
+    },
+    delete: function () {
+        const _this = this;
+        $('body').on('click', '.js-menu-item-delete', function (evt) {
+            const id = $(this).attr('data-id');
+            const action = $(this).attr('data-action');
+            const block = $(this).closest('.js-block-menu-item');
+            
+            if (id && id !== '0' && action) {
+                // Элемент сохранен, удаляем через AJAX
+                const request = new _glob.request({action});
+                request.setMethod('DELETE').setPreloader('.js-product').send((response) => {
+                    if (response.data && response.data.view) {
+                        // Обновляем всю страницу меню
+                        const menuBlock = $('.js-block-menu-items');
+                        let html = $(response.data.view);
+                        // Ищем блок меню внутри отрендеренного view (menu_inner содержит форму с блоком меню)
+                        const newMenuBlock = html.find('.js-block-menu-items');
+                        if (newMenuBlock.length) {
+                            menuBlock.html(newMenuBlock.html());
+                        } else {
+                            // Если не нашли, пробуем найти внутри формы
+                            const formBlock = html.find('#global-form .js-block-menu-items');
+                            if (formBlock.length) {
+                                menuBlock.html(formBlock.html());
+                            } else {
+                                // Если все еще не нашли, просто удаляем элемент
+                                block.remove();
+                            }
+                        }
+                        _glob.images = {};
+                        _config.run();
+                    } else {
+                        // Если нет view, просто удаляем элемент со страницы
+                        block.remove();
+                    }
+                    if (response.message) {
+                        _glob.noty.success(response.message);
+                    }
+                });
+            } else {
+                block.remove();
+            }
+        });
+    },
     run: function (selector) {
+        if (this._block.length) {
+            this.setUrl();
+            this.search();
+            return;
+        }
+
         this._block = $(selector);
         if (this._block.length) {
             this.setUrl();
             this.search();
+            this.add();
+            this.delete();
         }
     }
 };
@@ -778,7 +945,5 @@ $(document).ready(function () {
     _infoBlock.run();
     _auth.run();
     _post.run();
-    _template.run();
     _message.run();
-    _menu.run('.a-block-inner.menu');
 })

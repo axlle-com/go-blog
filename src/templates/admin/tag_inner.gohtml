@@ -70,7 +70,7 @@
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="template_id"
-                                                    data-validator="template_id">
+                                                    data-validator-name="template_id">
                                                 <option></option>
                                                 {{ range .templates}}
                                                     <option value="{{ .ID }}"
@@ -92,7 +92,7 @@
                                                     name="alias"
                                                     id="alias"
                                                     value="{{ .tag.Alias }}"
-                                                    data-validator="alias">
+                                                    data-validator-name="alias">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -103,7 +103,7 @@
                                                     name="url"
                                                     id="url"
                                                     value="{{ .tag.URL }}"
-                                                    data-validator="url" disabled>
+                                                    data-validator-name="url" disabled>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -118,7 +118,7 @@
                                                     id="name"
                                                     value="{{ .tag.Name }}"
                                                     data-validator-required
-                                                    data-validator="name">
+                                                    data-validator-name="name">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -130,7 +130,7 @@
                                                     id="title"
                                                     value="{{ ptrStr .tag.Title }}"
                                                     data-validator-required
-                                                    data-validator="title">
+                                                    data-validator-name="title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -145,7 +145,7 @@
                                                     id="meta_title"
                                                     value="{{ ptrStr .tag.MetaTitle }}"
                                                     data-validator-required
-                                                    data-validator="meta_title">
+                                                    data-validator-name="meta_title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-group small">
@@ -156,7 +156,7 @@
                                                     name="meta_description"
                                                     id="meta_description"
                                                     data-validator-required
-                                                    data-validator="meta_description">{{ ptrStr .tag.MetaDescription }}</textarea>
+                                                    data-validator-name="meta_description">{{ ptrStr .tag.MetaDescription }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>
@@ -181,7 +181,7 @@
                                                     class="form-control select2"
                                                     name="menus[]"
                                                     id="menu"
-                                                    data-validator="menus"
+                                                    data-validator-name="menus"
                                                     multiple
                                                     data-placeholder="{{ call .T "ui.placeholder.select_menu" nil }}">
                                                 <option value=""></option>

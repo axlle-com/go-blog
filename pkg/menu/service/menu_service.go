@@ -18,17 +18,20 @@ type MenuService struct {
 	menuRepo                  repository.MenuRepository
 	menuItemService           *MenuItemService
 	menuItemCollectionService *MenuItemCollectionService
+	menuItemAggregateService  *MenuItemAggregateService
 }
 
 func NewMenuService(
 	menuRepository repository.MenuRepository,
 	menuItemService *MenuItemService,
 	menuItemCollectionService *MenuItemCollectionService,
+	menuItemAggregateService *MenuItemAggregateService,
 ) *MenuService {
 	return &MenuService{
 		menuRepo:                  menuRepository,
 		menuItemService:           menuItemService,
 		menuItemCollectionService: menuItemCollectionService,
+		menuItemAggregateService:  menuItemAggregateService,
 	}
 }
 
@@ -42,7 +45,7 @@ func (s *MenuService) Aggregate(model *models.Menu) (*models.Menu, error) {
 		return nil, err
 	}
 
-	menuItems = s.menuItemCollectionService.Aggregate(menuItems)
+	menuItems = s.menuItemAggregateService.Aggregate(menuItems)
 
 	nodes := make(map[uint]*models.MenuItem, len(menuItems))
 	roots := make([]*models.MenuItem, 0)
@@ -110,6 +113,8 @@ func (s *MenuService) SaveFromRequest(form *request.MenuRequest, found *models.M
 		if itemsReq[i] == nil {
 			continue
 		}
+
+		itemsReq[i].MenuID = newMenu.ID
 
 		i := i // захват индекса!
 		sem <- struct{}{}

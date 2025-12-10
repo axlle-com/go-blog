@@ -61,7 +61,7 @@
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="template_id"
-                                                    data-validator="template_id">
+                                                    data-validator-name="template_id">
                                                 <option></option>
                                                 {{ range .templates}}
                                                     <option value="{{ .ID }}"
@@ -84,7 +84,7 @@
                                                     id="title"
                                                     value="{{ .infoBlock.Title }}"
                                                     data-validator-required
-                                                    data-validator="title">
+                                                    data-validator-name="title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>

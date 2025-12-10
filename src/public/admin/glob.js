@@ -150,29 +150,22 @@ const _glob = {
             const keys = path.match(/([^\[\]\.]+)/g) || [];
             let curr = target;
 
-            // создаём контейнеры на пути
+            // создаём ТОЛЬКО объекты на пути (без массивов по цифрам)
             for (let i = 0; i < keys.length - 1; i++) {
                 const key = keys[i];
-                const next = keys[i + 1];
-                const needArray = /^\d+$/.test(next);
+                let exists = curr[key];
 
-                const exists = curr[key];
-                if (exists == null) {
-                    curr[key] = needArray ? [] : {};
-                } else {
-                    if (needArray && !Array.isArray(exists)) {
-                        curr[key] = [];
-                    }
-                    if (!needArray && (typeof exists !== 'object' || Array.isArray(exists))) {
-                        curr[key] = {};
-                    }
+                if (!exists || typeof exists !== 'object' || Array.isArray(exists)) {
+                    curr[key] = {};
                 }
+
                 curr = curr[key];
             }
 
             const lastKey = keys[keys.length - 1];
             const typeHint = _glob.typeHints.get(path);
 
+            // поля вида name="tags[]" и т.п.
             if (isMulti) {
                 if (!Array.isArray(curr[lastKey])) {
                     curr[lastKey] = curr[lastKey] == null ? [] : [curr[lastKey]];
@@ -188,7 +181,11 @@ const _glob = {
             }
 
             let newValue = this.castByType(value, typeHint);
-            if (newValue === '' || newValue == null || (this.isPlainObject(newValue) && Object.keys(newValue).length === 0)) {
+            if (
+                newValue === '' ||
+                newValue == null ||
+                (this.isPlainObject(newValue) && Object.keys(newValue).length === 0)
+            ) {
                 return;
             }
 
@@ -201,6 +198,44 @@ const _glob = {
             } else {
                 curr[lastKey] = newValue;
             }
+        }
+
+        normalizeNumericKeys(value) {
+            // массивы просто нормализуем по элементам
+            if (Array.isArray(value)) {
+                return value.map(v => this.normalizeNumericKeys(v));
+            }
+
+            // простые объекты — наш случай
+            if (value && typeof value === 'object'
+                && !(value instanceof File)
+                && !(value instanceof Blob)
+                && !(value instanceof Date)
+                && !(value instanceof ArrayBuffer)
+            ) {
+                const keys = Object.keys(value);
+                if (!keys.length) {
+                    return value;
+                }
+
+                const allNumeric = keys.every(k => /^\d+$/.test(k));
+
+                // если все ключи — числа ("0","1","1400"...) → превращаем в массив
+                if (allNumeric) {
+                    const sorted = keys.sort((a, b) => Number(a) - Number(b));
+                    return sorted.map(k => this.normalizeNumericKeys(value[k]));
+                }
+
+                // обычный объект — просто обходим поля
+                const res = {};
+                for (const k of keys) {
+                    res[k] = this.normalizeNumericKeys(value[k]);
+                }
+                return res;
+            }
+
+            // примитивы/спецтипы возвращаем как есть
+            return value;
         }
 
         send(callback = null) {
@@ -227,8 +262,6 @@ const _glob = {
 
             // Собираем объект на основе payload
             _this.payload.forEach(function (value, key) {
-                _cl_(key)
-                _cl_(value)
                 _this.deepSetWithTypes(formObject, key, value);
             });
 
@@ -261,7 +294,8 @@ const _glob = {
                 ajaxOptions.data = formObject;
             } else {
                 // Для POST (или других типов, где нужно тело)
-                ajaxOptions.data = JSON.stringify(formObject);
+                const normalized = this.normalizeNumericKeys(formObject);
+                ajaxOptions.data = JSON.stringify(normalized);
                 ajaxOptions.contentType = 'application/json';
             }
 
@@ -378,7 +412,7 @@ const _glob = {
                 if (errs && Object.keys(errs).length) {
                     for (let key in errs) {
                         // подсветка
-                        let selector = `[data-validator="${key}"]`;
+                        let selector = `[data-validator-name="${key}"]`;
                         if (form) {
                             $(form).find(selector).addClass('is-invalid');
                         } else {
@@ -416,28 +450,44 @@ const _glob = {
 
         castValueAuto(value) {
             // Бинарные/особые типы не трогаем
-            if (value instanceof File || value instanceof Blob || value instanceof Date || value instanceof ArrayBuffer) return value;
-            if (typeof value !== 'string') return value;
+            if (value instanceof File || value instanceof Blob || value instanceof Date || value instanceof ArrayBuffer) {
+                return value;
+            }
+            if (typeof value !== 'string') {
+                return value;
+            }
 
             const s = value.trim();
-            if (s === '') return s;
+            if (s === '') {
+                return s;
+            }
 
             // boolean
-            if (/^(true|false)$/i.test(s)) return s.toLowerCase() === 'true';
+            if (/^(true|false)$/i.test(s)) {
+                return s.toLowerCase() === 'true';
+            }
 
             // null/undefined
-            if (/^(null)$/i.test(s)) return null;
-            if (/^(undefined)$/i.test(s)) return undefined;
+            if (/^(null)$/i.test(s)) {
+                return null;
+            }
+            if (/^(undefined)$/i.test(s)) {
+                return undefined;
+            }
 
             // int
             if (/^[+-]?\d+$/.test(s)) {
                 const n = Number(s);
-                if (Number.isSafeInteger(n)) return n;
+                if (Number.isSafeInteger(n)) {
+                    return n;
+                }
             }
             // float
             if (/^[+-]?\d*\.\d+$/.test(s)) {
                 const n = Number(s);
-                if (!Number.isNaN(n)) return n;
+                if (!Number.isNaN(n)) {
+                    return n;
+                }
             }
             return value;
         }
@@ -451,10 +501,16 @@ const _glob = {
             const base = typeStr.replace(/\[\]$/, '').toLowerCase();
 
             const castOne = (val) => {
-                if (val instanceof File || val instanceof Blob || val instanceof Date || val instanceof ArrayBuffer) return val;
-                if (typeof val !== 'string') return val;
+                if (val instanceof File || val instanceof Blob || val instanceof Date || val instanceof ArrayBuffer) {
+                    return val;
+                }
+                if (typeof val !== 'string') {
+                    return val;
+                }
                 const s = val.trim();
-                if (s === '') return s;
+                if (s === '') {
+                    return s;
+                }
 
                 switch (base) {
                     case 'int':
@@ -478,13 +534,13 @@ const _glob = {
                     case 'bool':
                     case 'boolean':
                         // поддерживаем "1"/"0" и true/false
-                        if (value === '1' || value === 1 || value === true || value === 'true') {
+                        if (val === '1' || val === 1 || val === true || val === 'true') {
                             return true;
                         }
-                        if (value === '0' || value === 0 || value === false || value === 'false') {
+                        if (val === '0' || val === 0 || val === false || val === 'false') {
                             return false;
                         }
-                        return Boolean(value);
+                        return Boolean(val);
                     case 'json':
                         try {
                             return JSON.parse(s);
@@ -505,7 +561,9 @@ const _glob = {
         }
 
         isPlainObject(value) {
-            if (value === null || typeof value !== 'object') return false;
+            if (value === null || typeof value !== 'object') {
+                return false;
+            }
             const proto = Object.getPrototypeOf(value);
             return proto === Object.prototype || proto === null;
         }

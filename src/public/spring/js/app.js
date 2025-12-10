@@ -471,20 +471,23 @@ return this;}
 validateForm(){if(this.form&&this.validate){let err=[];$.each(this.form.find('[data-validator-required]'),function(index,value){err.push(_glob.validation.change($(this)));});this.hasErrors=err.indexOf(true)!==-1;}}
 setAction(action){this.action=action;return this;}
 setMethod(method){this.method=method;return this;}
-deepSetWithTypes(target,path,value){const isMulti=/\[\]$/.test(path);const keys=path.match(/([^\[\]\.]+)/g)||[];let curr=target;for(let i=0;i<keys.length-1;i++){const key=keys[i];const next=keys[i+1];const needArray=/^\d+$/.test(next);const exists=curr[key];if(exists==null){curr[key]=needArray?[]:{};}else{if(needArray&&!Array.isArray(exists)){curr[key]=[];}
-if(!needArray&&(typeof exists!=='object'||Array.isArray(exists))){curr[key]={};}}
+deepSetWithTypes(target,path,value){const isMulti=/\[\]$/.test(path);const keys=path.match(/([^\[\]\.]+)/g)||[];let curr=target;for(let i=0;i<keys.length-1;i++){const key=keys[i];let exists=curr[key];if(!exists||typeof exists!=='object'||Array.isArray(exists)){curr[key]={};}
 curr=curr[key];}
 const lastKey=keys[keys.length-1];const typeHint=_glob.typeHints.get(path);if(isMulti){if(!Array.isArray(curr[lastKey])){curr[lastKey]=curr[lastKey]==null?[]:[curr[lastKey]];}
 const incoming=Array.isArray(value)?value:[value];incoming.forEach(item=>{const casted=this.castByType(item,typeHint);if(casted!==''&&casted!=null){curr[lastKey].push(casted);}});return;}
 let newValue=this.castByType(value,typeHint);if(newValue===''||newValue==null||(this.isPlainObject(newValue)&&Object.keys(newValue).length===0)){return;}
 if(Object.prototype.hasOwnProperty.call(curr,lastKey)&&!Array.isArray(curr[lastKey])){curr[lastKey]=[curr[lastKey]];}
 if(Array.isArray(curr[lastKey])){curr[lastKey].push(newValue);}else{curr[lastKey]=newValue;}}
+normalizeNumericKeys(value){if(Array.isArray(value)){return value.map(v=>this.normalizeNumericKeys(v));}
+if(value&&typeof value==='object'&&!(value instanceof File)&&!(value instanceof Blob)&&!(value instanceof Date)&&!(value instanceof ArrayBuffer)){const keys=Object.keys(value);if(!keys.length){return value;}
+const allNumeric=keys.every(k=>/^\d+$/.test(k));if(allNumeric){const sorted=keys.sort((a,b)=>Number(a)-Number(b));return sorted.map(k=>this.normalizeNumericKeys(value[k]));}
+const res={};for(const k of keys){res[k]=this.normalizeNumericKeys(value[k]);}
+return res;}
+return value;}
 send(callback=null){const _this=this;this.validateForm();if(this.hasErrors){_glob.noty.error('Заполнены не все обязательные поля');return;}
 if(this.hasSend){_glob.console.error('Форма еще отправляется');return;}
 if(this.preloader){this.preloader.show();}
-this.hasSend=true;let formObject={};const csrf=$('meta[name="csrf-token"]').attr('content');_this.payload.forEach(function(value,key){_cl_(key)
-_cl_(value)
-_this.deepSetWithTypes(formObject,key,value);});let ajaxOptions={url:_this.action,headers:{'X-CSRF-TOKEN':csrf},type:_this.method,dataType:'json',beforeSend:function(){},success:function(response){_this.setData(response).defaultBehavior();if(callback){callback(response);}},error:function(response){_this.errorResponse(response);},complete:function(){_this.hasSend=false;if(_this.preloader){_this.preloader.hide();}}};if(_this.method.toUpperCase()==='GET'){ajaxOptions.data=formObject;}else{ajaxOptions.data=JSON.stringify(formObject);ajaxOptions.contentType='application/json';}
+this.hasSend=true;let formObject={};const csrf=$('meta[name="csrf-token"]').attr('content');_this.payload.forEach(function(value,key){_this.deepSetWithTypes(formObject,key,value);});let ajaxOptions={url:_this.action,headers:{'X-CSRF-TOKEN':csrf},type:_this.method,dataType:'json',beforeSend:function(){},success:function(response){_this.setData(response).defaultBehavior();if(callback){callback(response);}},error:function(response){_this.errorResponse(response);},complete:function(){_this.hasSend=false;if(_this.preloader){_this.preloader.hide();}}};if(_this.method.toUpperCase()==='GET'){ajaxOptions.data=formObject;}else{const normalized=this.normalizeNumericKeys(formObject);ajaxOptions.data=JSON.stringify(normalized);ajaxOptions.contentType='application/json';}
 $.ajax(ajaxOptions);}
 sendForm(callback=null){const _this=this;this.validateForm();if(this.hasErrors){_glob.noty.error('Заполнены не все обязательные поля');return;}
 if(this.hasSend){_glob.console.error('Форма еще отправляется');return;}
@@ -500,23 +503,33 @@ try{this.form[0].reset();}catch(e){}}}
 errorResponse(response,form=null){let extraErrors='';let json,message,errors;if(response&&(json=response.responseJSON)){message=json.message;if(message){message=message.replace(/\|/gi,`<br>`);}
 errors=json.errors;}
 if(!message&&response.responseText){try{message=JSON.parse(response.responseText).message;}catch(e){_glob.console.error(e)}}
-if(response.status===400||response.status===419||response.status===422){let errs=errors||response.errors;if(errs&&Object.keys(errs).length){for(let key in errs){let selector=`[data-validator="${key}"]`;if(form){$(form).find(selector).addClass('is-invalid');}else{$(selector).addClass('is-invalid');}
+if(response.status===400||response.status===419||response.status===422){let errs=errors||response.errors;if(errs&&Object.keys(errs).length){for(let key in errs){let selector=`[data-validator-name="${key}"]`;if(form){$(form).find(selector).addClass('is-invalid');}else{$(selector).addClass('is-invalid');}
 let fieldErrors=Array.isArray(errs[key])?errs[key]:[errs[key]];extraErrors+=fieldErrors.join('<br>')+'<br>';}}
 _glob.noty.error((message?message+'<br>':'')+(extraErrors||_glob.ERROR_MESSAGE));}else if(response.status===406){_glob.noty.error(message?message:_glob.ERROR_MESSAGE);}else if(response.status===500){_glob.noty.error(message?message:response.statusText);}else{_glob.noty.error(message?message:response.statusText);}}
 setLocation(curLoc){let url='';try{url=curLoc==='index'?'/':curLoc;history.pushState(null,null,url);return;}catch(e){_glob.console.error(e.message);}
 location.hash='#'+url;}
-castValueAuto(value){if(value instanceof File||value instanceof Blob||value instanceof Date||value instanceof ArrayBuffer)return value;if(typeof value!=='string')return value;const s=value.trim();if(s==='')return s;if(/^(true|false)$/i.test(s))return s.toLowerCase()==='true';if(/^(null)$/i.test(s))return null;if(/^(undefined)$/i.test(s))return undefined;if(/^[+-]?\d+$/.test(s)){const n=Number(s);if(Number.isSafeInteger(n))return n;}
-if(/^[+-]?\d*\.\d+$/.test(s)){const n=Number(s);if(!Number.isNaN(n))return n;}
+castValueAuto(value){if(value instanceof File||value instanceof Blob||value instanceof Date||value instanceof ArrayBuffer){return value;}
+if(typeof value!=='string'){return value;}
+const s=value.trim();if(s===''){return s;}
+if(/^(true|false)$/i.test(s)){return s.toLowerCase()==='true';}
+if(/^(null)$/i.test(s)){return null;}
+if(/^(undefined)$/i.test(s)){return undefined;}
+if(/^[+-]?\d+$/.test(s)){const n=Number(s);if(Number.isSafeInteger(n)){return n;}}
+if(/^[+-]?\d*\.\d+$/.test(s)){const n=Number(s);if(!Number.isNaN(n)){return n;}}
 return value;}
 castByType(value,typeStr){if(!typeStr){return this.castValueAuto(value);}
-const isArrayType=/\[\]$/.test(typeStr);const base=typeStr.replace(/\[\]$/,'').toLowerCase();const castOne=(val)=>{if(val instanceof File||val instanceof Blob||val instanceof Date||val instanceof ArrayBuffer)return val;if(typeof val!=='string')return val;const s=val.trim();if(s==='')return s;switch(base){case 'int':case 'integer':if(/^[+-]?\d+$/.test(s)){const n=Number(s);if(Number.isSafeInteger(n)){return n;}}
+const isArrayType=/\[\]$/.test(typeStr);const base=typeStr.replace(/\[\]$/,'').toLowerCase();const castOne=(val)=>{if(val instanceof File||val instanceof Blob||val instanceof Date||val instanceof ArrayBuffer){return val;}
+if(typeof val!=='string'){return val;}
+const s=val.trim();if(s===''){return s;}
+switch(base){case 'int':case 'integer':if(/^[+-]?\d+$/.test(s)){const n=Number(s);if(Number.isSafeInteger(n)){return n;}}
 return s;case 'float':case 'number':if(/^[+-]?\d+(\.\d+)?$/.test(s)){const n=Number(s);if(!Number.isNaN(n)){return n;}}
-return s;case 'bool':case 'boolean':if(value==='1'||value===1||value===true||value==='true'){return true;}
-if(value==='0'||value===0||value===false||value==='false'){return false;}
-return Boolean(value);case 'json':try{return JSON.parse(s);}catch{return s;}
+return s;case 'bool':case 'boolean':if(val==='1'||val===1||val===true||val==='true'){return true;}
+if(val==='0'||val===0||val===false||val==='false'){return false;}
+return Boolean(val);case 'json':try{return JSON.parse(s);}catch{return s;}
 case 'string':default:return s;}};if(isArrayType){if(Array.isArray(value))return value.map(castOne);return[castOne(value)];}
 return castOne(value);}
-isPlainObject(value){if(value===null||typeof value!=='object')return false;const proto=Object.getPrototypeOf(value);return proto===Object.prototype||proto===null;}},validation:{control:function(){const self=this;$('body').on('blur','[data-validator-required]',function(){let field=$(this);self.change(field);})},change:function(field){let err=false,self=this;let help=field.closest('div').find('.invalid-feedback');if(field.attr('type')==='checkbox'){if(field.prop('checked')){field.removeClass('is-invalid');help.text('').hide();}else{field.addClass('is-invalid');help.text(_glob.ERROR_FIELD).show();err=true;}}else{if(field.val()){field.removeClass('is-invalid');help.text('').hide();}else{field.addClass('is-invalid');help.text(_glob.ERROR_FIELD).show();err=true;}}
+isPlainObject(value){if(value===null||typeof value!=='object'){return false;}
+const proto=Object.getPrototypeOf(value);return proto===Object.prototype||proto===null;}},validation:{control:function(){const self=this;$('body').on('blur','[data-validator-required]',function(){let field=$(this);self.change(field);})},change:function(field){let err=false,self=this;let help=field.closest('div').find('.invalid-feedback');if(field.attr('type')==='checkbox'){if(field.prop('checked')){field.removeClass('is-invalid');help.text('').hide();}else{field.addClass('is-invalid');help.text(_glob.ERROR_FIELD).show();err=true;}}else{if(field.val()){field.removeClass('is-invalid');help.text('').hide();}else{field.addClass('is-invalid');help.text(_glob.ERROR_FIELD).show();err=true;}}
 return err;}},cookie:class{constructor(name,value,options){this.name=name;this.value=value;this.options=options;}
 get(){let matches=document.cookie.match(new RegExp("(?:^|; )"+this.name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g,'\\$1')+"=([^;]*)"));return matches?decodeURIComponent(matches[1]):undefined;}
 set(){this.options=this.options||{};let expires=this.options.expires;if(typeof expires=="number"&&expires){let d=new Date();d.setDate(d.getDate()+expires);expires=this.options.expires=d;}

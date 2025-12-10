@@ -33,8 +33,18 @@ func (c *menuController) Create(ctx *gin.Context) {
 		return
 	}
 
+	menu, err = c.menuService.Aggregate(menu)
+	if err != nil {
+		ctx.JSON(
+			http.StatusInternalServerError,
+			response.Fail(http.StatusInternalServerError, err.Error(), nil),
+		)
+		return
+	}
+
 	data := response.Body{
 		"model":     menu,
+		"templates": c.templates(ctx),
 		"resources": app.NewResources().Resources(),
 	}
 	ctx.JSON(

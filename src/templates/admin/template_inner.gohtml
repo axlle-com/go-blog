@@ -54,7 +54,7 @@
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="resource_name"
-                                                    data-validator="resource_name">
+                                                    data-validator-name="resource_name">
                                                 <option></option>
                                                 {{ range $key, $value := .resources }}
                                                     {{ if eq $.templateModel.GetResourceName $key }}
@@ -78,7 +78,7 @@
                                                     id="title"
                                                     value="{{ .templateModel.Title }}"
                                                     data-validator-required
-                                                    data-validator="title">
+                                                    data-validator-name="title">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <legend>{{ call .T "ui.label.title" nil }}</legend>
@@ -91,7 +91,7 @@
                                                     id="name"
                                                     value="{{ .templateModel.Name }}"
                                                     data-validator-required
-                                                    data-validator="name">
+                                                    data-validator-name="name">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </fieldset>

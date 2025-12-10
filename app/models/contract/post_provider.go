@@ -1,6 +1,6 @@
 package contract
 
-type PostProvider interface {
+type BlogProvider interface {
 	GetPosts() []Post
-	GetPublishers() ([]Publisher, error)
+	GetPublishers(Paginator, PublisherFilter) ([]Publisher, int, error)
 }

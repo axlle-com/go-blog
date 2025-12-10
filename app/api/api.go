@@ -14,7 +14,7 @@ type Api struct {
 	File         fileProvider.FileProvider
 	Image        apppPovider.ImageProvider
 	Gallery      apppPovider.GalleryProvider
-	Post         contract.PostProvider
+	Blog         contract.BlogProvider
 	Template     templateProvider.TemplateProvider
 	User         userProvider.UserProvider
 	Alias        alias.AliasProvider

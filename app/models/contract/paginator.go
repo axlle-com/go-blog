@@ -18,4 +18,6 @@ type Paginator interface {
 	HasPages() bool
 	AddQueryString(s string)
 	GetQuery() template.URL
+
+	Clone() Paginator
 }

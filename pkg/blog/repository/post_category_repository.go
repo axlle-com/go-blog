@@ -122,13 +122,15 @@ func (r *categoryRepository) WithPaginate(p contract.Paginator, filter *models.C
 
 	query := r.db.Model(&category)
 
-	// TODO WHERE IN; LIKE
-	for col, val := range filter.GetMap() {
-		if col == "title" {
-			query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
-			continue
+	if filter != nil {
+		// TODO WHERE IN; LIKE
+		for col, val := range filter.GetMap() {
+			if col == "title" {
+				query = query.Where(fmt.Sprintf("%s.%v ilike ?", table, col), fmt.Sprintf("%%%v%%", val))
+				continue
+			}
+			query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
 		}
-		query = query.Where(fmt.Sprintf("%s.%v = ?", table, col), val)
 	}
 
 	query.Count(&total)

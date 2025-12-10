@@ -36,6 +36,8 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 		protected.POST("/file/images", container.AdminWebFileController.UploadImages)
 		protected.DELETE("/file/image/*filePath", container.AdminWebFileController.DeleteImage)
 
+		protected.GET("/publishers", container.AdminAjaxPublisherController.Filter)
+
 		protected.GET("/posts", container.AdminWebPostController.GetPosts)
 		protected.GET("/posts/:id", container.AdminWebPostController.GetPost)
 		protected.GET("/posts/form", container.AdminWebPostController.CreatePost)

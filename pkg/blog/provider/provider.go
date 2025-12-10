@@ -6,12 +6,12 @@ import (
 	"github.com/axlle-com/blog/pkg/blog/service"
 )
 
-func NewPostProvider(
+func NewBlogProvider(
 	postService *service.PostService,
 	postCollectionService *service.PostCollectionService,
 	categoriesService *service.CategoriesService,
 	tagCollectionService *service.TagCollectionService,
-) contract.PostProvider {
+) contract.BlogProvider {
 	return &provider{
 		postService:           postService,
 		postCollectionService: postCollectionService,
@@ -40,35 +40,48 @@ func (p *provider) GetPosts() []contract.Post {
 	return nil
 }
 
-func (p *provider) GetPublishers() ([]contract.Publisher, error) { // @todo paginate!!!
-	var collection []contract.Publisher
+func (p *provider) GetPublishers(paginator contract.Paginator) (collection []contract.Publisher, total int, err error) {
+	newPaginator := paginator.Clone()
+	total = newPaginator.GetTotal()
 
-	posts, err := p.postCollectionService.GetAll()
+	posts, err := p.postCollectionService.WithPaginate(paginator, nil)
 	if err != nil {
-		return nil, err
+		return
+	}
+
+	if total <= paginator.GetTotal() {
+		total = paginator.GetTotal()
 	}
 
 	for _, post := range posts {
 		collection = append(collection, post)
 	}
 
-	categories, err := p.categoriesService.GetAll()
+	categories, err := p.categoriesService.WithPaginate(paginator, nil)
 	if err != nil {
-		return collection, err
+		return
+	}
+
+	if total <= paginator.GetTotal() {
+		total = paginator.GetTotal()
 	}
 
 	for _, category := range categories {
 		collection = append(collection, category)
 	}
 
-	tags, err := p.tagCollectionService.GetAll()
+	tags, err := p.tagCollectionService.WithPaginate(paginator, nil)
 	if err != nil {
-		return collection, err
+		return
+	}
+
+	if total <= paginator.GetTotal() {
+		total = paginator.GetTotal()
 	}
 
 	for _, tag := range tags {
 		collection = append(collection, tag)
 	}
 
-	return collection, err
+	return
 }

@@ -19,14 +19,14 @@ import (
 type seeder struct {
 	menuRepo         repository.MenuRepository
 	menuItemRepo     repository.MenuItemRepository
-	postProvider     contract.PostProvider
+	postProvider     contract.BlogProvider
 	templateProvider template.TemplateProvider
 }
 
 func NewMenuSeeder(
 	menu repository.MenuRepository,
 	menuItem repository.MenuItemRepository,
-	postProvider contract.PostProvider,
+	postProvider contract.BlogProvider,
 	template template.TemplateProvider,
 ) contract.Seeder {
 	return &seeder{

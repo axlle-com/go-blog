@@ -2,7 +2,6 @@ package models
 
 import (
 	"html/template"
-	"math"
 	"net/url"
 	"strconv"
 
@@ -20,7 +19,7 @@ type paginator struct {
 	URL         template.URL `json:"url"`
 }
 
-func PaginatorFromQuery(query url.Values) contract.Paginator {
+func FromQuery(query url.Values) contract.Paginator {
 	p := &paginator{
 		Query: query,
 	}
@@ -31,20 +30,17 @@ func PaginatorFromQuery(query url.Values) contract.Paginator {
 	return p
 }
 
-func PaginatorFromPage(page, pageSize int) contract.Paginator {
-	p := &paginator{
-		Page:     page,
-		PageSize: pageSize,
+func (p *paginator) Clone() contract.Paginator {
+	newPaginator := &paginator{
+		Total:       p.Total,
+		Page:        p.Page,
+		PageSize:    p.PageSize,
+		Query:       cloneValues(p.Query),
+		QueryString: p.QueryString,
+		URL:         p.URL,
 	}
-	return p
-}
 
-func (p *paginator) defaultQuery(key, defaultValue string) string {
-	values, ok := p.Query[key]
-	if ok {
-		return values[0]
-	}
-	return defaultValue
+	return newPaginator
 }
 
 func (p *paginator) SetPage() {
@@ -87,33 +83,12 @@ func (p *paginator) GetPage() int {
 	return p.Page
 }
 
-func (p *paginator) setQueryString() {
-	if p.Query == nil {
-		return
-	}
-
-	query := make(url.Values)
-	for key, values := range p.Query {
-		if key == "page" || key == "pageSize" || key == "_csrf" {
-			continue
-		}
-		query[key] = values
-	}
-
-	temp := query.Encode()
-	if temp == "" {
-		return
-	}
-
-	p.QueryString = template.URL(temp)
-}
-
 func (p *paginator) SetPageSize() {
 	pageSizeStr := p.defaultQuery("pageSize", strconv.Itoa(DefaultPageSize))
 
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil || pageSize < 1 {
-		pageSize = 20
+		pageSize = DefaultPageSize
 	}
 	p.PageSize = pageSize
 }
@@ -127,17 +102,35 @@ func (p *paginator) PrintFullQuery() template.URL {
 	if p.PageSize != DefaultPageSize {
 		size = "&pageSize=" + strconv.Itoa(p.PageSize)
 	}
-	pageQuery := template.URL("page=" + strconv.Itoa(p.Page) + size)
-	return pageQuery + p.GetQuery()
+
+	query := "page=" + strconv.Itoa(p.Page) + size
+
+	if qs := p.GetQuery(); qs != "" {
+		query += "&" + string(qs)
+	}
+
+	return template.URL(query)
 }
 
 func (p *paginator) HasPages() bool {
-	return p.Total > p.PageSize
+	return p.PageSize > 0 && p.Total > p.PageSize
 }
 
 func (p *paginator) PageNumbers() []interface{} {
-	totalPages := int(math.Ceil(float64(p.Total) / float64(p.PageSize)))
+	if p.PageSize <= 0 {
+		return nil
+	}
+
+	totalPages := p.Total / p.PageSize
+	if p.Total%p.PageSize != 0 {
+		totalPages++
+	}
+	if totalPages <= 0 {
+		return nil
+	}
+
 	var pages []interface{}
+
 	if totalPages <= 7 {
 		for i := 1; i <= totalPages; i++ {
 			pages = append(pages, i)
@@ -165,5 +158,50 @@ func (p *paginator) PageNumbers() []interface{} {
 			pages = append(pages, totalPages)
 		}
 	}
+
 	return pages
+}
+
+func (p *paginator) setQueryString() {
+	if p.Query == nil {
+		return
+	}
+
+	query := make(url.Values)
+	for key, values := range p.Query {
+		if key == "page" || key == "pageSize" || key == "_csrf" {
+			continue
+		}
+		query[key] = values
+	}
+
+	temp := query.Encode()
+	if temp == "" {
+		return
+	}
+
+	p.QueryString = template.URL(temp)
+}
+
+func (p *paginator) defaultQuery(key, defaultValue string) string {
+	values, ok := p.Query[key]
+	if ok && len(values) > 0 {
+		return values[0]
+	}
+	return defaultValue
+}
+
+func cloneValues(v url.Values) url.Values {
+	if v == nil {
+		return nil
+	}
+
+	m := make(url.Values, len(v))
+	for k, vv := range v {
+		cp := make([]string, len(vv))
+		copy(cp, vv)
+		m[k] = cp
+	}
+
+	return m
 }

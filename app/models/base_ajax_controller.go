@@ -80,7 +80,7 @@ func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
 }
 
 func (c *BaseAjax) PaginatorFromQuery(ctx *gin.Context) contract.Paginator {
-	return PaginatorFromQuery(ctx.Request.URL.Query())
+	return FromQuery(ctx.Request.URL.Query())
 }
 
 // getLoc получает локализатор из контекста.

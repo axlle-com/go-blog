@@ -113,7 +113,7 @@ const _filterApi = {
                                 const total = Number(p.total || 0);
 
                                 const results = items.map(it => ({
-                                    id: it.id ?? it.ID ?? it.value,
+                                    id: it.uuid ?? it.id ?? it.ID ?? it.value,
                                     text: it.text ?? it.title ?? it.Name
                                 })).filter(o => o.id != null && o.text != null);
 
@@ -549,11 +549,87 @@ const _menu = {
                 delete linkInput.dataset.oldUrl;
             });
     },
+    add: function () {
+        const _this = this;
+        $('body').on('click', '.menu .js-add-button', function (evt) {
+            const block = $('.js-block-menu-items');
+            const menuId = $('input[name="id"]').val();
+            const count = block.find('.js-block-menu-item').length + 1;
+            const html = `
+            <div class="card js-block-menu-item">
+                <div class="card-body text-secondary">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <fieldset class="form-block js-menu-items-publisher-url">
+                                <legend>Menu item parameters</legend>
+                                <input type="hidden" name="menu_items[${count}][menu_id]" value="${menuId}">
+    
+                                <div class="form-group small">
+                                    <label>Title</label>
+                                    <input class="form-control form-shadow" name="menu_items[${count}][title]" value="" placeholder="Title">
+                                    <div class="invalid-feedback"></div>
+                                </div>
+    
+                                <div class="form-group small">
+                                    <label>Publisher</label>
+                                    <select class="form-control select2 select2-search"
+                                            data-placeholder="..."
+                                            data-select2-search="true"
+                                            data-allow-clear="true"
+                                            data-action="/admin/publishers"
+                                            name="menu_items[${count}][publisher_uuid]"
+                                            data-validator="publisher_uuid">
+                                        <option></option>
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+    
+                                <div class="form-group small">
+                                    <label>Custom link</label>
+                                    <input class="form-control form-shadow" name="menu_items[${count}][url]" value="" placeholder="Custom link">
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+    
+                        <div class="col-md-6">
+                            <fieldset class="form-block">
+                                <legend>Hierarchy and sort</legend>
+                                <div class="form-group small">
+                                    <label>Parent menu item</label>
+                                    <select class="form-control select2 select2-search"
+                                            data-placeholder="Parent menu item"
+                                            data-select2-search="true"
+                                            data-allow-clear="true"
+                                            data-action="/admin/ajax/menus/menus-items?menu_id=${menuId}"
+                                            name="menu_items[${count}][menu_item_id]"
+                                            data-validator="menu_item_id">
+                                        <option></option>
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+    
+                                <div class="form-group small">
+                                    <label>Sort</label>
+                                    <input class="form-control form-shadow" type="number" name="menu_items[${count}][sort]" value="0" placeholder="Sort">
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            block.append(html);
+            _this.setUrl();
+            _this.search();
+        });
+    },
     run: function (selector) {
         this._block = $(selector);
         if (this._block.length) {
             this.setUrl();
             this.search();
+            this.add();
         }
     }
 };
@@ -765,7 +841,6 @@ const _config = {
         this.summernote500();
         this.summernote();
         this.flatpickr();
-        _menu.run('.a-block-inner.menu');
     }
 }
 
@@ -778,7 +853,6 @@ $(document).ready(function () {
     _infoBlock.run();
     _auth.run();
     _post.run();
-    _template.run();
     _message.run();
     _menu.run('.a-block-inner.menu');
 })

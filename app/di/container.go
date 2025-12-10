@@ -66,6 +66,8 @@ import (
 	messageQueue "github.com/axlle-com/blog/pkg/message/queue"
 	messageRepo "github.com/axlle-com/blog/pkg/message/repository"
 	messageService "github.com/axlle-com/blog/pkg/message/service"
+	publisherAjax "github.com/axlle-com/blog/pkg/publisher/http/admin/handlers/ajax"
+	publisherService "github.com/axlle-com/blog/pkg/publisher/service"
 	settingsMigrate "github.com/axlle-com/blog/pkg/settings/db/migrate"
 	settingsRepo "github.com/axlle-com/blog/pkg/settings/repository"
 	settingsService "github.com/axlle-com/blog/pkg/settings/service"
@@ -112,7 +114,7 @@ type Container struct {
 	PostRepo          postRepo.PostRepository
 	PostService       *postService.PostService
 	PostsService      *postService.PostCollectionService
-	PostProvider      contract.PostProvider
+	PostProvider      contract.BlogProvider
 	CategoryRepo      postRepo.CategoryRepository
 	CategoriesService *postService.CategoriesService
 	CategoryService   *postService.CategoryService
@@ -194,6 +196,7 @@ type Container struct {
 	FrontWebPostController       postFrontWeb.PostController
 	FrontAjaxMessageController   messageFrontWeb.MessageController
 	FrontWebUserController       userFrontWeb.Controller
+	AdminAjaxPublisherController publisherAjax.PublisherController
 
 	Api *api.Api
 }
@@ -255,12 +258,12 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
 	// Initialize Api with available providers (before creating services that use Api)
-	// Some providers will be added later (Post, Analytic, InfoBlock)
+	// Some providers will be added later (Blog, Analytic, InfoBlock)
 	newApi := &api.Api{
 		File:         fileProv,
 		Image:        newImageProvider,
 		Gallery:      newGalleryProvider,
-		Post:         nil, // Will be set later
+		Blog:         nil, // Will be set later
 		Template:     newTemplateProvider,
 		User:         newUserProvider,
 		Alias:        newAliasProvider,
@@ -287,10 +290,10 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newApi)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newApi)
-	newPostProvider := provider.NewPostProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
+	newBlogProvider := provider.NewBlogProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 
-	// Update Api with Post provider
-	newApi.Post = newPostProvider
+	// Update Api with Blog provider
+	newApi.Blog = newBlogProvider
 
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
 	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
@@ -308,9 +311,11 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
 	newMenuProvider := provider2.NewMenuProvider(newView, newMenuService)
 
+	newPublisherService := publisherService.NewCollectionService(newApi)
+
 	newApi.MenuProvider = newMenuProvider
 
-	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newPostProvider, newTemplateProvider)
+	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newBlogProvider, newTemplateProvider)
 
 	// I18n
 	newI18n := i18nsvc.New(cfg)
@@ -515,6 +520,11 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		newCache,
 	)
 
+	adminAjaxPublisherController := publisherAjax.NewPublisherController(
+		newPublisherService,
+		newApi,
+	)
+
 	return &Container{
 		Config:    cfg,
 		Queue:     newQueue,
@@ -542,7 +552,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		PostRepo:          newPostRepo,
 		PostService:       newPostService,
 		PostsService:      newPostCollectionService,
-		PostProvider:      newPostProvider,
+		PostProvider:      newBlogProvider,
 		CategoryRepo:      newCategoryRepo,
 		CategoriesService: newCategoriesService,
 		CategoryService:   categoryService,
@@ -623,6 +633,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		FrontWebPostController:       frontWebPostController,
 		FrontAjaxMessageController:   frontAjaxMessageController,
 		FrontWebUserController:       frontWebUserController,
+		AdminAjaxPublisherController: adminAjaxPublisherController,
 
 		Api: newApi,
 	}

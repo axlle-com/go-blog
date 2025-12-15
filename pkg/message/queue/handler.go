@@ -48,7 +48,6 @@ func (qh *queueHandler) create(payload []byte) error {
 	var obj model.Message
 
 	dec := json.NewDecoder(bytes.NewReader(payload))
-	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&obj); err != nil {
 		return fmt.Errorf("incorrect data format: %v", err)

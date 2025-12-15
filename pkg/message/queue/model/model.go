@@ -8,7 +8,8 @@ import (
 
 type Message struct {
 	UserUUID   string  `json:"user_uuid" form:"user_uuid" binding:"-"`
-	From       *string `json:"from" form:"from" binding:"omitempty"`
+	Email      *string `json:"email" binding:"omitempty"`
+	UserName   *string `json:"user_name" binding:"required"`
 	To         *string `json:"to" form:"to" binding:"omitempty"`
 	Subject    *string `json:"subject" form:"subject" binding:"required,max=255"`
 	Body       string  `json:"body" form:"body" binding:"omitempty"`
@@ -25,7 +26,7 @@ func (m *Message) Model() *models.Message {
 		userUUID = newUUID
 	}
 	return &models.Message{
-		From:     m.From,
+		From:     m.Email,
 		Subject:  m.Subject,
 		Body:     m.Body,
 		UserUUID: userUUID,

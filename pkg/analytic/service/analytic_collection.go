@@ -1,29 +1,29 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"github.com/axlle-com/blog/pkg/analytic/repository"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type AnalyticCollectionService struct {
 	analyticRepo    repository.AnalyticRepository
 	analyticService *AnalyticService
-	userProvider    userProvider.UserProvider
+	api             *api.Api
 }
 
 func NewAnalyticCollectionService(
 	analyticRepo repository.AnalyticRepository,
 	analyticService *AnalyticService,
-	userProvider userProvider.UserProvider,
+	api *api.Api,
 ) *AnalyticCollectionService {
 	return &AnalyticCollectionService{
 		analyticService: analyticService,
 		analyticRepo:    analyticRepo,
-		userProvider:    userProvider,
+		api:             api,
 	}
 }
 
@@ -75,7 +75,7 @@ func (s *AnalyticCollectionService) Aggregates(analytics []*models.Analytic) []*
 
 	if len(userUUIDs) > 0 {
 		var err error
-		users, err = s.userProvider.GetMapByUUIDs(userUUIDs)
+		users, err = s.api.User.GetMapByUUIDs(userUUIDs)
 		if err != nil {
 			logger.Error(err)
 		}

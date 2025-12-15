@@ -3,29 +3,29 @@ package service
 import (
 	"sync"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 )
 
 type TemplateCollectionService struct {
 	templateService *TemplateService
 	templateRepo    repository.TemplateRepository
-	userProvider    user.UserProvider
+	api             *api.Api
 }
 
 func NewTemplateCollectionService(
 	templateService *TemplateService,
 	templateRepo repository.TemplateRepository,
-	userProvider user.UserProvider,
+	api *api.Api,
 ) *TemplateCollectionService {
 	return &TemplateCollectionService{
 		templateService: templateService,
 		templateRepo:    templateRepo,
-		userProvider:    userProvider,
+		api:             api,
 	}
 }
 
@@ -76,7 +76,7 @@ func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*
 		defer wg.Done()
 		if len(userIDs) > 0 {
 			var err error
-			users, err = s.userProvider.GetMapByIDs(userIDs)
+			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
 				logger.Error(err)
 			}

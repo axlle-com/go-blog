@@ -8,20 +8,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
 )
 
 type seeder struct {
 	infoBlockService *service.InfoBlockService
-	templateProvider template.TemplateProvider
-	userProvider     user.UserProvider
+	api              *api.Api
 	config           contract.Config
 }
 
@@ -37,14 +35,12 @@ type InfoBlockSeedData struct {
 
 func NewSeeder(
 	infoBlockService *service.InfoBlockService,
-	templateProvider template.TemplateProvider,
-	user user.UserProvider,
+	api *api.Api,
 	cfg contract.Config,
 ) contract.Seeder {
 	return &seeder{
 		infoBlockService: infoBlockService,
-		templateProvider: templateProvider,
-		userProvider:     user,
+		api:              api,
 		config:           cfg,
 	}
 }
@@ -54,8 +50,7 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	layout := s.config.Layout()
-	seedPath := s.config.SrcFolderBuilder("db", layout, "seed", fmt.Sprintf("%s.json", moduleName))
+	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
 
 	// Проверяем существование файла
 	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
@@ -74,7 +69,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 		return err
 	}
 
-	idsUser := s.userProvider.GetAllIds()
+	idsUser := s.api.User.GetAllIds()
 	if len(idsUser) == 0 {
 		return nil
 	}
@@ -83,7 +78,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 		resourceName := "info_blocks"
 		var templateID *uint
 		if blockData.Template != "" {
-			tpl, err := s.templateProvider.GetByNameAndResource(blockData.Template, resourceName)
+			tpl, err := s.api.Template.GetByNameAndResource(blockData.Template, resourceName)
 			if err != nil {
 				logger.Errorf("[info_block][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", blockData.Template, resourceName, err)
 				continue
@@ -112,7 +107,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 		}
 
 		if blockData.UserID != nil {
-			foundUser, _ := s.userProvider.GetByID(*blockData.UserID)
+			foundUser, _ := s.api.User.GetByID(*blockData.UserID)
 			if foundUser != nil {
 				userID := foundUser.GetID()
 				infoBlock.UserID = &userID
@@ -135,8 +130,8 @@ func (s *seeder) SeedTest(n int) error {
 }
 
 func (s *seeder) infoBlocks(n int) error {
-	idsUser := s.userProvider.GetAllIds()
-	ids := s.templateProvider.GetAllIds()
+	idsUser := s.api.User.GetAllIds()
+	ids := s.api.Template.GetAllIds()
 
 	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]

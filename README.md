@@ -25,3 +25,14 @@ staticcheck ./...
 
 chmod +x deploy.sh
 ```
+
+
+### 
+```bash
+sudo fuser -k 3000/tcp
+
+```
+```bash
+sudo ss -ltnp | grep ':3000'
+sudo kill -9 12345
+```

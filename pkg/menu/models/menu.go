@@ -14,7 +14,7 @@ type Menu struct {
 	TemplateID  *uint      `gorm:"index" json:"template_id"`
 	Title       string     `gorm:"size:100" json:"title,omitempty"`
 	IsPublished bool       `gorm:"default:true" json:"is_published,omitempty"`
-	IsMain      bool       `gorm:"default:false" json:"IsMain,omitempty"`
+	IsMain      bool       `gorm:"default:false" json:"is_main,omitempty"`
 	Ico         *string    `gorm:"size:255" json:"ico,omitempty"`
 	Sort        int        `gorm:"default:0" json:"sort,omitempty"`
 	CreatedAt   *time.Time `gorm:"index" json:"created_at,omitempty"`

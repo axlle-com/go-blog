@@ -3,21 +3,14 @@ package provider
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/message/service"
 )
-
-type MessageProvider interface {
-	GetAll() []contract.Message
-	GetByID(id uint) (contract.Message, error)
-	GetAllIds() []uint
-	GetByIDs(ids []uint) ([]contract.Message, error)
-	GetMapByIDs(ids []uint) (map[uint]contract.Message, error)
-}
 
 func NewMessageProvider(
 	messageService service.MessageService,
 	messageCollectionService service.MessageCollectionService,
-) MessageProvider {
+) appProvider.MessageProvider {
 	return &provider{
 		messageService:           messageService,
 		messageCollectionService: messageCollectionService,

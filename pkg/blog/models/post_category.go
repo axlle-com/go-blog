@@ -10,32 +10,32 @@ import (
 )
 
 type PostCategory struct {
-	ID                 uint       `gorm:"primaryKey" json:"id"`
-	UUID               uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
-	UserID             *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
-	TemplateID         *uint      `gorm:"index" json:"template_id,omitempty"`
-	PostCategoryID     *uint      `gorm:"index" json:"post_category_id,omitempty"`
-	Path               string     `gorm:"index" json:"-"`
-	MetaTitle          *string    `gorm:"size:100" json:"meta_title,omitempty"`
-	MetaDescription    *string    `gorm:"size:200" json:"meta_description,omitempty"`
-	Alias              string     `gorm:"size:255;unique" json:"alias"`
-	URL                string     `gorm:"size:1000;unique" json:"url"`
-	IsPublished        *bool      `gorm:"index;default:true" json:"is_published,omitempty"`
-	IsFavourites       *bool      `gorm:"default:false" json:"is_favourites,omitempty"`
-	InSitemap          bool       `gorm:"index;default:true" json:"in_sitemap,omitempty"`
-	Image              *string    `gorm:"size:255" json:"image,omitempty"`
-	ShowImage          *bool      `gorm:"default:true" json:"show_image,omitempty"`
-	Title              string     `gorm:"size:255;not null" json:"title"`
-	TitleShort         *string    `gorm:"size:150" json:"title_short,omitempty"`
-	Description        *string    `gorm:"type:text" json:"description,omitempty"`
-	DescriptionPreview *string    `gorm:"type:text" json:"description_preview,omitempty"`
-	Sort               *uint      `gorm:"index;default:0" json:"sort,omitempty"`
-	CreatedAt          *time.Time `gorm:"index" json:"created_at,omitempty"`
-	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
-	DeletedAt          *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+	ID                 uint           `gorm:"primaryKey" json:"id"`
+	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
+	UserID             *uint          `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
+	TemplateID         *uint          `gorm:"index" json:"template_id,omitempty"`
+	PostCategoryID     *uint          `gorm:"index" json:"post_category_id,omitempty"`
+	Path               string         `gorm:"index" json:"-"`
+	MetaTitle          *string        `gorm:"size:100" json:"meta_title,omitempty"`
+	MetaDescription    *string        `gorm:"size:200" json:"meta_description,omitempty"`
+	Alias              string         `gorm:"size:255;unique" json:"alias"`
+	URL                string         `gorm:"size:1000;unique" json:"url"`
+	IsPublished        *bool          `gorm:"index;default:true" json:"is_published,omitempty"`
+	IsFavourites       *bool          `gorm:"default:false" json:"is_favourites,omitempty"`
+	InSitemap          *bool          `gorm:"index;default:true" json:"in_sitemap,omitempty"`
+	Image              *string        `gorm:"size:255" json:"image,omitempty"`
+	ShowImage          *bool          `gorm:"default:true" json:"show_image,omitempty"`
+	Title              string         `gorm:"size:255;not null" json:"title"`
+	TitleShort         *string        `gorm:"size:150" json:"title_short,omitempty"`
+	Description        *string        `gorm:"type:text" json:"description,omitempty"`
+	DescriptionPreview *string        `gorm:"type:text" json:"description_preview,omitempty"`
+	Sort               *uint          `gorm:"index;default:0" json:"sort,omitempty"`
+	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb" json:"galleries_snapshot"`
+	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb" json:"info_blocks_snapshot"`
 
-	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"galleries_snapshot"`
-	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb;not null;default:'[]'::jsonb" json:"info_blocks_snapshot"`
+	CreatedAt *time.Time `gorm:"index" json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	DeletedAt *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
 	Galleries  []contract.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	InfoBlocks []contract.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
@@ -159,6 +159,7 @@ func (c *PostCategory) Saving() {
 	c.SetAlias()
 	c.setTitleShort()
 	c.setURL()
+	c.setInSitemap()
 }
 
 func (c *PostCategory) setURL() {
@@ -173,6 +174,13 @@ func (c *PostCategory) setTitleShort() {
 	}
 	if *c.TitleShort == "" {
 		c.TitleShort = nil
+	}
+}
+
+func (c *PostCategory) setInSitemap() {
+	if c.InSitemap == nil {
+		v := true
+		c.InSitemap = &v
 	}
 }
 

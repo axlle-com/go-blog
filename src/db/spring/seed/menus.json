@@ -1,0 +1,15 @@
+[
+  {
+    "user_id": 1,
+    "title": "Main",
+    "is_main": true,
+    "menu_items": [
+      {
+        "publisher_url": "/"
+      },
+      {
+        "publisher_url": "/services"
+      }
+    ]
+  }
+]

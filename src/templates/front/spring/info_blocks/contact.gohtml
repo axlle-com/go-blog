@@ -13,23 +13,29 @@
 
                         <!--Contact Form-->
                         <div class="default-form">
-                            <form method="post" action="index.html">
+                            <form method="post" action="/messages">
+                                <input type="hidden" name="form_name" value="contact">
+                                <input type="hidden" name="subject" value="contact">
                                 <div class="form-group">
-                                    <input type="text" name="fullname" value="" placeholder="Full Name" required>
+                                    <input type="text" name="user_name" value="" placeholder="Name" data-validator-required data-validator-name="user_name">
+                                    <div class="invalid-feedback"></div>
                                 </div>
 
                                 <div class="form-group">
-                                    <input type="text" name="email" value="" placeholder="Your Email" required>
+                                    <input type="email" name="email" value="" placeholder="Your Email" data-validator-required data-validator-name="email">
+                                    <div class="invalid-feedback"></div>
                                 </div>
 
                                 <div class="form-group">
-                                    <textarea name="message" placeholder="Message" rows="4" required></textarea>
+                                    <textarea name="body" placeholder="Message" rows="4" data-validator-required data-validator-name="body"></textarea>
+                                    <div class="invalid-feedback"></div>
                                 </div>
 
                                 <div class="form-group">
-                                    <button type="submit" class="theme-btn btn-style-two">Submit <span class="icon ti-arrow-circle-right"></span></button>
+                                    <button type="submit" class="theme-btn btn-style-two">
+                                        Submit <span class="icon ti-arrow-circle-right"></span>
+                                    </button>
                                 </div>
-
                             </form>
                         </div>
 
@@ -37,7 +43,10 @@
                     <!--Image Column-->
                     <div class="map-column col-md-6 col-sm-12 col-xs-12">
                         <div class="inner-column">
-                            <figure class="image"><img src="/public/spring/images/girls.png" loading="lazy" decoding="async" fetchpriority="low" alt="Contact"></figure>
+                            <figure class="image">
+                                <img src="/public/spring/images/girls.png" loading="lazy" decoding="async"
+                                     fetchpriority="low" alt="Contact">
+                            </figure>
                         </div>
                     </div>
                 </div>
@@ -45,28 +54,47 @@
             <div class="lower-section">
                 <div class="row clearfix">
 
-                    <div class="column col-md-4 col-sm-6 col-xs-12">
-                        <ul class="contact-info-list">
-                            <span class="icon fa fa-send"></span>
-                            <li><strong>Location</strong></li>
-                            <li>046 Rowena Meadows, Schoenside, Costa Rica</li>
-                        </ul>
+                    <div class="column col-md-3 col-sm-6 col-xs-12">
+                        <div class="contact-info-item">
+                            <img src="/public/spring/images/contacts1.png" loading="lazy" decoding="async"
+                                 fetchpriority="low" alt="Contact">
+                            <div class="contact-info-text">
+                                <strong>Location</strong>
+                                <div>046 Rowena Meadows, Schoenside, Costa Rica</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="column col-md-4 col-sm-6 col-xs-12">
-                        <ul class="contact-info-list">
-                            <span class="icon fa fa-envelope"></span>
-                            <li><strong>Email</strong></li>
-                            <li>adderss@domain.com</li>
-                        </ul>
+                    <div class="column col-md-3 col-sm-6 col-xs-12">
+                        <div class="contact-info-item">
+                            <img src="/public/spring/images/contacts2.png" loading="lazy" decoding="async"
+                                 fetchpriority="low" alt="Contact">
+                            <div class="contact-info-text">
+                                <strong>Email</strong>
+                                <div>adderss@domain.com</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="column col-md-4 col-sm-6 col-xs-12">
-                        <ul class="contact-info-list">
-                            <span class="icon fa fa-phone"></span>
-                            <li><strong>Phone</strong></li>
-                            <li>+880 100 030 6005</li>
-                        </ul>
+                    <div class="column col-md-3 col-sm-6 col-xs-12">
+                        <div class="contact-info-item">
+                            <img src="/public/spring/images/contacts3.png" loading="lazy" decoding="async"
+                                 fetchpriority="low" alt="Contact">
+                            <div class="contact-info-text">
+                                <strong>Phone</strong>
+                                <div>+880 100 030 6005</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column col-md-3 col-sm-6 col-xs-12">
+                        <div class="contact-info-item">
+                            <img src="/public/spring/images/contacts4.png" loading="lazy" decoding="async"
+                                 fetchpriority="low" alt="Contact">
+                            <div class="contact-info-text">
+                                <strong>Phone</strong>
+                                <div>+880 100 030 6005</div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

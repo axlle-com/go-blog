@@ -99,7 +99,7 @@ type Container struct {
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.FileService
 	FileCollectionService *fileService.CollectionService
-	FileProvider          fileProvider.FileProvider
+	FileProvider          apppPovider.FileProvider
 
 	ImageRepo     galleryRepo.GalleryImageRepository
 	ImageEvent    *galleryService.ImageEvent
@@ -115,18 +115,18 @@ type Container struct {
 	PostRepo          postRepo.PostRepository
 	PostService       *postService.PostService
 	PostsService      *postService.PostCollectionService
-	PostProvider      contract.BlogProvider
+	PostProvider      apppPovider.BlogProvider
 	CategoryRepo      postRepo.CategoryRepository
 	CategoriesService *postService.CategoriesService
 	CategoryService   *postService.CategoryService
 
-	TemplateProvider          templateProvider.TemplateProvider
+	TemplateProvider          apppPovider.TemplateProvider
 	TemplateRepo              templateRepo.TemplateRepository
 	TemplateService           *templateService.TemplateService
 	TemplateCollectionService *templateService.TemplateCollectionService
 
 	UserRepo        userRepository.UserRepository
-	UserProvider    userProvider.UserProvider
+	UserProvider    apppPovider.UserProvider
 	UserService     *usersService.UserService
 	UserAuthService *usersService.AuthService
 
@@ -134,7 +134,7 @@ type Container struct {
 	UserPermissionRepo userRepository.PermissionRepository
 
 	AliasRepo     alias.AliasRepository
-	AliasProvider alias.AliasProvider
+	AliasProvider apppPovider.AliasProvider
 
 	InfoBlockHasResourceRepo   infoBlockRepo.InfoBlockHasResourceRepository
 	InfoBlockRepo              infoBlockRepo.InfoBlockRepository
@@ -155,7 +155,7 @@ type Container struct {
 	AnalyticRepo              analyticRepo.AnalyticRepository
 	AnalyticService           *analyticService.AnalyticService
 	AnalyticCollectionService *analyticService.AnalyticCollectionService
-	AnalyticProvider          analyticProvider.AnalyticProvider
+	AnalyticProvider          apppPovider.AnalyticProvider
 
 	MenuRepo                  menuRepository.MenuRepository
 	MenuService               *menuService.MenuService
@@ -194,7 +194,7 @@ type Container struct {
 	AdminAjaxMenuController      menuAdminAjax.ControllerMenu
 	AdminAjaxMenuItemController  menuAdminAjax.ControllerMenuItem
 	AdminWebFileController       fileAdminWeb.Controller
-	FrontWebPostController       postFrontWeb.PostController
+	FrontWebPostController       postFrontWeb.BlogController
 	FrontAjaxMessageController   messageFrontWeb.MessageController
 	FrontWebUserController       userFrontWeb.Controller
 	AdminAjaxPublisherController publisherAjax.PublisherController
@@ -215,19 +215,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
 	fileProv := fileProvider.NewFileProvider(uploadService, newFileService, fileCollectionService)
 
-	newImageRepo := galleryRepo.NewImageRepo(db.PostgreSQL())
-	newImageEvent := galleryService.NewImageEvent(fileProv)
-	newImageService := galleryService.NewImageService(newImageRepo, newImageEvent, fileProv)
-	newImageProvider := galleryProvider.NewImageProvider(newImageRepo)
-
-	newResourceRepo := galleryRepo.NewResourceRepo(db.PostgreSQL())
-
-	newGalleryRepo := galleryRepo.NewGalleryRepo(db.PostgreSQL())
-	newGalleryEvent := galleryService.NewGalleryEvent(newQueue, newImageService, newGalleryRepo, newResourceRepo)
-	newImageEvent.SetGalleryEvent(newGalleryEvent)
-	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, fileProv)
-	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
-
 	newUserRepo := userRepository.NewUserRepo(db.PostgreSQL())
 	newRoleRepo := userRepository.NewRoleRepo(db.PostgreSQL())
 	newPermissionRepo := userRepository.NewPermissionRepo(db.PostgreSQL())
@@ -237,33 +224,21 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newTemplateRepo := templateRepo.NewTemplateRepo(db.PostgreSQL())
 	newTemplateProvider := templateProvider.NewProvider(newTemplateRepo)
-	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newUserProvider)
-	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newUserProvider)
-
-	newMessageRepo := messageRepo.NewMessageRepo(db.PostgreSQL())
-	newMessageService := messageService.NewMessageService(newMessageRepo, newUserProvider)
-	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newUserProvider)
-	newMailService := messageService.NewMailService(cfg, newQueue, newMessageService, newMessageCollectionService, newUserProvider)
-
-	// Settings
-	newSettingsRepo := settingsRepo.NewRepository(db.PostgreSQL())
-	newSettingsService := settingsService.NewService(newSettingsRepo)
 
 	newAliasRepo := alias.NewAliasRepo(db.PostgreSQL())
 	newAliasProvider := alias.NewAliasProvider(newAliasRepo)
 
-	newPostRepo := postRepo.NewPostRepo(db.PostgreSQL())
-	newCategoryRepo := postRepo.NewCategoryRepo(db.PostgreSQL())
+	newImageRepo := galleryRepo.NewImageRepo(db.PostgreSQL())
+	newImageProvider := galleryProvider.NewImageProvider(newImageRepo)
 
-	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db.PostgreSQL())
-	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
+	newResourceRepo := galleryRepo.NewResourceRepo(db.PostgreSQL())
+	newGalleryRepo := galleryRepo.NewGalleryRepo(db.PostgreSQL())
 
-	// Initialize Api with available providers (before creating services that use Api)
-	// Some providers will be added later (Blog, Analytic, InfoBlock)
+	// Initialize partial Api with available providers (before creating services that use Api)
 	newApi := &api.Api{
 		File:      fileProv,
 		Image:     newImageProvider,
-		Gallery:   newGalleryProvider,
+		Gallery:   nil, // Will be set later
 		Blog:      nil, // Will be set later
 		Template:  newTemplateProvider,
 		User:      newUserProvider,
@@ -271,7 +246,34 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		InfoBlock: nil, // Will be set later
 		Analytic:  nil, // Will be set later
 		Menu:      nil, // Will be set later
+		Publisher: nil, // Will be set later
 	}
+
+	newImageEvent := galleryService.NewImageEvent(newApi)
+	newImageService := galleryService.NewImageService(newImageRepo, newImageEvent, newApi)
+	newGalleryEvent := galleryService.NewGalleryEvent(newQueue, newImageService, newGalleryRepo, newResourceRepo)
+	newImageEvent.SetGalleryEvent(newGalleryEvent)
+	newGalleryService := galleryService.NewGalleryService(newGalleryRepo, newGalleryEvent, newImageService, newResourceRepo, newApi)
+	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
+	newApi.Gallery = newGalleryProvider
+
+	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newApi)
+	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newApi)
+
+	newMessageRepo := messageRepo.NewMessageRepo(db.PostgreSQL())
+	newMessageService := messageService.NewMessageService(newMessageRepo, newApi)
+	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newApi)
+	newMailService := messageService.NewMailService(cfg, newQueue, newMessageService, newMessageCollectionService, newApi)
+
+	// Settings
+	newSettingsRepo := settingsRepo.NewRepository(db.PostgreSQL())
+	newSettingsService := settingsService.NewService(newSettingsRepo)
+
+	newPostRepo := postRepo.NewPostRepo(db.PostgreSQL())
+	newCategoryRepo := postRepo.NewCategoryRepo(db.PostgreSQL())
+
+	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db.PostgreSQL())
+	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newApi)
 	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue)
@@ -297,8 +299,8 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newApi.Blog = newBlogProvider
 
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
-	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newUserProvider)
-	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newUserProvider)
+	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newApi)
+	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newApi)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
 	// Update Api with Analytic provider
@@ -319,7 +321,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newApi.Publisher = publisherProvider.NewPublisherProvider(newApi)
 
-	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newBlogProvider, newTemplateProvider)
+	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newApi, cfg)
 
 	// I18n
 	newI18n := i18nsvc.New(cfg)
@@ -336,10 +338,10 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	settingsMigrator := settingsMigrate.NewMigrator(db.PostgreSQL())
 
 	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
-	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, newUserProvider, newTemplateProvider, newBlockProvider, cfg)
+	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, categoryService, newApi, cfg)
 	templateSeeder := templateDB.NewSeeder(newTemplateRepo)
-	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newTemplateProvider, newUserProvider, cfg)
-	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newUserProvider)
+	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newApi, cfg)
+	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newApi)
 
 	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder)
 

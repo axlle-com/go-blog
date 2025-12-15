@@ -23,11 +23,6 @@ type MenuFilter struct {
 	app.Filter
 }
 
-func (p *MenuFilter) ValidateForm(ctx *gin.Context) (*MenuFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
-
 func (p *MenuFilter) ValidateQuery(ctx *gin.Context) (*MenuFilter, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err

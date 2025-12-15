@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -129,6 +131,8 @@ func (w *WebMinifier) minifySpring() error {
 		"src/resources/spring/css/jquery.fancybox.css",
 		"src/resources/spring/css/style.css",
 		"src/resources/spring/css/responsive.css",
+		"src/resources/plugins/noty/noty.css",
+		"src/resources/plugins/noty/themes/relax.css",
 		"src/public/spring/css/common.css",
 	}
 	JS := []string{
@@ -142,6 +146,7 @@ func (w *WebMinifier) minifySpring() error {
 		"src/resources/spring/js/wow.js",
 		"src/resources/spring/js/validate.js",
 		"src/resources/spring/js/script.js",
+		"src/resources/plugins/noty/noty.js",
 		"src/public/admin/glob.js",
 	}
 
@@ -163,6 +168,27 @@ func (w *WebMinifier) mergeAndMinifyFiles(mediaType string, inputPaths []string,
 		input, err := os.ReadFile(inputPath)
 		if err != nil {
 			return fmt.Errorf("[mergeAndMinifyFiles] read %s: %w", inputPath, err)
+		}
+
+		// Если это CSS, исправляем относительные пути к шрифтам
+		if mediaType == "text/css" {
+			inputStr := string(input)
+			// Исправляем пути для inter шрифтов - они должны быть доступны по /public/fonts/inter-v2-latin-*.woff2
+			// так как файлы находятся в src/public/fonts/
+			if strings.Contains(inputPath, "inter") {
+				// Заменяем относительные пути на абсолютные для inter шрифтов
+				re := regexp.MustCompile(`url\(([^)]*inter-v2-latin-[^)]+)\)`)
+				inputStr = re.ReplaceAllStringFunc(inputStr, func(match string) string {
+					// Извлекаем имя файла из url(...)
+					fileName := regexp.MustCompile(`url\(([^)]+)\)`).FindStringSubmatch(match)[1]
+					// Если путь не начинается с / или http, делаем его абсолютным
+					if !strings.HasPrefix(fileName, "/") && !strings.HasPrefix(fileName, "http") {
+						return "url(/public/fonts/" + fileName + ")"
+					}
+					return match
+				})
+			}
+			input = []byte(inputStr)
 		}
 
 		buffer.Write(input)

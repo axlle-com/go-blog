@@ -22,11 +22,6 @@ type AnalyticFilter struct {
 	models.Filter
 }
 
-func (p *AnalyticFilter) ValidateForm(ctx *gin.Context) (*AnalyticFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
-
 func (p *AnalyticFilter) ValidateQuery(ctx *gin.Context) (*AnalyticFilter, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err

@@ -7,6 +7,7 @@ type Form interface {
 	Name() string
 	Title() string
 	GetUserUUID() string
+	GetUserName() *string
 	GetFrom() string
 	GetTo() string
 	Model() *models.Message

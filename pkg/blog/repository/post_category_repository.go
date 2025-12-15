@@ -18,6 +18,7 @@ type CategoryRepository interface {
 	Create(postCategory *models.PostCategory) error
 	GetByID(id uint) (*models.PostCategory, error)
 	GetByIDs(ids []uint) ([]*models.PostCategory, error)
+	FindByParam(field string, value any) (*models.PostCategory, error)
 	Update(new *models.PostCategory, old *models.PostCategory) error
 	UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error)
 	DeleteByID(id uint) error
@@ -141,6 +142,9 @@ func (r *categoryRepository) WithPaginate(p contract.Paginator, filter *models.C
 		if filter.Query != nil && *filter.Query != "" {
 			query = query.Where(fmt.Sprintf("%s.title ilike ?", table), fmt.Sprintf("%%%s%%", *filter.Query))
 		}
+		if filter.URL != nil && *filter.URL != "" {
+			query = query.Where(fmt.Sprintf("%s.url = ?", table), *filter.URL)
+		}
 		if filter.Date != nil && *filter.Date != "" {
 			query = query.Where(fmt.Sprintf("DATE(%s.created_at) = ?", table), *filter.Date)
 		}
@@ -201,6 +205,17 @@ func (r *categoryRepository) Create(category *models.PostCategory) error {
 func (r *categoryRepository) GetByID(id uint) (*models.PostCategory, error) {
 	var category models.PostCategory
 	if err := r.db.First(&category, id).Error; err != nil {
+		return nil, err
+	}
+	return &category, nil
+}
+
+func (r *categoryRepository) FindByParam(field string, value any) (*models.PostCategory, error) {
+	var category models.PostCategory
+	condition := map[string]any{
+		field: value,
+	}
+	if err := r.db.Where(condition).First(&category).Error; err != nil {
 		return nil, err
 	}
 	return &category, nil

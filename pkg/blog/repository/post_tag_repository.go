@@ -67,6 +67,9 @@ func (r *postTagRepository) WithPaginate(p contract.Paginator, filter *models.Ta
 		if filter.Query != nil && *filter.Query != "" {
 			query = query.Where(fmt.Sprintf("(%s.title ilike ? OR %s.name ilike ?)", table, table), fmt.Sprintf("%%%s%%", *filter.Query), fmt.Sprintf("%%%s%%", *filter.Query))
 		}
+		if filter.URL != nil && *filter.URL != "" {
+			query = query.Where(fmt.Sprintf("%s.url = ?", table), *filter.URL)
+		}
 		if filter.Date != nil && *filter.Date != "" {
 			query = query.Where(fmt.Sprintf("DATE(%s.created_at) = ?", table), *filter.Date)
 		}

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -85,7 +86,7 @@ func (v *View) RenderToString(name string, data any) (string, error) {
 		return "", err
 	}
 
-	return buf.String(), nil
+	return v.removeWhitespaceBetweenTags(buf.String()), nil
 }
 
 func (v *View) AddTemplateFromString(name, tmplStr string) error {
@@ -124,11 +125,18 @@ func (v *View) ViewStatic(name string) string {
 		name = "index"
 	}
 
-	if v.config.Layout() == "" {
-		return fmt.Sprintf("default.%s", name)
-	}
-
 	return fmt.Sprintf("%s.%s", v.config.Layout(), name)
+}
+
+func (v *View) removeWhitespaceBetweenTags(s string) string {
+	// Удаляем пробелы между тегами
+	re := regexp.MustCompile(`>\s+<`)
+	compactHTML := re.ReplaceAllString(s, "><")
+	// Удаляем все переносы строк и табы, заменяя их на пробелы
+	compactHTML = regexp.MustCompile(`[\n\r\t]+`).ReplaceAllString(compactHTML, " ")
+	// Удаляем множественные пробелы
+	compactHTML = regexp.MustCompile(`\s+`).ReplaceAllString(compactHTML, " ")
+	return strings.TrimSpace(compactHTML)
 }
 
 func (v *View) loadTemplates(templatesDir string) *template.Template {
@@ -152,6 +160,7 @@ func (v *View) loadTemplates(templatesDir string) *template.Template {
 
 		"render": func(name string, data any) template.HTML {
 			var buf bytes.Buffer
+			name = v.View(name)
 			if err := tmpl.ExecuteTemplate(&buf, name, data); err != nil {
 				logger.Errorf("[app][template][loadTemplates] render template %q failed: %v", name, err)
 				return template.HTML(fmt.Sprintf("<!-- render %q error: %v -->", name, err))

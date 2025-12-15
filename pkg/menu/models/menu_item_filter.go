@@ -11,6 +11,7 @@ type MenuItemFilter struct {
 	MenuID           *uint   `json:"menu_id" form:"menu_id" binding:"omitempty"`
 	MenuItemID       *uint   `json:"menu_item_id" form:"menu_item_id" binding:"omitempty"`
 	Title            *string `json:"title" form:"title" binding:"omitempty"`
+	URL              *string `json:"url" form:"url" binding:"omitempty"`
 	ForNotMenuItemID *uint   `json:"for_not_menu_item_id" form:"for_not_menu_item_id" binding:"omitempty"`
 	IDs              []uint  `json:"ids" form:"ids" binding:"omitempty"`
 
@@ -22,6 +23,11 @@ type MenuItemFilter struct {
 
 func (f *MenuItemFilter) SetMenuItemID(id uint) *MenuItemFilter {
 	f.MenuItemID = &id
+	return f
+}
+
+func (f *MenuItemFilter) SetURL(url string) *MenuItemFilter {
+	f.URL = &url
 	return f
 }
 
@@ -43,6 +49,10 @@ func (f *MenuItemFilter) GetMap() map[string]string {
 
 func (f *MenuItemFilter) GetUUIDs() []uuid.UUID {
 	return f.UUIDs
+}
+
+func (f *MenuItemFilter) GetURL() *string {
+	return f.URL
 }
 
 func (f *MenuItemFilter) GetQuery() string {

@@ -4,9 +4,8 @@ import (
 	"strconv"
 
 	"github.com/axlle-com/blog/app/errutil"
-	"github.com/gin-gonic/gin"
-
 	"github.com/axlle-com/blog/app/models"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -20,14 +19,10 @@ type TagFilter struct {
 	Name       *string     `json:"name" form:"name" binding:"omitempty"`
 	Title      *string     `json:"title" form:"title" binding:"omitempty"`
 	Date       *string     `json:"date" form:"date" binding:"omitempty"`
+	URL        *string     `json:"url" form:"url" binding:"omitempty" ignore:"true"`
 	UUIDs      []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
 	Query      *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
 	models.Filter
-}
-
-func (p *TagFilter) ValidateForm(ctx *gin.Context) (*TagFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
 }
 
 func (p *TagFilter) ValidateQuery(ctx *gin.Context) (*TagFilter, *errutil.Errors) {

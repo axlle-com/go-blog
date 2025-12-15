@@ -4,23 +4,15 @@ import (
 	"mime/multipart"
 
 	"github.com/axlle-com/blog/app/logger"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/file/service"
 )
-
-type FileProvider interface {
-	UploadFile(file *multipart.FileHeader, dist string) (path string, err error)
-	UploadFiles(files []*multipart.FileHeader, dist string) (paths []string)
-	DeleteFile(file string) error
-	Received(files []string) error
-	Exist(file string) bool
-	RevisionReceived()
-}
 
 func NewFileProvider(
 	uploadService *service.UploadService,
 	fileService *service.FileService,
 	collectionService *service.CollectionService,
-) FileProvider {
+) appProvider.FileProvider {
 	return &provider{
 		uploadService:     uploadService,
 		fileService:       fileService,

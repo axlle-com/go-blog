@@ -8,7 +8,8 @@ import (
 )
 
 type Contact struct {
-	From     *string `json:"from" binding:"required,email"`
+	Email    *string `json:"email" binding:"required,email"`
+	UserName *string `json:"user_name" binding:"required"`
 	To       *string `json:"to" binding:"omitempty,email"`
 	Subject  *string `json:"subject" binding:"required"`
 	Body     *string `json:"body" binding:"required"`
@@ -28,8 +29,8 @@ func (c *Contact) Name() string {
 }
 
 func (c *Contact) GetFrom() string {
-	if c.From != nil {
-		return *c.From
+	if c.Email != nil {
+		return *c.Email
 	}
 	return ""
 }
@@ -45,13 +46,17 @@ func (c *Contact) GetUserUUID() string {
 	return c.UserUUID
 }
 
+func (c *Contact) GetUserName() *string {
+	return c.UserName
+}
+
 func (c *Contact) Title() string {
 	return "Форма обратной связи"
 }
 
 func (c *Contact) Model() *models.Message {
 	return &models.Message{
-		From:    c.From,
+		From:    c.Email,
 		Subject: c.Subject,
 		Body:    *c.Body,
 	}

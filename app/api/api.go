@@ -1,25 +1,19 @@
 package api
 
 import (
-	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
-	"github.com/axlle-com/blog/pkg/alias"
-	analyticProvider "github.com/axlle-com/blog/pkg/analytic/provider"
-	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
-	templateProvider "github.com/axlle-com/blog/pkg/template/provider"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 )
 
 type Api struct {
-	File      fileProvider.FileProvider
+	File      apppPovider.FileProvider
 	Image     apppPovider.ImageProvider
 	Gallery   apppPovider.GalleryProvider
-	Blog      contract.BlogProvider
-	Template  templateProvider.TemplateProvider
-	User      userProvider.UserProvider
-	Alias     alias.AliasProvider
+	Blog      apppPovider.BlogProvider
+	Template  apppPovider.TemplateProvider
+	User      apppPovider.UserProvider
+	Alias     apppPovider.AliasProvider
 	InfoBlock apppPovider.InfoBlockProvider
-	Analytic  analyticProvider.AnalyticProvider
+	Analytic  apppPovider.AnalyticProvider
 	Menu      apppPovider.MenuProvider
 	Publisher apppPovider.PublisherProvider
 }

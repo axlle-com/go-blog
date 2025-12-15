@@ -30,11 +30,13 @@ func (j *CreateUserJob) Run(ctx context.Context) error {
 
 func (j *CreateUserJob) GetData() []byte {
 	payload := struct {
-		UUID  string `json:"uuid"`
-		Email string `json:"email"`
+		UUID  string  `json:"uuid"`
+		Email string  `json:"email"`
+		Name  *string `json:"name"`
 	}{
 		j.form.GetUserUUID(),
 		j.form.GetFrom(),
+		j.form.GetUserName(),
 	}
 
 	bytes, _ := json.Marshal(payload)

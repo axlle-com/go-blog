@@ -1,0 +1,14 @@
+[
+  {
+    "user_id": 1,
+    "template": "services",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "services",
+    "alias": "services",
+    "info_blocks": [
+      "Блок contact"
+    ]
+  }
+]
+

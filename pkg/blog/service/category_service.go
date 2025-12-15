@@ -1,16 +1,23 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/axlle-com/blog/app/api"
+	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/models/dto"
+	"github.com/axlle-com/blog/app/service"
 	app "github.com/axlle-com/blog/app/service/struct"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
+	"github.com/google/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -70,8 +77,6 @@ func (s *CategoryService) SaveFromRequest(
 ) (model *models.PostCategory, err error) {
 	categoryForm := app.LoadStruct(&models.PostCategory{}, form).(*models.PostCategory)
 
-	categoryForm.Alias = s.GenerateAlias(categoryForm)
-
 	if found == nil {
 		model, err = s.Create(categoryForm, user)
 	} else {
@@ -127,13 +132,20 @@ func (s *CategoryService) Delete(category *models.PostCategory) error {
 func (s *CategoryService) Create(category *models.PostCategory, user contract.User) (*models.PostCategory, error) {
 	id := user.GetID()
 	category.UserID = &id
+	category.Alias = s.generateAlias(category)
+
 	if err := s.categoryRepo.Create(category); err != nil {
 		return nil, err
 	}
+
 	return category, nil
 }
 
 func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contract.User) (*models.PostCategory, error) {
+	if category.Alias != found.Alias {
+		category.Alias = s.generateAlias(category)
+	}
+
 	tx := s.categoryRepo.Tx()
 
 	defer func() {
@@ -154,7 +166,7 @@ func (s *CategoryService) Update(category *models.PostCategory, found *models.Po
 	return category, nil
 }
 
-func (s *CategoryService) GenerateAlias(category *models.PostCategory) string {
+func (s *CategoryService) generateAlias(category *models.PostCategory) string {
 	var aliasStr string
 	if category.Alias == "" {
 		aliasStr = category.Title
@@ -178,4 +190,86 @@ func (s *CategoryService) DeleteImageFile(category *models.PostCategory) error {
 	}
 	category.Image = nil
 	return nil
+}
+
+func (s *CategoryService) View(category *models.PostCategory) (*models.PostCategory, error) {
+	var wg sync.WaitGroup
+	agg := errutil.New()
+
+	// --- InfoBlocks snapshot ---
+	if category.InfoBlocksSnapshot == nil {
+		service.SafeGo(&wg, func(c *models.PostCategory, id uuid.UUID) func() {
+			return func() {
+				blocks := s.api.InfoBlock.GetForResourceUUID(id.String())
+				if len(blocks) == 0 {
+					return
+				}
+
+				raw, e := json.Marshal(dto.MapInfoBlocks(blocks))
+				if e != nil {
+					agg.Add(fmt.Errorf("marshal info_blocks_snapshot: %w", e))
+					return
+				}
+
+				v := datatypes.JSON(raw)
+				patch := map[string]any{"info_blocks_snapshot": v}
+				if _, e = s.categoryRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
+					agg.Add(fmt.Errorf("update info_blocks_snapshot: %w", e))
+					return
+				}
+
+				c.InfoBlocksSnapshot = v
+			}
+		}(category, category.UUID))
+	}
+
+	// --- Galleries snapshot ---
+	if category.GalleriesSnapshot == nil {
+		service.SafeGo(&wg, func(c *models.PostCategory, id uuid.UUID) func() {
+			return func() {
+				galleries := s.api.Gallery.GetForResourceUUID(id.String())
+				if len(galleries) == 0 {
+					return
+				}
+
+				raw, e := json.Marshal(dto.MapGalleries(galleries))
+				if e != nil {
+					agg.Add(fmt.Errorf("marshal galleries_snapshot: %w", e))
+					return
+				}
+
+				v := datatypes.JSON(raw)
+				patch := map[string]any{"galleries_snapshot": v}
+				if _, e = s.categoryRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
+					agg.Add(fmt.Errorf("update galleries_snapshot: %w", e))
+					return
+				}
+
+				c.GalleriesSnapshot = v
+			}
+		}(category, category.UUID))
+	}
+
+	// --- template ---
+	if category.TemplateID != nil {
+		service.SafeGo(&wg, func(c *models.PostCategory) func() {
+			return func() {
+				tpl, e := s.api.Template.GetByID(*c.TemplateID)
+				if e != nil {
+					agg.Add(fmt.Errorf("get template: %w", e))
+					return
+				}
+				c.Template = tpl
+			}
+		}(category))
+	}
+
+	wg.Wait()
+
+	return category, agg.Error()
+}
+
+// @todo переделать на фильтр везде
+func (s *CategoryService) FindByParam(field string, value any) (*models.PostCategory, error) {
+	return s.categoryRepo.FindByParam(field, value)
 }

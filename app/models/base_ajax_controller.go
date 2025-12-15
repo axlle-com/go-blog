@@ -42,6 +42,18 @@ func (c *BaseAjax) GetUser(ctx *gin.Context) contract.User {
 	return &u
 }
 
+func (c *BaseAjax) GetAdmin(ctx *gin.Context) contract.User {
+	userData, exists := ctx.Get("user")
+	if !exists {
+		return nil
+	}
+	u, ok := userData.(user.User)
+	if !ok {
+		return nil
+	}
+	return &u
+}
+
 func (c *BaseAjax) RenderView(view string, data map[string]any, ctx *gin.Context) string {
 	var buf bytes.Buffer
 	originalWriter := ctx.Writer
@@ -58,13 +70,16 @@ func (c *BaseAjax) RenderView(view string, data map[string]any, ctx *gin.Context
 }
 
 // RenderHTML автоматически добавляет функцию перевода T в данные шаблона
-func (c *BaseAjax) RenderHTML(ctx *gin.Context, code int, name string, obj any) {
+func (c *BaseAjax) RenderHTML(ctx *gin.Context, code int, tplName string, obj any) {
 	data := c.prepareTemplateData(ctx, obj)
-	ctx.HTML(code, name, data)
+	ctx.HTML(code, tplName, data)
 }
 
 func (c *BaseAjax) Render404(ctx *gin.Context, tplName string, obj any) {
-	c.RenderHTML(ctx, http.StatusNotFound, tplName, gin.H{"title": "404", "error": "Page not found"})
+	if obj == nil {
+		obj = gin.H{"title": "Page not found", "error": "404"} // @todo make better
+	}
+	c.RenderHTML(ctx, http.StatusNotFound, tplName, obj)
 	ctx.Abort()
 }
 
@@ -74,8 +89,13 @@ func (c *BaseAjax) prepareTemplateData(ctx *gin.Context, obj any) any {
 }
 
 func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
+	// Удаляем пробелы между тегами
 	re := regexp.MustCompile(`>\s+<`)
 	compactHTML := re.ReplaceAllString(s, "><")
+	// Удаляем все переносы строк и табы, заменяя их на пробелы
+	compactHTML = regexp.MustCompile(`[\n\r\t]+`).ReplaceAllString(compactHTML, " ")
+	// Удаляем множественные пробелы
+	compactHTML = regexp.MustCompile(`\s+`).ReplaceAllString(compactHTML, " ")
 	return strings.TrimSpace(compactHTML)
 }
 

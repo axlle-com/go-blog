@@ -8,33 +8,31 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	apppPovider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/axlle-com/blog/pkg/blog/service"
-	template "github.com/axlle-com/blog/pkg/template/provider"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
 	"github.com/google/uuid"
 )
 
 type seeder struct {
-	postRepo          repository.PostRepository
-	postService       *service.PostService
-	categoryRepo      repository.CategoryRepository
-	userProvider      user.UserProvider
-	templateProvider  template.TemplateProvider
-	infoBlockProvider apppPovider.InfoBlockProvider
-	config            contract.Config
+	postRepo        repository.PostRepository
+	postService     *service.PostService
+	categoryRepo    repository.CategoryRepository
+	categoryService *service.CategoryService
+	api             *api.Api
+	config          contract.Config
 }
 
 type PostSeedData struct {
 	UserID             *uint    `json:"user_id"`
 	Template           string   `json:"template"`
 	PostCategoryID     *uint    `json:"post_category_id"`
+	CategoryAlias      *string  `json:"category_alias"`
 	MetaTitle          *string  `json:"meta_title"`
 	MetaDescription    *string  `json:"meta_description"`
 	IsPublished        bool     `json:"is_published"`
@@ -42,10 +40,11 @@ type PostSeedData struct {
 	HasComments        bool     `json:"has_comments"`
 	ShowImagePost      bool     `json:"show_image_post"`
 	ShowImageCategory  bool     `json:"show_image_category"`
-	InSitemap          bool     `json:"in_sitemap"`
+	InSitemap          *bool    `json:"in_sitemap"`
 	IsMain             bool     `json:"is_main"`
 	Media              *string  `json:"media"`
 	Title              string   `json:"title"`
+	Alias              *string  `json:"alias"`
 	TitleShort         *string  `json:"title_short"`
 	DescriptionPreview *string  `json:"description_preview"`
 	Description        *string  `json:"description"`
@@ -59,33 +58,47 @@ type PostSeedData struct {
 	InfoBlocks         []string `json:"info_blocks"`
 }
 
+type CategorySeedData struct {
+	UserID      *uint    `json:"user_id"`
+	Template    string   `json:"template"`
+	IsPublished *bool    `json:"is_published"`
+	InSitemap   *bool    `json:"in_sitemap"`
+	Title       string   `json:"title"`
+	InfoBlocks  []string `json:"info_blocks"`
+}
+
 func NewSeeder(
 	post repository.PostRepository,
 	postService *service.PostService,
 	category repository.CategoryRepository,
-	user user.UserProvider,
-	template template.TemplateProvider,
-	infoBlockProvider apppPovider.InfoBlockProvider,
+	categoryService *service.CategoryService,
+	api *api.Api,
 	cfg contract.Config,
 ) contract.Seeder {
 	return &seeder{
-		postRepo:          post,
-		postService:       postService,
-		categoryRepo:      category,
-		userProvider:      user,
-		templateProvider:  template,
-		infoBlockProvider: infoBlockProvider,
-		config:            cfg,
+		postRepo:        post,
+		postService:     postService,
+		categoryRepo:    category,
+		categoryService: categoryService,
+		api:             api,
+		config:          cfg,
 	}
 }
 
 func (s *seeder) Seed() error {
+	if len(s.api.User.GetAllIds()) == 0 {
+		return nil
+	}
+
+	if err := s.seedCategoriesFromJSON("post_categories"); err != nil {
+		return err
+	}
+
 	return s.seedFromJSON("posts")
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	layout := s.config.Layout()
-	seedPath := s.config.SrcFolderBuilder("db", layout, "seed", fmt.Sprintf("%s.json", moduleName))
+	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
 
 	// Проверяем существование файла
 	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
@@ -104,70 +117,39 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 		return err
 	}
 
-	idsUser := s.userProvider.GetAllIds()
-	if len(idsUser) == 0 {
-		return nil
-	}
-
 	for _, postData := range postsData {
-		found, err := s.postService.FindByParam("title", postData.Title)
-		var existingPost *models.Post
+		var found *models.Post
+		if postData.Alias == nil {
+			found, _ = s.postService.FindByParam("is_main", true)
+		} else {
+			found, _ = s.postService.FindByParam("alias", postData.Alias)
+		}
 		if found != nil {
-			existingPost = found
+			logger.Infof("[blog][seeder][seedFromJSON] post with title='%v' already exists, skipping", postData.Alias)
+			continue
 		}
 
 		// Ищем шаблон по name и resource_name
-		resourceName := "posts"
+		resourceName := (&models.Post{}).GetName()
 		var templateID *uint
 		if postData.Template != "" {
-			tpl, err := s.templateProvider.GetByNameAndResource(postData.Template, resourceName)
+			tpl, err := s.api.Template.GetByNameAndResource(postData.Template, resourceName)
 			if err != nil {
 				logger.Errorf("[blog][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", postData.Template, resourceName, err)
-				// Пропускаем этот пост, если шаблон не найден
 				continue
 			}
 			id := tpl.GetID()
 			templateID = &id
 		}
 
-		// Если пост уже существует, проверяем инфоблоки
-		if existingPost != nil {
-			// Получаем уже привязанные инфоблоки
-			attachedInfoBlocks := s.infoBlockProvider.GetForResourceUUID(existingPost.UUID.String())
-			attachedTitles := make(map[string]bool)
-			for _, ib := range attachedInfoBlocks {
-				attachedTitles[ib.GetTitle()] = true
+		if postData.CategoryAlias != nil {
+			cat, err := s.categoryService.FindByParam("alias", *postData.CategoryAlias)
+			if err != nil {
+				logger.Errorf("[blog][seeder][seedFromJSON] category not found: alias=%s, error=%v", *postData.CategoryAlias, err)
+				continue
 			}
-
-			// Привязываем недостающие инфоблоки
-			if len(postData.InfoBlocks) > 0 {
-				for _, infoBlockTitle := range postData.InfoBlocks {
-					if infoBlockTitle == "" {
-						continue
-					}
-
-					// Пропускаем, если инфоблок уже привязан
-					if attachedTitles[infoBlockTitle] {
-						continue
-					}
-
-					// Ищем инфоблок по title
-					infoBlock, err := s.infoBlockProvider.FindByTitle(infoBlockTitle)
-					if err != nil || infoBlock == nil {
-						logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockTitle, postData.Title)
-						continue
-					}
-
-					// Привязываем инфоблок к посту
-					_, err = s.infoBlockProvider.Attach(infoBlock.GetID(), existingPost.UUID.String())
-					if err != nil {
-						logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockTitle, postData.Title, err)
-						continue
-					}
-					logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d) to existing post '%s'", infoBlockTitle, infoBlock.GetID(), postData.Title)
-				}
-			}
-			continue
+			id := cat.ID
+			postData.PostCategoryID = &id
 		}
 
 		// Парсим даты
@@ -215,7 +197,11 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 
 		var userF contract.User
 		if postData.UserID != nil {
-			userF, _ = s.userProvider.GetByID(*postData.UserID)
+			userF, _ = s.api.User.GetByID(*postData.UserID)
+		}
+
+		if postData.Alias != nil {
+			post.Alias = *postData.Alias
 		}
 
 		createdPost, err := s.postService.Create(&post, userF)
@@ -232,14 +218,14 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				}
 
 				// Ищем инфоблок по title
-				infoBlock, err := s.infoBlockProvider.FindByTitle(infoBlockTitle)
+				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockTitle)
 				if err != nil || infoBlock == nil {
 					logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockTitle, postData.Title)
 					continue
 				}
 
 				// Привязываем инфоблок к посту
-				_, err = s.infoBlockProvider.Attach(infoBlock.GetID(), createdPost.UUID.String())
+				_, err = s.api.InfoBlock.Attach(infoBlock.GetID(), createdPost.UUID.String())
 				if err != nil {
 					logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockTitle, postData.Title, err)
 					continue
@@ -253,6 +239,117 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 	return nil
 }
 
+func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
+	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
+
+	// Проверяем существование файла
+	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
+		logger.Infof("[blog][seeder][seedCategoriesFromJSON] seed file not found: %s, skipping", seedPath)
+		return nil
+	}
+
+	// Читаем JSON файл
+	data, err := os.ReadFile(seedPath)
+	if err != nil {
+		return err
+	}
+
+	var categoriesData []CategorySeedData
+	if err := json.Unmarshal(data, &categoriesData); err != nil {
+		return err
+	}
+
+	for _, categoryData := range categoriesData {
+		// Ищем существующую категорию по title
+		allCategories, err := s.categoryRepo.GetAll()
+		var existingCategory *models.PostCategory
+		if err == nil {
+			for _, cat := range allCategories {
+				if cat.Title == categoryData.Title {
+					existingCategory = cat
+					break
+				}
+			}
+		}
+
+		// Если категория уже существует, пропускаем её
+		if existingCategory != nil {
+			logger.Infof("[blog][seeder][seedCategoriesFromJSON] category with title='%s' already exists, skipping", categoryData.Title)
+			continue
+		}
+
+		resourceName := "post_categories"
+		var templateID *uint
+		if categoryData.Template != "" {
+			tpl, err := s.api.Template.GetByNameAndResource(categoryData.Template, resourceName)
+			if err != nil {
+				logger.Errorf("[blog][seeder][seedCategoriesFromJSON] template not found: name=%s, resource=%s, error=%v", categoryData.Template, resourceName, err)
+				continue
+			}
+			id := tpl.GetID()
+			templateID = &id
+		}
+
+		isPublished := true
+		if categoryData.IsPublished != nil {
+			isPublished = *categoryData.IsPublished
+		}
+
+		var inSitemap *bool
+		if categoryData.InSitemap != nil {
+			inSitemap = categoryData.InSitemap
+		}
+
+		category := models.PostCategory{
+			UUID:        uuid.New(),
+			TemplateID:  templateID,
+			IsPublished: &isPublished,
+			InSitemap:   inSitemap,
+			Title:       categoryData.Title,
+			CreatedAt:   db.TimePtr(time.Now()),
+			UpdatedAt:   db.TimePtr(time.Now()),
+			DeletedAt:   nil,
+		}
+
+		var userF contract.User
+		if categoryData.UserID != nil {
+			userF, _ = s.api.User.GetByID(*categoryData.UserID)
+		}
+
+		createdCategory, err := s.categoryService.Create(&category, userF)
+		if err != nil {
+			logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error creating category: %v", err)
+			continue
+		}
+
+		if len(categoryData.InfoBlocks) > 0 {
+			for _, infoBlockTitle := range categoryData.InfoBlocks {
+				if infoBlockTitle == "" {
+					continue
+				}
+
+				// Ищем инфоблок по title
+				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockTitle)
+				if err != nil || infoBlock == nil {
+					logger.Infof("[blog][seeder][seedCategoriesFromJSON] info block with title='%s' not found for category '%s', skipping", infoBlockTitle, categoryData.Title)
+					continue
+				}
+
+				// Привязываем инфоблок к категории
+				_, err = s.api.InfoBlock.Attach(infoBlock.GetID(), createdCategory.UUID.String())
+				if err != nil {
+					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockTitle, categoryData.Title, err)
+					continue
+				}
+				logger.Infof("[blog][seeder][seedCategoriesFromJSON] attached info block '%s' (ID=%d) to category '%s'", infoBlockTitle, infoBlock.GetID(), categoryData.Title)
+			}
+		}
+	}
+
+	logger.Infof("[blog][seeder][seedCategoriesFromJSON] seeded %d categories from JSON", len(categoriesData))
+	return nil
+}
+
 func (s *seeder) SeedTest(n int) error {
 	err := s.categories(n)
 	if err != nil {
@@ -263,9 +360,9 @@ func (s *seeder) SeedTest(n int) error {
 }
 
 func (s *seeder) posts(n int) error {
-	ids := s.templateProvider.GetAllIds()
+	ids := s.api.Template.GetAllIds()
 	idsCategory, _ := s.categoryRepo.GetAllIds()
-	idsUser := s.userProvider.GetAllIds()
+	idsUser := s.api.User.GetAllIds()
 	for i := 1; i <= n; i++ {
 		randomID := ids[rand.Intn(len(ids))]
 		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
@@ -281,7 +378,7 @@ func (s *seeder) posts(n int) error {
 			HasComments:        db.RandBool(),
 			ShowImagePost:      db.RandBool(),
 			ShowImageCategory:  db.RandBool(),
-			InSitemap:          db.RandBool(),
+			InSitemap:          db.IntToBoolPtr(),
 			Media:              db.StrPtr(faker.Word()),
 			Title:              "TitlePost #" + strconv.Itoa(i),
 			TitleShort:         db.StrPtr("TitlePostShort #" + strconv.Itoa(i)),
@@ -299,7 +396,7 @@ func (s *seeder) posts(n int) error {
 			DeletedAt:          nil,
 		}
 
-		userF, _ := s.userProvider.GetByID(randomUserID)
+		userF, _ := s.api.User.GetByID(randomUserID)
 		_, err := s.postService.Create(&post, userF)
 		if err != nil {
 			return err
@@ -311,8 +408,8 @@ func (s *seeder) posts(n int) error {
 }
 
 func (s *seeder) categories(n int) error {
-	ids := s.templateProvider.GetAllIds()
-	idsUser := s.userProvider.GetAllIds()
+	ids := s.api.Template.GetAllIds()
+	idsUser := s.api.User.GetAllIds()
 
 	for i := 1; i <= n; i++ {
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
@@ -337,7 +434,7 @@ func (s *seeder) categories(n int) error {
 			URL:                faker.URL(),
 			IsPublished:        db.IntToBoolPtr(),
 			IsFavourites:       db.IntToBoolPtr(),
-			InSitemap:          db.RandBool(),
+			InSitemap:          db.IntToBoolPtr(),
 			Title:              "TitleCategory #" + strconv.Itoa(i),
 			TitleShort:         db.StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
 			DescriptionPreview: db.StrPtr(faker.Paragraph()),

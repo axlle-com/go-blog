@@ -10,21 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *postController) RenderPost(ctx *gin.Context, post *models.Post) {
+func (c *blogController) RenderPost(ctx *gin.Context, post *models.Post) {
 	post, err := c.postService.View(post)
 	if post == nil || err != nil {
 		if err != nil {
-			logger.Errorf("[blog][postController][RenderPost] error: %v", err)
+			logger.Errorf("[blog][blogController][RenderPost] error: %v", err)
 		}
 
-		c.Render404(ctx, c.view.ViewStatic("404"), nil)
+		c.Render404(ctx, c.view.ViewStatic("error"), nil)
 		return
 	}
 
 	var blocks []dto.InfoBlock
-	if post.InfoBlocksSnapshot != nil && len(*post.InfoBlocksSnapshot) > 0 {
-		if err := json.Unmarshal(*post.InfoBlocksSnapshot, &blocks); err != nil {
-			logger.Errorf("[blog][postController][RenderPost] id=%v: %v", post.ID, err)
+	if post.InfoBlocksSnapshot != nil && len(post.InfoBlocksSnapshot) > 0 {
+		if err := json.Unmarshal(post.InfoBlocksSnapshot, &blocks); err != nil {
+			logger.Errorf("[blog][blogController][RenderPost] id=%v: %v", post.ID, err)
 		}
 	}
 
@@ -32,8 +32,9 @@ func (c *postController) RenderPost(ctx *gin.Context, post *models.Post) {
 		http.StatusOK,
 		c.view.View(post.GetTemplateName()),
 		gin.H{
-			"title":  "Home Page",
-			"blocks": blocks,
+			"settings": c.settings(ctx),
+			"title":    "Home Page",
+			"blocks":   blocks,
 		},
 	)
 }

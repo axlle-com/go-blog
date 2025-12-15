@@ -8,6 +8,34 @@
     margin-bottom: 15px;
 }
 
+/* Form validation styles */
+.default-form input.is-invalid,
+.default-form textarea.is-invalid {
+    border-color: #d35f41;
+    box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+    -moz-box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+    -webkit-box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+}
+
+.default-form .form-shadow.is-invalid {
+    box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+    -moz-box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+    -webkit-box-shadow: inset 0 1px 3px rgb(211, 95, 65);
+}
+
+.default-form .invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #d35f41;
+    line-height: 1.4;
+}
+
+.default-form .invalid-feedback:empty {
+    display: none;
+}
+
 .modal-header, .modal-body, .modal-footer {
     padding: 15px 30px;
 }
@@ -402,6 +430,33 @@
 .contact-icon {
     color: #1f8ceb;
     margin-right: 8px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.contact-info-item img {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.contact-info-text {
+    flex: 1;
+}
+
+.contact-info-text strong {
+    display: block;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.contact-info-text div {
+    line-height: 1.3;
 }
 
 /* Service card (внутреннее выравнивание) */

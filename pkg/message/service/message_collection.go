@@ -1,29 +1,29 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	appContracts "github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/models"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/google/uuid"
 )
 
 type MessageCollectionService struct {
 	messageRepo    contracts.MessageRepository
 	messageService contracts.MessageService
-	userProvider   userProvider.UserProvider
+	api            *api.Api
 }
 
 func NewMessageCollectionService(
 	messageRepo contracts.MessageRepository,
 	messageService contracts.MessageService,
-	userProvider userProvider.UserProvider,
+	api *api.Api,
 ) *MessageCollectionService {
 	return &MessageCollectionService{
 		messageService: messageService,
 		messageRepo:    messageRepo,
-		userProvider:   userProvider,
+		api:            api,
 	}
 }
 
@@ -83,7 +83,7 @@ func (s *MessageCollectionService) Aggregates(messages []*models.Message) []*mod
 
 	if len(userUUIDs) > 0 {
 		var err error
-		users, err = s.userProvider.GetMapByUUIDs(userUUIDs)
+		users, err = s.api.User.GetMapByUUIDs(userUUIDs)
 		if err != nil {
 			logger.Errorf("[MessageCollectionService][Aggregates] Error: %v", err)
 		}

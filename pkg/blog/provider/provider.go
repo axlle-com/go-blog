@@ -7,6 +7,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/service"
 )
@@ -16,7 +17,7 @@ func NewBlogProvider(
 	postCollectionService *service.PostCollectionService,
 	categoriesService *service.CategoriesService,
 	tagCollectionService *service.TagCollectionService,
-) contract.BlogProvider {
+) appProvider.BlogProvider {
 	return &provider{
 		postService:           postService,
 		postCollectionService: postCollectionService,
@@ -62,6 +63,12 @@ func (p *provider) GetPublishers(paginator contract.Paginator, filter contract.P
 			postFilter.Query = &query
 			categoryFilter.Query = &query
 			tagFilter.Query = &query
+		}
+		if filter.GetURL() != nil && *filter.GetURL() != "" {
+			url := *filter.GetURL()
+			postFilter.URL = &url
+			categoryFilter.URL = &url
+			tagFilter.URL = &url
 		}
 	}
 

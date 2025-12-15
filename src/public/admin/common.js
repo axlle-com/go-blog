@@ -670,7 +670,7 @@ const _menu = {
             const id = $(this).attr('data-id');
             const action = $(this).attr('data-action');
             const block = $(this).closest('.js-block-menu-item');
-            
+
             if (id && id !== '0' && action) {
                 // Элемент сохранен, удаляем через AJAX
                 const request = new _glob.request({action});
@@ -767,9 +767,13 @@ const _message = {
     _selector: '.js-message-content',
     _selectorList: '.js-message-list',
     _unviewed: '.js-message-unviewed',
-    read: function () {
+    read: function (selector) {
         const _this = this;
-        $('body').on('click', '.mail-item', function (e) {
+        $(selector).on('click', '.mail-item', function (e) {
+            _cl_(e.target)
+            if ($(e.target).closest('input, label, button, a').length) {
+                return;
+            }
             const $this = $(this);
             const action = $this.data('jsMessageAction');
             if (action) {
@@ -783,9 +787,10 @@ const _message = {
             }
         });
     },
-    delete: function () {
+    delete: function (selector) {
         const _this = this;
-        $('body').on('click', '.js-message-content-delete', function (e) {
+        $(selector).on('click', '.js-message-content-delete', function (e) {
+
             const $this = $(this);
             const action = $this.data('jsMessageAction');
             if (action) {
@@ -797,9 +802,14 @@ const _message = {
             }
         });
     },
-    run: function () {
-        this.read();
-        this.delete();
+    run: function (selector) {
+        if (!$(selector).length) {
+            return
+        }
+
+        selector = 'body ' + selector
+        this.read(selector);
+        this.delete(selector);
     }
 };
 const _config = {
@@ -945,5 +955,5 @@ $(document).ready(function () {
     _infoBlock.run();
     _auth.run();
     _post.run();
-    _message.run();
+    _message.run('.a-block-inner .js-message-list');
 })

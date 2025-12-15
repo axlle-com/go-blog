@@ -115,7 +115,7 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 					return
 				}
 
-				p.InfoBlocksSnapshot = &v
+				p.InfoBlocksSnapshot = v
 			}
 		}(post, post.UUID))
 	}
@@ -142,7 +142,7 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 					return
 				}
 
-				p.GalleriesSnapshot = &v
+				p.GalleriesSnapshot = v
 			}
 		}(post, post.UUID))
 	}
@@ -186,6 +186,11 @@ func (s *PostService) GetByID(id uint) (*models.Post, error) {
 
 func (s *PostService) generateAlias(post *models.Post) string {
 	var newAlias string
+
+	if post.IsMain {
+		return newAlias
+	}
+
 	if post.Alias == "" {
 		newAlias = post.Title
 	} else {

@@ -3,24 +3,16 @@ package provider
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"github.com/axlle-com/blog/pkg/analytic/service"
 )
 
-type AnalyticProvider interface {
-	SaveForm(raw any) (contract.Analytic, error)
-	GetAll() []contract.Analytic
-	GetByID(id uint) (contract.Analytic, error)
-	GetAllIds() []uint
-	GetByIDs(ids []uint) ([]contract.Analytic, error)
-	GetMapByIDs(ids []uint) (map[uint]contract.Analytic, error)
-}
-
 func NewAnalyticProvider(
 	analyticService *service.AnalyticService,
 	analyticCollectionService *service.AnalyticCollectionService,
-) AnalyticProvider {
+) appProvider.AnalyticProvider {
 	return &provider{
 		analyticService:           analyticService,
 		analyticCollectionService: analyticCollectionService,

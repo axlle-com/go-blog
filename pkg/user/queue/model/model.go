@@ -7,8 +7,9 @@ import (
 )
 
 type User struct {
-	UUID  string `json:"uuid" form:"uuid"`
-	Email string `json:"email" form:"uuid"`
+	UUID  string  `json:"uuid" form:"uuid"`
+	Email string  `json:"email" form:"email"`
+	Name  *string `json:"name" form:"name"`
 }
 
 func (m *User) Model() *models.User {
@@ -20,8 +21,14 @@ func (m *User) Model() *models.User {
 		}
 		userUUID = newUUID
 	}
+
+	var name string
+	if m.Name != nil {
+		name = *m.Name
+	}
 	return &models.User{
-		Email: m.Email,
-		UUID:  userUUID,
+		Email:     m.Email,
+		UUID:      userUUID,
+		FirstName: name,
 	}
 }

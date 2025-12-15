@@ -5,27 +5,27 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/message/models"
 	"github.com/axlle-com/blog/pkg/message/service"
-	user "github.com/axlle-com/blog/pkg/user/provider"
 	"github.com/bxcodec/faker/v3"
 )
 
 type seeder struct {
 	messageService *service.MessageService
-	userProvider   user.UserProvider
+	api            *api.Api
 }
 
 func NewMessageSeeder(
 	messageService *service.MessageService,
-	userProvider user.UserProvider,
+	api *api.Api,
 ) contract.Seeder {
 	return &seeder{
 		messageService: messageService,
-		userProvider:   userProvider,
+		api:            api,
 	}
 }
 
@@ -34,7 +34,7 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) SeedTest(n int) error {
-	idsUser := s.userProvider.GetAll()
+	idsUser := s.api.User.GetAll()
 	for i := 1; i <= n; i++ {
 		randomUser := idsUser[rand.Intn(len(idsUser))]
 

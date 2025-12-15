@@ -8,16 +8,11 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	"gorm.io/gorm"
 )
 
-type AliasProvider interface {
-	Generate(r contract.Publisher, s string) string
-	Create(title string) string
-	transliterate(input string) string
-}
-
-func NewAliasProvider(aliasRepo AliasRepository) AliasProvider {
+func NewAliasProvider(aliasRepo AliasRepository) appProvider.AliasProvider {
 	return &provider{
 		aliasRepo: aliasRepo,
 	}

@@ -1,20 +1,20 @@
 package service
 
 import (
-	"github.com/axlle-com/blog/pkg/file/provider"
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 )
 
 type ImageEvent struct {
 	galleryEvent *GalleryEvent
-	fileProvider provider.FileProvider
+	api          *api.Api
 }
 
 func NewImageEvent(
-	file provider.FileProvider,
+	api *api.Api,
 ) *ImageEvent {
 	return &ImageEvent{
-		fileProvider: file,
+		api: api,
 	}
 }
 
@@ -31,7 +31,7 @@ func (e *ImageEvent) SetGalleryEvent(galleryEvent *GalleryEvent) {
 }
 
 func (e *ImageEvent) DeletedImage(im *models.Image) (err error) {
-	err = e.fileProvider.DeleteFile(im.File)
+	err = e.api.File.DeleteFile(im.File)
 	if err != nil {
 		return err
 	}

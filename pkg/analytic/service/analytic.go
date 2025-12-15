@@ -1,24 +1,24 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/analytic/models"
 	"github.com/axlle-com/blog/pkg/analytic/repository"
-	userProvider "github.com/axlle-com/blog/pkg/user/provider"
 )
 
 type AnalyticService struct {
 	analyticRepo repository.AnalyticRepository
-	userProvider userProvider.UserProvider
+	api          *api.Api
 }
 
 func NewAnalyticService(
 	analyticRepository repository.AnalyticRepository,
-	userProvider userProvider.UserProvider,
+	api *api.Api,
 ) *AnalyticService {
 	return &AnalyticService{
 		analyticRepo: analyticRepository,
-		userProvider: userProvider,
+		api:          api,
 	}
 }
 

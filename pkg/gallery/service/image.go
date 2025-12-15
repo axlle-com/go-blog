@@ -3,27 +3,27 @@ package service
 import (
 	"errors"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/errutil"
-	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 )
 
 type ImageService struct {
-	imageRepo    repository.GalleryImageRepository
-	imageEvent   *ImageEvent
-	fileProvider fileProvider.FileProvider
+	imageRepo  repository.GalleryImageRepository
+	imageEvent *ImageEvent
+	api        *api.Api
 }
 
 func NewImageService(
 	image repository.GalleryImageRepository,
 	imageEvent *ImageEvent,
-	fileProvider fileProvider.FileProvider,
+	api *api.Api,
 ) *ImageService {
 	return &ImageService{
-		imageRepo:    image,
-		imageEvent:   imageEvent,
-		fileProvider: fileProvider,
+		imageRepo:  image,
+		imageEvent: imageEvent,
+		api:        api,
 	}
 }
 

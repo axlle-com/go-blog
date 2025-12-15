@@ -3,9 +3,9 @@ package service
 import (
 	"errors"
 
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
 	"github.com/google/uuid"
@@ -17,7 +17,7 @@ type GalleryService struct {
 	galleryEvent *GalleryEvent
 	imageService *ImageService
 	resourceRepo repository.GalleryResourceRepository
-	fileProvider fileProvider.FileProvider
+	api          *api.Api
 }
 
 func NewGalleryService(
@@ -25,14 +25,14 @@ func NewGalleryService(
 	galleryEvent *GalleryEvent,
 	imageService *ImageService,
 	resourceRepo repository.GalleryResourceRepository,
-	fileProvider fileProvider.FileProvider,
+	api *api.Api,
 ) *GalleryService {
 	return &GalleryService{
 		galleryRepo:  galleryRepo,
 		galleryEvent: galleryEvent,
 		imageService: imageService,
 		resourceRepo: resourceRepo,
-		fileProvider: fileProvider,
+		api:          api,
 	}
 }
 
@@ -187,7 +187,7 @@ func (s *GalleryService) galleryImageUpdate(gallery *models.Gallery) error {
 	}
 
 	if len(sliceFiles) > 0 {
-		err = s.fileProvider.Received(sliceFiles)
+		err = s.api.File.Received(sliceFiles)
 		if err != nil {
 			logger.Errorf("[GalleryService][galleryImageUpdate] Error: %v", err)
 			errSlice = append(errSlice, err)

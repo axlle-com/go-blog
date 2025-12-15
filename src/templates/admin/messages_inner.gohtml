@@ -75,13 +75,13 @@
         </ul>
         <ul class="list-group list-group-sm list-group-flush" id="mail-item-wrapper">
             {{ range .messages }}
-                <li class="list-group-item mail-item {{ if eq .Viewed false }} unread {{ end }}"
+                <li class="list-group-item mail-item{{ if eq .Viewed false }} unread {{ end }}"
                     data-js-message-action="{{ .AdminAjaxURL }}?{{ $.paginator.PrintFullQuery }}">
                     <div class="media">
                         <div class="d-flex">
                             <div class="custom-control custom-control-nolabel custom-checkbox mr-2">
-                                <input type="checkbox" class="custom-control-input" id="inbox-1">
-                                <label for="inbox-1" class="custom-control-label"></label>
+                                <input type="checkbox" class="custom-control-input" id="inbox-{{ .ID }}">
+                                <label for="inbox-{{ .ID }}" class="custom-control-label"></label>
                             </div>
                             <button type="button" class="btn-starred btn btn-icon btn-xs mr-2"
                                     data-toggle="button" aria-pressed="false">

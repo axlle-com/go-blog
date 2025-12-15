@@ -24,7 +24,7 @@ type CategoryRequest struct {
 	IsFavourites       *bool   `json:"is_favourites" form:"is_favourites" binding:"omitempty"`
 	HasComments        *bool   `json:"has_comments" form:"has_comments" binding:"omitempty"`
 	ShowImage          *bool   `json:"show_image" form:"show_image" binding:"omitempty"`
-	InSitemap          bool    `json:"in_sitemap" form:"in_sitemap" binding:"omitempty"`
+	InSitemap          *bool   `json:"in_sitemap" form:"in_sitemap" binding:"omitempty"`
 	Title              string  `json:"title" form:"title" binding:"required,max=255"`
 	TitleShort         *string `json:"title_short" form:"title_short" binding:"omitempty,max=155"`
 	DescriptionPreview *string `json:"description_preview" form:"description_preview" binding:"omitempty"`

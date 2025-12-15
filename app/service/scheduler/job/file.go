@@ -6,15 +6,15 @@ import (
 
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
-	fileProvider "github.com/axlle-com/blog/pkg/file/provider"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 )
 
 type DeleteFiles struct {
 	start time.Time
-	file  fileProvider.FileProvider
+	file  appProvider.FileProvider
 }
 
-func NewDeleteFiles(file fileProvider.FileProvider) contract.Job {
+func NewDeleteFiles(file appProvider.FileProvider) contract.Job {
 	return &DeleteFiles{
 		file:  file,
 		start: time.Now(),

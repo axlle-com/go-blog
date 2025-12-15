@@ -3,23 +3,14 @@ package provider
 import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	appProvider "github.com/axlle-com/blog/app/models/provider"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 )
 
-type TemplateProvider interface {
-	GetAll() []contract.Template
-	GetByID(id uint) (contract.Template, error)
-	GetAllIds() []uint
-	GetByIDs(ids []uint) ([]contract.Template, error)
-	GetMapByIDs(ids []uint) (map[uint]contract.Template, error)
-	GetForResources(resource contract.Resource) ([]contract.Template, error)
-	GetByNameAndResource(name string, resourceName string) (contract.Template, error)
-}
-
 func NewProvider(
 	template repository.TemplateRepository,
-) TemplateProvider {
+) appProvider.TemplateProvider {
 	return &provider{
 		templateRepo: template,
 	}

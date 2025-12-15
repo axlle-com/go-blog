@@ -79,6 +79,7 @@ func (s *PostService) Create(post *models.Post, user contract.User) (*models.Pos
 func (s *PostService) Update(post, found *models.Post) (*models.Post, error) {
 	post.ID = found.ID
 	post.UUID = found.UUID
+	post.UserID = found.UserID
 
 	if post.Alias != found.Alias {
 		post.Alias = s.generateAlias(post)

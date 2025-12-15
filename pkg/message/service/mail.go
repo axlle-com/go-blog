@@ -1,11 +1,11 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/models/contract"
 	selfContracts "github.com/axlle-com/blog/pkg/message/contracts"
 	"github.com/axlle-com/blog/pkg/message/form"
 	mailer "github.com/axlle-com/blog/pkg/message/job"
-	"github.com/axlle-com/blog/pkg/user/provider"
 )
 
 type MailService struct {
@@ -13,7 +13,7 @@ type MailService struct {
 	queue                    contract.Queue
 	messageService           selfContracts.MessageService
 	messageCollectionService selfContracts.MessageCollectionService
-	userProvider             provider.UserProvider
+	api                      *api.Api
 }
 
 func NewMailService(
@@ -21,7 +21,7 @@ func NewMailService(
 	queue contract.Queue,
 	messageService selfContracts.MessageService,
 	messageCollectionService selfContracts.MessageCollectionService,
-	userProvider provider.UserProvider,
+	api *api.Api,
 
 ) *MailService {
 	return &MailService{
@@ -29,7 +29,7 @@ func NewMailService(
 		queue:                    queue,
 		messageService:           messageService,
 		messageCollectionService: messageCollectionService,
-		userProvider:             userProvider,
+		api:                      api,
 	}
 }
 

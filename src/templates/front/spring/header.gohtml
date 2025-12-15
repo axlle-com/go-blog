@@ -4,6 +4,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ .settings.csrfToken }}"/>
 
         <title>Spring - Software, App, Saas & Product Showcase Landing HTML5 Template | Home Version One</title>
         <!-- Stylesheets -->
@@ -35,40 +36,15 @@
 
                         <!--Nav Outer-->
                         <div class="nav-outer clearfix">
-                            <!-- Main Menu -->
-                            <nav class="main-menu">
-
-                                <div class="navbar-header">
-                                    <!-- Toggle Button -->
-                                    <button type="button" class="navbar-toggle" data-toggle="collapse"
-                                            data-target=".navbar-collapse">
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-                                        <span class="icon-bar"></span>
-                                    </button>
-                                </div>
-
-                                <div class="navbar-collapse collapse scroll-nav clearfix">
-                                    <ul class="navigation clearfix">
-                                        <li><a href="/">Home</a></li>
-                                        <li><a href="/services">Services</a></li>
-                                        <li><a href="/inventory">Inventory</a></li>
-                                        <li class="dropdown current"><a href="#">Extra Pages</a>
-                                            <ul>
-                                                <li><a href="/about.html">About Us</a></li>
-                                                <li><a href="/price.html">Pricing</a></li>
-                                            </ul>
-                                            <div class="dropdown-btn"><span class="fa fa-angle-down"></span></div></li>
-                                        <li><a href="/contact">Contact Us</a></li>
-                                    </ul>
-                                </div>
-
-                            </nav>
-                            <!-- Main Menu End-->
+                            {{ .settings.menu }}
 
                             <!--Other Links-->
                             <div class="other-links">
-                                <a href="contact.html" class="theme-btn btn-style-one">Get Quote</a>
+                                {{ if .settings.user }}
+                                    <a href="/admin" class="theme-btn btn-style-one">Admin</a>
+                                {{ else }}
+                                    <a href="/contact" class="theme-btn btn-style-one">Get Quote</a>
+                                {{ end }}
                             </div>
 
                         </div>

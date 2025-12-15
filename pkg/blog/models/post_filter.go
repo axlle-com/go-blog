@@ -20,14 +20,10 @@ type PostFilter struct {
 	PostCategoryID *uint       `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string     `json:"title" form:"title" binding:"omitempty"`
 	Date           *string     `json:"date" form:"date" binding:"omitempty"`
+	URL            *string     `json:"url" form:"url" binding:"omitempty" ignore:"true"`
 	UUIDs          []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
 	Query          *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
 	models.Filter
-}
-
-func (p *PostFilter) ValidateForm(ctx *gin.Context) (*PostFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
 }
 
 func (p *PostFilter) ValidateQuery(ctx *gin.Context) (*PostFilter, *errutil.Errors) {

@@ -23,11 +23,6 @@ type InfoBlockRequest struct {
 	app.Filter
 }
 
-func (p *InfoBlockRequest) ValidateForm(ctx *gin.Context) (*InfoBlockRequest, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
-
 func (p *InfoBlockRequest) ValidateQuery(ctx *gin.Context) (*InfoBlockRequest, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err

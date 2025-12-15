@@ -10,6 +10,7 @@ import (
 type PublisherFilter struct {
 	UUIDs []uuid.UUID
 	Query string
+	URL   *string
 
 	models.Filter
 }
@@ -29,17 +30,16 @@ func (f *PublisherFilter) GetQuery() string {
 	return f.Query
 }
 
+func (f *PublisherFilter) GetURL() *string {
+	return f.URL
+}
+
 func (f *PublisherFilter) SetUUIDs(uuids []uuid.UUID) {
 	f.UUIDs = uuids
 }
 
 func (f *PublisherFilter) SetQuery(query string) {
 	f.Query = query
-}
-
-func (f *PublisherFilter) ValidateForm(ctx *gin.Context) (*PublisherFilter, *errutil.Errors) {
-	err := f.Filter.ValidateForm(ctx, f)
-	return f, err
 }
 
 func (f *PublisherFilter) ValidateQuery(ctx *gin.Context) (*PublisherFilter, *errutil.Errors) {

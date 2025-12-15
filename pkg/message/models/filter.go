@@ -22,11 +22,6 @@ type MessageFilter struct {
 	models.Filter
 }
 
-func (p *MessageFilter) ValidateForm(ctx *gin.Context) (*MessageFilter, *errutil.Errors) {
-	err := p.Filter.ValidateForm(ctx, p)
-	return p, err
-}
-
 func (p *MessageFilter) ValidateQuery(ctx *gin.Context) (*MessageFilter, *errutil.Errors) {
 	err := p.Filter.ValidateQuery(ctx, p)
 	return p, err

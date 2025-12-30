@@ -12,8 +12,8 @@ SSH_OPTS="-i $KEY -o IdentitiesOnly=yes -o PreferredAuthentications=publickey \
 
 # ===== Проект на VPS =====
 APP_DIR="${APP_DIR:-/opt/go-app}"     # путь к git-репозиторию на VPS
-BRANCH="${BRANCH:-master}"             # ветка
-REPO_URL="${REPO_URL:-git@github.com:axlle-com/go-blog.git}" # можно оставить пустым
+BRANCH="${BRANCH:-master}"            # ветка
+REPO_URL="${REPO_URL:-git@github.com:axlle-com/go-blog.git}"
 
 # ===== Команда после апдейта =====
 MAKE_CMD="${MAKE_CMD:-make rebuild-dev}"
@@ -81,8 +81,8 @@ fi
 log "git reset --hard origin/\$BRANCH"
 git reset --hard "origin/\$BRANCH"
 
-log "git clean -xdf -e .env -e acme.json"
-git clean -xdf -e .env -e acme.json
+log "git clean -xdf -e .env -e acme.json -e data -e data/**"
+git clean -xdf -e .env -e acme.json -e data -e data/**
 
 # сабмодули (если есть)
 if [ -f .gitmodules ]; then

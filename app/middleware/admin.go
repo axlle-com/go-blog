@@ -16,13 +16,15 @@ func Admin() gin.HandlerFunc {
 		userUUID := session.Get("user_uuid")
 		userData := session.Get("user")
 		if userID == nil {
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			ctx.Status(http.StatusUnauthorized)
+			ctx.Abort()
 			return
 		}
 
 		newUser, ok := userData.(models.User)
 		if !ok || !newUser.CanAdmin() {
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			ctx.Status(http.StatusUnauthorized)
+			ctx.Abort()
 			return
 		}
 

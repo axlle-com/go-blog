@@ -647,7 +647,7 @@ const _glob = {
         }
     },
     typeHints: {
-        _exact: new Map(),   // полный путь (если когда-нибудь захочешь)
+        _exact: new Map(),   // полный путь
         _norm: new Map(),   // нормализованный путь ( [0] -> [] )
         _leaf: new Map(),   // тип по имени поля (leaf), например parent_id -> int
 
@@ -713,8 +713,8 @@ const _glob = {
                 patronymic: 'string',
                 phone: 'string',
                 email: 'string',
-                is_email: 'bool',
-                is_phone: 'bool',
+                email_confirmed_at: 'string',
+                phone_confirmed_at: 'string',
                 status: 'int',
                 avatar: 'string',
                 password_hash: 'string',

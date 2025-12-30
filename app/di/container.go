@@ -2,10 +2,10 @@ package di
 
 import (
 	"github.com/axlle-com/blog/app/api"
-	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/cache"
 	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
+	"github.com/axlle-com/blog/app/service/disk"
 	i18nsvc "github.com/axlle-com/blog/app/service/i18n"
 	"github.com/axlle-com/blog/app/service/mailer"
 	mailerQueue "github.com/axlle-com/blog/app/service/mailer/queue"
@@ -95,6 +95,8 @@ type Container struct {
 	View      contract.View
 	Scheduler contract.Scheduler
 	Template  contract.Scheduler
+	Disk      contract.DiskService
+	I18n      *i18nsvc.Service
 
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.FileService
@@ -169,9 +171,6 @@ type Container struct {
 	SettingsRepo    settingsRepo.Repository
 	SettingsService *settingsService.Service
 
-	// I18n
-	I18n *i18nsvc.Service
-
 	Migrator contract.Migrator
 	Seeder   contract.Seeder
 
@@ -205,8 +204,10 @@ type Container struct {
 func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newQueue := queue.NewQueue()
 	newCache := cache.NewCache()
-	newView := view.NewView(config.Config())
+	newDisk := disk.NewDiskService(cfg)
+
 	newMailer := mailer.NewMailer(cfg, newQueue)
+	newView := view.NewView(cfg, newDisk)
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
 	newFileService := fileService.NewFileService(newFileRepo)
@@ -321,10 +322,10 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newApi.Publisher = publisherProvider.NewPublisherProvider(newApi)
 
-	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newApi, cfg)
-
 	// I18n
-	newI18n := i18nsvc.New(cfg)
+	newI18n := i18nsvc.New(cfg, newDisk)
+
+	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newApi, cfg, newDisk)
 
 	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
 	postMigrator := postMigrate.NewMigrator(db.PostgreSQL())
@@ -338,9 +339,9 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	settingsMigrator := settingsMigrate.NewMigrator(db.PostgreSQL())
 
 	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
-	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, categoryService, newApi, cfg)
-	templateSeeder := templateDB.NewSeeder(newTemplateRepo)
-	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newApi, cfg)
+	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, categoryService, newApi, cfg, newDisk)
+	templateSeeder := templateDB.NewSeeder(cfg, newDisk, newTemplateRepo)
+	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newApi, cfg, newDisk)
 	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newApi)
 
 	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder)
@@ -539,6 +540,8 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		Cache:     newCache,
 		View:      newView,
 		Scheduler: newScheduler,
+		Disk:      newDisk,
+		I18n:      newI18n,
 
 		FileUploadService:     uploadService,
 		FileCollectionService: fileCollectionService,
@@ -612,9 +615,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		// Settings
 		SettingsRepo:    newSettingsRepo,
 		SettingsService: newSettingsService,
-
-		// I18n
-		I18n: newI18n,
 
 		Migrator: newMigrator,
 		Seeder:   seeder,

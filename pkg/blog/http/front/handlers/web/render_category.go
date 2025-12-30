@@ -17,7 +17,7 @@ func (c *blogController) RenderCategory(ctx *gin.Context, category *models.PostC
 			logger.Errorf("[blog][blogController][RenderCategory] error: %v", err)
 		}
 
-		c.Render404(ctx, c.view.ViewStatic("error"), nil)
+		c.Render404(ctx, c.view.View("error"), nil)
 		return
 	}
 

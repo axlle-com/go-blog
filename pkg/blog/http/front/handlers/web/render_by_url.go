@@ -9,7 +9,7 @@ import (
 func (c *blogController) RenderByURL(ctx *gin.Context) {
 	alias := ctx.Param("alias")
 	if !isValidAlias(alias) {
-		c.Render404(ctx, c.view.ViewStatic("error"), nil)
+		c.Render404(ctx, c.view.View("error"), nil)
 		return
 	}
 
@@ -28,7 +28,7 @@ func (c *blogController) RenderByURL(ctx *gin.Context) {
 
 	c.Render404(
 		ctx,
-		c.view.ViewStatic("error"),
+		c.view.View("error"),
 		gin.H{
 			"title":    "Page not found",
 			"error":    "404",

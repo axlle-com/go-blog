@@ -14,7 +14,8 @@ func AuthRequired() gin.HandlerFunc {
 		userUUID := session.Get("user_uuid")
 		user := session.Get("user")
 		if userID == nil {
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			ctx.Status(http.StatusUnauthorized)
+			ctx.Abort()
 			return
 		}
 		ctx.Set("user", user)

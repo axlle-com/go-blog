@@ -47,24 +47,27 @@ func (s *seeder) Seed() error {
 		return nil
 	}
 
+	now := time.Now()
 	phone := "+7-900-111-22-33"
-	createdAt := time.Now()
-	updatedAt := time.Now()
+	createdAt := now
+	updatedAt := now
+	emailConfirmedAt := now
+	phoneConfirmedAt := now
 
 	role, _ := s.role.GetByName("superadmin")
 	user := models.User{
-		Avatar:    db.StrPtr("/public/img/user.svg"),
-		FirstName: "Admin",
-		LastName:  "Admin",
-		Phone:     &phone,
-		Email:     "admin@ax-box.ru",
-		IsEmail:   db.BoolToBoolPtr(true),
-		IsPhone:   db.BoolToBoolPtr(true),
-		Status:    10,
-		Password:  "123456",
-		CreatedAt: &createdAt,
-		UpdatedAt: &updatedAt,
-		Roles:     []models.Role{*role},
+		Avatar:           db.StrPtr("/public/img/user.svg"),
+		FirstName:        "Admin",
+		LastName:         "Admin",
+		Phone:            &phone,
+		Email:            "admin@ax-box.ru",
+		EmailConfirmedAt: &emailConfirmedAt,
+		PhoneConfirmedAt: &phoneConfirmedAt,
+		Status:           models.UserStatusRegistered,
+		Password:         "123456",
+		CreatedAt:        &createdAt,
+		UpdatedAt:        &updatedAt,
+		Roles:            []models.Role{*role},
 	}
 
 	err = s.user.Create(&user)
@@ -95,9 +98,9 @@ func (s *seeder) SeedTest(n int) error {
 			LastName:           lastName,
 			Phone:              &phone,
 			Email:              faker.Email(),
-			IsEmail:            db.IntToBoolPtr(),
-			IsPhone:            db.IntToBoolPtr(),
-			Status:             int8(rand.Intn(10)),
+			EmailConfirmedAt:   nil,
+			PhoneConfirmedAt:   nil,
+			Status:             int8(rand.Intn(2)),
 			Password:           password,
 			RememberToken:      &rememberToken,
 			AuthKey:            &authKey,

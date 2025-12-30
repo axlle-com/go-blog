@@ -65,7 +65,7 @@ func (s *TemplateService) Update(template *models.Template) (*models.Template, e
 }
 
 func (s *TemplateService) Delete(template *models.Template) (err error) {
-	return s.templateRepo.Delete(template)
+	return s.templateRepo.Delete(template) // @todo обновить связи
 }
 
 func (s *TemplateService) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contract.User) (template *models.Template, err error) {

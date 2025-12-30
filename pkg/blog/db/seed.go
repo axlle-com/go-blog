@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
 	"time"
 
@@ -26,45 +25,53 @@ type seeder struct {
 	categoryService *service.CategoryService
 	api             *api.Api
 	config          contract.Config
+	disk            contract.DiskService
+}
+
+type InfoBlockSeedItem struct {
+	ID       uint   `json:"id"`
+	Title    string `json:"title"`
+	Sort     int    `json:"sort"`
+	Position string `json:"position"`
 }
 
 type PostSeedData struct {
-	UserID             *uint    `json:"user_id"`
-	Template           string   `json:"template"`
-	PostCategoryID     *uint    `json:"post_category_id"`
-	CategoryAlias      *string  `json:"category_alias"`
-	MetaTitle          *string  `json:"meta_title"`
-	MetaDescription    *string  `json:"meta_description"`
-	IsPublished        bool     `json:"is_published"`
-	IsFavourites       bool     `json:"is_favourites"`
-	HasComments        bool     `json:"has_comments"`
-	ShowImagePost      bool     `json:"show_image_post"`
-	ShowImageCategory  bool     `json:"show_image_category"`
-	InSitemap          *bool    `json:"in_sitemap"`
-	IsMain             bool     `json:"is_main"`
-	Media              *string  `json:"media"`
-	Title              string   `json:"title"`
-	Alias              *string  `json:"alias"`
-	TitleShort         *string  `json:"title_short"`
-	DescriptionPreview *string  `json:"description_preview"`
-	Description        *string  `json:"description"`
-	ShowDate           bool     `json:"show_date"`
-	DatePub            *string  `json:"date_pub"`
-	DateEnd            *string  `json:"date_end"`
-	Image              *string  `json:"image"`
-	Hits               uint     `json:"hits"`
-	Sort               int      `json:"sort"`
-	Stars              float32  `json:"stars"`
-	InfoBlocks         []string `json:"info_blocks"`
+	UserID             *uint               `json:"user_id"`
+	Template           string              `json:"template"`
+	PostCategoryID     *uint               `json:"post_category_id"`
+	CategoryAlias      *string             `json:"category_alias"`
+	MetaTitle          *string             `json:"meta_title"`
+	MetaDescription    *string             `json:"meta_description"`
+	IsPublished        bool                `json:"is_published"`
+	IsFavourites       bool                `json:"is_favourites"`
+	HasComments        bool                `json:"has_comments"`
+	ShowImagePost      bool                `json:"show_image_post"`
+	ShowImageCategory  bool                `json:"show_image_category"`
+	InSitemap          *bool               `json:"in_sitemap"`
+	IsMain             bool                `json:"is_main"`
+	Media              *string             `json:"media"`
+	Title              string              `json:"title"`
+	Alias              *string             `json:"alias"`
+	TitleShort         *string             `json:"title_short"`
+	DescriptionPreview *string             `json:"description_preview"`
+	Description        *string             `json:"description"`
+	ShowDate           bool                `json:"show_date"`
+	DatePub            *string             `json:"date_pub"`
+	DateEnd            *string             `json:"date_end"`
+	Image              *string             `json:"image"`
+	Hits               uint                `json:"hits"`
+	Sort               int                 `json:"sort"`
+	Stars              float32             `json:"stars"`
+	InfoBlocks         []InfoBlockSeedItem `json:"info_blocks"`
 }
 
 type CategorySeedData struct {
-	UserID      *uint    `json:"user_id"`
-	Template    string   `json:"template"`
-	IsPublished *bool    `json:"is_published"`
-	InSitemap   *bool    `json:"in_sitemap"`
-	Title       string   `json:"title"`
-	InfoBlocks  []string `json:"info_blocks"`
+	UserID      *uint               `json:"user_id"`
+	Template    string              `json:"template"`
+	IsPublished *bool               `json:"is_published"`
+	InSitemap   *bool               `json:"in_sitemap"`
+	Title       string              `json:"title"`
+	InfoBlocks  []InfoBlockSeedItem `json:"info_blocks"`
 }
 
 func NewSeeder(
@@ -74,6 +81,7 @@ func NewSeeder(
 	categoryService *service.CategoryService,
 	api *api.Api,
 	cfg contract.Config,
+	disk contract.DiskService,
 ) contract.Seeder {
 	return &seeder{
 		postRepo:        post,
@@ -82,6 +90,7 @@ func NewSeeder(
 		categoryService: categoryService,
 		api:             api,
 		config:          cfg,
+		disk:            disk,
 	}
 }
 
@@ -98,16 +107,17 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
+	// Путь относительно src/services
+	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
 
 	// Проверяем существование файла
-	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
+	if !s.disk.Exists(seedPath) {
 		logger.Infof("[blog][seeder][seedFromJSON] seed file not found: %s, skipping", seedPath)
 		return nil
 	}
 
-	// Читаем JSON файл
-	data, err := os.ReadFile(seedPath)
+	// Читаем JSON файл через DiskService
+	data, err := s.disk.ReadFile(seedPath)
 	if err != nil {
 		return err
 	}
@@ -212,25 +222,29 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 
 		// Привязываем инфоблоки по title, если они указаны
 		if len(postData.InfoBlocks) > 0 {
-			for _, infoBlockTitle := range postData.InfoBlocks {
-				if infoBlockTitle == "" {
+			for i := range postData.InfoBlocks {
+				infoBlockItem := &postData.InfoBlocks[i]
+				if infoBlockItem.Title == "" {
 					continue
 				}
 
 				// Ищем инфоблок по title
-				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockTitle)
+				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
 				if err != nil || infoBlock == nil {
-					logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockTitle, postData.Title)
+					logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockItem.Title, postData.Title)
 					continue
 				}
 
-				// Привязываем инфоблок к посту
-				_, err = s.api.InfoBlock.Attach(infoBlock.GetID(), createdPost.UUID.String())
+				// Устанавливаем ID инфоблока
+				infoBlockItem.ID = infoBlock.GetID()
+
+				// Привязываем инфоблок к посту с указанием сортировки и позиции
+				_, err = s.api.InfoBlock.SaveForm(infoBlockItem, createdPost.UUID.String())
 				if err != nil {
-					logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockTitle, postData.Title, err)
+					logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockItem.Title, postData.Title, err)
 					continue
 				}
-				logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d) to post '%s'", infoBlockTitle, infoBlock.GetID(), postData.Title)
+				logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to post '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, postData.Title)
 			}
 		}
 	}
@@ -240,16 +254,17 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 }
 
 func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
-	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
+	// Путь относительно src/services
+	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
 
 	// Проверяем существование файла
-	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
+	if !s.disk.Exists(seedPath) {
 		logger.Infof("[blog][seeder][seedCategoriesFromJSON] seed file not found: %s, skipping", seedPath)
 		return nil
 	}
 
-	// Читаем JSON файл
-	data, err := os.ReadFile(seedPath)
+	// Читаем JSON файл через DiskService
+	data, err := s.disk.ReadFile(seedPath)
 	if err != nil {
 		return err
 	}
@@ -323,25 +338,29 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 		}
 
 		if len(categoryData.InfoBlocks) > 0 {
-			for _, infoBlockTitle := range categoryData.InfoBlocks {
-				if infoBlockTitle == "" {
+			for i := range categoryData.InfoBlocks {
+				infoBlockItem := &categoryData.InfoBlocks[i]
+				if infoBlockItem.Title == "" {
 					continue
 				}
 
 				// Ищем инфоблок по title
-				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockTitle)
+				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
 				if err != nil || infoBlock == nil {
-					logger.Infof("[blog][seeder][seedCategoriesFromJSON] info block with title='%s' not found for category '%s', skipping", infoBlockTitle, categoryData.Title)
+					logger.Infof("[blog][seeder][seedCategoriesFromJSON] info block with title='%s' not found for category '%s', skipping", infoBlockItem.Title, categoryData.Title)
 					continue
 				}
 
-				// Привязываем инфоблок к категории
-				_, err = s.api.InfoBlock.Attach(infoBlock.GetID(), createdCategory.UUID.String())
+				// Устанавливаем ID инфоблока
+				infoBlockItem.ID = infoBlock.GetID()
+
+				// Привязываем инфоблок к категории с указанием сортировки и позиции
+				_, err = s.api.InfoBlock.SaveForm(infoBlockItem, createdCategory.UUID.String())
 				if err != nil {
-					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockTitle, categoryData.Title, err)
+					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockItem.Title, categoryData.Title, err)
 					continue
 				}
-				logger.Infof("[blog][seeder][seedCategoriesFromJSON] attached info block '%s' (ID=%d) to category '%s'", infoBlockTitle, infoBlock.GetID(), categoryData.Title)
+				logger.Infof("[blog][seeder][seedCategoriesFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to category '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, categoryData.Title)
 			}
 		}
 	}

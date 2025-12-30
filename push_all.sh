@@ -1,11 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
-SHA=$(git rev-parse --short HEAD)
 
-docker build -f Dockerfile --target app -t ghcr.io/axlle-com/go-blog:latest -t ghcr.io/axlle-com/go-blog:app-$SHA .
-docker push ghcr.io/axlle-com/go-blog:latest
-docker push ghcr.io/axlle-com/go-blog:app-$SHA
+IMAGE="ghcr.io/axlle-com/go-blog"
+SHA="$(git rev-parse --short HEAD)"
 
-docker build -f Dockerfile --target cli -t ghcr.io/axlle-com/go-blog:cli-latest -t ghcr.io/axlle-com/go-blog:cli-$SHA .
-docker push ghcr.io/axlle-com/go-blog:cli-latest
-docker push ghcr.io/axlle-com/go-blog:cli-$SHA
+PLATFORM="linux/amd64"
+
+# Логин (ожидает переменную GHCR_TOKEN в окружении)
+# export GHCR_TOKEN=...
+echo "${GHCR_TOKEN:?set GHCR_TOKEN}" | docker login ghcr.io -u axlle-com --password-stdin
+
+# APP
+docker build --platform "$PLATFORM" -f Dockerfile --target app \
+  -t "$IMAGE:latest" \
+  -t "$IMAGE:app-$SHA" \
+  .
+
+docker push "$IMAGE:latest"
+docker push "$IMAGE:app-$SHA"
+
+# CLI
+docker build --platform "$PLATFORM" -f Dockerfile --target cli \
+  -t "$IMAGE:cli-latest" \
+  -t "$IMAGE:cli-$SHA" \
+  .
+
+docker push "$IMAGE:cli-latest"
+docker push "$IMAGE:cli-$SHA"

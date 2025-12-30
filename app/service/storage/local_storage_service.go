@@ -15,22 +15,20 @@ const staticPath = "/public/img/"
 
 type LocalStorageService struct {
 	publicBase      string // https://site.com
-	localPathPrefix string // web-путь, например: /public/uploads
-	fsBase          string // абсолютный путь на диске, например: /abs/path/src/public/uploads
+	localPathPrefix string // web-путь, например: /uploads
+	fsBase          string // абсолютный путь на диске, например: /abs/path/uploads
 }
 
 func NewLocalStorageService(cfg contract.Config) contract.Storage {
-	fsBase := filepath.Join(cfg.SrcFolder(), cfg.UploadPath())
-
 	return &LocalStorageService{
 		publicBase:      strings.TrimRight(cfg.AppHost(), "/"),
-		localPathPrefix: cfg.UploadPath(),
-		fsBase:          fsBase,
+		localPathPrefix: cfg.UploadPath(),                 // URL путь остается /uploads/
+		fsBase:          cfg.DataFolder(cfg.UploadPath()), // Физический путь: data/uploads
 	}
 }
 
 func (b *LocalStorageService) Save(fh *multipart.FileHeader, folder, fileName string) (string, error) {
-	rel := joinURLPath(b.localPathPrefix, folder, fileName) // /public/uploads/posts/uuid.jpg
+	rel := joinURLPath(b.localPathPrefix, folder, fileName) // /uploads/posts/uuid.jpg
 	fullURL := b.publicBase + rel
 
 	absPath := filepath.Join(b.fsBase, folder) // <-- ПРАВИЛЬНЫЙ корень записи
@@ -114,7 +112,7 @@ func (b *LocalStorageService) toAbsPath(urlOrPath string) string {
 		return filepath.Join(b.fsBase, rel)
 	}
 
-	// Относительный web-путь с префиксом (/public/uploads/...)
+	// Относительный web-путь с префиксом (/uploads/...)
 	if strings.HasPrefix(urlOrPath, b.localPathPrefix) {
 		rel := strings.TrimPrefix(urlOrPath, b.localPathPrefix)
 		rel = strings.TrimLeft(rel, "/")

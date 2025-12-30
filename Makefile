@@ -7,19 +7,22 @@ SERVICES?=postgres redis
 
 all: env network up
 
+pull:
+	@docker compose -f $(COMPOSE_FILE) pull $(SERVICES)
+
 up: env
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
 
 up-logging:
 	@docker compose -f $(COMPOSE_FILE) --profile logging up -d $(SERVICES)
 
-rebuild: env network
+rebuild: env network pull
 	@docker compose -f $(COMPOSE_FILE) down -v
 	@docker compose -f $(COMPOSE_FILE) build --no-cache $(SERVICES)
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
 
 re-up: env network
-	@docker compose -f $(COMPOSE_FILE) down -v
+	@docker compose -f $(COMPOSE_FILE) down
 	@docker compose -f $(COMPOSE_FILE) up -d $(SERVICES)
 
 down:

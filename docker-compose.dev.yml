@@ -1,9 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: app
+    image: ghcr.io/axlle-com/go-blog:${APP_TAG:-latest}
     restart: always
     environment:
       - APP_ROOT=/app
@@ -13,9 +10,8 @@ services:
       - projects_network
       - traefik
     volumes:
-      - ./docker/.env:/app/.env
-      - ./docker/.env:/.env
-      - ./:/app
+      - ./.env:/app/.env:ro
+      - ./data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +33,6 @@ services:
       - 'traefik.http.routers.goapp-https.tls=true'
       - 'traefik.http.routers.goapp-https.tls.certresolver=le'
 
-      # Если используешь динамический файл — оставь миддлвари:
       - 'traefik.http.routers.goapp-https.middlewares=sec-headers@file,gzip@file'
 
       - 'traefik.http.routers.goapp-https.service=goapp'
@@ -47,16 +42,16 @@ services:
       - 'traefik.http.services.goapp.loadbalancer.healthcheck.timeout=5s'
 
   cli:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: cli
+    image: ghcr.io/axlle-com/go-blog:${CLI_TAG:-cli-latest}
     profiles: ["cli"]      # не стартует по умолчанию
     restart: "no"
     env_file:
       - .env
     networks:
       - projects_network
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./data:/app/data
     depends_on:
       postgres:
         condition: service_healthy

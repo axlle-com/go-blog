@@ -13,13 +13,15 @@ import (
 
 func InitWebRoutes(r *gin.Engine, container *di.Container) {
 	analytic := analyticMiddleware.NewAnalytic(container.Queue)
+	errorMiddleware := middleware.NewError(container.View)
+	languageMiddleware := middleware.NewLanguage(container.I18n)
 
 	r.GET("/health", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "OK")
 	})
 	r.Use(middleware.Main())
-	r.Use(middleware.Language(container.I18n))
-	r.Use(middleware.Error())
+	r.Use(languageMiddleware.Handler())
+	r.Use(errorMiddleware.Handler())
 	r.Use(analytic.Handler())
 	r.GET("/", container.FrontWebPostController.RenderHome)
 	r.GET("/login", container.FrontWebUserController.Login)
@@ -39,7 +41,7 @@ func InitWebRoutes(r *gin.Engine, container *di.Container) {
 				"menu":  menu.NewMenu(ctx.FullPath(), nil),
 			})
 		} else {
-			ctx.HTML(http.StatusNotFound, container.View.ViewStatic("error"), gin.H{"title": "Page not found", "error": "404"})
+			ctx.HTML(http.StatusNotFound, container.View.View("error"), gin.H{"title": "Page not found", "error": "404"})
 		}
 	})
 }

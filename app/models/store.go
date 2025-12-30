@@ -15,13 +15,13 @@ func Store(cfg contract.Config) redis.Store {
 		store = memstore.NewStore(cfg.KeyCookie())
 		logger.Info("[Store] Using memstore")
 		return store
-	} else {
-		store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), "", cfg.RedisPassword(), cfg.KeyCookie())
-		if err != nil {
-			logger.Errorf("[Store] Error: %v, Started memstore", err)
-			store = memstore.NewStore(cfg.KeyCookie())
-			return store
-		}
+	}
+
+	store, err = redis.NewStore(10, "tcp", cfg.RedisHost(), "", cfg.RedisPassword(), cfg.KeyCookie())
+	if err != nil {
+		logger.Errorf("[Store] Error: %v, Started memstore", err)
+		store = memstore.NewStore(cfg.KeyCookie())
+		return store
 	}
 
 	logger.Info("[Store] Using redis")

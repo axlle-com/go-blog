@@ -2,13 +2,12 @@ package db
 
 import (
 	"fmt"
+	"io/fs"
 	"math/rand"
-	"os"
-	"path/filepath"
+	"path"
 	"strings"
 	"time"
 
-	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -18,35 +17,44 @@ import (
 )
 
 type seeder struct {
+	config   contract.Config
+	disk     contract.DiskService
 	template repository.TemplateRepository
 }
 
 func NewSeeder(
+	config contract.Config,
+	disk contract.DiskService,
 	template repository.TemplateRepository,
 ) contract.Seeder {
 	return &seeder{
+		config:   config,
+		disk:     disk,
 		template: template,
 	}
 }
 
 func (s *seeder) Seed() error {
-	cfg := config.Config()
-
-	// templates/<layout>
-	layout := cfg.Layout()
-	templatesRoot := cfg.SrcFolderBuilder("templates", "front", layout)
-
-	// Если папки нет — ничего не делаем (не падаем)
-	if _, err := os.Stat(templatesRoot); err != nil {
-		if os.IsNotExist(err) {
-			logger.Infof("[template][seeder][Seed] templates root not found: %s", templatesRoot)
-			return nil
-		}
-		return err
+	layout := strings.TrimSpace(s.config.Layout())
+	if layout == "" {
+		layout = "default"
 	}
 
-	// Обходим файлы темы и добавляем все .gohtml кроме default.gohtml
-	walkErr := filepath.Walk(templatesRoot, func(path string, info os.FileInfo, err error) error {
+	// templates/front/<layout>
+	templatesRoot := path.Join("templates", "front", layout)
+
+	templatesFS := s.disk.GetTemplatesFS()
+
+	// Если папки нет — ничего не делаем (не падаем)
+	if _, err := fs.Stat(templatesFS, templatesRoot); err != nil {
+		if isNotExistFS(err) {
+			logger.Infof("[template][seeder][Seed] templates root not found in FS: %s", templatesRoot)
+			return nil
+		}
+		return fmt.Errorf("stat templates root %q: %w", templatesRoot, err)
+	}
+
+	walkErr := fs.WalkDir(templatesFS, templatesRoot, func(pathString string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -54,33 +62,31 @@ func (s *seeder) Seed() error {
 			return nil
 		}
 
-		if filepath.Ext(path) != ".gohtml" {
+		ext := strings.ToLower(path.Ext(pathString))
+		if ext != ".gohtml" {
 			return nil
 		}
 
-		base := filepath.Base(path)
+		base := path.Base(pathString)
 		if strings.EqualFold(base, "default.gohtml") {
 			return nil
 		}
 
 		// Имя шаблона = имя файла без расширения
-		name := strings.TrimSuffix(base, filepath.Ext(base))
+		name := strings.TrimSuffix(base, ext)
 
-		// Ресурс — это директория сразу под layout, например: templates/<layout>/<resource>/<file>.gohtml
-		rel, err := filepath.Rel(templatesRoot, path)
-		if err != nil {
-			return err
-		}
-		// Получаем имя корневой папки ресурса
-		parts := strings.Split(rel, string(filepath.Separator))
+		// Ресурс — это директория сразу под layout:
+		// templates/front/<layout>/<resource>/<file>.gohtml
+		rel := strings.TrimPrefix(pathString, templatesRoot+"/")
+		parts := strings.Split(rel, "/")
 		if len(parts) < 2 {
 			// Файлы непосредственно в корне layout пропускаем
 			return nil
 		}
 		resourceName := parts[0]
 
-		// Читаем содержимое шаблона и сохраняем в HTML
-		data, err := os.ReadFile(path)
+		// Читаем содержимое шаблона из templatesFS
+		data, err := fs.ReadFile(templatesFS, pathString)
 		if err != nil {
 			return err
 		}
@@ -92,15 +98,22 @@ func (s *seeder) Seed() error {
 			title = fmt.Sprintf("%s/%s", resourceName, name)
 		}
 
-		// Сначала проверяем существование шаблона по theme, name и resource_name через фильтр
+		// Проверяем существование по фильтру (важно: указатели на копии)
 		filter := models.NewTemplateFilter()
-		filter.Theme = &layout
-		filter.Name = &name
-		filter.ResourceName = &resourceName
+		layoutCopy := layout
+		nameCopy := name
+		resourceCopy := resourceName
+
+		filter.Theme = &layoutCopy
+		filter.Name = &nameCopy
+		filter.ResourceName = &resourceCopy
+
 		existing, err := s.template.FindByFilter(filter)
 		if err == nil && existing != nil {
-			// Шаблон уже существует, пропускаем без ошибки
-			logger.Infof("[template][seeder][Seed] template with theme=%s, name=%s and resource_name=%s already exists (ID=%d), skipping", layout, name, resourceName, existing.ID)
+			logger.Infof(
+				"[template][seeder][Seed] template theme=%s name=%s resource=%s already exists (ID=%info), skipping",
+				layout, name, resourceName, existing.ID,
+			)
 			return nil
 		}
 
@@ -121,6 +134,7 @@ func (s *seeder) Seed() error {
 			logger.Errorf("[template][seeder][Seed] error creating template %s: %v", tpl.Name, err)
 			return err
 		}
+
 		return nil
 	})
 
@@ -128,7 +142,7 @@ func (s *seeder) Seed() error {
 		return walkErr
 	}
 
-	logger.Info("[template][seeder][Seed] Database seeded Template from filesystem successfully!")
+	logger.Info("[template][seeder][Seed] Database seeded Template from FS successfully!")
 	return nil
 }
 
@@ -141,31 +155,31 @@ func (s *seeder) SeedTest(n int) error {
 		"Шаблон для меню":      "menus",
 	}
 
-	// один раз посеять rng
 	rand.Seed(time.Now().UnixNano())
 
-	// подготовим слайс ключей
 	keys := make([]string, 0, len(resources))
 	for title := range resources {
 		keys = append(keys, title)
 	}
 
+	layout := s.config.Layout()
+
 	for i := 1; i <= n; i++ {
-		var template models.Template
 		now := time.Now()
 
-		// берём случайный ключ и значение из map
 		title := keys[rand.Intn(len(keys))]
 		resource := resources[title]
 
-		template.Title = fmt.Sprintf("%s #%d", title, i)
-		template.Name = faker.Username()
-		template.Theme = db.StrPtr(config.Config().Layout())
-		template.ResourceName = db.StrPtr(resource)
-		template.CreatedAt = &now
-		template.UpdatedAt = &now
+		tpl := models.Template{
+			Title:        fmt.Sprintf("%s #%d", title, i),
+			Name:         faker.Username(),
+			Theme:        db.StrPtr(layout),
+			ResourceName: db.StrPtr(resource),
+			CreatedAt:    &now,
+			UpdatedAt:    &now,
+		}
 
-		if err := s.template.Create(&template); err != nil {
+		if err := s.template.Create(&tpl); err != nil {
 			return err
 		}
 	}
@@ -183,6 +197,7 @@ func extractTitleFromTemplate(content string) string {
 		if trimmed == "" {
 			continue
 		}
+
 		if strings.HasPrefix(trimmed, "<!--") && strings.Contains(trimmed, "-->") {
 			inner := strings.TrimPrefix(trimmed, "<!--")
 			inner = strings.TrimSuffix(inner, "-->")
@@ -191,5 +206,18 @@ func extractTitleFromTemplate(content string) string {
 		// первая непустая строка не комментарий — выходим
 		break
 	}
+
 	return ""
+}
+
+func isNotExistFS(err error) bool {
+	// embed/fs иногда возвращает fs.ErrNotExist, иногда текстовую ошибку
+	if err == nil {
+		return false
+	}
+	if err == fs.ErrNotExist {
+		return true
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "file does not exist") || strings.Contains(msg, "no such file")
 }

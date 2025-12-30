@@ -14,7 +14,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 
 	post, err := c.postService.FindByParam("is_main", true)
 	if post == nil || err != nil {
-		c.Render404(ctx, c.view.ViewStatic("error"), nil)
+		c.Render404(ctx, c.view.View("error"), nil)
 		return
 	}
 
@@ -23,7 +23,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		if err != nil {
 			logger.Errorf("[blog][blogController][RenderHome] Error: %v", err)
 		}
-		c.Render404(ctx, c.view.ViewStatic("error"), nil)
+		c.Render404(ctx, c.view.View("error"), nil)
 		return
 	}
 
@@ -37,7 +37,6 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		c.view.View(post.GetTemplateName()),
 		gin.H{
 			"settings": c.settings(ctx),
-			"title":    "Home Page",
 			"post":     post,
 			"blocks":   blocks,
 		},

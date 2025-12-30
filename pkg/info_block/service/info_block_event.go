@@ -18,7 +18,7 @@ func NewInfoBlockEventService(
 		queue: queue,
 	}
 }
-func (s *InfoBlockEventService) StartJob(collection []*models.InfoBlockResponse) {
+func (s *InfoBlockEventService) StartJob(collection []*models.InfoBlockResponse, action string) {
 	if len(collection) == 0 {
 		return
 	}
@@ -50,7 +50,7 @@ func (s *InfoBlockEventService) StartJob(collection []*models.InfoBlockResponse)
 
 	newJob := job.NewInfoBlockJob(
 		&dto.Collection{ResourceBlocks: slice},
-		"update",
+		action,
 	)
 
 	s.queue.Enqueue(newJob, 0)

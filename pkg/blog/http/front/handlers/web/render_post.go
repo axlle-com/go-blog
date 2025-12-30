@@ -17,7 +17,7 @@ func (c *blogController) RenderPost(ctx *gin.Context, post *models.Post) {
 			logger.Errorf("[blog][blogController][RenderPost] error: %v", err)
 		}
 
-		c.Render404(ctx, c.view.ViewStatic("error"), nil)
+		c.Render404(ctx, c.view.View("error"), nil)
 		return
 	}
 

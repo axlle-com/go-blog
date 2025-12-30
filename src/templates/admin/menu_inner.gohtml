@@ -68,7 +68,7 @@
 
         <div class="accordion-unstacked accordion-active-primary accordion-root js-block-menu-items" id="{{ $rootID }}">
             {{ range .model.MenuItems }}
-                {{ template "menuItemUnstackedAllOpenFlat" dict
+                {{ template "admin.menuItemUnstackedAllOpenFlat" dict
                 "item"        .
                 "parent"      $rootID
                 "prefix"      $prefix
@@ -79,7 +79,7 @@
     </form>
     {{ end }}
 
-    {{ define "menuItemUnstackedAllOpenFlat" }}
+    {{ define "admin.menuItemUnstackedAllOpenFlat" }}
         {{- $it := .item -}}
         {{- $parent := .parent -}}
         {{- $prefix := .prefix -}}
@@ -194,7 +194,7 @@
                     {{ if $hasKids }}
                         <div class="accordion-unstacked accordion-active-primary" id="{{$childAccID}}">
                             {{- range $it.Children }}
-                                {{ template "menuItemUnstackedAllOpenFlat" dict
+                                {{ template "admin.menuItemUnstackedAllOpenFlat" dict
                                 "item"        .
                                 "parent"      $childAccID
                                 "prefix"      $prefix

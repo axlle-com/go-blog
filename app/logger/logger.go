@@ -56,8 +56,8 @@ func getLogger() *logrus.Logger {
 
 		if shouldLogToFile() {
 			if rl, err := rotatelogs.New(
-				conf.RuntimeFolder("logs/app-%Y-%m-%d.log"),
-				rotatelogs.WithLinkName(conf.RuntimeFolder("logs/app.log")),
+				conf.DataFolder("logs/app-%Y-%m-%d.log"),
+				rotatelogs.WithLinkName(conf.DataFolder("logs/app.log")),
 				rotatelogs.WithRotationTime(24*time.Hour),
 				rotatelogs.WithMaxAge(7*24*time.Hour),
 			); err == nil {

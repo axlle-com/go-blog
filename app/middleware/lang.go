@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"net/http"
+	"strings"
 	"time"
 
 	i18nsvc "github.com/axlle-com/blog/app/service/i18n"
@@ -11,39 +11,62 @@ import (
 
 const CtxLocKey = "loc"
 
-func Language(i18n *i18nsvc.Service) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		request := c.Request
+func NewLanguage(i18nService *i18nsvc.Service) *Language {
+	return &Language{i18n: i18nService}
+}
 
-		accept := request.Header.Get("Accept-Language")
-		lang := request.URL.Query().Get("lang")
-		if lang == "" {
-			if c, err := request.Cookie("lang"); err == nil {
-				lang = c.Value
+type Language struct {
+	i18n *i18nsvc.Service
+}
+
+func (l *Language) Handler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if l.i18n == nil {
+			ctx.Next()
+			return
+		}
+
+		accept, _ := l.i18n.NormalizeLang(ctx.GetHeader("Accept-Language"))
+
+		qLangRaw := strings.TrimSpace(ctx.Query("lang"))
+		qLang, qOk := l.i18n.NormalizeLang(qLangRaw)
+
+		var cLang string
+		if !qOk {
+			if c, err := ctx.Request.Cookie("lang"); err == nil {
+				if tag, ok := l.i18n.NormalizeLang(c.Value); ok {
+					cLang = tag
+				}
 			}
 		}
 
-		loc := i18n.Localizer(lang, accept)
+		loc := l.i18n.Localizer(qLang, cLang, accept)
 
-		// Если пришёл ?lang=xx — обновим cookie, чтобы закрепить язык
-		if lang := c.Query("lang"); lang != "" {
-			http.SetCookie(c.Writer, &http.Cookie{
-				Name:     "lang",
-				Value:    lang,
-				Path:     "/",
-				MaxAge:   int((365 * 24 * time.Hour).Seconds()),
-				HttpOnly: false,
-				SameSite: http.SameSiteLaxMode,
-			})
+		if qOk {
+			cLang = qLang
+			secure := ctx.Request.TLS != nil
+			ctx.SetCookie(
+				"lang",
+				qLang,
+				int((365 * 24 * time.Hour).Seconds()),
+				"/",
+				"",
+				secure,
+				false,
+			)
 		}
 
-		c.Set(CtxLocKey, loc)
+		if cLang == "" {
+			cLang = accept
+		}
 
-		// Создаём функцию T для шаблонов
-		tFunc := buildT(loc)
-		c.Set("T", tFunc)
+		ctx.Set(CtxLocKey, loc)
+		ctx.Set("lang", cLang)
 
-		c.Next()
+		// функция T для шаблонов
+		ctx.Set("T", buildT(loc))
+
+		ctx.Next()
 	}
 }
 

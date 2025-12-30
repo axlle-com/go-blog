@@ -1,11 +1,13 @@
 /.idea/
 /pgdata/
 /src/app.css
-/src/resources/
+/data/resources/
 /dev.env
-/src/public/uploads/
 /.env
 /app/testutils/.env
 /coverage.out
 /coverage.html
 /runtime/
+/uploads/
+/data/
+/bin/

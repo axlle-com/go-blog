@@ -25,12 +25,13 @@ type Config interface {
 	SessionKey(string) string
 	UserSessionKey(string) string
 
-	// UploadPath return /public/uploads/
+	// UploadPath return /uploads/
 	UploadPath() string
-	RuntimeFolder(s string) string
+	DataFolder(...string) string
+	Root() string
 	SrcFolder() string
 	SrcFolderBuilder(...string) string
-	PublicFolderBuilder(parts ...string) string
+	PublicFolderBuilder(...string) string
 	Layout() string
 
 	SMTPActive() bool

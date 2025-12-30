@@ -80,13 +80,15 @@ func SetupTestRouter() *gin.Engine {
 
 		router = gin.New()
 
+		languageMiddleware := middleware.NewLanguage(container.I18n)
+
 		store := models.Store(cfg)
 		router.Use(sessions.Sessions(cfg.SessionsName(), store))
-		router.Use(middleware.Language(container.I18n))
+		router.Use(languageMiddleware.Handler())
 
 		container.View.SetRouter(router)
 		container.View.Load()
-		container.View.SetStatic()
+		container.Disk.SetupStaticFiles(router)
 
 		InitApiRoutes(router, container)
 		InitWebRoutes(router, container)

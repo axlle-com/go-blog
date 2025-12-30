@@ -153,7 +153,7 @@ func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBloc
 		logger.Errorf("[info_block][InfoBlockService][Update] error: %v", err)
 	}
 
-	s.infoBlockEventService.StartJob(collection)
+	s.infoBlockEventService.StartJob(collection, "update")
 
 	return infoBlock, nil
 }
@@ -191,7 +191,7 @@ func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.Inf
 		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
 	}
 
-	s.infoBlockEventService.StartJob(collection) // @todo новый экшен attach нужен, не дело что в update запихал
+	s.infoBlockEventService.StartJob(collection, "attach")
 
 	return nil
 }
@@ -210,7 +210,7 @@ func (s *InfoBlockService) DeleteByResourceUUID(resourceUUID uuid.UUID) error {
 		return err
 	}
 
-	s.infoBlockEventService.StartJob(collection)
+	s.infoBlockEventService.StartJob(collection, "delete")
 
 	return nil
 }
@@ -225,7 +225,7 @@ func (s *InfoBlockService) DeleteHasResourceByID(id uint) error {
 	}
 
 	if err := s.resourceRepo.DeleteByID(id); err == nil {
-		s.infoBlockEventService.StartJob(collection)
+		s.infoBlockEventService.StartJob(collection, "delete")
 	}
 
 	return err
@@ -248,7 +248,7 @@ func (s *InfoBlockService) Delete(infoBlock *models.InfoBlock) (err error) {
 		return err
 	}
 
-	s.infoBlockEventService.StartJob(collection)
+	s.infoBlockEventService.StartJob(collection, "delete")
 
 	return nil
 }

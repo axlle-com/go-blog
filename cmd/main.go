@@ -16,7 +16,7 @@ import (
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/routes"
-	"github.com/axlle-com/blog/app/web"
+	"github.com/axlle-com/blog/app/service/minify"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
@@ -107,14 +107,18 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 		logger.Errorf("[main][Init][Seeder] seed error: %v", err)
 	}
 
-	err = web.NewWebMinifier(config).Run()
+	err = minify.NewWebMinifier(config).Run()
 	if err != nil {
 		logger.Errorf("[main][Init][WebMinifier] error: %v", err)
 	}
 
+	err = container.Disk.SetupStaticFiles(router)
+	if err != nil {
+		logger.Errorf("[main][Init][SetupStaticFiles] error: %v", err)
+	}
+
 	container.View.SetRouter(router)
 	container.View.Load()
-	container.View.SetStatic()
 
 	routes.InitApiRoutes(router, container)
 	routes.InitWebRoutes(router, container)

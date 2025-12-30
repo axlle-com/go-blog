@@ -86,7 +86,7 @@ func SetupTestRouter() *gin.Engine {
 
 		container.View.SetRouter(router)
 		container.View.Load()
-		container.View.SetStatic()
+		container.Disk.SetupStaticFiles(router)
 
 		InitApiRoutes(router, container)
 		InitWebRoutes(router, container)

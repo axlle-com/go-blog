@@ -14,6 +14,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	UserStatusGuest      int8 = 0
+	UserStatusRegistered int8 = 1
+)
+
 type User struct {
 	ID                 uint           `gorm:"primaryKey" json:"id"`
 	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
@@ -22,8 +27,6 @@ type User struct {
 	Patronymic         *string        `gorm:"size:255" json:"patronymic,omitempty"`
 	Phone              *string        `gorm:"size:255;unique" json:"phone,omitempty"`
 	Email              string         `gorm:"size:255;unique;not null" json:"email"`
-	IsEmail            *bool          `gorm:"default:false" json:"is_email,omitempty"`
-	IsPhone            *bool          `gorm:"default:false" json:"is_phone,omitempty"`
 	Status             int8           `gorm:"index;not null;default:0" json:"status"`
 	Avatar             *string        `gorm:"size:255" json:"avatar,omitempty"`
 	Password           string         `gorm:"-" json:"-"`
@@ -32,6 +35,8 @@ type User struct {
 	AuthToken          *string        `gorm:"size:500;default:null;index" json:"-"`
 	AuthKey            *string        `gorm:"size:32;default:null;" json:"-"`
 	PasswordResetToken *string        `gorm:"size:255;unique" json:"-"`
+	EmailConfirmedAt   *time.Time     `gorm:"index" json:"email_confirmed_at,omitempty"`
+	PhoneConfirmedAt   *time.Time     `gorm:"index" json:"phone_confirmed_at,omitempty"`
 	CreatedAt          *time.Time     `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt          *time.Time     `json:"updated_at,omitempty"`
 	DeletedAt          gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"omitempty"`
@@ -49,8 +54,8 @@ func (u *User) Fields() []string {
 		"patronymic",
 		"phone",
 		"email",
-		"is_email",
-		"is_phone",
+		"email_confirmed_at",
+		"phone_confirmed_at",
 		"status",
 		"avatar",
 		"created_at",

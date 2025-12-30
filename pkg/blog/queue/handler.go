@@ -45,7 +45,7 @@ func (qh *queueHandler) Run(data []byte) {
 	}
 
 	switch action {
-	case "update":
+	case "attach", "update", "delete":
 		if err := qh.update(payload); err != nil {
 			logger.Errorf("[blog][queue][create] error: %v", err)
 		}

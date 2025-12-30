@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"strconv"
 	"time"
 
@@ -21,6 +20,7 @@ type seeder struct {
 	infoBlockService *service.InfoBlockService
 	api              *api.Api
 	config           contract.Config
+	disk             contract.DiskService
 }
 
 type InfoBlockSeedData struct {
@@ -37,11 +37,13 @@ func NewSeeder(
 	infoBlockService *service.InfoBlockService,
 	api *api.Api,
 	cfg contract.Config,
+	disk contract.DiskService,
 ) contract.Seeder {
 	return &seeder{
 		infoBlockService: infoBlockService,
 		api:              api,
 		config:           cfg,
+		disk:             disk,
 	}
 }
 
@@ -50,16 +52,17 @@ func (s *seeder) Seed() error {
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	seedPath := s.config.SrcFolderBuilder("db", s.config.Layout(), "seed", fmt.Sprintf("%s.json", moduleName))
+	// Путь относительно src/services
+	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
 
 	// Проверяем существование файла
-	if _, err := os.Stat(seedPath); os.IsNotExist(err) {
+	if !s.disk.Exists(seedPath) {
 		logger.Infof("[info_block][seeder][seedFromJSON] seed file not found: %s, skipping", seedPath)
 		return nil
 	}
 
-	// Читаем JSON файл
-	data, err := os.ReadFile(seedPath)
+	// Читаем JSON файл через DiskService
+	data, err := s.disk.ReadFile(seedPath)
 	if err != nil {
 		return err
 	}

@@ -47,7 +47,7 @@ type config struct {
 	srcFolder   string
 	layout      string
 
-	runtimeFolder string
+	dataFolder string
 
 	smtpActive   bool
 	smtpHost     string
@@ -110,11 +110,11 @@ func LoadConfig() (err error) {
 		instance.dbUserTest = getEnv("DB_USER_TEST", "postgres")
 		instance.dbPasswordTest = getEnv("DB_PASSWORD_TEST", "secret")
 
-		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/public/uploads/")
+		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/uploads/")
 		instance.srcFolder = getEnv("FILE_SRC_FOLDER", "src")
 		instance.layout = getEnv("LAYOUT", "")
 
-		instance.runtimeFolder = getEnv("RUNTIME_FOLDER", "runtime")
+		instance.dataFolder = getEnv("DATA_FOLDER", "data")
 
 		instance.smtpHost = getEnv("SMTP_HOST", "")
 		smtpPort := getEnv("SMTP_PORT", "2525")
@@ -282,6 +282,14 @@ func (c *config) Port() string {
 	return ":" + strings.TrimPrefix(strings.TrimSpace(c.appPort), ":")
 }
 
+func (c *config) Root() string {
+	root, err := c.root()
+	if err != nil {
+		return ""
+	}
+	return root
+}
+
 func (c *config) UploadPath() string {
 	path := "/" + strings.Trim(c.uploadsPath, "/") + "/"
 	if c.IsTest() {
@@ -290,17 +298,37 @@ func (c *config) UploadPath() string {
 	return path
 }
 
-func (c *config) RuntimeFolder(folder string) string {
-	base := filepath.Clean(c.runtimeFolder)
-
-	folder = strings.TrimSpace(folder)
-	if folder == "" {
+func (c *config) DataFolder(parts ...string) string {
+	base := filepath.Clean(c.dataFolder)
+	if len(parts) == 0 {
 		return base
 	}
 
-	folder = strings.TrimLeft(folder, `/\`)
+	out := base
+	sep := string(filepath.Separator)
 
-	return filepath.Join(base, folder)
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+
+		// Нормализуем слэши и чистим путь
+		p = filepath.Clean(filepath.FromSlash(p))
+
+		// Не даём абсолютному пути "сбросить" base
+		p = strings.TrimLeft(p, `\/`)
+		p = strings.TrimLeft(p, sep)
+
+		// Запрещаем выход выше base
+		if p == "" || p == "." || p == ".." || strings.HasPrefix(p, ".."+sep) {
+			continue // или return base, если хочешь жестко
+		}
+
+		out = filepath.Join(out, p)
+	}
+
+	return out
 }
 
 func (c *config) SrcFolder() string {
@@ -328,19 +356,30 @@ func (c *config) Layout() string {
 }
 
 func (c *config) SrcFolderBuilder(parts ...string) string {
-	elems := []string{filepath.Clean(c.SrcFolder())}
+	base := filepath.Clean(c.SrcFolder())
+	if len(parts) == 0 {
+		return base
+	}
 
+	out := base
 	for _, p := range parts {
 		p = strings.TrimSpace(p)
 		if p == "" {
 			continue
 		}
 
-		p = strings.TrimLeft(p, `/\`)
-		elems = append(elems, p)
+		p = filepath.Clean(filepath.FromSlash(p))
+
+		p = strings.TrimLeft(p, `\/`)
+		p = strings.TrimLeft(p, string(filepath.Separator))
+		if p == "." {
+			continue
+		}
+
+		out = filepath.Join(out, p)
 	}
 
-	return filepath.Join(elems...)
+	return out
 }
 
 func (c *config) PublicFolderBuilder(parts ...string) string {

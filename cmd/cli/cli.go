@@ -53,7 +53,7 @@ var Commands = map[string]func(){
 	"refill": func() {
 		rollback()
 		migrate()
-		seed()
+		//seed()
 		//seedTest()
 	},
 }

@@ -79,7 +79,7 @@ func (qh *queueHandler) update(payload []byte) error {
 		filter := models.NewInfoBlockFilter()
 		filter.UUIDs = []uuid.UUID{newUUID}
 
-		qh.infoBlockEventService.StartJob(qh.infoBlockService.GetForResourceByFilter(filter))
+		qh.infoBlockEventService.StartJob(qh.infoBlockService.GetForResourceByFilter(filter), "update")
 	}
 
 	return nil

@@ -110,11 +110,13 @@ func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contract.
 	if err != nil {
 		return nil, err
 	}
+
 	ib.FromInterface(infoBlock)
 	err = p.blockService.Attach(newUUID, ib)
 	if err != nil {
 		return nil, err
 	}
+
 	p.collectionService.AggregatesResponses([]*models.InfoBlockResponse{ib})
 	return ib, nil
 }

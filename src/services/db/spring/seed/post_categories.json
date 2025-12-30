@@ -1,0 +1,22 @@
+[
+  {
+    "user_id": 1,
+    "template": "services",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "services",
+    "alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  }
+]

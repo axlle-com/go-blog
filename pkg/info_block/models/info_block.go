@@ -128,15 +128,27 @@ func (i *InfoBlock) GetTitle() string {
 }
 
 func (i *InfoBlock) GetMedia() string {
-	return *i.Media
+	if i.Media != nil {
+		return *i.Media
+	}
+
+	return ""
 }
 
 func (i *InfoBlock) GetDescription() string {
-	return *i.Description
+	if i.Description != nil {
+		return *i.Description
+	}
+
+	return ""
 }
 
 func (i *InfoBlock) GetImage() string {
-	return *i.Image
+	if i.Image != nil {
+		return *i.Image
+	}
+
+	return ""
 }
 
 func (i *InfoBlock) GetGalleries() []contract.Gallery {

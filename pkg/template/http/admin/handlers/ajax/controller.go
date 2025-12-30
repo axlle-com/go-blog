@@ -42,7 +42,7 @@ type templateController struct {
 
 func ShowIndexPageTest(ctx *gin.Context) {
 	fileName := filepath.Base("index.gohtml")
-	templatePath := filepath.Join("src/templates", fileName)
+	templatePath := filepath.Join("templates", fileName)
 	data, err := os.ReadFile(templatePath)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "Ошибка чтения файла: %s", err.Error())

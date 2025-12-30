@@ -14,18 +14,25 @@ type Service struct {
 	bundle *i18n.Bundle
 }
 
-func New(cfg contract.Config) *Service {
+func New(cfg contract.Config, diskService contract.DiskService) *Service {
 	newBundle := i18n.NewBundle(language.English)
 	newBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	// Используем конфиг для получения пути к файлам локализации
-	localesDir := cfg.SrcFolderBuilder("services/i18n/locales")
-
-	// Загружаем файлы из файловой системы
+	// Загружаем файлы через DiskService (из embed или с диска)
 	for _, lang := range []string{"en", "ru"} {
-		path := filepath.Join(localesDir, lang+".json")
-		if _, err := newBundle.LoadMessageFile(path); err != nil {
-			logger.Errorf("[I18n] Failed to load locale file %s: %v", path, err)
+		path := filepath.Join("i18n", "locales", lang+".json")
+
+		// Читаем файл через DiskService
+		data, err := diskService.ReadFile(path)
+		if err != nil {
+			logger.Errorf("[I18n] Failed to read locale file %s: %v", path, err)
+			panic(err)
+		}
+
+		// Парсим и загружаем сообщения из байтов
+		_, err = newBundle.ParseMessageFileBytes(data, path)
+		if err != nil {
+			logger.Errorf("[I18n] Failed to parse locale file %s: %v", path, err)
 			panic(err)
 		}
 		logger.Infof("[I18n] Loaded locale file: %s", path)

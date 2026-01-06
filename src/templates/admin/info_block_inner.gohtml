@@ -54,6 +54,25 @@
                                     <fieldset class="form-block">
                                         <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
                                         <div class="form-group small">
+                                            <label for="infoBlockParent">{{ call .T "ui.label.parent_info_block" nil }}</label>
+                                            <select
+                                                    class="form-control select2"
+                                                    data-placeholder="{{ call .T "ui.placeholder.parent" nil }}"
+                                                    data-select2-search="true"
+                                                    data-allow-clear="true"
+                                                    name="info_block_id"
+                                                    data-validator-name="info_block_id">
+                                                <option></option>
+                                                {{ range .infoBlocks}}
+                                                    <option value="{{ .ID }}"
+                                                            {{ if eq .ID $.infoBlock.GetInfoBlockID }}selected{{ end }}>
+                                                        {{ .Title }}
+                                                    </option>
+                                                {{ end }}
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                        <div class="form-group small">
                                             <label for="blogTitle">{{ call .T "ui.label.template" nil }}</label>
                                             <select
                                                     class="form-control select2"

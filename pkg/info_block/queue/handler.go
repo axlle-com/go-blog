@@ -16,17 +16,20 @@ import (
 
 func NewGalleryQueueHandler(
 	infoBlockService *service.InfoBlockService,
+	infoBlockCollectionService *service.InfoBlockCollectionService,
 	infoBlockEventService *service.InfoBlockEventService,
 ) contract.QueueHandler {
 	return &queueHandler{
-		infoBlockService:      infoBlockService,
-		infoBlockEventService: infoBlockEventService,
+		infoBlockService:           infoBlockService,
+		infoBlockCollectionService: infoBlockCollectionService,
+		infoBlockEventService:      infoBlockEventService,
 	}
 }
 
 type queueHandler struct {
-	infoBlockService      *service.InfoBlockService
-	infoBlockEventService *service.InfoBlockEventService
+	infoBlockService           *service.InfoBlockService
+	infoBlockCollectionService *service.InfoBlockCollectionService
+	infoBlockEventService      *service.InfoBlockEventService
 }
 
 func (qh *queueHandler) Run(data []byte) {
@@ -79,7 +82,7 @@ func (qh *queueHandler) update(payload []byte) error {
 		filter := models.NewInfoBlockFilter()
 		filter.UUIDs = []uuid.UUID{newUUID}
 
-		qh.infoBlockEventService.StartJob(qh.infoBlockService.GetForResourceByFilter(filter), "update")
+		qh.infoBlockEventService.StartJob(qh.infoBlockCollectionService.GetForResourceByFilter(filter), "update")
 	}
 
 	return nil

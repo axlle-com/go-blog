@@ -33,9 +33,12 @@ func (c *blockController) CreateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
+	infoBlocks, _ := c.blockCollectionService.GetAll()
+
 	data := response.Body{
-		"templates": c.templates(ctx),
-		"infoBlock": block,
+		"templates":  c.templates(ctx),
+		"infoBlocks": infoBlocks,
+		"infoBlock":  block,
 	}
 	ctx.JSON(
 		http.StatusCreated,

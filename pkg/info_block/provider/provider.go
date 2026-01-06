@@ -36,7 +36,7 @@ func (p *provider) GetForResourceUUID(resourceUUID string) []contract.InfoBlock 
 
 	filter := models.NewInfoBlockFilter()
 	filter.ResourceUUID = &newUUID
-	infoBlocks := p.blockService.GetForResourceByFilter(filter)
+	infoBlocks := p.collectionService.GetForResourceByFilter(filter)
 	if infoBlocks == nil {
 		return nil
 	}
@@ -118,6 +118,7 @@ func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contract.
 	}
 
 	p.collectionService.AggregatesResponses([]*models.InfoBlockResponse{ib})
+
 	return ib, nil
 }
 

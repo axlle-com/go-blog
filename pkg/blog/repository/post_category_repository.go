@@ -54,6 +54,7 @@ func (r *categoryRepository) GetDescendantsByID(id uint) ([]*models.PostCategory
 	if err != nil {
 		return nil, err
 	}
+
 	return r.GetDescendants(category)
 }
 
@@ -231,6 +232,7 @@ func (r *categoryRepository) GetDescendants(category *models.PostCategory) ([]*m
 	if err != nil {
 		return nil, err
 	}
+
 	return descendants, nil
 }
 

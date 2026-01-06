@@ -28,6 +28,7 @@ func MapInfoBlocks(list []contract.InfoBlock) []InfoBlock {
 	if len(list) == 0 {
 		return nil
 	}
+
 	out := make([]InfoBlock, 0, len(list))
 	for _, ib := range list {
 		out = append(out, MapInfoBlock(ib))

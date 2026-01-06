@@ -27,6 +27,7 @@ func (m *migrator) Migrate() error {
 
 	m.db.Exec(db.HashIndex("info_blocks", "uuid"))
 	m.db.Exec(db.HashIndex("info_block_has_resources", "resource_uuid"))
+	m.db.Exec(db.LikePrefixIndex("info_blocks", "path"))
 
 	return nil
 }

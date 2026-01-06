@@ -15,7 +15,7 @@ type PostCategory struct {
 	UserID             *uint          `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint          `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint          `gorm:"index" json:"post_category_id,omitempty"`
-	Path               string         `gorm:"index" json:"-"`
+	Path               string         `gorm:"size:1000" json:"-"`
 	MetaTitle          *string        `gorm:"size:100" json:"meta_title,omitempty"`
 	MetaDescription    *string        `gorm:"size:200" json:"meta_description,omitempty"`
 	Alias              string         `gorm:"size:255;unique" json:"alias"`

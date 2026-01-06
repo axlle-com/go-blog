@@ -13,6 +13,8 @@ type InfoBlock struct {
 	UUID        uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	TemplateID  *uint      `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
 	UserID      *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
+	InfoBlockID *uint      `gorm:"index" json:"info_block_id,omitempty" form:"info_block_id" binding:"omitempty"`
+	Path        string     `gorm:"size:1000" json:"-"`
 	Media       *string    `gorm:"size:255" json:"media" form:"media" binding:"omitempty,max=255"`
 	Title       string     `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
 	Description *string    `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
@@ -25,6 +27,8 @@ type InfoBlock struct {
 	User      contract.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
 	Galleries []contract.Gallery `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 
+	Children    []*InfoBlock          `gorm:"-" json:"children" form:"children" binding:"-" ignore:"true"`
+	Parent      *InfoBlock            `gorm:"-" json:"parent" form:"parent" binding:"-" ignore:"true"`
 	Sort        int                   `gorm:"-" json:"sort" form:"sort" binding:"omitempty"`
 	Position    string                `gorm:"-" json:"position" form:"position" binding:"omitempty"`
 	HasResource *InfoBlockHasResource `gorm:"-" json:"has_resource" form:"has_resource" binding:"omitempty"`
@@ -87,6 +91,14 @@ func (i *InfoBlock) GetRelationID() uint {
 		id = i.HasResource.ID
 	}
 	return id
+}
+
+func (i *InfoBlock) GetInfoBlockID() uint {
+	var infoBlockID uint
+	if i.InfoBlockID != nil {
+		infoBlockID = *i.InfoBlockID
+	}
+	return infoBlockID
 }
 
 func (i *InfoBlock) GetTemplateTitle() string {

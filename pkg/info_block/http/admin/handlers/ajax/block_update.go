@@ -42,9 +42,22 @@ func (c *blockController) UpdateInfoBlock(ctx *gin.Context) {
 		return
 	}
 
+	var infoBlocks []*models.InfoBlock
+	if block.ID != 0 {
+		var err2 error
+		infoBlocks, err2 = c.blockCollectionService.GetAllForParent(block)
+		if err2 != nil {
+			// Если ошибка, получаем все инфоблоки
+			infoBlocks, _ = c.blockCollectionService.GetAll()
+		}
+	} else {
+		infoBlocks, _ = c.blockCollectionService.GetAll()
+	}
+
 	data := gin.H{
-		"templates": c.templates(ctx),
-		"infoBlock": block,
+		"templates":  c.templates(ctx),
+		"infoBlocks": infoBlocks,
+		"infoBlock":  block,
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

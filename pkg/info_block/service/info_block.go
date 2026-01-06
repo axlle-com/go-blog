@@ -87,15 +87,6 @@ func (s *InfoBlockService) FindByFilter(filter *models.InfoBlockFilter) (*models
 	return s.infoBlockRepo.FindByFilter(filter)
 }
 
-func (s *InfoBlockService) GetForResourceByFilter(filter *models.InfoBlockFilter) []*models.InfoBlockResponse {
-	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Error(err)
-		return nil
-	}
-	return s.infoBlockCollection.AggregatesResponses(infoBlocks)
-}
-
 func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *models.InfoBlock, user contract.User) (infoBlock *models.InfoBlock, err error) {
 	blockForm := app.LoadStruct(&models.InfoBlock{}, form).(*models.InfoBlock)
 
@@ -104,7 +95,7 @@ func (s *InfoBlockService) SaveFromRequest(form *models.BlockRequest, found *mod
 	} else {
 		blockForm.ID = found.ID
 		blockForm.UUID = found.UUID
-		infoBlock, err = s.Update(blockForm)
+		infoBlock, err = s.Update(blockForm, found)
 	}
 
 	if err != nil {
@@ -140,13 +131,13 @@ func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contract.Use
 	return infoBlock, nil
 }
 
-func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
-	if err := s.infoBlockRepo.Update(infoBlock); err != nil {
+func (s *InfoBlockService) Update(new *models.InfoBlock, old *models.InfoBlock) (*models.InfoBlock, error) {
+	if err := s.infoBlockRepo.Update(new, old); err != nil {
 		return nil, err
 	}
 
 	filter := models.NewInfoBlockFilter()
-	filter.ID = &infoBlock.ID
+	filter.ID = &new.ID
 
 	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
@@ -155,7 +146,7 @@ func (s *InfoBlockService) Update(infoBlock *models.InfoBlock) (*models.InfoBloc
 
 	s.infoBlockEventService.StartJob(collection, "update")
 
-	return infoBlock, nil
+	return new, nil
 }
 
 func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.InfoBlock) error {
@@ -267,5 +258,10 @@ func (s *InfoBlockService) DeleteImageFile(infoBlock *models.InfoBlock) (*models
 	}
 	infoBlock.Image = nil
 
-	return s.Update(infoBlock)
+	oldBlock, err := s.infoBlockRepo.FindByID(infoBlock.ID)
+	if err != nil {
+		return infoBlock, err
+	}
+
+	return s.Update(infoBlock, oldBlock)
 }

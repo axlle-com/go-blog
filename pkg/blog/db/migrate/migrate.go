@@ -34,6 +34,7 @@ func (m *migrator) Migrate() error {
 	m.db.Exec(db.HashIndex("post_categories", "uuid"))
 	m.db.Exec(db.HashIndex("post_categories", "alias"))
 	m.db.Exec(db.HashIndex("post_categories", "url"))
+	m.db.Exec(db.LikePrefixIndex("post_categories", "path"))
 
 	m.db.Exec(db.HashIndex("post_tags", "name"))
 	m.db.Exec(db.HashIndex("post_tags", "alias"))

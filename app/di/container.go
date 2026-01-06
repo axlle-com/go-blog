@@ -387,7 +387,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 			postQueue.NewInfoBlockQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newApi),
 		},
 		"galleries": {
-			infoBlockQueue.NewGalleryQueueHandler(newBlockService, newBlockEventService),
+			infoBlockQueue.NewGalleryQueueHandler(newBlockService, newBlockCollectionService, newBlockEventService),
 			postQueue.NewGalleryQueueHandler(newCategoriesService, newPostCollectionService, postTagCollectionService, newApi),
 		},
 	})

@@ -28,6 +28,7 @@ func (m *migrator) Migrate() error {
 	m.db.Exec(db.HashIndex("menus", "uuid"))
 	m.db.Exec(db.HashIndex("menu_items", "publisher_uuid"))
 	m.db.Exec(db.HashIndex("menu_items", "url"))
+	m.db.Exec(db.LikePrefixIndex("menu_items", "path"))
 
 	return nil
 }

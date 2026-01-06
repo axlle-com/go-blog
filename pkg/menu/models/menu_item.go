@@ -12,7 +12,7 @@ type MenuItem struct {
 	PublisherUUID *uuid.UUID `gorm:"type:uuid;index,using:hash"` // Publisher материал который доступен по URL
 	MenuID        uint       `gorm:"index" json:"menu_id"`
 	MenuItemID    *uint      `gorm:"index" json:"menu_item_id,omitempty"`
-	Path          string     `gorm:"size:1000;index" json:"-"`
+	Path          string     `gorm:"size:1000" json:"-"`
 	Title         string     `gorm:"size:100" json:"title"`
 	URL           string     `gorm:"size:1000" json:"url"`
 	Ico           *string    `gorm:"size:255" json:"ico,omitempty"`

@@ -3,7 +3,8 @@ package web
 import (
 	"net/http"
 
-	"github.com/axlle-com/blog/pkg/menu/models"
+	"github.com/axlle-com/blog/pkg/info_block/models"
+	menuModels "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
 )
@@ -28,17 +29,30 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 
 	block.Galleries = c.api.Gallery.GetForResourceUUID(block.UUID.String())
 
+	var infoBlocks []*models.InfoBlock
+	if block.ID != 0 {
+		var err2 error
+		infoBlocks, err2 = c.blockCollectionService.GetAllForParent(block)
+		if err2 != nil {
+			// Если ошибка, получаем все инфоблоки
+			infoBlocks, _ = c.blockCollectionService.GetAll()
+		}
+	} else {
+		infoBlocks, _ = c.blockCollectionService.GetAll()
+	}
+
 	c.RenderHTML(ctx,
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{
-			"title":     "Страница инфо блока",
-			"templates": c.templates(ctx),
-			"infoBlock": block,
+			"title":      "Страница инфо блока",
+			"templates":  c.templates(ctx),
+			"infoBlocks": infoBlocks,
+			"infoBlock":  block,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+				"menu":      menuModels.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
 			},
 		},
 	)

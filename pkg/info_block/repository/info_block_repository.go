@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -18,14 +17,21 @@ type InfoBlockRepository interface {
 	GetAll() ([]*models.InfoBlock, error)
 	GetByIDs(ids []uint) ([]*models.InfoBlock, error)
 	GetForResourceByFilter(filter *models.InfoBlockFilter) ([]*models.InfoBlockResponse, error)
+
 	FindByID(id uint) (*models.InfoBlock, error)
 	FindByFilter(filter *models.InfoBlockFilter) (*models.InfoBlock, error)
+
 	WithPaginate(p contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error)
+
 	Delete(infoBlock *models.InfoBlock) error
 	DeleteByIDs(ids []uint) (err error)
+
 	GetRoots() ([]*models.InfoBlock, error)
 	GetDescendants(infoBlock *models.InfoBlock) ([]*models.InfoBlock, error)
 	GetAllForParent(parent *models.InfoBlock) ([]*models.InfoBlock, error)
+
+	// Потомки для нескольких корней
+	GetDescendantsByRoots(rootIDs []uint) ([]*models.InfoBlock, error)
 }
 
 type infoBlockRepository struct {
@@ -34,8 +40,7 @@ type infoBlockRepository struct {
 }
 
 func NewInfoBlockRepo(db *gorm.DB) InfoBlockRepository {
-	r := &infoBlockRepository{db: db}
-	return r
+	return &infoBlockRepository{db: db}
 }
 
 func (r *infoBlockRepository) WithTx(tx *gorm.DB) InfoBlockRepository {
@@ -44,27 +49,35 @@ func (r *infoBlockRepository) WithTx(tx *gorm.DB) InfoBlockRepository {
 
 func (r *infoBlockRepository) Create(infoBlock *models.InfoBlock) error {
 	infoBlock.Creating()
+
+	// root
 	if infoBlock.InfoBlockID == nil || *infoBlock.InfoBlockID == 0 {
 		if err := r.db.Create(infoBlock).Error; err != nil {
 			return err
 		}
-		// Для корневого инфоблока путь – просто /id/
-		infoBlock.Path = fmt.Sprintf("/%d/", infoBlock.ID)
-		return r.db.Model(infoBlock).Update("path", infoBlock.Path).Error
+
+		infoBlock.PathLtree = fmt.Sprintf("%d", infoBlock.ID)
+
+		return r.db.Model(infoBlock).UpdateColumn("path_ltree", infoBlock.PathLtree).Error
 	}
 
-	// Если есть родитель, получаем его данные.
+	// parent
 	var parent models.InfoBlock
 	if err := r.db.First(&parent, *infoBlock.InfoBlockID).Error; err != nil {
 		return fmt.Errorf("parent not found: %w", err)
 	}
 
+	if parent.PathLtree == "" {
+		return fmt.Errorf("parent path_ltree is empty (id=%d)", parent.ID)
+	}
+
 	if err := r.db.Create(infoBlock).Error; err != nil {
 		return err
 	}
-	// Путь дочернего узла – путь родителя + id дочернего.
-	infoBlock.Path = fmt.Sprintf("%s%d/", parent.Path, infoBlock.ID)
-	return r.db.Model(infoBlock).Update("path", infoBlock.Path).Error
+
+	infoBlock.PathLtree = fmt.Sprintf("%s.%d", parent.PathLtree, infoBlock.ID)
+
+	return r.db.Model(infoBlock).UpdateColumn("path_ltree", infoBlock.PathLtree).Error
 }
 
 func (r *infoBlockRepository) FindByID(id uint) (*models.InfoBlock, error) {
@@ -79,7 +92,6 @@ func (r *infoBlockRepository) FindByFilter(filter *models.InfoBlockFilter) (*mod
 	var model models.InfoBlock
 	query := r.db.Model(&model)
 
-	// Применяем фильтры напрямую из полей структуры
 	if filter.Title != nil {
 		query = query.Where("title = ?", *filter.Title)
 	}
@@ -99,6 +111,7 @@ func (r *infoBlockRepository) FindByFilter(filter *models.InfoBlockFilter) (*mod
 	if err := query.First(&model).Error; err != nil {
 		return nil, err
 	}
+
 	return &model, nil
 }
 
@@ -133,23 +146,9 @@ func (r *infoBlockRepository) WithPaginate(p contract.Paginator, filter *models.
 	return infoBlocks, nil
 }
 
-func (r *infoBlockRepository) save(infoBlock *models.InfoBlock) error {
-	return r.db.Select(
-		"TemplateID",
-		"InfoBlockID",
-		"Media",
-		"Title",
-		"Description",
-		"Image",
-		"Path",
-	).Save(infoBlock).Error
-}
-
 func (r *infoBlockRepository) Update(new *models.InfoBlock, old *models.InfoBlock) error {
 	new.Updating()
-	new.Path = old.Path
 
-	// Если родитель не изменился – просто сохраняем изменения.
 	oldParent, newParent := uint(0), uint(0)
 	if old.InfoBlockID != nil {
 		oldParent = *old.InfoBlockID
@@ -158,59 +157,90 @@ func (r *infoBlockRepository) Update(new *models.InfoBlock, old *models.InfoBloc
 		newParent = *new.InfoBlockID
 	}
 
+	// parent not changed => обычное сохранение (path_ltree не трогаем)
 	if oldParent == newParent {
-		return r.save(new)
+		return r.db.Select(
+			"TemplateID",
+			"InfoBlockID",
+			"Media",
+			"Title",
+			"Description",
+			"Image",
+		).Save(new).Error
 	}
 
-	// Если родитель меняется, требуется пересчитать путь для нового поддерева.
+	if old.PathLtree == "" {
+		return fmt.Errorf("old path_ltree is empty (id=%d)", old.ID)
+	}
+
+	// получаем нового родителя (если есть)
 	var newParentInfoBlock models.InfoBlock
 	if newParent != 0 {
 		if err := r.db.First(&newParentInfoBlock, newParent).Error; err != nil {
 			return fmt.Errorf("new parent not found: %w", err)
 		}
-	}
-
-	// Сохраняем старый путь для поиска потомков.
-	oldPath := old.Path
-	// Сохраняем новый путь для узла.
-	var newPath string
-	if newParent == 0 {
-		// Перемещение в корень
-		newPath = fmt.Sprintf("/%d/", new.ID)
-	} else {
-		newPath = fmt.Sprintf("%s%d/", newParentInfoBlock.Path, new.ID)
-	}
-
-	// Обновляем путь для узла и всех потомков.
-	var descendants []*models.InfoBlock
-	if err := r.db.
-		Where("path LIKE ?", fmt.Sprintf("%s%%", oldPath)).
-		Find(&descendants).Error; err != nil {
-		return err
-	}
-
-	// Рассчитываем смещение нового пути относительно старого.
-	// Для каждого потомка новый путь = newPath + (old descendant.Path без префикса oldPath).
-	for _, node := range descendants {
-		relative := strings.TrimPrefix(node.Path, oldPath)
-		node.Path = newPath + relative
-		if err := r.db.Model(node).Update("path", node.Path).Error; err != nil {
-			return err
+		if newParentInfoBlock.PathLtree == "" {
+			return fmt.Errorf("new parent path_ltree is empty (id=%d)", newParentInfoBlock.ID)
 		}
 	}
 
-	// Обновляем сам узел.
-	new.Path = newPath
-	return r.save(new)
+	// новый путь для корня поддерева
+	var newPathLtree string
+	if newParent == 0 {
+		newPathLtree = fmt.Sprintf("%d", new.ID)
+	} else {
+		newPathLtree = fmt.Sprintf("%s.%d", newParentInfoBlock.PathLtree, new.ID)
+	}
+
+	tx := r.db.Begin()
+	defer func() {
+		if rec := recover(); rec != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// 1) одним запросом обновляем path_ltree у узла и всех потомков
+	// path_ltree = newPath || subpath(path_ltree, nlevel(oldPath))
+	// WHERE path_ltree <@ oldPath
+	if err := tx.Model(&models.InfoBlock{}).
+		Where("path_ltree <@ ?::ltree", old.PathLtree).
+		UpdateColumn(
+			"path_ltree",
+			gorm.Expr("?::ltree || subpath(path_ltree, nlevel(?::ltree))", newPathLtree, old.PathLtree),
+		).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to update subtree paths: %w", err)
+	}
+
+	// 2) сохраняем поля узла (включая нового родителя и новый path_ltree)
+	new.PathLtree = newPathLtree
+	if err := tx.Select(
+		"TemplateID",
+		"InfoBlockID",
+		"Media",
+		"Title",
+		"Description",
+		"Image",
+		"PathLtree",
+	).Save(new).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (r *infoBlockRepository) Delete(infoBlock *models.InfoBlock) error {
 	if !infoBlock.Deleting() {
 		return errors.New("deletion errors occurred")
 	}
+	if infoBlock.PathLtree == "" {
+		return fmt.Errorf("path_ltree is empty (id=%d)", infoBlock.ID)
+	}
 
-	likePattern := fmt.Sprintf("%s%%", infoBlock.Path)
-	return r.db.Where("path LIKE ?", likePattern).Delete(&models.InfoBlock{}).Error
+	// узел + потомки
+	return r.db.Where("path_ltree <@ ?::ltree", infoBlock.PathLtree).
+		Delete(&models.InfoBlock{}).Error
 }
 
 func (r *infoBlockRepository) GetAll() ([]*models.InfoBlock, error) {
@@ -224,16 +254,20 @@ func (r *infoBlockRepository) GetAll() ([]*models.InfoBlock, error) {
 
 func (r *infoBlockRepository) GetByIDs(ids []uint) ([]*models.InfoBlock, error) {
 	var infoBlocks []*models.InfoBlock
-	query := r.db.Where("id IN ?", ids)
-
-	if err := query.Find(&infoBlocks).Error; err != nil {
-		return nil, err
+	if len(ids) == 0 {
+		return []*models.InfoBlock{}, nil
 	}
 
+	if err := r.db.Where("id IN ?", ids).Find(&infoBlocks).Error; err != nil {
+		return nil, err
+	}
 	return infoBlocks, nil
 }
 
 func (r *infoBlockRepository) DeleteByIDs(ids []uint) (err error) {
+	if len(ids) == 0 {
+		return nil
+	}
 	return r.db.Where("id IN ?", ids).Delete(&models.InfoBlock{}).Error
 }
 
@@ -284,28 +318,73 @@ func (r *infoBlockRepository) GetRoots() ([]*models.InfoBlock, error) {
 
 func (r *infoBlockRepository) GetDescendants(infoBlock *models.InfoBlock) ([]*models.InfoBlock, error) {
 	var descendants []*models.InfoBlock
-	likePattern := fmt.Sprintf("%s%%", infoBlock.Path)
+	if infoBlock == nil || infoBlock.ID == 0 || infoBlock.PathLtree == "" {
+		return []*models.InfoBlock{}, nil
+	}
+
 	err := r.db.
-		Where("path LIKE ? AND id <> ?", likePattern, infoBlock.ID).
+		Where("path_ltree <@ ?::ltree AND id <> ?", infoBlock.PathLtree, infoBlock.ID).
 		Order("id ASC").
 		Find(&descendants).Error
-	if err != nil {
-		return nil, err
-	}
 
 	return descendants, err
 }
 
 func (r *infoBlockRepository) GetAllForParent(parent *models.InfoBlock) ([]*models.InfoBlock, error) {
+	// Сохраняю семантику как в твоём старом коде:
+	// "все элементы, которые НЕ являются потомками parent (и не сам parent)"
 	var items []*models.InfoBlock
-	likePattern := fmt.Sprintf("%s%%", parent.Path)
+	if parent == nil || parent.ID == 0 || parent.PathLtree == "" {
+		return []*models.InfoBlock{}, nil
+	}
+
 	err := r.db.
-		Where("path NOT LIKE ? AND id <> ?", likePattern, parent.ID).
+		Where("NOT (path_ltree <@ ?::ltree) AND id <> ?", parent.PathLtree, parent.ID).
 		Order("id ASC").
 		Find(&items).Error
-	if err != nil {
+
+	return items, err
+}
+
+func (r *infoBlockRepository) GetDescendantsByRoots(rootIDs []uint) ([]*models.InfoBlock, error) {
+	if len(rootIDs) == 0 {
+		return []*models.InfoBlock{}, nil
+	}
+
+	// берём пути корней
+	type row struct {
+		ID        uint
+		PathLtree string
+	}
+	var roots []row
+	if err := r.db.Model(&models.InfoBlock{}).
+		Select("id, path_ltree").
+		Where("id IN ?", rootIDs).
+		Find(&roots).Error; err != nil {
 		return nil, err
 	}
 
-	return items, err
+	paths := make([]string, 0, len(roots))
+	for _, rt := range roots {
+		if rt.PathLtree != "" {
+			paths = append(paths, rt.PathLtree)
+		}
+	}
+	if len(paths) == 0 {
+		return []*models.InfoBlock{}, nil
+	}
+
+	// OR-условия без Raw/unnest
+	q := r.db.Model(&models.InfoBlock{}).Where("1=0")
+	for _, p := range paths {
+		q = q.Or("path_ltree <@ ?::ltree", p)
+	}
+
+	var descendants []*models.InfoBlock
+	err := q.
+		Where("id NOT IN ?", rootIDs).
+		Order("id ASC").
+		Find(&descendants).Error
+
+	return descendants, err
 }

@@ -16,6 +16,8 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	m.db.Exec("CREATE EXTENSION IF NOT EXISTS ltree;")
+
 	err := m.db.AutoMigrate(
 		&models.Post{},
 		&models.PostCategory{},
@@ -34,7 +36,7 @@ func (m *migrator) Migrate() error {
 	m.db.Exec(db.HashIndex("post_categories", "uuid"))
 	m.db.Exec(db.HashIndex("post_categories", "alias"))
 	m.db.Exec(db.HashIndex("post_categories", "url"))
-	m.db.Exec(db.LikePrefixIndex("post_categories", "path"))
+	m.db.Exec(db.LtreeGistIndex("post_categories", "path_ltree"))
 
 	m.db.Exec(db.HashIndex("post_tags", "name"))
 	m.db.Exec(db.HashIndex("post_tags", "alias"))

@@ -16,6 +16,8 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	m.db.Exec("CREATE EXTENSION IF NOT EXISTS ltree;")
+
 	err := m.db.AutoMigrate(
 		&models.Menu{},
 		&models.MenuItem{},
@@ -28,7 +30,7 @@ func (m *migrator) Migrate() error {
 	m.db.Exec(db.HashIndex("menus", "uuid"))
 	m.db.Exec(db.HashIndex("menu_items", "publisher_uuid"))
 	m.db.Exec(db.HashIndex("menu_items", "url"))
-	m.db.Exec(db.LikePrefixIndex("menu_items", "path"))
+	m.db.Exec(db.LtreeGistIndex("menu_items", "path_ltree"))
 
 	return nil
 }

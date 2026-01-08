@@ -105,8 +105,8 @@ func LoadConfig() (err error) {
 		instance.dbPassword = getEnv("DB_PASSWORD", "secret")
 
 		instance.dbNameTest = getEnv("DB_NAME_TEST", "cms_test")
-		instance.dbUserTest = getEnv("DB_USER_TEST", "postgres")
-		instance.dbPasswordTest = getEnv("DB_PASSWORD_TEST", "secret")
+		instance.dbUserTest = getEnv("DB_USER_TEST", "postgres_test")
+		instance.dbPasswordTest = getEnv("DB_PASSWORD_TEST", "secret_test")
 
 		instance.uploadsPath = getEnv("FILE_UPLOADS_PATH", "/uploads/")
 		instance.srcFolder = getEnv("FILE_SRC_FOLDER", "src")
@@ -186,7 +186,7 @@ func (c *config) DBUrlTest() string {
 			" user=" + c.dbUserTest +
 			" password=" + c.dbPasswordTest +
 			" dbname=" + c.dbNameTest +
-			" appPort=" + c.dbPort +
+			" port=" + c.dbPort +
 			" sslmode=disable TimeZone=Europe/Moscow"
 	}
 	return dsn

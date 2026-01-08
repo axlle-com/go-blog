@@ -16,6 +16,8 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	m.db.Exec("CREATE EXTENSION IF NOT EXISTS ltree;")
+
 	err := m.db.AutoMigrate(
 		&models.InfoBlock{},
 		&models.InfoBlockHasResource{},
@@ -27,7 +29,7 @@ func (m *migrator) Migrate() error {
 
 	m.db.Exec(db.HashIndex("info_blocks", "uuid"))
 	m.db.Exec(db.HashIndex("info_block_has_resources", "resource_uuid"))
-	m.db.Exec(db.LikePrefixIndex("info_blocks", "path"))
+	m.db.Exec(db.LtreeGistIndex("info_blocks", "path_ltree"))
 
 	return nil
 }

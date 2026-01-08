@@ -189,12 +189,17 @@ func GinIndex(table string, column string) string {
 }
 
 // LikePrefixIndex создаёт btree-индекс под LIKE 'prefix%'
-// Пример: WHERE path LIKE '/3/%'
 func LikePrefixIndex(table string, column string) string {
-	// отдельное имя, чтобы не конфликтовать с обычным idx_table_col
 	name := IndexName(table, column, "like")
 	return fmt.Sprintf(
 		"CREATE INDEX IF NOT EXISTS %s ON %s (%s text_pattern_ops);",
 		name, table, column,
 	)
+}
+
+// LtreeGistIndex создаёт GiST индекс для ltree колонки
+// Пример: CREATE INDEX IF NOT EXISTS idx_table_path_ltree ON table USING gist (path_ltree);
+func LtreeGistIndex(table string, column string) string {
+	name := IndexName(table, column)
+	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING gist (%s);", name, table, column)
 }

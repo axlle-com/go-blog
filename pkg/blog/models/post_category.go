@@ -15,7 +15,7 @@ type PostCategory struct {
 	UserID             *uint          `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	TemplateID         *uint          `gorm:"index" json:"template_id,omitempty"`
 	PostCategoryID     *uint          `gorm:"index" json:"post_category_id,omitempty"`
-	Path               string         `gorm:"size:1000" json:"-"`
+	PathLtree          string         `gorm:"type:ltree;column:path_ltree;not null" json:"-"`
 	MetaTitle          *string        `gorm:"size:100" json:"meta_title,omitempty"`
 	MetaDescription    *string        `gorm:"size:200" json:"meta_description,omitempty"`
 	Alias              string         `gorm:"size:255;unique" json:"alias"`
@@ -71,6 +71,29 @@ func (c *PostCategory) GetTitle() string {
 	return c.Title
 }
 
+func (c *PostCategory) UpdatedFields() []string {
+	return []string{
+		"UserID",
+		"TemplateID",
+		"PostCategoryID",
+		"MetaTitle",
+		"MetaDescription",
+		"Alias",
+		"URL",
+		"IsPublished",
+		"IsFavourites",
+		"InSitemap",
+		"Image",
+		"ShowImage",
+		"Title",
+		"TitleShort",
+		"DescriptionPreview",
+		"Description",
+		"Sort",
+		"PathLtree",
+	}
+}
+
 func (c *PostCategory) GetTemplateName() string {
 	if c.Template != nil {
 		return c.Template.GetFullName(c.GetTable())
@@ -120,9 +143,11 @@ func (c *PostCategory) GetTemplateID() uint {
 
 func (c *PostCategory) GetCategoryTitleShort() string {
 	var titleShort string
-	if c.Category != nil {
+
+	if c.Category != nil && c.Category.TitleShort != nil {
 		titleShort = *c.Category.TitleShort
 	}
+
 	return titleShort
 }
 

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/axlle-com/blog/app/logger"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type MenuItemRepository interface {
@@ -54,25 +54,15 @@ func (r *menuItemRepository) GetDescendantsByID(id uint) ([]*models.MenuItem, er
 }
 
 func (r *menuItemRepository) GetByIDs(ids []uint) ([]*models.MenuItem, error) {
-	var categories []*models.MenuItem
-	if err := r.db.Where("id IN (?)", ids).Find(&categories).Error; err != nil {
+	var items []*models.MenuItem
+	if err := r.db.Where("id IN (?)", ids).Find(&items).Error; err != nil {
 		return nil, err
 	}
-	return categories, nil
+	return items, nil
 }
 
 func (r *menuItemRepository) save(menuItem *models.MenuItem) error {
-	return r.db.Select(
-		"UserID",
-		"PublisherUUID",
-		"MenuID",
-		"MenuItemID",
-		"Path",
-		"Title",
-		"URL",
-		"Ico",
-		"Sort",
-	).Save(menuItem).Error
+	return r.db.Select(menuItem.UpdatedFields()).Save(menuItem).Error
 }
 
 func (r *menuItemRepository) DeleteByID(id uint) error {
@@ -85,7 +75,10 @@ func (r *menuItemRepository) DeleteByID(id uint) error {
 
 func (r *menuItemRepository) GetByParams(params map[string]any) ([]*models.MenuItem, error) {
 	var items []*models.MenuItem
-	if err := r.db.Where(params).Order(fmt.Sprintf("%s.sort ASC", (&models.MenuItem{}).GetTable())).Find(&items).Error; err != nil {
+	if err := r.db.
+		Where(params).
+		Order(fmt.Sprintf("%s.sort ASC", (&models.MenuItem{}).GetTable())).
+		Find(&items).Error; err != nil {
 		return nil, err
 	}
 	return items, nil
@@ -98,24 +91,28 @@ func (r *menuItemRepository) GetByFilter(paginator contract.Paginator, filter *m
 
 	query := r.db.Model(&model)
 
-	if filter.MenuID != nil && *filter.MenuID != 0 {
-		query = query.Where("menu_id = ?", *filter.MenuID)
-	}
-
-	if filter.ForNotMenuItemID != nil && *filter.ForNotMenuItemID != 0 {
-		var nodePath string
-		err := r.db.Table(model.GetTable()).
-			Where("id = ?", *filter.ForNotMenuItemID).
-			Pluck("path", &nodePath).Error
-		if err != nil {
-			return nil, err
+	if filter != nil {
+		if filter.MenuID != nil && *filter.MenuID != 0 {
+			query = query.Where("menu_id = ?", *filter.MenuID)
 		}
 
-		query = query.Where("path NOT LIKE ?", nodePath+"%")
-	}
+		// исключить узел и всех его потомков из выборки (чтобы нельзя было выбрать родителем потомка)
+		if filter.ForNotMenuItemID != nil && *filter.ForNotMenuItemID != 0 {
+			var nodePathLtree string
+			err := r.db.Table(model.GetTable()).
+				Where("id = ?", *filter.ForNotMenuItemID).
+				Pluck("path_ltree", &nodePathLtree).Error
+			if err != nil {
+				return nil, err
+			}
+			if nodePathLtree != "" {
+				query = query.Where("NOT (path_ltree <@ ?::ltree)", nodePathLtree)
+			}
+		}
 
-	if filter.IDs != nil {
-		query = query.Where("id IN ?", filter.IDs)
+		if filter.IDs != nil {
+			query = query.Where("id IN ?", filter.IDs)
+		}
 	}
 
 	if paginator == nil {
@@ -134,23 +131,23 @@ func (r *menuItemRepository) GetByFilter(paginator contract.Paginator, filter *m
 	}
 
 	paginator.SetTotal(int(total))
-
 	return items, nil
 }
 
 func (r *menuItemRepository) GetAll() ([]*models.MenuItem, error) {
-	var menuItems []*models.MenuItem
-	if err := r.db.Order("id ASC").Find(&menuItems).Error; err != nil {
+	var items []*models.MenuItem
+	if err := r.db.Order("id ASC").Find(&items).Error; err != nil {
 		return nil, err
 	}
-	return menuItems, nil
+	return items, nil
 }
 
 func (r *menuItemRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.MenuItem{}).Pluck("id", &ids).Error; err != nil {
-		logger.Error(err)
+		return nil, err
 	}
+
 	return ids, nil
 }
 
@@ -159,39 +156,64 @@ func (r *menuItemRepository) Delete(menuItem *models.MenuItem) error {
 		return fmt.Errorf("menuItem is nil")
 	}
 
-	likePattern := fmt.Sprintf("%s%%", menuItem.Path)
-	return r.db.Where("path LIKE ?", likePattern).Delete(&models.MenuItem{}).Error
+	// если PathLtree не заполнен — подстрахуемся и возьмём из БД
+	path := menuItem.PathLtree
+	if path == "" && menuItem.ID != 0 {
+		var tmp models.MenuItem
+		if err := r.db.Select("path_ltree").First(&tmp, menuItem.ID).Error; err != nil {
+			return err
+		}
+
+		path = tmp.PathLtree
+	}
+
+	if path == "" {
+		return fmt.Errorf("empty path_ltree for delete")
+	}
+
+	return r.db.Where("path_ltree <@ ?::ltree", path).Delete(&models.MenuItem{}).Error
 }
 
 func (r *menuItemRepository) GetRoots() ([]*models.MenuItem, error) {
 	var roots []*models.MenuItem
 	err := r.db.Where("menu_item_id IS NULL").Find(&roots).Error
+
 	return roots, err
 }
 
 func (r *menuItemRepository) Create(menuItem *models.MenuItem) error {
+	if menuItem == nil {
+		return fmt.Errorf("menuItem is nil")
+	}
+
 	menuItem.Creating()
+
+	// Если корень (MenuItemID NULL или 0)
 	if menuItem.MenuItemID == nil || *menuItem.MenuItemID == 0 {
 		if err := r.db.Create(menuItem).Error; err != nil {
 			return err
 		}
-		// Для корневой категории путь – просто /id/
-		menuItem.Path = fmt.Sprintf("/%d/", menuItem.ID)
-		return r.db.Model(menuItem).Update("path", menuItem.Path).Error
+
+		menuItem.PathLtree = fmt.Sprintf("%d", menuItem.ID)
+		return r.db.Model(menuItem).Update("path_ltree", menuItem.PathLtree).Error
 	}
 
-	// Если есть родитель, получаем его данные.
+	// родитель
 	var parent models.MenuItem
 	if err := r.db.First(&parent, *menuItem.MenuItemID).Error; err != nil {
 		return fmt.Errorf("parent not found: %w", err)
+	}
+	if parent.PathLtree == "" {
+		return fmt.Errorf("parent has empty path_ltree (id=%d)", parent.ID)
 	}
 
 	if err := r.db.Create(menuItem).Error; err != nil {
 		return err
 	}
-	// Путь дочернего узла – путь родителя + id дочернего.
-	menuItem.Path = fmt.Sprintf("%s%d/", parent.Path, menuItem.ID)
-	return r.db.Model(menuItem).Update("path", menuItem.Path).Error
+
+	menuItem.PathLtree = fmt.Sprintf("%s.%d", parent.PathLtree, menuItem.ID)
+
+	return r.db.Model(menuItem).Update("path_ltree", menuItem.PathLtree).Error
 }
 
 func (r *menuItemRepository) GetByID(id uint) (*models.MenuItem, error) {
@@ -204,9 +226,8 @@ func (r *menuItemRepository) GetByID(id uint) (*models.MenuItem, error) {
 
 func (r *menuItemRepository) GetDescendants(menuItem *models.MenuItem) ([]*models.MenuItem, error) {
 	var descendants []*models.MenuItem
-	likePattern := fmt.Sprintf("%s%%", menuItem.Path)
 	err := r.db.
-		Where("path LIKE ? AND id <> ?", likePattern, menuItem.ID).
+		Where("path_ltree <@ ?::ltree AND id <> ?", menuItem.PathLtree, menuItem.ID).
 		Order("id ASC").
 		Find(&descendants).Error
 	if err != nil {
@@ -216,83 +237,137 @@ func (r *menuItemRepository) GetDescendants(menuItem *models.MenuItem) ([]*model
 }
 
 func (r *menuItemRepository) GetAllForParent(parent *models.MenuItem) ([]*models.MenuItem, error) {
-	var descendants []*models.MenuItem
-	likePattern := fmt.Sprintf("%s%%", parent.Path)
+	var items []*models.MenuItem
 	err := r.db.
-		Where("path NOT LIKE ? AND id <> ?", likePattern, parent.ID).
+		Where("NOT (path_ltree <@ ?::ltree) AND id <> ?", parent.PathLtree, parent.ID).
 		Order("id ASC").
-		Find(&descendants).Error
+		Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
-	return descendants, nil
+	return items, nil
 }
 
-func (r *menuItemRepository) Update(new *models.MenuItem, old *models.MenuItem) error {
+func validatePathEndsWithID(path string, id uint) error {
+	if path == "" {
+		return fmt.Errorf("empty path_ltree")
+	}
+
+	last := path
+	if i := strings.LastIndex(path, "."); i >= 0 {
+		last = path[i+1:]
+	}
+	want := fmt.Sprintf("%d", id)
+	if last != want {
+		return fmt.Errorf("bad path_ltree=%q: last label=%q, expected id=%q", path, last, want)
+	}
+
+	return nil
+}
+
+func (r *menuItemRepository) Update(new *models.MenuItem, _ *models.MenuItem) error {
+	if new == nil {
+		return fmt.Errorf("new is nil")
+	}
+
 	new.Updating()
-	new.Path = old.Path
 
-	// Если родитель не изменился – просто сохраняем изменения.
-	oldParent, newParent := uint(0), uint(0)
-	if old.MenuItemID != nil {
-		oldParent = *old.MenuItemID
-	}
-	if new.MenuItemID != nil {
-		newParent = *new.MenuItemID
-	}
-
-	if oldParent == newParent {
-		return r.save(new)
-	}
-
-	// Если родитель меняется, требуется пересчитать путь для нового поддерева.
-	var newParentMenuItem models.MenuItem
-	if newParent != 0 {
-		if err := r.db.First(&newParentMenuItem, newParent).Error; err != nil {
-			return fmt.Errorf("new parent not found: %w", err)
-		}
-	}
-
-	// Сохраняем старый путь для поиска потомков.
-	oldPath := old.Path
-	// Сохраняем новый путь для узла.
-	var newPath string
-	if newParent == 0 {
-		// Перемещение в корень
-		newPath = fmt.Sprintf("/%d/", new.ID)
-	} else {
-		newPath = fmt.Sprintf("%s%d/", newParentMenuItem.Path, new.ID)
-	}
-
-	// Обновляем путь для узла и всех потомков.
-	var descendants []*models.MenuItem
-	if err := r.db.
-		Where("path LIKE ?", fmt.Sprintf("%s%%", oldPath)).
-		Find(&descendants).Error; err != nil {
-		return err
-	}
-
-	// Рассчитываем смещение нового пути относительно старого.
-	// Для каждого потомка новый путь = newPath + (old descendant.Path без префикса oldPath).
-	for _, node := range descendants {
-		relative := strings.TrimPrefix(node.Path, oldPath)
-		node.Path = newPath + relative
-		if err := r.db.Model(node).Update("path", node.Path).Error; err != nil {
+	return r.db.Transaction(func(db *gorm.DB) error {
+		// 1) читаем old под блокировкой
+		var old models.MenuItem
+		if err := db.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&old, new.ID).Error; err != nil {
 			return err
 		}
-	}
 
-	// Обновляем сам узел.
-	new.Path = newPath
-	return r.save(new)
+		if err := validatePathEndsWithID(old.PathLtree, old.ID); err != nil {
+			return fmt.Errorf("refuse to update because old path_ltree is invalid: %w", err)
+		}
+
+		// 2) определяем oldParent/newParent
+		oldParent, newParent := uint(0), uint(0)
+		if old.MenuItemID != nil {
+			oldParent = *old.MenuItemID
+		}
+		if new.MenuItemID != nil {
+			newParent = *new.MenuItemID
+		}
+
+		// 2.0) защита: parent=self
+		if newParent != 0 && newParent == old.ID {
+			return fmt.Errorf("cannot set parent to self: id=%d", old.ID)
+		}
+
+		// ВАЖНО: не даём случайно менять menu_id через Update (иначе можно разорвать целостность дерева)
+		new.MenuID = old.MenuID
+
+		// 2.1) если родитель не менялся — обычный save, но path_ltree оставляем прежним
+		if oldParent == newParent {
+			new.PathLtree = old.PathLtree
+			return db.Select(new.UpdatedFields()).Save(new).Error
+		}
+
+		// 3) валидируем нового родителя (если перенос не в корень)
+		var newParentMenuItem models.MenuItem
+		if newParent != 0 {
+			if err := db.Select("id", "path_ltree", "menu_id").
+				First(&newParentMenuItem, newParent).Error; err != nil {
+				return fmt.Errorf("new parent not found: %w", err)
+			}
+			if newParentMenuItem.PathLtree == "" {
+				return fmt.Errorf("new parent has empty path_ltree (id=%d)", newParentMenuItem.ID)
+			}
+			// защита: нельзя переносить в другой menu
+			if newParentMenuItem.MenuID != old.MenuID {
+				return fmt.Errorf(
+					"cannot move node between menus: old menu_id=%d new parent menu_id=%d",
+					old.MenuID, newParentMenuItem.MenuID,
+				)
+			}
+
+			// защита: нельзя завернуть в своего потомка (строковая проверка по ltree-путям)
+			// (newParentMenuItem.PathLtree начинается с old.PathLtree+".")
+			oldPrefix := old.PathLtree
+			descPrefix := oldPrefix + "."
+			if newParentMenuItem.PathLtree == oldPrefix || strings.HasPrefix(newParentMenuItem.PathLtree, descPrefix) {
+				return fmt.Errorf(
+					"cannot move node under its descendant: node=%d new_parent=%d",
+					old.ID, newParentMenuItem.ID,
+				)
+			}
+		}
+
+		oldPathLtree := old.PathLtree
+
+		var newPathLtree string
+		if newParent == 0 {
+			newPathLtree = fmt.Sprintf("%d", new.ID)
+		} else {
+			newPathLtree = fmt.Sprintf("%s.%d", newParentMenuItem.PathLtree, new.ID)
+		}
+
+		// 4) обновляем потомков (кроме корня поддерева), строго внутри menu_id
+		if err := db.Exec(`
+			UPDATE menu_items
+			SET path_ltree = ?::ltree || subpath(path_ltree, nlevel(?::ltree))
+			WHERE menu_id = ?
+			  AND path_ltree <@ ?::ltree
+			  AND path_ltree <> ?::ltree
+		`, newPathLtree, oldPathLtree, old.MenuID, oldPathLtree, oldPathLtree).Error; err != nil {
+			return fmt.Errorf("failed to update subtree paths: %w", err)
+		}
+
+		// 5) обновляем сам узел
+		new.PathLtree = newPathLtree
+		return db.Select(new.UpdatedFields()).Save(new).Error
+	})
 }
 
 func (r *menuItemRepository) UpdateURLForPublisher(publisherUuid uuid.UUID, newURL string) (int64, error) {
 	res := r.db.Model(&models.MenuItem{}).
 		Where("publisher_uuid = ?", publisherUuid).
-		Updates(map[string]any{
-			"url": newURL,
-		})
+		Updates(map[string]any{"url": newURL})
+
 	return res.RowsAffected, res.Error
 }
 

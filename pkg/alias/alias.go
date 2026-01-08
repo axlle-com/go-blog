@@ -44,13 +44,13 @@ func (p *provider) Generate(publisher contract.Publisher, aliasOld string) strin
 
 func (p *provider) Create(title string) string {
 	title = strings.ToLower(title)
-	alias := p.transliterate(title)
+	alias := p.Transliterate(title)
 	alias = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(alias, "-")
 	alias = strings.Trim(alias, "-")
 	return alias
 }
 
-func (p *provider) transliterate(input string) string {
+func (p *provider) Transliterate(input string) string {
 	translitMap := map[rune]string{
 		'а': "a", 'б': "b", 'в': "v", 'г': "g", 'д': "d", 'е': "e", 'ё': "yo", 'ж': "zh",
 		'з': "z", 'и': "i", 'й': "y", 'к': "k", 'л': "l", 'м': "m", 'н': "n", 'о': "o",

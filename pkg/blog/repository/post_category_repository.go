@@ -10,6 +10,7 @@ import (
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CategoryRepository interface {
@@ -54,41 +55,23 @@ func (r *categoryRepository) GetDescendantsByID(id uint) ([]*models.PostCategory
 	if err != nil {
 		return nil, err
 	}
-
 	return r.GetDescendants(category)
 }
 
 func (r *categoryRepository) GetByIDs(ids []uint) ([]*models.PostCategory, error) {
+	if len(ids) == 0 {
+		return []*models.PostCategory{}, nil
+	}
+
 	var categories []*models.PostCategory
-	if err := r.db.Where("id IN (?)", ids).Find(&categories).Error; err != nil {
+	if err := r.db.Where("id IN ?", ids).Find(&categories).Error; err != nil {
 		return nil, err
 	}
 	return categories, nil
 }
 
 func (r *categoryRepository) save(category *models.PostCategory) error {
-	return r.db.Select(
-		"UserID",
-		"TemplateID",
-		"PostCategoryID",
-		"LeftSet",
-		"RightSet",
-		"Level",
-		"MetaTitle",
-		"MetaDescription",
-		"Alias",
-		"URL",
-		"IsPublished",
-		"IsFavourites",
-		"InSitemap",
-		"Image",
-		"ShowImage",
-		"Title",
-		"TitleShort",
-		"DescriptionPreview",
-		"Description",
-		"Sort",
-	).Save(category).Error
+	return r.db.Select(category.UpdatedFields()).Save(category).Error
 }
 
 func (r *categoryRepository) DeleteByID(id uint) error {
@@ -104,6 +87,7 @@ func (r *categoryRepository) GetAll() ([]*models.PostCategory, error) {
 	if err := r.db.Order("id ASC").Find(&postCategories).Error; err != nil {
 		return nil, err
 	}
+
 	return postCategories, nil
 }
 
@@ -111,7 +95,9 @@ func (r *categoryRepository) GetAllIds() ([]uint, error) {
 	var ids []uint
 	if err := r.db.Model(&models.PostCategory{}).Pluck("id", &ids).Error; err != nil {
 		logger.Error(err)
+		return nil, err
 	}
+
 	return ids, nil
 }
 
@@ -168,8 +154,28 @@ func (r *categoryRepository) WithPaginate(p contract.Paginator, filter *models.C
 }
 
 func (r *categoryRepository) Delete(category *models.PostCategory) error {
-	likePattern := fmt.Sprintf("%s%%", category.Path)
-	return r.db.Where("path LIKE ?", likePattern).Delete(&models.PostCategory{}).Error
+	if category == nil {
+		return fmt.Errorf("category is nil")
+	}
+
+	// если PathLtree не заполнен — подстрахуемся и возьмём из БД
+	path := category.PathLtree
+	if path == "" && category.ID != 0 {
+		var tmp models.PostCategory
+		if err := r.db.Select("path_ltree").First(&tmp, category.ID).Error; err != nil {
+			return err
+		}
+
+		path = tmp.PathLtree
+	}
+
+	if path == "" {
+		return fmt.Errorf("empty path_ltree for delete (id=%d)", category.ID)
+	}
+
+	// удаляем узел и всех потомков
+	return r.db.Where("path_ltree <@ ?::ltree", path).
+		Delete(&models.PostCategory{}).Error
 }
 
 func (r *categoryRepository) GetRoots() ([]*models.PostCategory, error) {
@@ -179,28 +185,38 @@ func (r *categoryRepository) GetRoots() ([]*models.PostCategory, error) {
 }
 
 func (r *categoryRepository) Create(category *models.PostCategory) error {
+	if category == nil {
+		return fmt.Errorf("category is nil")
+	}
+
 	category.Creating()
+
+	// root
 	if category.PostCategoryID == nil || *category.PostCategoryID == 0 {
 		if err := r.db.Create(category).Error; err != nil {
 			return err
 		}
-		// Для корневой категории путь – просто /id/
-		category.Path = fmt.Sprintf("/%d/", category.ID)
-		return r.db.Model(category).Update("path", category.Path).Error
+		category.PathLtree = fmt.Sprintf("%d", category.ID)
+		return r.db.Model(category).UpdateColumn("path_ltree", category.PathLtree).Error
 	}
 
-	// Если есть родитель, получаем его данные.
+	// parent
 	var parent models.PostCategory
 	if err := r.db.First(&parent, *category.PostCategoryID).Error; err != nil {
 		return fmt.Errorf("parent not found: %w", err)
 	}
 
+	if parent.PathLtree == "" {
+		return fmt.Errorf("parent path_ltree is empty (id=%d)", parent.ID)
+	}
+
 	if err := r.db.Create(category).Error; err != nil {
 		return err
 	}
-	// Путь дочернего узла – путь родителя + id дочернего.
-	category.Path = fmt.Sprintf("%s%d/", parent.Path, category.ID)
-	return r.db.Model(category).Update("path", category.Path).Error
+
+	category.PathLtree = fmt.Sprintf("%s.%d", parent.PathLtree, category.ID)
+
+	return r.db.Model(category).Update("path_ltree", category.PathLtree).Error
 }
 
 func (r *categoryRepository) GetByID(id uint) (*models.PostCategory, error) {
@@ -223,88 +239,131 @@ func (r *categoryRepository) FindByParam(field string, value any) (*models.PostC
 }
 
 func (r *categoryRepository) GetDescendants(category *models.PostCategory) ([]*models.PostCategory, error) {
+	if category == nil || category.ID == 0 || category.PathLtree == "" {
+		return []*models.PostCategory{}, nil
+	}
+
 	var descendants []*models.PostCategory
-	likePattern := fmt.Sprintf("%s%%", category.Path)
 	err := r.db.
-		Where("path LIKE ? AND id <> ?", likePattern, category.ID).
+		Where("path_ltree <@ ?::ltree AND id <> ?", category.PathLtree, category.ID).
 		Order("id ASC").
 		Find(&descendants).Error
 	if err != nil {
 		return nil, err
 	}
-
 	return descendants, nil
 }
 
 func (r *categoryRepository) GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error) {
-	var descendants []*models.PostCategory
-	likePattern := fmt.Sprintf("%s%%", parent.Path)
+	if parent == nil || parent.ID == 0 || parent.PathLtree == "" {
+		return []*models.PostCategory{}, nil
+	}
+
+	var items []*models.PostCategory
 	err := r.db.
-		Where("path NOT LIKE ? AND id <> ?", likePattern, parent.ID).
+		Where("NOT (path_ltree <@ ?::ltree) AND id <> ?", parent.PathLtree, parent.ID).
 		Order("id ASC").
-		Find(&descendants).Error
+		Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
-	return descendants, nil
+	return items, nil
 }
 
-func (r *categoryRepository) Update(new *models.PostCategory, old *models.PostCategory) error {
+func (r *categoryRepository) Update(new *models.PostCategory, _ *models.PostCategory) error {
+	if new == nil {
+		return fmt.Errorf("new is nil")
+	}
+
 	new.Updating()
 
-	// Если родитель не изменился – просто сохраняем изменения.
-	oldParent, newParent := uint(0), uint(0)
-	if old.PostCategoryID != nil {
-		oldParent = *old.PostCategoryID
-	}
-	if new.PostCategoryID != nil {
-		newParent = *new.PostCategoryID
-	}
-
-	if oldParent == newParent {
-		return r.save(new)
-	}
-
-	// Если родитель меняется, требуется пересчитать путь для нового поддерева.
-	var newParentCategory models.PostCategory
-	if newParent != 0 {
-		if err := r.db.First(&newParentCategory, newParent).Error; err != nil {
-			return fmt.Errorf("new parent not found: %w", err)
-		}
-	}
-
-	// Сохраняем старый путь для поиска потомков.
-	oldPath := old.Path
-	// Сохраняем новый путь для узла.
-	var newPath string
-	if newParent == 0 {
-		// Перемещение в корень
-		newPath = fmt.Sprintf("/%d/", new.ID)
-	} else {
-		newPath = fmt.Sprintf("%s%d/", newParentCategory.Path, new.ID)
-	}
-
-	// Обновляем путь для узла и всех потомков.
-	var descendants []*models.PostCategory
-	if err := r.db.
-		Where("path LIKE ?", fmt.Sprintf("%s%%", oldPath)).
-		Find(&descendants).Error; err != nil {
-		return err
-	}
-
-	// Рассчитываем смещение нового пути относительно старого.
-	// Для каждого потомка новый путь = newPath + (old descendant.Path без префикса oldPath).
-	for _, node := range descendants {
-		relative := strings.TrimPrefix(node.Path, oldPath)
-		node.Path = newPath + relative
-		if err := r.db.Model(node).Update("path", node.Path).Error; err != nil {
+	return r.db.Transaction(func(db *gorm.DB) error {
+		// 1) читаем old под блокировкой
+		var old models.PostCategory
+		if err := db.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&old, new.ID).Error; err != nil {
 			return err
 		}
-	}
 
-	// Обновляем сам узел.
-	new.Path = newPath
-	return r.save(new)
+		if err := validatePathEndsWithID(old.PathLtree, old.ID); err != nil {
+			return fmt.Errorf("refuse to update because old path_ltree is invalid: %w", err)
+		}
+
+		// 2) определяем oldParent/newParent
+		oldParent, newParent := uint(0), uint(0)
+		if old.PostCategoryID != nil {
+			oldParent = *old.PostCategoryID
+		}
+		if new.PostCategoryID != nil {
+			newParent = *new.PostCategoryID
+		}
+
+		// 2.0) защита: parent=self
+		if newParent != 0 && newParent == old.ID {
+			return fmt.Errorf("cannot set parent to self: id=%d", old.ID)
+		}
+
+		// (опционально, но рекомендую оставить)
+		// чтобы случайно не занулить pointer-поля при Save(new),
+		// копируем из old как в MenuItem new.MenuID = old.MenuID
+		new.TemplateID = old.TemplateID
+		new.UserID = old.UserID
+
+		// 2.1) если родитель не менялся — обычный save, path_ltree оставляем прежним
+		if oldParent == newParent {
+			new.PathLtree = old.PathLtree
+			return db.Select(new.UpdatedFields()).Save(new).Error
+		}
+
+		// 3) валидируем нового родителя (если перенос не в root)
+		var newParentCategory models.PostCategory
+		if newParent != 0 {
+			if err := db.Select("id", "path_ltree").
+				First(&newParentCategory, newParent).Error; err != nil {
+				return fmt.Errorf("new parent not found: %w", err)
+			}
+
+			if newParentCategory.PathLtree == "" {
+				return fmt.Errorf("new parent has empty path_ltree (id=%d)", newParentCategory.ID)
+			}
+
+			// защита: нельзя завернуть в своего потомка
+			oldPrefix := old.PathLtree
+			descPrefix := oldPrefix + "."
+			if newParentCategory.PathLtree == oldPrefix || strings.HasPrefix(newParentCategory.PathLtree, descPrefix) {
+				return fmt.Errorf(
+					"cannot move node under its descendant: node=%d new_parent=%d",
+					old.ID, newParentCategory.ID,
+				)
+			}
+		}
+
+		oldPathLtree := old.PathLtree
+
+		var newPathLtree string
+		if newParent == 0 {
+			newPathLtree = fmt.Sprintf("%d", new.ID)
+		} else {
+			newPathLtree = fmt.Sprintf("%s.%d", newParentCategory.PathLtree, new.ID)
+		}
+
+		// 4) обновляем потомков (кроме корня поддерева) — БЕЗ template_id/user_id
+		if err := db.Exec(fmt.Sprintf(`
+			UPDATE %s
+			SET path_ltree = ?::ltree || subpath(path_ltree, nlevel(?::ltree))
+			WHERE path_ltree <@ ?::ltree
+			  AND path_ltree <> ?::ltree
+		`, new.GetTable()),
+			newPathLtree, oldPathLtree,
+			oldPathLtree, oldPathLtree,
+		).Error; err != nil {
+			return fmt.Errorf("failed to update subtree paths: %w", err)
+		}
+
+		// 5) обновляем сам узел
+		new.PathLtree = newPathLtree
+		return db.Select(new.UpdatedFields()).Save(new).Error
+	})
 }
 
 func (r *categoryRepository) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
@@ -320,4 +379,29 @@ func (r *categoryRepository) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[st
 		Updates(patch)
 
 	return tx.RowsAffected, tx.Error
+}
+
+func validatePathEndsWithID(path string, id uint) error {
+	if path == "" {
+		return fmt.Errorf("empty path_ltree")
+	}
+
+	last := path
+	if i := strings.LastIndex(path, "."); i >= 0 {
+		last = path[i+1:]
+	}
+
+	want := fmt.Sprintf("%d", id)
+	if last != want {
+		return fmt.Errorf("bad path_ltree=%q: last label=%q, expected id=%q", path, last, want)
+	}
+
+	return nil
+}
+
+func uval(p *uint) uint {
+	if p == nil {
+		return 0
+	}
+	return *p
 }

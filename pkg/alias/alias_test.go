@@ -135,8 +135,8 @@ func TestTransliterate(t *testing.T) {
 	newDB, _ := db.SetupDB(config.Config())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewAliasProvider(NewAliasRepo(newDB.PostgreSQL())).transliterate(tt.args.input); got != tt.want {
-				t.Errorf("transliterate() = %v, want %v", got, tt.want)
+			if got := NewAliasProvider(NewAliasRepo(newDB.PostgreSQL())).Transliterate(tt.args.input); got != tt.want {
+				t.Errorf("Transliterate() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -14,6 +14,7 @@ go run cmd/cli/cli.go -command=refill
 go test -count=1 -race ./...
 go test ./pkg/menu/repository -count=1 -v
 go test ./pkg/blog/repository -count=1 -v
+go test ./pkg/info_block/repository -count=1 -v
 ```
 
 ### Запуск анализа

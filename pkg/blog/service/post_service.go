@@ -49,6 +49,7 @@ func (s *PostService) FindAggregateByID(id uint) (*models.Post, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return s.Aggregate(post)
 }
 
@@ -98,11 +99,13 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
 			return func() {
 				blocks := s.api.InfoBlock.GetForResourceUUID(id.String())
-				if len(blocks) == 0 {
-					return
+
+				mapped := dto.MapInfoBlocks(blocks)
+				if mapped == nil {
+					mapped = []dto.InfoBlock{}
 				}
 
-				raw, e := json.Marshal(dto.MapInfoBlocks(blocks))
+				raw, e := json.Marshal(mapped)
 				if e != nil {
 					agg.Add(fmt.Errorf("marshal info_blocks_snapshot: %w", e))
 					return
@@ -125,11 +128,13 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
 			return func() {
 				galleries := s.api.Gallery.GetForResourceUUID(id.String())
-				if len(galleries) == 0 {
-					return
+
+				mapped := dto.MapGalleries(galleries)
+				if mapped == nil {
+					mapped = []dto.Gallery{}
 				}
 
-				raw, e := json.Marshal(dto.MapGalleries(galleries))
+				raw, e := json.Marshal(mapped)
 				if e != nil {
 					agg.Add(fmt.Errorf("marshal galleries_snapshot: %w", e))
 					return

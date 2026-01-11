@@ -65,7 +65,7 @@
                                                 <option></option>
                                                 {{ range .infoBlocks}}
                                                     <option value="{{ .ID }}"
-                                                            {{ if eq .ID $.infoBlock.GetInfoBlockID }}selected{{ end }}>
+                                                            {{ if eq .ID (ptrUint $.infoBlock.GetInfoBlockID) }}selected{{ end }}>
                                                         {{ .Title }}
                                                     </option>
                                                 {{ end }}
@@ -84,7 +84,7 @@
                                                 <option></option>
                                                 {{ range .templates}}
                                                     <option value="{{ .ID }}"
-                                                            {{ if eq .ID $.infoBlock.GetTemplateID }}selected{{ end }}>
+                                                            {{ if eq .ID (ptrUint $.infoBlock.GetTemplateID) }}selected{{ end }}>
                                                         {{ .Title }}
                                                     </option>
                                                 {{ end }}

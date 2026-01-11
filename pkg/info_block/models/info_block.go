@@ -67,22 +67,12 @@ func (i *InfoBlock) GetSort() int {
 	return i.Sort
 }
 
-func (i *InfoBlock) SetUUID() {
-	if i.UUID == uuid.Nil {
-		i.UUID = uuid.New()
-	}
-}
-
 func (i *InfoBlock) GetID() uint {
 	return i.ID
 }
 
-func (i *InfoBlock) GetTemplateID() uint {
-	var templateID uint
-	if i.TemplateID != nil {
-		templateID = *i.TemplateID
-	}
-	return templateID
+func (i *InfoBlock) GetTemplateID() *uint {
+	return i.TemplateID
 }
 
 func (i *InfoBlock) GetRelationID() uint {
@@ -90,7 +80,12 @@ func (i *InfoBlock) GetRelationID() uint {
 	if i.HasResource != nil {
 		id = i.HasResource.ID
 	}
+
 	return id
+}
+
+func (i *InfoBlock) GetInfoBlockID() *uint {
+	return i.InfoBlockID
 }
 
 func (i *InfoBlock) GetTemplateTitle() string {
@@ -99,6 +94,51 @@ func (i *InfoBlock) GetTemplateTitle() string {
 		title = i.Template.GetTitle()
 	}
 	return title
+}
+
+func (i *InfoBlock) GetInfoBlocks() []contract.InfoBlock {
+	if len(i.Children) == 0 {
+		return nil
+	}
+
+	out := make([]contract.InfoBlock, 0, len(i.Children))
+	for _, ch := range i.Children {
+		out = append(out, ch)
+	}
+
+	return out
+}
+
+func (i *InfoBlock) GetTitle() string {
+	return i.Title
+}
+
+func (i *InfoBlock) GetMedia() *string {
+	return i.Media
+}
+
+func (i *InfoBlock) GetDescription() *string {
+	return i.Description
+}
+
+func (i *InfoBlock) GetImage() *string {
+	return i.Image
+}
+
+func (i *InfoBlock) GetGalleries() []contract.Gallery {
+	return i.Galleries
+}
+
+func (i *InfoBlock) UpdatedFields() []string {
+	return []string{
+		"TemplateID",
+		"InfoBlockID",
+		"Media",
+		"Title",
+		"Description",
+		"Image",
+		"PathLtree",
+	}
 }
 
 func (i *InfoBlock) UserLastName() string {
@@ -127,36 +167,10 @@ func (i *InfoBlock) GetTable() string {
 	return "info_blocks"
 }
 
-func (i *InfoBlock) GetTitle() string {
-	return i.Title
-}
-
-func (i *InfoBlock) GetMedia() string {
-	if i.Media != nil {
-		return *i.Media
+func (i *InfoBlock) SetUUID() {
+	if i.UUID == uuid.Nil {
+		i.UUID = uuid.New()
 	}
-
-	return ""
-}
-
-func (i *InfoBlock) GetDescription() string {
-	if i.Description != nil {
-		return *i.Description
-	}
-
-	return ""
-}
-
-func (i *InfoBlock) GetImage() string {
-	if i.Image != nil {
-		return *i.Image
-	}
-
-	return ""
-}
-
-func (i *InfoBlock) GetGalleries() []contract.Gallery {
-	return i.Galleries
 }
 
 func (i *InfoBlock) Creating() {

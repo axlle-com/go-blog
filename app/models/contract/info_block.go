@@ -7,14 +7,16 @@ import (
 type InfoBlock interface {
 	GetID() uint
 	GetUUID() uuid.UUID
-	GetTemplateID() uint
+	GetTemplateID() *uint
+	GetInfoBlockID() *uint
 	GetTemplateTitle() string
 	GetTemplateName() string
 	GetTitle() string
-	GetDescription() string
-	GetImage() string
-	GetMedia() string
+	GetDescription() *string
+	GetImage() *string
+	GetMedia() *string
 	GetGalleries() []Gallery
+	GetInfoBlocks() []InfoBlock
 	GetPosition() string
 	GetPositions() []string
 	GetSort() int

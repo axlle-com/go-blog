@@ -141,7 +141,7 @@ func (s *TagService) SaveFromRequest(form *http.TagRequest, user contract.User) 
 			interfaceSlice[i] = block
 		}
 
-		slice, err := s.api.InfoBlock.SaveFormBatch(interfaceSlice, model.UUID.String())
+		slice, err := s.api.InfoBlock.CreateRelationFormBatch(interfaceSlice, model.UUID.String())
 		if err != nil {
 			logger.Error(err)
 		}

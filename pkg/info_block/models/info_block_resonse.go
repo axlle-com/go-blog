@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 
-	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 )
@@ -12,6 +11,8 @@ type InfoBlockResponse struct {
 	ID          uint      `json:"id" form:"id" binding:"-"`
 	UUID        uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
 	TemplateID  *uint     `json:"template_id" form:"template_id" binding:"omitempty"`
+	InfoBlockID *uint     `json:"info_block_id" form:"info_block_id" binding:"omitempty"`
+	PathLtree   string    `json:"path_ltree" form:"path_ltree" binding:"omitempty"`
 	UserID      *uint     `json:"user_id" form:"user_id" binding:"omitempty"`
 	Media       *string   `json:"media" form:"media" binding:"omitempty,max=255"`
 	Title       string    `json:"title" form:"title" binding:"required,max=255"`
@@ -66,12 +67,8 @@ func (i *InfoBlockResponse) GetID() uint {
 	return i.ID
 }
 
-func (i *InfoBlockResponse) GetTemplateID() uint {
-	var templateID uint
-	if i.TemplateID != nil {
-		templateID = *i.TemplateID
-	}
-	return templateID
+func (i *InfoBlockResponse) GetTemplateID() *uint {
+	return i.TemplateID
 }
 
 func (i *InfoBlockResponse) GetTemplateTitle() string {
@@ -82,34 +79,20 @@ func (i *InfoBlockResponse) GetTemplateTitle() string {
 	return title
 }
 
-func (i *InfoBlockResponse) UserLastName() string {
-	var lastName string
-	if i.User != nil {
-		lastName = i.User.GetLastName()
-	}
-	return lastName
-}
-
 func (i *InfoBlockResponse) GetTitle() string {
 	return i.Title
 }
 
-func (i *InfoBlockResponse) GetMedia() string {
-	if i.Media != nil {
-		return *i.Media
-	}
-	return ""
+func (i *InfoBlockResponse) GetMedia() *string {
+	return i.Media
 }
 
-func (i *InfoBlockResponse) GetDescription() string {
-	if i.Description != nil {
-		return *i.Description
-	}
-	return ""
+func (i *InfoBlockResponse) GetDescription() *string {
+	return i.Description
 }
 
-func (i *InfoBlockResponse) GetImage() string {
-	return *i.Image
+func (i *InfoBlockResponse) GetImage() *string {
+	return i.Image
 }
 
 func (i *InfoBlockResponse) GetGalleries() []contract.Gallery {
@@ -120,12 +103,27 @@ func (i *InfoBlockResponse) GetRelationID() uint {
 	return i.RelationID
 }
 
-func (i *InfoBlockResponse) FromInterface(infoBlock contract.InfoBlock) {
-	i.ID = infoBlock.GetID()
-	i.UUID = infoBlock.GetUUID()
-	i.TemplateID = db.UintPtr(infoBlock.GetTemplateID())
-	i.Title = infoBlock.GetTitle()
-	i.Description = db.StrPtr(infoBlock.GetDescription())
-	i.Image = db.StrPtr(infoBlock.GetImage())
-	i.Media = db.StrPtr(infoBlock.GetMedia())
+func (i *InfoBlockResponse) GetInfoBlockID() *uint {
+	return i.InfoBlockID
+}
+
+func (i *InfoBlockResponse) GetInfoBlocks() []contract.InfoBlock {
+	if len(i.Children) == 0 {
+		return nil
+	}
+
+	out := make([]contract.InfoBlock, 0, len(i.Children))
+	for _, ch := range i.Children {
+		out = append(out, ch)
+	}
+
+	return out
+}
+
+func (i *InfoBlockResponse) UserLastName() string {
+	var lastName string
+	if i.User != nil {
+		lastName = i.User.GetLastName()
+	}
+	return lastName
 }

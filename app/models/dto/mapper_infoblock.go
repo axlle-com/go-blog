@@ -8,10 +8,12 @@ func MapInfoBlock(src contract.InfoBlock) InfoBlock {
 	if src == nil {
 		return InfoBlock{}
 	}
-	return InfoBlock{
+
+	out := InfoBlock{
 		ID:          src.GetID(),
 		UUID:        src.GetUUID().String(),
 		TemplateID:  src.GetTemplateID(),
+		InfoBlockID: src.GetInfoBlockID(),
 		Template:    src.GetTemplateName(),
 		Title:       src.GetTitle(),
 		Description: src.GetDescription(),
@@ -22,6 +24,16 @@ func MapInfoBlock(src contract.InfoBlock) InfoBlock {
 		RelationID:  src.GetRelationID(),
 		Galleries:   MapGalleries(src.GetGalleries()),
 	}
+
+	children := src.GetInfoBlocks()
+	if len(children) > 0 {
+		out.InfoBlocks = make([]InfoBlock, 0, len(children))
+		for _, ch := range children {
+			out.InfoBlocks = append(out.InfoBlocks, MapInfoBlock(ch))
+		}
+	}
+
+	return out
 }
 
 func MapInfoBlocks(list []contract.InfoBlock) []InfoBlock {
@@ -58,10 +70,12 @@ func MapGalleries(list []contract.Gallery) []Gallery {
 	if len(list) == 0 {
 		return nil
 	}
+
 	out := make([]Gallery, 0, len(list))
 	for _, g := range list {
 		out = append(out, MapGallery(g))
 	}
+
 	return out
 }
 

@@ -239,7 +239,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				infoBlockItem.ID = infoBlock.GetID()
 
 				// Привязываем инфоблок к посту с указанием сортировки и позиции
-				_, err = s.api.InfoBlock.SaveForm(infoBlockItem, createdPost.UUID.String())
+				_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdPost.UUID.String())
 				if err != nil {
 					logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockItem.Title, postData.Title, err)
 					continue
@@ -355,7 +355,7 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 				infoBlockItem.ID = infoBlock.GetID()
 
 				// Привязываем инфоблок к категории с указанием сортировки и позиции
-				_, err = s.api.InfoBlock.SaveForm(infoBlockItem, createdCategory.UUID.String())
+				_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdCategory.UUID.String())
 				if err != nil {
 					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockItem.Title, categoryData.Title, err)
 					continue

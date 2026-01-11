@@ -8,12 +8,13 @@ import (
 type InfoBlock struct {
 	ID          uint        `json:"id"`
 	UUID        string      `json:"uuid"`
-	TemplateID  uint        `json:"template_id"`
+	TemplateID  *uint       `json:"template_id"`
+	InfoBlockID *uint       `json:"info_block_id"`
 	Template    string      `json:"template,omitempty"`
 	Title       string      `json:"title"`
-	Description string      `json:"description,omitempty"`
-	Image       string      `json:"image,omitempty"`
-	Media       string      `json:"media,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	Image       *string     `json:"image,omitempty"`
+	Media       *string     `json:"media,omitempty"`
 	Position    string      `json:"position,omitempty"`
 	Sort        int         `json:"sort"`
 	RelationID  uint        `json:"relation_id,omitempty"`
@@ -21,21 +22,21 @@ type InfoBlock struct {
 	InfoBlocks  []InfoBlock `json:"info_blocks,omitempty"`
 }
 
-func (b InfoBlock) GetID() uint         { return b.ID }
-func (b InfoBlock) GetUUID() uuid.UUID  { return parseUUID(b.UUID) }
-func (b InfoBlock) GetTemplateID() uint { return b.TemplateID }
+func (i InfoBlock) GetID() uint          { return i.ID }
+func (i InfoBlock) GetUUID() uuid.UUID   { return parseUUID(i.UUID) }
+func (i InfoBlock) GetTemplateID() *uint { return i.TemplateID }
 
-func (b InfoBlock) GetTemplateTitle() string { return b.Template }
-func (b InfoBlock) GetTemplateName() string  { return b.Template }
+func (i InfoBlock) GetTemplateTitle() string { return i.Template }
+func (i InfoBlock) GetTemplateName() string  { return i.Template }
 
-func (b InfoBlock) GetTitle() string       { return b.Title }
-func (b InfoBlock) GetDescription() string { return b.Description }
-func (b InfoBlock) GetImage() string       { return b.Image }
-func (b InfoBlock) GetMedia() string       { return b.Media }
+func (i InfoBlock) GetTitle() string        { return i.Title }
+func (i InfoBlock) GetDescription() *string { return i.Description }
+func (i InfoBlock) GetImage() *string       { return i.Image }
+func (i InfoBlock) GetMedia() *string       { return i.Media }
 
-func (b InfoBlock) GetPosition() string { return b.Position }
+func (i InfoBlock) GetPosition() string { return i.Position }
 
-func (b InfoBlock) GetPositions() []string {
+func (i InfoBlock) GetPositions() []string {
 	return []string{
 		"top",
 		"bottom",
@@ -44,16 +45,33 @@ func (b InfoBlock) GetPositions() []string {
 	}
 }
 
-func (b InfoBlock) GetSort() int        { return b.Sort }
-func (b InfoBlock) GetRelationID() uint { return b.RelationID }
+func (i InfoBlock) GetSort() int { return i.Sort }
 
-func (b InfoBlock) GetGalleries() []contract.Gallery {
-	if len(b.Galleries) == 0 {
+func (i InfoBlock) GetRelationID() uint { return i.RelationID }
+
+func (i InfoBlock) GetGalleries() []contract.Gallery {
+	if len(i.Galleries) == 0 {
 		return nil
 	}
-	out := make([]contract.Gallery, len(b.Galleries))
-	for i := range b.Galleries {
-		out[i] = b.Galleries[i] // dto.Gallery реализует contract.Gallery (см. ниже)
+
+	out := make([]contract.Gallery, len(i.Galleries))
+	for cnt := range i.Galleries {
+		out[cnt] = i.Galleries[cnt]
+	}
+	return out
+}
+
+func (i InfoBlock) GetInfoBlockID() *uint {
+	return i.InfoBlockID
+}
+
+func (i InfoBlock) GetInfoBlocks() []contract.InfoBlock {
+	if len(i.InfoBlocks) == 0 {
+		return nil
+	}
+	out := make([]contract.InfoBlock, 0, len(i.InfoBlocks))
+	for _, ch := range i.InfoBlocks {
+		out = append(out, ch)
 	}
 	return out
 }

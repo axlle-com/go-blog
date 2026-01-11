@@ -128,6 +128,7 @@ func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contract.Use
 	if err := s.infoBlockRepo.Create(infoBlock); err != nil {
 		return nil, err
 	}
+
 	return infoBlock, nil
 }
 

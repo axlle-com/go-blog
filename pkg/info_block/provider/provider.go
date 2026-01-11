@@ -45,6 +45,7 @@ func (p *provider) GetForResourceUUID(resourceUUID string) []contract.InfoBlock 
 	for _, infoBlock := range infoBlocks {
 		collection = append(collection, infoBlock)
 	}
+
 	return collection
 }
 
@@ -97,32 +98,7 @@ func (p *provider) Attach(infoBlockID uint, resourceUUID string) (infoBlocks []c
 	return infoBlocks, nil
 }
 
-func (p *provider) SaveForm(block any, resourceUUID string) (infoBlock contract.InfoBlock, err error) {
-	newUUID, err := uuid.Parse(resourceUUID)
-	if err != nil {
-		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
-		return
-	}
-
-	ib := app.LoadStruct(&models.InfoBlockResponse{}, block).(*models.InfoBlockResponse)
-
-	infoBlock, err = p.blockService.FindByID(ib.GetID())
-	if err != nil {
-		return nil, err
-	}
-
-	ib.FromInterface(infoBlock)
-	err = p.blockService.Attach(newUUID, ib)
-	if err != nil {
-		return nil, err
-	}
-
-	p.collectionService.AggregatesResponses([]*models.InfoBlockResponse{ib})
-
-	return ib, nil
-}
-
-func (p *provider) SaveFormBatch(blocks []any, resourceUUID string) (infoBlock []contract.InfoBlock, err error) {
+func (p *provider) CreateRelationFormBatch(blocks []any, resourceUUID string) (infoBlock []contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
 		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
@@ -156,5 +132,6 @@ func (p *provider) FindByTitle(title string) (contract.InfoBlock, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return infoBlock, nil
 }

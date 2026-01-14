@@ -11,6 +11,7 @@ import (
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/blog/service"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -45,7 +46,7 @@ func (qh *queueHandler) Run(data []byte) {
 	}
 
 	switch action {
-	case "attach", "update", "delete":
+	case queue.Attach, queue.Create, queue.Update, queue.Delete:
 		if err := qh.update(payload); err != nil {
 			logger.Errorf("[blog][queue][create] error: %v", err)
 		}

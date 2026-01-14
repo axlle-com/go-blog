@@ -42,7 +42,7 @@ func (s *InfoBlockCollectionService) GetRoots() ([]*models.InfoBlock, error) {
 func (s *InfoBlockCollectionService) GetForResourceByFilter(filter *models.InfoBlockFilter) []*models.InfoBlockResponse {
 	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
-		logger.Error(err)
+		logger.Errorf("[info_block][InfoBlockCollectionService][GetForResourceByFilter] Error: %v", err)
 		return nil
 	}
 
@@ -94,7 +94,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 			var err error
 			templates, err = s.api.Template.GetMapByIDs(templateIDs)
 			if err != nil {
-				logger.Error(err)
+				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
 			}
 		}
 	}()
@@ -105,7 +105,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 			var err error
 			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
-				logger.Error(err)
+				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
 			}
 		}
 	}()
@@ -165,8 +165,8 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 	if len(missingIDs) > 0 {
 		rootModels, err := s.infoBlockRepo.GetByIDs(missingIDs)
 		if err != nil {
-			logger.Error(err)
-			s.enrichInfoBlockResponses(infoBlocks) // хоть так
+			logger.Errorf("[info_block][InfoBlockCollectionService][AggregatesResponses] Error: %v", err)
+			s.enrichInfoBlockResponses(infoBlocks)
 			return infoBlocks
 		}
 		for _, m := range rootModels {
@@ -188,7 +188,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 	// 3) одним запросом получаем все узлы поддеревьев (включая корни)
 	allNodes, err := s.infoBlockRepo.GetSubtreesByPaths(paths)
 	if err != nil {
-		logger.Error(err)
+		logger.Errorf("[info_block][InfoBlockCollectionService][AggregatesResponses] Error: %v", err)
 		s.enrichInfoBlockResponses(infoBlocks)
 		return infoBlocks
 	}
@@ -383,7 +383,7 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 		var err error
 		templates, err = s.api.Template.GetMapByIDs(templateIDs)
 		if err != nil {
-			logger.Error(err)
+			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
 		}
 	}()
 
@@ -395,7 +395,7 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 		var err error
 		users, err = s.api.User.GetMapByIDs(userIDs)
 		if err != nil {
-			logger.Error(err)
+			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
 		}
 	}()
 

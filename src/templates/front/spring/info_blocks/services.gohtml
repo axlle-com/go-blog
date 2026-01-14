@@ -103,4 +103,9 @@
 
         </div>
     </section>
+
+    {{ range .InfoBlocks }}
+        {{ render .GetTemplateName . }}
+    {{ end }}
+
 {{ end }}

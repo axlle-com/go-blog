@@ -6,6 +6,7 @@ import (
 
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/message/form"
 )
 
@@ -28,7 +29,7 @@ func (j *CreateMessageJob) Run(ctx context.Context) error {
 }
 
 func (j *CreateMessageJob) GetData() []byte {
-	return models.NewEnvelopeQueue().ConvertData("create", j.form.Data())
+	return models.NewEnvelopeQueue().ConvertData(queue.Create, j.form.Data())
 }
 
 func (j *CreateMessageJob) GetName() string {
@@ -40,7 +41,7 @@ func (j *CreateMessageJob) GetQueue() string {
 }
 
 func (j *CreateMessageJob) GetAction() string {
-	return "create"
+	return queue.Create
 }
 
 func (j *CreateMessageJob) Duration() float64 {

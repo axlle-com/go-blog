@@ -61,7 +61,8 @@ func NewErrors(err error) *Errors {
 	// 2) Type mismatch during JSON unmarshalling
 	var ute *json.UnmarshalTypeError
 	if errors.As(err, &ute) {
-		field := ToSnakeCase(lastSegment(ute.Field)) // e.g. "menu_items.id" -> "id"
+		// e.g. "menu_items.id" -> "id"
+		field := ToSnakeCase(lastSegment(ute.Field))
 		expected := humanType(ute.Type)
 		actual := ute.Value
 		if field == "" {

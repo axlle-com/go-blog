@@ -8,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/menu/queue/model"
 	"github.com/axlle-com/blog/pkg/menu/service"
 )
@@ -35,11 +36,11 @@ func (qh *queueHandler) Run(data []byte) {
 	}
 
 	switch action {
-	case "update":
+	case queue.Update:
 		if err := qh.update(payload); err != nil {
 			logger.Errorf("[menu][queue][update] error: %v", err)
 		}
-	case "delete":
+	case queue.Delete:
 		if err := qh.delete(payload); err != nil {
 			logger.Errorf("[menu][queue][delete] error: %v", err)
 		}

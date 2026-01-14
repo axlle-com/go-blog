@@ -277,7 +277,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
 	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newApi)
-	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue)
+	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue, newInfoBlockRepo)
 	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newApi)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 

@@ -4,6 +4,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/gallery/models"
 	"github.com/axlle-com/blog/pkg/gallery/queue/job"
 	"github.com/axlle-com/blog/pkg/gallery/repository"
@@ -89,7 +90,7 @@ func (e *GalleryEvent) UpdateTrigger(ids []uint) {
 
 	newJob := job.NewGalleryJob(
 		&dto.Collection{ResourceBlocks: slice},
-		"update",
+		queue.Update,
 	)
 
 	e.queue.Enqueue(newJob, 0)

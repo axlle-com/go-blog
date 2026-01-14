@@ -7,6 +7,7 @@ import (
 
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models"
+	"github.com/axlle-com/blog/app/service/queue"
 )
 
 func NewAnalyticsJob(
@@ -38,7 +39,7 @@ func (j *AnalyticsJob) GetData() []byte {
 		logger.Errorf("[AnalyticsJob][GetData] Error: %v", err)
 		return nil
 	}
-	j.data = models.NewEnvelopeQueue().ConvertData("create", string(raw))
+	j.data = models.NewEnvelopeQueue().ConvertData(queue.Create, string(raw))
 	return j.data
 }
 
@@ -51,7 +52,7 @@ func (j *AnalyticsJob) GetQueue() string {
 }
 
 func (j *AnalyticsJob) GetAction() string {
-	return "create"
+	return queue.Create
 }
 
 func (j *AnalyticsJob) Duration() float64 {

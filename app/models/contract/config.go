@@ -25,7 +25,6 @@ type Config interface {
 	SessionKey(string) string
 	UserSessionKey(string) string
 
-	// UploadPath return /uploads/
 	UploadPath() string
 	DataFolder(...string) string
 	Root() string

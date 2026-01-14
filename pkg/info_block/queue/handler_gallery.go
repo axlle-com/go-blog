@@ -9,6 +9,7 @@ import (
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/models/dto"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
 	"github.com/google/uuid"
@@ -40,7 +41,7 @@ func (qh *queueHandler) Run(data []byte) {
 	}
 
 	switch action {
-	case "update":
+	case queue.Update:
 		if err := qh.update(payload); err != nil {
 			logger.Errorf("[info_block][queue][create] error: %v", err)
 		}
@@ -53,37 +54,38 @@ func (qh *queueHandler) update(payload []byte) error {
 	var objects dto.Collection
 
 	dec := json.NewDecoder(bytes.NewReader(payload))
-	dec.DisallowUnknownFields()
 	if err := dec.Decode(&objects); err != nil {
 		return fmt.Errorf("incorrect data format: %w", err)
 	}
 
-	type bundle struct {
-		uuids    []uuid.UUID
-		snapshot []dto.InfoBlock
-	}
-	byRes := make(map[string]*bundle)
+	// Собираем уникальные resource UUID
+	seen := make(map[uuid.UUID]struct{}, len(objects.ResourceBlocks))
+	uuids := make([]uuid.UUID, 0, len(objects.ResourceBlocks))
 
-	for _, ib := range objects.ResourceBlocks {
-		resUUID := ib.ResourceUUID
-		if resUUID == "" {
+	for _, rb := range objects.ResourceBlocks {
+		if rb.ResourceUUID == "" {
 			continue
 		}
 
-		if _, seen := byRes[resUUID]; seen {
-			continue
-		}
-
-		newUUID, err := uuid.Parse(resUUID)
+		infoBlockUUID, err := uuid.Parse(rb.ResourceUUID)
 		if err != nil {
-			return fmt.Errorf("invalid resource_uuid %q: %v", resUUID, err)
+			return fmt.Errorf("invalid resource_uuid %q: %v", rb.ResourceUUID, err)
 		}
 
-		filter := models.NewInfoBlockFilter()
-		filter.UUIDs = []uuid.UUID{newUUID}
+		if _, ok := seen[infoBlockUUID]; ok {
+			continue
+		}
 
-		qh.infoBlockEventService.StartJob(qh.infoBlockCollectionService.GetForResourceByFilter(filter), "update")
+		seen[infoBlockUUID] = struct{}{}
+		uuids = append(uuids, infoBlockUUID)
 	}
 
-	return nil
+	if len(uuids) == 0 {
+		return nil
+	}
+
+	filter := models.NewInfoBlockFilter()
+	filter.UUIDs = uuids
+
+	return qh.infoBlockEventService.UpdatedByFilter(filter)
 }

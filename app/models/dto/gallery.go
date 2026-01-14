@@ -34,7 +34,7 @@ func (g Gallery) GetImages() []contract.Image {
 	}
 	out := make([]contract.Image, len(g.Images))
 	for i := range g.Images {
-		out[i] = g.Images[i] // dto.Image реализует contract.Image (см. ниже)
+		out[i] = g.Images[i]
 	}
 	return out
 }

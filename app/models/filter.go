@@ -14,7 +14,7 @@ import (
 
 type Filter struct {
 	Field
-	array       map[string]string // TODO map[string][]string
+	array       map[string]string // @todo map[string][]string
 	queryString template.URL
 	query       url.Values
 	context     *gin.Context

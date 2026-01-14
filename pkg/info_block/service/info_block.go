@@ -125,11 +125,12 @@ func (s *InfoBlockService) Create(infoBlock *models.InfoBlock, user contract.Use
 		id := user.GetID()
 		infoBlock.UserID = &id
 	}
+
 	if err := s.infoBlockRepo.Create(infoBlock); err != nil {
 		return nil, err
 	}
 
-	return infoBlock, nil
+	return s.infoBlockEventService.Created(infoBlock)
 }
 
 func (s *InfoBlockService) Update(new *models.InfoBlock, old *models.InfoBlock) (*models.InfoBlock, error) {
@@ -137,17 +138,7 @@ func (s *InfoBlockService) Update(new *models.InfoBlock, old *models.InfoBlock) 
 		return nil, err
 	}
 
-	filter := models.NewInfoBlockFilter()
-	filter.ID = &new.ID
-
-	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockService][Update] error: %v", err)
-	}
-
-	s.infoBlockEventService.StartJob(collection, "update")
-
-	return new, nil
+	return s.infoBlockEventService.Updated(new)
 }
 
 func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.InfoBlock) error {
@@ -175,63 +166,34 @@ func (s *InfoBlockService) Attach(resourceUUID uuid.UUID, infoBlock contract.Inf
 		return err
 	}
 
-	filter := models.NewInfoBlockFilter()
-	filter.ResourceUUID = &resourceUUID
-
-	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
-	}
-
-	s.infoBlockEventService.StartJob(collection, "attach")
-
-	return nil
+	return s.infoBlockEventService.Attached(resourceUUID)
 }
 
 func (s *InfoBlockService) DeleteByResourceUUID(resourceUUID uuid.UUID) error {
 	filter := models.NewInfoBlockFilter()
 	filter.ResourceUUID = &resourceUUID
 
-	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockService][Attach] error: %v", err)
-	}
-
-	err = s.resourceRepo.DeleteByResourceUUID(resourceUUID)
+	err := s.resourceRepo.DeleteByResourceUUID(resourceUUID)
 	if err != nil {
 		return err
 	}
 
-	s.infoBlockEventService.StartJob(collection, "delete")
-
-	return nil
+	return s.infoBlockEventService.DeletedByFilter(filter)
 }
 
+// @todo optimize
 func (s *InfoBlockService) DeleteHasResourceByID(id uint) error {
 	filter := models.NewInfoBlockFilter()
 	filter.RelationID = &id
 
-	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockService][DeleteHasResourceByID] error: %v", err)
-	}
-
 	if err := s.resourceRepo.DeleteByID(id); err == nil {
-		s.infoBlockEventService.StartJob(collection, "delete")
+		return s.infoBlockEventService.DeletedByFilter(filter)
 	}
 
-	return err
+	return nil
 }
 
 func (s *InfoBlockService) Delete(infoBlock *models.InfoBlock) (err error) {
-	filter := models.NewInfoBlockFilter()
-	filter.ID = &infoBlock.ID
-
-	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockService][DeleteHasResourceByID] error: %v", err)
-	}
-
 	if err = s.resourceRepo.DeleteByInfoBlockID(infoBlock.ID); err != nil {
 		return err
 	}
@@ -240,9 +202,7 @@ func (s *InfoBlockService) Delete(infoBlock *models.InfoBlock) (err error) {
 		return err
 	}
 
-	s.infoBlockEventService.StartJob(collection, "delete")
-
-	return nil
+	return s.infoBlockEventService.Deleted(infoBlock)
 }
 
 func (s *InfoBlockService) DeleteImageFile(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {

@@ -70,6 +70,7 @@ func (e *ErrUtil) Error() error {
 func (e *ErrUtil) ErrorAndReset() error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+
 	if len(e.counts) == 0 {
 		return nil
 	}
@@ -87,16 +88,19 @@ func (e *ErrUtil) ErrorAndReset() error {
 			parts = append(parts, msg)
 		}
 	}
-	// reset под эксклюзивной блокировкой
+
 	e.counts = make(map[string]int)
+
 	return errors.New(strings.Join(parts, "; "))
 }
 
 // Merge Схлопывает набор ошибок в одну (игнорируя nil)
 func (e *ErrUtil) Merge(errs ...error) error {
 	m := New()
+
 	for _, err := range errs {
 		m.Add(err)
 	}
+
 	return m.Error()
 }

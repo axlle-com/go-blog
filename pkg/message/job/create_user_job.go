@@ -7,6 +7,7 @@ import (
 
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/pkg/message/form"
 )
 
@@ -40,7 +41,7 @@ func (j *CreateUserJob) GetData() []byte {
 	}
 
 	bytes, _ := json.Marshal(payload)
-	return app.NewEnvelopeQueue().ConvertData("create", string(bytes))
+	return app.NewEnvelopeQueue().ConvertData(queue.Create, string(bytes))
 }
 
 func (j *CreateUserJob) GetName() string {
@@ -52,7 +53,7 @@ func (j *CreateUserJob) GetQueue() string {
 }
 
 func (j *CreateUserJob) GetAction() string {
-	return "create"
+	return queue.Create
 }
 
 func (j *CreateUserJob) Duration() float64 {

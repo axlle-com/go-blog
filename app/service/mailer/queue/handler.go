@@ -9,6 +9,7 @@ import (
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/service/mailer/queue/model"
+	"github.com/axlle-com/blog/app/service/queue"
 )
 
 func NewMailerQueueHandler(mailer contract.Mailer) contract.QueueHandler {
@@ -29,7 +30,7 @@ func (qh *queueHandler) Run(data []byte) {
 	}
 
 	switch action {
-	case "create":
+	case queue.Create:
 		if err := qh.create(payload); err != nil {
 			logger.Errorf("[mailer][queue][create] error: %v", err)
 		}

@@ -139,7 +139,8 @@ func FormatDate(date time.Time) string {
 }
 
 func RandomDate() time.Time {
-	startDate := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC) // Начальная дата
+	// Начальная дата
+	startDate := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Now()
 	delta := endDate.Sub(startDate)
 	randomDuration := time.Duration(rand.Int63n(int64(delta)))

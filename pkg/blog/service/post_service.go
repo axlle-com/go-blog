@@ -189,25 +189,25 @@ func (s *PostService) GetByID(id uint) (*models.Post, error) {
 	return s.postRepo.FindByID(id)
 }
 
-func (s *PostService) generateAlias(post *models.Post) string {
+func (s *PostService) generateAlias(model *models.Post) string {
 	var newAlias string
 
-	if post.IsMain {
+	if model.IsMain {
 		return newAlias
 	}
 
-	if post.Alias == "" {
-		newAlias = post.Title
+	if model.Alias == "" {
+		newAlias = model.Title
 	} else {
-		newAlias = post.Alias
+		newAlias = model.Alias
 	}
 
-	return s.api.Alias.Generate(post, newAlias)
+	return s.api.Alias.Generate(model, newAlias)
 }
 
-func (s *PostService) receivedImage(post *models.Post) error {
-	if post.Image != nil && *post.Image != "" {
-		return s.api.File.Received([]string{*post.Image})
+func (s *PostService) receivedImage(model *models.Post) error {
+	if model.Image != nil && *model.Image != "" {
+		return s.api.File.Received([]string{*model.Image})
 	}
 
 	return nil

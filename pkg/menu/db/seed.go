@@ -21,11 +21,12 @@ import (
 )
 
 type seeder struct {
-	menuRepo     repository.MenuRepository
-	menuItemRepo repository.MenuItemRepository
-	api          *api.Api
 	config       contract.Config
 	disk         contract.DiskService
+	seedService  contract.SeedService
+	api          *api.Api
+	menuRepo     repository.MenuRepository
+	menuItemRepo repository.MenuItemRepository
 }
 
 type MenuSeedData struct {
@@ -47,104 +48,120 @@ type MenuItemSeedData struct {
 }
 
 func NewMenuSeeder(
-	menu repository.MenuRepository,
-	menuItem repository.MenuItemRepository,
-	api *api.Api,
 	cfg contract.Config,
 	disk contract.DiskService,
+	seedService contract.SeedService,
+	api *api.Api,
+	menu repository.MenuRepository,
+	menuItem repository.MenuItemRepository,
 ) contract.Seeder {
 	return &seeder{
-		menuRepo:     menu,
-		menuItemRepo: menuItem,
-		api:          api,
 		config:       cfg,
 		disk:         disk,
+		seedService:  seedService,
+		api:          api,
+		menuRepo:     menu,
+		menuItemRepo: menuItem,
 	}
 }
 
 func (s *seeder) Seed() error {
-	return s.seedFromJSON("menus")
+	return s.seedFromJSON((&models.Menu{}).GetTable())
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	// Путь относительно src/services
-	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
-
-	// Проверяем существование файла
-	if !s.disk.Exists(seedPath) {
-		logger.Infof("[menu][seeder][seedFromJSON] seed file not found: %s, skipping", seedPath)
-		return nil
-	}
-
-	// Читаем JSON файл через DiskService
-	data, err := s.disk.ReadFile(seedPath)
+	files, err := s.seedService.GetFiles(s.config.Layout(), moduleName)
 	if err != nil {
 		return err
 	}
-
-	var menusData []MenuSeedData
-	if err := json.Unmarshal(data, &menusData); err != nil {
-		return err
+	if len(files) == 0 {
+		logger.Infof("[menu][seeder][seedFromJSON] seed files not found for module: %s, skipping", moduleName)
+		return nil
 	}
 
-	for _, menuData := range menusData {
-		// Проверяем, существует ли меню с таким title
-		found, _ := s.menuRepo.GetByParams(map[string]any{"title": menuData.Title})
-		var existingMenu *models.Menu
-		if len(found) > 0 {
-			existingMenu = found[0]
-			logger.Infof("[menu][seeder][seedFromJSON] menu with title='%s' already exists (ID=%d), skipping", menuData.Title, existingMenu.ID)
+	for name, seedPath := range files {
+		data, err := s.disk.ReadFile(seedPath)
+		if err != nil {
+			return err
+		}
+
+		ok, err := s.seedService.IsApplied(name)
+		if err != nil {
+			return err
+		}
+		if ok {
 			continue
 		}
 
-		// Создаем меню
-		menu := &models.Menu{
-			UUID:        uuid.New(),
-			Title:       menuData.Title,
-			IsPublished: true,
-			IsMain:      false,
-			Sort:        0,
-			CreatedAt:   db.TimePtr(time.Now()),
-			UpdatedAt:   db.TimePtr(time.Now()),
+		var menusData []MenuSeedData
+		if err := json.Unmarshal(data, &menusData); err != nil {
+			return err
 		}
 
-		if menuData.IsMain != nil {
-			menu.IsMain = *menuData.IsMain
-		}
-		if menuData.IsPublished != nil {
-			menu.IsPublished = *menuData.IsPublished
-		}
-
-		// Ищем шаблон, если указан
-		if menuData.Template != nil && *menuData.Template != "" {
-			resourceName := "menus"
-			tpl, err := s.api.Template.GetByNameAndResource(*menuData.Template, resourceName)
-			if err != nil {
-				logger.Errorf("[menu][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", *menuData.Template, resourceName, err)
-			} else {
-				id := tpl.GetID()
-				menu.TemplateID = &id
+		for _, menuData := range menusData {
+			// Проверяем, существует ли меню с таким title
+			found, _ := s.menuRepo.GetByParams(map[string]any{"title": menuData.Title})
+			var existingMenu *models.Menu
+			if len(found) > 0 {
+				existingMenu = found[0]
+				logger.Infof("[menu][seeder][seedFromJSON] menu with title='%s' already exists (ID=%d), skipping", menuData.Title, existingMenu.ID)
+				continue
 			}
-		}
 
-		if err := s.menuRepo.Create(menu); err != nil {
-			logger.Errorf("[menu][seeder][seedFromJSON] error creating menu: %v", err)
-			continue
-		}
+			// Создаем меню
+			menu := &models.Menu{
+				UUID:        uuid.New(),
+				Title:       menuData.Title,
+				IsPublished: true,
+				IsMain:      false,
+				Sort:        0,
+				CreatedAt:   db.TimePtr(time.Now()),
+				UpdatedAt:   db.TimePtr(time.Now()),
+			}
 
-		// Создаем пункты меню
-		if len(menuData.MenuItems) > 0 {
-			sortCounter := 0
-			for _, itemData := range menuData.MenuItems {
-				if err := s.createMenuItem(menu.ID, nil, itemData, &sortCounter); err != nil {
-					logger.Errorf("[menu][seeder][seedFromJSON] error creating menu item: %v", err)
-					continue
+			if menuData.IsMain != nil {
+				menu.IsMain = *menuData.IsMain
+			}
+			if menuData.IsPublished != nil {
+				menu.IsPublished = *menuData.IsPublished
+			}
+
+			// Ищем шаблон, если указан
+			if menuData.Template != nil && *menuData.Template != "" {
+				resourceName := (&models.Menu{}).GetName()
+				tpl, err := s.api.Template.GetByNameAndResource(*menuData.Template, resourceName)
+				if err != nil {
+					logger.Errorf("[menu][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", *menuData.Template, resourceName, err)
+				} else {
+					id := tpl.GetID()
+					menu.TemplateID = &id
+				}
+			}
+
+			if err := s.menuRepo.Create(menu); err != nil {
+				logger.Errorf("[menu][seeder][seedFromJSON] error creating menu: %v", err)
+				continue
+			}
+
+			// Создаем пункты меню
+			if len(menuData.MenuItems) > 0 {
+				sortCounter := 0
+				for _, itemData := range menuData.MenuItems {
+					if err := s.createMenuItem(menu.ID, nil, itemData, &sortCounter); err != nil {
+						logger.Errorf("[menu][seeder][seedFromJSON] error creating menu item: %v", err)
+						continue
+					}
 				}
 			}
 		}
+
+		if err := s.seedService.MarkApplied(name); err != nil {
+			return err
+		}
+
+		logger.Infof("[menu][seeder][seedFromJSON] seeded %d menus from JSON (%s)", len(menusData), name)
 	}
 
-	logger.Infof("[menu][seeder][seedFromJSON] seeded %d menus from JSON", len(menusData))
 	return nil
 }
 

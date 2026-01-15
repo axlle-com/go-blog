@@ -29,13 +29,11 @@ staticcheck ./...
 chmod +x deploy.sh
 ```
 
-
-### 
+### Убить локальный процесс
 ```bash
 sudo fuser -k 3000/tcp
-
-```
-```bash
 sudo ss -ltnp | grep ':3000'
 sudo kill -9 12345
+sudo pkill -9 blog
+pkill blog
 ```

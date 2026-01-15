@@ -36,6 +36,7 @@ func (r *Resources) Themes() map[string]string    { return r.themes }
 // ResourceTemplate возвращает исходник шаблона из embed (templates/**/<file>.gohtml).
 // Ищет файл по базовому имени (например index.gohtml) по всему дереву templates.
 // Если найдены несколько — берём первый.
+// @todo remake
 func (r *Resources) ResourceTemplate(name string) string {
 	value, ok := r.resources[name]
 	if !ok {

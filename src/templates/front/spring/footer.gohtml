@@ -8,7 +8,8 @@
                         <div class="footer-column">
                             <div class="footer-widget about-widget">
                                 <div class="widget-inner">
-                                    <div class="logo"><img src="/public/spring/images/logo.png" alt="" style="height: 40px;"></div>
+                                    <div class="logo"><img src="/static/spring/images/logo.png" alt=""
+                                                           style="height: 40px;"></div>
                                     <div class="copyright">&copy; 2020 All Rights Reserved</div>
                                 </div>
                             </div>
@@ -126,14 +127,28 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="theme-btn btn-style-two">Submit <span class="icon ti-arrow-circle-right"></span></button>
+                    <button type="submit" class="theme-btn btn-style-two">Submit <span
+                                class="icon ti-arrow-circle-right"></span></button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{ js "/public/spring/js/app.js" }}
-    {{ js "/public/spring/js/common.js" }}
+    {{ bundleJs
+    "static/spring/js/jquery.js"
+    "static/spring/js/bootstrap.min.js"
+    "static/spring/js/appear.js"
+    "static/spring/js/pagenav.js"
+    "static/spring/js/jquery.scrollTo.js"
+    "static/spring/js/jquery.fancybox.pack.js"
+    "static/spring/js/owl.js"
+    "static/spring/js/wow.js"
+    "static/spring/js/validate.js"
+    "static/spring/js/script.js"
+    "static/resources/plugins/noty/noty.min.js"
+    "static/admin/glob.js"
+    "static/spring/js/common.js"
+    }}
 
     </body>
     </html>

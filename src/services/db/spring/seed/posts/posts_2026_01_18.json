@@ -1,0 +1,214 @@
+[
+  {
+    "user_id": 1,
+    "template": "index",
+    "is_published": true,
+    "in_sitemap": true,
+    "is_main": true,
+    "title": "home",
+    "image": "/static/spring/images/index.png",
+    "info_blocks": [
+      {
+        "title": "Блок about",
+        "sort": 1,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок services",
+        "sort": 2,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact_form",
+        "sort": 3,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 4,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок clients",
+        "sort": 5,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "educational portal",
+    "alias": "educational-portal",
+    "image": "/static/spring/images/services/education.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "telemedicine service",
+    "alias": "telemedicine-service",
+    "image": "/static/spring/images/services/medicine.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "inform",
+    "alias": "inform",
+    "image": "/static/spring/images/services/inform.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "corp",
+    "alias": "corp",
+    "image": "/static/spring/images/services/corp.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "ecom",
+    "alias": "ecom",
+    "image": "/static/spring/images/services/ecom.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "chat",
+    "alias": "chat",
+    "image": "/static/spring/images/services/chat.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "erp",
+    "alias": "erp",
+    "image": "/static/spring/images/services/erp.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "is_published": true,
+    "in_sitemap": true,
+    "title": "support",
+    "alias": "support",
+    "image": "/static/spring/images/services/support.png",
+    "category_alias": "services",
+    "info_blocks": [
+      {
+        "title": "Блок contact_form",
+        "sort": 0,
+        "position": "bottom"
+      },
+      {
+        "title": "Блок contact",
+        "sort": 1,
+        "position": "bottom"
+      }
+    ]
+  }
+]

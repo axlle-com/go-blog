@@ -1,0 +1,32 @@
+[
+  {
+    "user_id": 1,
+    "template": "about",
+    "title": "Блок about",
+    "image": "/static/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "services",
+    "title": "Блок services",
+    "image": "/static/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "contact_form",
+    "title": "Блок contact_form",
+    "image": "/static/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "contact",
+    "title": "Блок contact",
+    "image": "/static/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "clients",
+    "title": "Блок clients",
+    "image": "/static/img/404.svg"
+  }
+]

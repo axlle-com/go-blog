@@ -37,6 +37,7 @@ type PostCategory struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	DeletedAt *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
+	Posts      []*Post              `gorm:"-" json:"posts" form:"posts" binding:"-" ignore:"true"`
 	Galleries  []contract.Gallery   `gorm:"-" json:"galleries" form:"galleries" binding:"-" ignore:"true"`
 	InfoBlocks []contract.InfoBlock `gorm:"-" json:"info_blocks" form:"info_blocks" binding:"-" ignore:"true"`
 	Category   *PostCategory        `gorm:"-" json:"category" form:"category" binding:"-" ignore:"true"`

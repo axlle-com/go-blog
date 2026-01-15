@@ -2,14 +2,16 @@ package di
 
 import (
 	"github.com/axlle-com/blog/app/api"
-	"github.com/axlle-com/blog/app/models/cache"
+	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
+	"github.com/axlle-com/blog/app/service/cache"
 	"github.com/axlle-com/blog/app/service/disk"
 	i18nsvc "github.com/axlle-com/blog/app/service/i18n"
 	"github.com/axlle-com/blog/app/service/mailer"
 	mailerQueue "github.com/axlle-com/blog/app/service/mailer/queue"
 	"github.com/axlle-com/blog/app/service/migrate"
+	"github.com/axlle-com/blog/app/service/minify"
 	"github.com/axlle-com/blog/app/service/queue"
 	"github.com/axlle-com/blog/app/service/scheduler"
 	"github.com/axlle-com/blog/app/service/storage"
@@ -86,17 +88,20 @@ import (
 	usersQueue "github.com/axlle-com/blog/pkg/user/queue"
 	userRepository "github.com/axlle-com/blog/pkg/user/repository"
 	usersService "github.com/axlle-com/blog/pkg/user/service"
+	"github.com/gin-contrib/sessions/redis"
 )
 
 type Container struct {
-	Config    contract.Config
-	Queue     contract.Queue
-	Cache     contract.Cache
-	View      contract.View
-	Scheduler contract.Scheduler
-	Template  contract.Scheduler
-	Disk      contract.DiskService
-	I18n      *i18nsvc.Service
+	Config      contract.Config
+	Queue       contract.Queue
+	Cache       contract.Cache
+	View        contract.View
+	Scheduler   contract.Scheduler
+	Disk        contract.DiskService
+	Minifier    contract.Minifier
+	SeedService contract.SeedService
+	Store       redis.Store
+	I18n        *i18nsvc.Service
 
 	FileUploadService     *fileService.UploadService
 	FileService           *fileService.FileService
@@ -205,9 +210,12 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newQueue := queue.NewQueue()
 	newCache := cache.NewCache()
 	newDisk := disk.NewDiskService(cfg)
+	newMinifier := minify.NewWebMinifier(cfg, newDisk)
+	newStore := models.Store(cfg)
+	newSeedService := migrate.NewSeedService(db, newDisk)
 
 	newMailer := mailer.NewMailer(cfg, newQueue)
-	newView := view.NewView(cfg, newDisk)
+	newView := view.NewView(cfg, newDisk, newMinifier)
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
 	newFileService := fileService.NewFileService(newFileRepo)
@@ -294,6 +302,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newApi)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newApi)
+	categoryService.SetPostCollectionService(newPostCollectionService)
 	newBlogProvider := provider.NewBlogProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 
 	// Update Api with Blog provider
@@ -325,7 +334,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	// I18n
 	newI18n := i18nsvc.New(cfg, newDisk)
 
-	menuSeeder := menuDB.NewMenuSeeder(menuRepo, menuItemRepo, newApi, cfg, newDisk)
+	menuSeeder := menuDB.NewMenuSeeder(cfg, newDisk, newSeedService, newApi, menuRepo, menuItemRepo)
 
 	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
 	postMigrator := postMigrate.NewMigrator(db.PostgreSQL())
@@ -339,9 +348,9 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	settingsMigrator := settingsMigrate.NewMigrator(db.PostgreSQL())
 
 	userSeeder := userDB.NewSeeder(newUserRepo, newRoleRepo, newPermissionRepo)
-	postSeeder := postDB.NewSeeder(newPostRepo, newPostService, newCategoryRepo, categoryService, newApi, cfg, newDisk)
+	postSeeder := postDB.NewSeeder(cfg, newDisk, db, newSeedService, newApi, newPostRepo, newPostService, newCategoryRepo, categoryService)
 	templateSeeder := templateDB.NewSeeder(cfg, newDisk, newTemplateRepo)
-	infoBlockSeeder := infoBlockDB.NewSeeder(newBlockService, newApi, cfg, newDisk)
+	infoBlockSeeder := infoBlockDB.NewSeeder(cfg, newDisk, newSeedService, newApi, newBlockService)
 	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newApi)
 
 	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder)
@@ -541,7 +550,9 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		View:      newView,
 		Scheduler: newScheduler,
 		Disk:      newDisk,
+		Minifier:  newMinifier,
 		I18n:      newI18n,
+		Store:     newStore,
 
 		FileUploadService:     uploadService,
 		FileCollectionService: fileCollectionService,

@@ -11,17 +11,17 @@ import (
 	"github.com/axlle-com/blog/app/models/contract"
 )
 
-const staticPath = "/public/img/"
+const staticPath = "/static/"
 
 type LocalStorageService struct {
-	publicBase      string // https://site.com
+	staticBase      string // https://site.com
 	localPathPrefix string // web-путь, например: /uploads
 	fsBase          string // абсолютный путь на диске, например: /abs/path/uploads
 }
 
 func NewLocalStorageService(cfg contract.Config) contract.Storage {
 	return &LocalStorageService{
-		publicBase:      strings.TrimRight(cfg.AppHost(), "/"),
+		staticBase:      strings.TrimRight(cfg.AppHost(), "/"),
 		localPathPrefix: cfg.UploadPath(),                 // URL путь остается /uploads/
 		fsBase:          cfg.DataFolder(cfg.UploadPath()), // Физический путь: data/uploads
 	}
@@ -29,7 +29,7 @@ func NewLocalStorageService(cfg contract.Config) contract.Storage {
 
 func (b *LocalStorageService) Save(fh *multipart.FileHeader, folder, fileName string) (string, error) {
 	rel := joinURLPath(b.localPathPrefix, folder, fileName) // /uploads/posts/uuid.jpg
-	fullURL := b.publicBase + rel
+	fullURL := b.staticBase + rel
 
 	absPath := filepath.Join(b.fsBase, folder) // <-- ПРАВИЛЬНЫЙ корень записи
 	if err := os.MkdirAll(absPath, 0o750); err != nil {
@@ -58,7 +58,7 @@ func (b *LocalStorageService) Save(fh *multipart.FileHeader, folder, fileName st
 
 func (b *LocalStorageService) SaveReader(reader io.Reader, _ int64, folder, filename, _ string) (string, error) {
 	rel := joinURLPath(b.localPathPrefix, folder, filename)
-	fullURL := b.publicBase + rel
+	fullURL := b.staticBase + rel
 
 	absPath := filepath.Join(b.fsBase, folder) // <-- тоже из fsBase
 	if err := os.MkdirAll(absPath, 0o750); err != nil {
@@ -75,6 +75,7 @@ func (b *LocalStorageService) SaveReader(reader io.Reader, _ int64, folder, file
 	if _, err = io.Copy(out, reader); err != nil {
 		return "", err
 	}
+
 	return fullURL, nil
 }
 
@@ -83,9 +84,11 @@ func (b *LocalStorageService) Destroy(urlOrPath string) error {
 	if p == "" {
 		return nil
 	}
+
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		return nil
 	}
+
 	return os.Remove(p)
 }
 
@@ -97,7 +100,9 @@ func (b *LocalStorageService) Exists(urlOrPath string) bool {
 	if p == "" {
 		return false
 	}
+
 	info, err := os.Stat(p)
+
 	return err == nil && !info.IsDir()
 }
 
@@ -109,6 +114,7 @@ func (b *LocalStorageService) toAbsPath(urlOrPath string) string {
 		if rel == "" {
 			return ""
 		}
+
 		return filepath.Join(b.fsBase, rel)
 	}
 
@@ -119,6 +125,7 @@ func (b *LocalStorageService) toAbsPath(urlOrPath string) string {
 		if rel == "" {
 			return ""
 		}
+
 		return filepath.Join(b.fsBase, rel)
 	}
 
@@ -135,6 +142,7 @@ func joinURLPath(parts ...string) string {
 	for _, p := range parts {
 		cleaned = append(cleaned, strings.Trim(p, "/"))
 	}
+
 	return "/" + strings.Join(cleaned, "/")
 }
 
@@ -142,7 +150,7 @@ func isStaticRef(s string) bool {
 	if s == "" {
 		return false
 	}
-	// 1) Полный URL c /public/img/ в path
+	// 1) Полный URL c /static/ в path
 	if u, err := url.Parse(s); err == nil && u.Scheme != "" && u.Host != "" {
 		return strings.HasPrefix(u.Path, staticPath)
 	}
@@ -151,6 +159,7 @@ func isStaticRef(s string) bool {
 	if strings.HasPrefix(asSlash, staticPath) {
 		return true
 	}
-	// 3) Абсолютный путь в ФС, содержащий /public/img/
+
+	// 3) Абсолютный путь в ФС, содержащий /static/
 	return strings.Contains(asSlash, staticPath)
 }

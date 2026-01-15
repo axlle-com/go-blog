@@ -1,8 +1,27 @@
 {{ define "admin.footer" }}
     </div>
-    <script src="/public/admin/app.js"></script>
-    <script src="/public/admin/glob.js"></script>
-    <script src="/public/admin/common.js"></script>
+
+    {{ bundleJs
+    "static/resources/plugins/jquery-3-6-0/jquery.min.js"
+    "static/resources/plugins/bootstrap-4-6-1/js/bootstrap.bundle.min.js"
+    "static/resources/plugins/simplebar/simplebar.min.js"
+    "static/resources/plugins/feather-icons/feather.min.js"
+    "static/resources/plugins/summernote/summernote-bs4.min.js"
+    "static/resources/plugins/select2/js/select2.full.min.js"
+    "static/resources/plugins/select2/js/i18n/ru.js"
+    "static/resources/plugins/flatpickr/flatpickr.min.js"
+    "static/resources/plugins/flatpickr/l10n/ru.js"
+    "static/resources/plugins/noty/noty.min.js"
+    "static/resources/plugins/inputmask/jquery.inputmask.min.js"
+    "static/resources/plugins/fancybox/fancybox.umd.js"
+    "static/resources/plugins/sweetalert2/sweetalert2.all.min.js"
+    "static/resources/plugins/sortablejs/Sortable.min.js"
+    "static/resources/plugins/js/script.min.js"
+    "static/resources/plugins/date-format/date-format.js"
+    "static/admin/glob.js"
+    "static/admin/common.js"
+    }}
+
     </body>
     </html>
 {{ end}}

@@ -31,14 +31,17 @@ func (c *BaseAjax) GetUser(ctx *gin.Context) contract.User {
 	if !exists {
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
+
 		return nil
 	}
 	u, ok := userData.(user.User)
 	if !ok {
 		ctx.Redirect(http.StatusFound, "/login")
 		ctx.Abort()
+
 		return nil
 	}
+
 	return &u
 }
 
@@ -47,10 +50,12 @@ func (c *BaseAjax) GetAdmin(ctx *gin.Context) contract.User {
 	if !exists {
 		return nil
 	}
+
 	u, ok := userData.(user.User)
 	if !ok {
 		return nil
 	}
+
 	return &u
 }
 
@@ -66,6 +71,7 @@ func (c *BaseAjax) RenderView(view string, data map[string]any, ctx *gin.Context
 	c.RenderHTML(ctx, http.StatusOK, view, data)
 
 	ctx.Writer = originalWriter
+
 	return c.removeWhitespaceBetweenTags(buf.String())
 }
 
@@ -96,6 +102,7 @@ func (c *BaseAjax) removeWhitespaceBetweenTags(s string) string {
 	compactHTML = regexp.MustCompile(`[\n\r\t]+`).ReplaceAllString(compactHTML, " ")
 	// Удаляем множественные пробелы
 	compactHTML = regexp.MustCompile(`\s+`).ReplaceAllString(compactHTML, " ")
+
 	return strings.TrimSpace(compactHTML)
 }
 
@@ -109,7 +116,9 @@ func getLoc(ctx *gin.Context) *i18n.Localizer {
 	if !ok {
 		return nil
 	}
+
 	loc, _ := v.(*i18n.Localizer)
+
 	return loc
 }
 
@@ -128,6 +137,7 @@ func (c *BaseAjax) BuildT(ctx *gin.Context) func(id string, data map[string]any,
 		if err != nil || s == "" {
 			return id
 		}
+
 		return s
 	}
 }
@@ -148,6 +158,7 @@ func (c *BaseAjax) T(ctx *gin.Context, id string, data ...map[string]any) string
 	if err != nil || s == "" {
 		return id
 	}
+
 	return s
 }
 

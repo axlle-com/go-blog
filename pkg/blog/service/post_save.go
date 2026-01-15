@@ -60,42 +60,42 @@ func (s *PostService) SaveFromRequest(form *http.PostRequest, found *models.Post
 	return model, nil
 }
 
-func (s *PostService) Create(post *models.Post, user contract.User) (*models.Post, error) {
+func (s *PostService) Create(model *models.Post, user contract.User) (*models.Post, error) {
 	id := user.GetID()
-	post.UserID = &id
-	post.Alias = s.generateAlias(post)
+	model.UserID = &id
+	model.Alias = s.generateAlias(model)
 
-	if err := s.postRepo.Create(post); err != nil {
+	if err := s.postRepo.Create(model); err != nil {
 		return nil, err
 	}
 
-	if err := s.receivedImage(post); err != nil {
+	if err := s.receivedImage(model); err != nil {
 		return nil, err
 	}
 
-	return post, nil
+	return model, nil
 }
 
-func (s *PostService) Update(post, found *models.Post) (*models.Post, error) {
-	post.ID = found.ID
-	post.UUID = found.UUID
-	post.UserID = found.UserID
+func (s *PostService) Update(model, found *models.Post) (*models.Post, error) {
+	model.ID = found.ID
+	model.UUID = found.UUID
+	model.UserID = found.UserID
 
-	if post.Alias != found.Alias {
-		post.Alias = s.generateAlias(post)
+	if model.Alias != found.Alias {
+		model.Alias = s.generateAlias(model)
 	}
 
-	if err := s.postRepo.Update(post); err != nil {
+	if err := s.postRepo.Update(model); err != nil {
 		return nil, err
 	}
 
-	if post.Image != nil && found.Image != nil && *post.Image != *found.Image {
-		if err := s.receivedImage(post); err != nil {
+	if model.Image != nil && (found.Image == nil || *model.Image != *found.Image) {
+		if err := s.receivedImage(model); err != nil {
 			return nil, err
 		}
 	}
 
-	s.queue.Enqueue(job.NewPostJob(post, "update"), 0)
+	s.queue.Enqueue(job.NewPostJob(model, "update"), 0)
 
-	return post, nil
+	return model, nil
 }

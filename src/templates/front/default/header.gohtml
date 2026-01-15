@@ -5,7 +5,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Визитка</title>
-        <link href="/public/app.css" rel="stylesheet">
+        {{ bundleCss "static/resources/plugins/bootstrap-5.0.2-dist/css/bootstrap.min.css" }}
         <style>
             .hero {
                 background-size: cover;
@@ -43,9 +43,6 @@
         </div>
     </nav>
     <header class="hero text-center">
-        <div class="container">
-            <h1 class="display-4">Добро пожаловать!</h1>
-            <p class="lead">Я ваш лучший партнер в создании удивительных решений.</p>
-        </div>
+        <div class="container"></div>
     </header>
 {{ end}}

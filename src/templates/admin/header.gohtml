@@ -5,8 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="csrf-token" content="{{ .csrfToken }}"/>
-    <link rel="stylesheet" href="/public/admin/app.css">
-    <link rel="stylesheet" href="/public/admin/common.css">
+
+    {{ bundleCss
+    "static/resources/font/inter/inter.min.css"
+    "static/resources/font/play/play.css"
+    "static/resources/plugins/material-design-icons-iconfont/material-design-icons.min.css"
+    "static/resources/plugins/fontawesome-free/css/all.min.css"
+    "static/resources/plugins/simplebar/simplebar.min.css"
+    "static/resources/plugins/summernote/summernote-bs4.min.css"
+    "static/resources/plugins/select2/css/select2.min.css"
+    "static/resources/plugins/flatpickr/flatpickr.min.css"
+    "static/resources/plugins/noty/noty.min.css"
+    "static/resources/plugins/noty/themes/relax.min.css"
+    "static/resources/plugins/fancybox/fancybox.css"
+    "static/resources/plugins/sweetalert2/sweetalert2.min.css"
+    "static/admin/style.css"
+    "static/admin/sidebar-dark.min.css"
+    "static/admin/common.css"
+    }}
+
     <title> {{ .Title }}</title>
 </head>
 <body class="a-block">
@@ -76,7 +93,7 @@
                             <h6 class="mb-0">{{ .user.LastName }}</h6>
                             <ul>
                                 {{ range .user.Roles }}
-                                <li class="text-gray-400 font-size-sm">{{ .Name }}</li>
+                                    <li class="text-gray-400 font-size-sm">{{ .Name }}</li>
                                 {{ end }}
                             </ul>
                         </div>
@@ -94,4 +111,4 @@
             </li>
         </ul>
     </div>
-{{ end }}
+    {{ end }}

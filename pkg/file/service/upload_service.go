@@ -57,6 +57,7 @@ func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder stri
 		if newErr != nil {
 			return "", newErr
 		}
+
 		return "", err
 	}
 

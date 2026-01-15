@@ -22,8 +22,9 @@ import (
 )
 
 type CategoryService struct {
-	categoryRepo repository.CategoryRepository
-	api          *api.Api
+	categoryRepo          repository.CategoryRepository
+	postCollectionService *PostCollectionService
+	api                   *api.Api
 }
 
 func NewCategoryService(
@@ -34,6 +35,10 @@ func NewCategoryService(
 		categoryRepo: categoryRepo,
 		api:          api,
 	}
+}
+
+func (s *CategoryService) SetPostCollectionService(postCollectionService *PostCollectionService) {
+	s.postCollectionService = postCollectionService
 }
 
 func (s *CategoryService) GetAggregateByID(id uint) (*models.PostCategory, error) {
@@ -129,21 +134,29 @@ func (s *CategoryService) Delete(category *models.PostCategory) error {
 	return s.categoryRepo.Delete(category)
 }
 
-func (s *CategoryService) Create(category *models.PostCategory, user contract.User) (*models.PostCategory, error) {
+func (s *CategoryService) Create(model *models.PostCategory, user contract.User) (*models.PostCategory, error) {
 	id := user.GetID()
-	category.UserID = &id
-	category.Alias = s.generateAlias(category)
+	model.UserID = &id
+	model.Alias = s.generateAlias(model)
 
-	if err := s.categoryRepo.Create(category); err != nil {
+	if err := s.categoryRepo.Create(model); err != nil {
 		return nil, err
 	}
 
-	return category, nil
+	if err := s.receivedImage(model); err != nil {
+		return nil, err
+	}
+
+	return model, nil
 }
 
-func (s *CategoryService) Update(category *models.PostCategory, found *models.PostCategory, user contract.User) (*models.PostCategory, error) {
-	if category.Alias != found.Alias {
-		category.Alias = s.generateAlias(category)
+func (s *CategoryService) Update(model, found *models.PostCategory, user contract.User) (*models.PostCategory, error) {
+	model.ID = found.ID
+	model.UUID = found.UUID
+	model.UserID = found.UserID
+
+	if model.Alias != found.Alias {
+		model.Alias = s.generateAlias(model)
 	}
 
 	tx := s.categoryRepo.Tx()
@@ -154,7 +167,7 @@ func (s *CategoryService) Update(category *models.PostCategory, found *models.Po
 		}
 	}()
 
-	if err := s.categoryRepo.WithTx(tx).Update(category, found); err != nil {
+	if err := s.categoryRepo.WithTx(tx).Update(model, found); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
@@ -163,7 +176,13 @@ func (s *CategoryService) Update(category *models.PostCategory, found *models.Po
 		return nil, err
 	}
 
-	return category, nil
+	if model.Image != nil && (found.Image == nil || *model.Image != *found.Image) {
+		if err := s.receivedImage(model); err != nil {
+			return nil, err
+		}
+	}
+
+	return model, nil
 }
 
 func (s *CategoryService) generateAlias(category *models.PostCategory) string {
@@ -181,20 +200,48 @@ func (s *CategoryService) DeleteImageFile(category *models.PostCategory) error {
 	if category.Image == nil {
 		return nil
 	}
+
 	err := s.api.File.DeleteFile(*category.Image)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		logger.Errorf("[DeleteImageFile] Error: %v", err)
 	}
+
 	category.Image = nil
+
 	return nil
 }
 
-func (s *CategoryService) View(category *models.PostCategory) (*models.PostCategory, error) {
+func (s *CategoryService) View(
+	category *models.PostCategory,
+	paginator contract.Paginator,
+	filter *models.PostFilter,
+) (*models.PostCategory, error) {
 	var wg sync.WaitGroup
 	agg := errutil.New()
+
+	// --- Posts with pagination ---
+	if s.postCollectionService != nil && paginator != nil {
+		service.SafeGo(&wg, func(c *models.PostCategory, p contract.Paginator, f *models.PostFilter) func() {
+			return func() {
+				postFilter := models.NewPostFilter()
+				if f != nil {
+					*postFilter = *f
+				}
+				categoryID := c.ID
+				postFilter.PostCategoryID = &categoryID
+
+				posts, e := s.postCollectionService.WithPaginate(p, postFilter)
+				if e != nil {
+					agg.Add(fmt.Errorf("get posts: %w", e))
+					return
+				}
+
+				c.Posts = posts
+			}
+		}(category, paginator, filter))
+	}
 
 	// --- InfoBlocks snapshot ---
 	if category.InfoBlocksSnapshot == nil {
@@ -272,4 +319,12 @@ func (s *CategoryService) View(category *models.PostCategory) (*models.PostCateg
 // @todo переделать на фильтр везде
 func (s *CategoryService) FindByParam(field string, value any) (*models.PostCategory, error) {
 	return s.categoryRepo.FindByParam(field, value)
+}
+
+func (s *CategoryService) receivedImage(category *models.PostCategory) error {
+	if category.Image != nil && *category.Image != "" {
+		return s.api.File.Received([]string{*category.Image})
+	}
+
+	return nil
 }

@@ -26,6 +26,7 @@ func (s *FileService) Delete(file string) error {
 	if err != nil {
 		return err
 	}
+
 	return s.fileRepo.Delete(model.ID)
 }
 
@@ -34,6 +35,7 @@ func (s *FileService) Destroy(file string) error {
 	if err != nil {
 		return err
 	}
+
 	return s.fileRepo.Destroy(model.ID)
 }
 

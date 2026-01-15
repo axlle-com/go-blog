@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -19,13 +18,15 @@ import (
 )
 
 type seeder struct {
+	config          contract.Config
+	disk            contract.DiskService
+	db              contract.DB
+	seedService     contract.SeedService
+	api             *api.Api
 	postRepo        repository.PostRepository
 	postService     *service.PostService
 	categoryRepo    repository.CategoryRepository
 	categoryService *service.CategoryService
-	api             *api.Api
-	config          contract.Config
-	disk            contract.DiskService
 }
 
 type InfoBlockSeedItem struct {
@@ -75,22 +76,26 @@ type CategorySeedData struct {
 }
 
 func NewSeeder(
+	cfg contract.Config,
+	disk contract.DiskService,
+	db contract.DB,
+	seedService contract.SeedService,
+	api *api.Api,
 	post repository.PostRepository,
 	postService *service.PostService,
 	category repository.CategoryRepository,
 	categoryService *service.CategoryService,
-	api *api.Api,
-	cfg contract.Config,
-	disk contract.DiskService,
 ) contract.Seeder {
 	return &seeder{
+		config:          cfg,
+		disk:            disk,
+		db:              db,
+		seedService:     seedService,
+		api:             api,
 		postRepo:        post,
 		postService:     postService,
 		categoryRepo:    category,
 		categoryService: categoryService,
-		api:             api,
-		config:          cfg,
-		disk:            disk,
 	}
 }
 
@@ -99,274 +104,11 @@ func (s *seeder) Seed() error {
 		return nil
 	}
 
-	if err := s.seedCategoriesFromJSON("post_categories"); err != nil {
+	if err := s.seedCategoriesFromJSON((&models.PostCategory{}).GetTable()); err != nil {
 		return err
 	}
 
-	return s.seedFromJSON("posts")
-}
-
-func (s *seeder) seedFromJSON(moduleName string) error {
-	// Путь относительно src/services
-	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
-
-	// Проверяем существование файла
-	if !s.disk.Exists(seedPath) {
-		logger.Infof("[blog][seeder][seedFromJSON] seed file not found: %s, skipping", seedPath)
-		return nil
-	}
-
-	// Читаем JSON файл через DiskService
-	data, err := s.disk.ReadFile(seedPath)
-	if err != nil {
-		return err
-	}
-
-	var postsData []PostSeedData
-	if err := json.Unmarshal(data, &postsData); err != nil {
-		return err
-	}
-
-	for _, postData := range postsData {
-		var found *models.Post
-		if postData.Alias == nil {
-			found, _ = s.postService.FindByParam("is_main", true)
-		} else {
-			found, _ = s.postService.FindByParam("alias", postData.Alias)
-		}
-		if found != nil {
-			logger.Infof("[blog][seeder][seedFromJSON] post with title='%v' already exists, skipping", postData.Alias)
-			continue
-		}
-
-		// Ищем шаблон по name и resource_name
-		resourceName := (&models.Post{}).GetName()
-		var templateID *uint
-		if postData.Template != "" {
-			tpl, err := s.api.Template.GetByNameAndResource(postData.Template, resourceName)
-			if err != nil {
-				logger.Errorf("[blog][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", postData.Template, resourceName, err)
-				continue
-			}
-			id := tpl.GetID()
-			templateID = &id
-		}
-
-		if postData.CategoryAlias != nil {
-			cat, err := s.categoryService.FindByParam("alias", *postData.CategoryAlias)
-			if err != nil {
-				logger.Errorf("[blog][seeder][seedFromJSON] category not found: alias=%s, error=%v", *postData.CategoryAlias, err)
-				continue
-			}
-			id := cat.ID
-			postData.PostCategoryID = &id
-		}
-
-		// Парсим даты
-		var datePub, dateEnd *time.Time
-		if postData.DatePub != nil {
-			if parsed := db.ParseDate(*postData.DatePub); parsed != nil {
-				datePub = parsed
-			}
-		}
-		if postData.DateEnd != nil {
-			if parsed := db.ParseDate(*postData.DateEnd); parsed != nil {
-				dateEnd = parsed
-			}
-		}
-
-		post := models.Post{
-			UUID:               uuid.New(),
-			TemplateID:         templateID,
-			PostCategoryID:     postData.PostCategoryID,
-			MetaTitle:          postData.MetaTitle,
-			MetaDescription:    postData.MetaDescription,
-			IsPublished:        postData.IsPublished,
-			IsFavourites:       postData.IsFavourites,
-			HasComments:        postData.HasComments,
-			ShowImagePost:      postData.ShowImagePost,
-			ShowImageCategory:  postData.ShowImageCategory,
-			InSitemap:          postData.InSitemap,
-			IsMain:             postData.IsMain,
-			Media:              postData.Media,
-			Title:              postData.Title,
-			TitleShort:         postData.TitleShort,
-			DescriptionPreview: postData.DescriptionPreview,
-			Description:        postData.Description,
-			ShowDate:           postData.ShowDate,
-			DatePub:            datePub,
-			DateEnd:            dateEnd,
-			Image:              postData.Image,
-			Hits:               postData.Hits,
-			Sort:               postData.Sort,
-			Stars:              postData.Stars,
-			CreatedAt:          db.TimePtr(time.Now()),
-			UpdatedAt:          db.TimePtr(time.Now()),
-			DeletedAt:          nil,
-		}
-
-		var userF contract.User
-		if postData.UserID != nil {
-			userF, _ = s.api.User.GetByID(*postData.UserID)
-		}
-
-		if postData.Alias != nil {
-			post.Alias = *postData.Alias
-		}
-
-		createdPost, err := s.postService.Create(&post, userF)
-		if err != nil {
-			logger.Errorf("[blog][seeder][seedFromJSON] error creating post: %v", err)
-			continue
-		}
-
-		// Привязываем инфоблоки по title, если они указаны
-		if len(postData.InfoBlocks) > 0 {
-			for i := range postData.InfoBlocks {
-				infoBlockItem := &postData.InfoBlocks[i]
-				if infoBlockItem.Title == "" {
-					continue
-				}
-
-				// Ищем инфоблок по title
-				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
-				if err != nil || infoBlock == nil {
-					logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockItem.Title, postData.Title)
-					continue
-				}
-
-				// Устанавливаем ID инфоблока
-				infoBlockItem.ID = infoBlock.GetID()
-
-				// Привязываем инфоблок к посту с указанием сортировки и позиции
-				_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdPost.UUID.String())
-				if err != nil {
-					logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockItem.Title, postData.Title, err)
-					continue
-				}
-				logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to post '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, postData.Title)
-			}
-		}
-	}
-
-	logger.Infof("[blog][seeder][seedFromJSON] seeded %d posts from JSON", len(postsData))
-	return nil
-}
-
-func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
-	// Путь относительно src/services
-	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
-
-	// Проверяем существование файла
-	if !s.disk.Exists(seedPath) {
-		logger.Infof("[blog][seeder][seedCategoriesFromJSON] seed file not found: %s, skipping", seedPath)
-		return nil
-	}
-
-	// Читаем JSON файл через DiskService
-	data, err := s.disk.ReadFile(seedPath)
-	if err != nil {
-		return err
-	}
-
-	var categoriesData []CategorySeedData
-	if err := json.Unmarshal(data, &categoriesData); err != nil {
-		return err
-	}
-
-	for _, categoryData := range categoriesData {
-		// Ищем существующую категорию по title
-		allCategories, err := s.categoryRepo.GetAll()
-		var existingCategory *models.PostCategory
-		if err == nil {
-			for _, cat := range allCategories {
-				if cat.Title == categoryData.Title {
-					existingCategory = cat
-					break
-				}
-			}
-		}
-
-		// Если категория уже существует, пропускаем её
-		if existingCategory != nil {
-			logger.Infof("[blog][seeder][seedCategoriesFromJSON] category with title='%s' already exists, skipping", categoryData.Title)
-			continue
-		}
-
-		resourceName := "post_categories"
-		var templateID *uint
-		if categoryData.Template != "" {
-			tpl, err := s.api.Template.GetByNameAndResource(categoryData.Template, resourceName)
-			if err != nil {
-				logger.Errorf("[blog][seeder][seedCategoriesFromJSON] template not found: name=%s, resource=%s, error=%v", categoryData.Template, resourceName, err)
-				continue
-			}
-			id := tpl.GetID()
-			templateID = &id
-		}
-
-		isPublished := true
-		if categoryData.IsPublished != nil {
-			isPublished = *categoryData.IsPublished
-		}
-
-		var inSitemap *bool
-		if categoryData.InSitemap != nil {
-			inSitemap = categoryData.InSitemap
-		}
-
-		category := models.PostCategory{
-			UUID:        uuid.New(),
-			TemplateID:  templateID,
-			IsPublished: &isPublished,
-			InSitemap:   inSitemap,
-			Title:       categoryData.Title,
-			CreatedAt:   db.TimePtr(time.Now()),
-			UpdatedAt:   db.TimePtr(time.Now()),
-			DeletedAt:   nil,
-		}
-
-		var userF contract.User
-		if categoryData.UserID != nil {
-			userF, _ = s.api.User.GetByID(*categoryData.UserID)
-		}
-
-		createdCategory, err := s.categoryService.Create(&category, userF)
-		if err != nil {
-			logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error creating category: %v", err)
-			continue
-		}
-
-		if len(categoryData.InfoBlocks) > 0 {
-			for i := range categoryData.InfoBlocks {
-				infoBlockItem := &categoryData.InfoBlocks[i]
-				if infoBlockItem.Title == "" {
-					continue
-				}
-
-				// Ищем инфоблок по title
-				infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
-				if err != nil || infoBlock == nil {
-					logger.Infof("[blog][seeder][seedCategoriesFromJSON] info block with title='%s' not found for category '%s', skipping", infoBlockItem.Title, categoryData.Title)
-					continue
-				}
-
-				// Устанавливаем ID инфоблока
-				infoBlockItem.ID = infoBlock.GetID()
-
-				// Привязываем инфоблок к категории с указанием сортировки и позиции
-				_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdCategory.UUID.String())
-				if err != nil {
-					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockItem.Title, categoryData.Title, err)
-					continue
-				}
-				logger.Infof("[blog][seeder][seedCategoriesFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to category '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, categoryData.Title)
-			}
-		}
-	}
-
-	logger.Infof("[blog][seeder][seedCategoriesFromJSON] seeded %d categories from JSON", len(categoriesData))
-	return nil
+	return s.seedFromJSON((&models.Post{}).GetTable())
 }
 
 func (s *seeder) SeedTest(n int) error {
@@ -376,6 +118,290 @@ func (s *seeder) SeedTest(n int) error {
 	}
 
 	return s.posts(n)
+}
+
+func (s *seeder) seedFromJSON(moduleName string) error {
+	files, _ := s.seedService.GetFiles(s.config.Layout(), moduleName)
+
+	for name, seedPath := range files {
+		data, err := s.disk.ReadFile(seedPath)
+		if err != nil {
+			return err
+		}
+
+		ok, err := s.seedService.IsApplied(name)
+		if err != nil {
+			return err
+		}
+		if ok {
+			continue
+		}
+
+		var postsData []PostSeedData
+		if err := json.Unmarshal(data, &postsData); err != nil {
+			return err
+		}
+
+		for _, postData := range postsData {
+			var found *models.Post
+			if postData.Alias == nil {
+				found, _ = s.postService.FindByParam("is_main", true)
+			} else {
+				found, _ = s.postService.FindByParam("alias", postData.Alias)
+			}
+			if found != nil {
+				logger.Infof("[blog][seeder][seedFromJSON] post with title='%v' already exists, skipping", postData.Alias)
+				continue
+			}
+
+			// Ищем шаблон по name и resource_name
+			resourceName := (&models.Post{}).GetName()
+			var templateID *uint
+			if postData.Template != "" {
+				tpl, err := s.api.Template.GetByNameAndResource(postData.Template, resourceName)
+				if err != nil {
+					logger.Errorf("[blog][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", postData.Template, resourceName, err)
+					continue
+				}
+				id := tpl.GetID()
+				templateID = &id
+			}
+
+			if postData.CategoryAlias != nil {
+				cat, err := s.categoryService.FindByParam("alias", *postData.CategoryAlias)
+				if err != nil {
+					logger.Errorf("[blog][seeder][seedFromJSON] category not found: alias=%s, error=%v", *postData.CategoryAlias, err)
+					continue
+				}
+				id := cat.ID
+				postData.PostCategoryID = &id
+			}
+
+			// Парсим даты
+			var datePub, dateEnd *time.Time
+			if postData.DatePub != nil {
+				if parsed := db.ParseDate(*postData.DatePub); parsed != nil {
+					datePub = parsed
+				}
+			}
+			if postData.DateEnd != nil {
+				if parsed := db.ParseDate(*postData.DateEnd); parsed != nil {
+					dateEnd = parsed
+				}
+			}
+
+			post := models.Post{
+				UUID:               uuid.New(),
+				TemplateID:         templateID,
+				PostCategoryID:     postData.PostCategoryID,
+				MetaTitle:          postData.MetaTitle,
+				MetaDescription:    postData.MetaDescription,
+				IsPublished:        postData.IsPublished,
+				IsFavourites:       postData.IsFavourites,
+				HasComments:        postData.HasComments,
+				ShowImagePost:      postData.ShowImagePost,
+				ShowImageCategory:  postData.ShowImageCategory,
+				InSitemap:          postData.InSitemap,
+				IsMain:             postData.IsMain,
+				Media:              postData.Media,
+				Title:              postData.Title,
+				TitleShort:         postData.TitleShort,
+				DescriptionPreview: postData.DescriptionPreview,
+				Description:        postData.Description,
+				ShowDate:           postData.ShowDate,
+				DatePub:            datePub,
+				DateEnd:            dateEnd,
+				Image:              postData.Image,
+				Hits:               postData.Hits,
+				Sort:               postData.Sort,
+				Stars:              postData.Stars,
+				CreatedAt:          db.TimePtr(time.Now()),
+				UpdatedAt:          db.TimePtr(time.Now()),
+				DeletedAt:          nil,
+			}
+
+			var userF contract.User
+			if postData.UserID != nil {
+				userF, _ = s.api.User.GetByID(*postData.UserID)
+			}
+
+			if postData.Alias != nil {
+				post.Alias = *postData.Alias
+			}
+
+			createdPost, err := s.postService.Create(&post, userF)
+			if err != nil {
+				logger.Errorf("[blog][seeder][seedFromJSON] error creating post: %v", err)
+				continue
+			}
+
+			// Привязываем инфоблоки по title, если они указаны
+			if len(postData.InfoBlocks) > 0 {
+				for i := range postData.InfoBlocks {
+					infoBlockItem := &postData.InfoBlocks[i]
+					if infoBlockItem.Title == "" {
+						continue
+					}
+
+					// Ищем инфоблок по title
+					infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
+					if err != nil || infoBlock == nil {
+						logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockItem.Title, postData.Title)
+						continue
+					}
+
+					// Устанавливаем ID инфоблока
+					infoBlockItem.ID = infoBlock.GetID()
+
+					// Привязываем инфоблок к посту с указанием сортировки и позиции
+					_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdPost.UUID.String())
+					if err != nil {
+						logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockItem.Title, postData.Title, err)
+						continue
+					}
+					logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to post '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, postData.Title)
+				}
+			}
+		}
+
+		if err := s.seedService.MarkApplied(name); err != nil {
+			return err
+		}
+
+		logger.Infof("[blog][seeder][seedFromJSON] seeded %d posts from JSON", len(postsData))
+	}
+
+	return nil
+}
+
+func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
+	files, err := s.seedService.GetFiles(s.config.Layout(), moduleName)
+	if err != nil {
+		return err
+	}
+	if len(files) == 0 {
+		logger.Infof("[blog][seeder][seedCategoriesFromJSON] seed files not found for module: %s, skipping", moduleName)
+		return nil
+	}
+
+	for name, seedPath := range files {
+		data, err := s.disk.ReadFile(seedPath)
+		if err != nil {
+			return err
+		}
+
+		ok, err := s.seedService.IsApplied(name)
+		if err != nil {
+			return err
+		}
+		if ok {
+			continue
+		}
+
+		var categoriesData []CategorySeedData
+		if err := json.Unmarshal(data, &categoriesData); err != nil {
+			return err
+		}
+
+		for _, categoryData := range categoriesData {
+			// Ищем существующую категорию по title
+			allCategories, err := s.categoryRepo.GetAll()
+			var existingCategory *models.PostCategory
+			if err == nil {
+				for _, cat := range allCategories {
+					if cat.Title == categoryData.Title {
+						existingCategory = cat
+						break
+					}
+				}
+			}
+
+			// Если категория уже существует, пропускаем её
+			if existingCategory != nil {
+				logger.Infof("[blog][seeder][seedCategoriesFromJSON] category with title='%s' already exists, skipping", categoryData.Title)
+				continue
+			}
+
+			resourceName := "post_categories"
+			var templateID *uint
+			if categoryData.Template != "" {
+				tpl, err := s.api.Template.GetByNameAndResource(categoryData.Template, resourceName)
+				if err != nil {
+					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] template not found: name=%s, resource=%s, error=%v", categoryData.Template, resourceName, err)
+					continue
+				}
+				id := tpl.GetID()
+				templateID = &id
+			}
+
+			isPublished := true
+			if categoryData.IsPublished != nil {
+				isPublished = *categoryData.IsPublished
+			}
+
+			var inSitemap *bool
+			if categoryData.InSitemap != nil {
+				inSitemap = categoryData.InSitemap
+			}
+
+			category := models.PostCategory{
+				UUID:        uuid.New(),
+				TemplateID:  templateID,
+				IsPublished: &isPublished,
+				InSitemap:   inSitemap,
+				Title:       categoryData.Title,
+				CreatedAt:   db.TimePtr(time.Now()),
+				UpdatedAt:   db.TimePtr(time.Now()),
+				DeletedAt:   nil,
+			}
+
+			var userF contract.User
+			if categoryData.UserID != nil {
+				userF, _ = s.api.User.GetByID(*categoryData.UserID)
+			}
+
+			createdCategory, err := s.categoryService.Create(&category, userF)
+			if err != nil {
+				logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error creating category: %v", err)
+				continue
+			}
+
+			if len(categoryData.InfoBlocks) > 0 {
+				for i := range categoryData.InfoBlocks {
+					infoBlockItem := &categoryData.InfoBlocks[i]
+					if infoBlockItem.Title == "" {
+						continue
+					}
+
+					// Ищем инфоблок по title
+					infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
+					if err != nil || infoBlock == nil {
+						logger.Infof("[blog][seeder][seedCategoriesFromJSON] info block with title='%s' not found for category '%s', skipping", infoBlockItem.Title, categoryData.Title)
+						continue
+					}
+
+					// Устанавливаем ID инфоблока
+					infoBlockItem.ID = infoBlock.GetID()
+
+					// Привязываем инфоблок к категории с указанием сортировки и позиции
+					_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdCategory.UUID.String())
+					if err != nil {
+						logger.Errorf("[blog][seeder][seedCategoriesFromJSON] error attaching info block '%s' to category '%s': %v", infoBlockItem.Title, categoryData.Title, err)
+						continue
+					}
+					logger.Infof("[blog][seeder][seedCategoriesFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to category '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, categoryData.Title)
+				}
+			}
+		}
+
+		if err := s.seedService.MarkApplied(name); err != nil {
+			return err
+		}
+
+		logger.Infof("[blog][seeder][seedCategoriesFromJSON] seeded %d categories from JSON (%s)", len(categoriesData), name)
+	}
+
+	return nil
 }
 
 func (s *seeder) posts(n int) error {
@@ -406,7 +432,7 @@ func (s *seeder) posts(n int) error {
 			ShowDate:           db.RandBool(),
 			DatePub:            db.ParseDate("02.01.2006"),
 			DateEnd:            db.ParseDate("02.01.2006"),
-			Image:              db.StrPtr("/public/img/404.svg"),
+			Image:              db.StrPtr("/static/img/404.svg"),
 			Hits:               uint(rand.Intn(1000)),
 			Sort:               rand.Intn(100),
 			Stars:              rand.Float32() * 5,
@@ -458,7 +484,7 @@ func (s *seeder) categories(n int) error {
 			TitleShort:         db.StrPtr("TitleCategoryShort #" + strconv.Itoa(i)),
 			DescriptionPreview: db.StrPtr(faker.Paragraph()),
 			Description:        db.StrPtr(faker.Paragraph()),
-			Image:              db.StrPtr("/public/img/404.svg"),
+			Image:              db.StrPtr("/static/img/404.svg"),
 			Sort:               db.IntToUintPtr(rand.Intn(100)),
 			CreatedAt:          db.TimePtr(time.Now()),
 			UpdatedAt:          db.TimePtr(time.Now()),

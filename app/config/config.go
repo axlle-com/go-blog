@@ -285,45 +285,34 @@ func (c *config) DataFolder(parts ...string) string {
 	out := base
 	sep := string(filepath.Separator)
 
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if p == "" {
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
 			continue
 		}
 
 		// Нормализуем слэши и чистим путь
-		p = filepath.Clean(filepath.FromSlash(p))
+		part = filepath.Clean(filepath.FromSlash(part))
+
+		part = strings.TrimPrefix(part, "."+sep)
+		if part == "data" || strings.HasPrefix(part, "data"+sep) {
+			part = strings.TrimPrefix(part, "data")
+			part = strings.TrimPrefix(part, sep)
+		}
 
 		// Не даём абсолютному пути "сбросить" base
-		p = strings.TrimLeft(p, `\/`)
-		p = strings.TrimLeft(p, sep)
+		part = strings.TrimLeft(part, `\/`)
+		part = strings.TrimLeft(part, sep)
 
 		// Запрещаем выход выше base
-		if p == "" || p == "." || p == ".." || strings.HasPrefix(p, ".."+sep) {
+		if part == "" || part == "." || part == ".." || strings.HasPrefix(part, ".."+sep) {
 			continue
 		}
 
-		out = filepath.Join(out, p)
+		out = filepath.Join(out, part)
 	}
 
 	return out
-}
-
-func (c *config) SrcFolder() string {
-	if c.srcFolder == "" {
-		return ""
-	}
-
-	if c.IsTest() {
-		root, err := c.root()
-		if err != nil || root == "" {
-			return ""
-		}
-
-		return filepath.Clean(filepath.Join(root, c.srcFolder))
-	}
-
-	return filepath.Clean(c.srcFolder)
 }
 
 func (c *config) Layout() string {
@@ -334,44 +323,44 @@ func (c *config) Layout() string {
 	return c.layout
 }
 
-func (c *config) SrcFolderBuilder(parts ...string) string {
-	base := filepath.Clean(c.SrcFolder())
+func (c *config) SrcFolder(parts ...string) string {
+	base := filepath.Clean(c.srcFolder)
 	if len(parts) == 0 {
 		return base
 	}
 
 	out := base
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if p == "" {
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
 			continue
 		}
 
-		p = filepath.Clean(filepath.FromSlash(p))
+		part = filepath.Clean(filepath.FromSlash(part))
 
-		p = strings.TrimLeft(p, `\/`)
-		p = strings.TrimLeft(p, string(filepath.Separator))
-		if p == "." {
+		part = strings.TrimLeft(part, `\/`)
+		part = strings.TrimLeft(part, string(filepath.Separator))
+		if part == "." {
 			continue
 		}
 
-		out = filepath.Join(out, p)
+		out = filepath.Join(out, part)
 	}
 
 	return out
 }
 
-func (c *config) PublicFolderBuilder(parts ...string) string {
-	elems := []string{filepath.Clean(c.SrcFolder()), "public"}
+func (c *config) StaticFolder(parts ...string) string {
+	elems := []string{filepath.Clean(c.SrcFolder()), "static"}
 
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if p == "" {
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
 			continue
 		}
 
-		p = strings.TrimLeft(p, `/\`)
-		elems = append(elems, p)
+		part = strings.TrimLeft(part, `/\`)
+		elems = append(elems, part)
 	}
 
 	return filepath.Join(elems...)
@@ -382,6 +371,7 @@ func (c *config) UserSessionKey(s string) string {
 	if c.IsTest() {
 		return key + "test_" + s
 	}
+
 	return key + s
 }
 

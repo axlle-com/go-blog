@@ -32,14 +32,15 @@ type Post struct {
 	DescriptionPreview *string        `gorm:"type:text" json:"description_preview" form:"description_preview" binding:"omitempty"`
 	Description        *string        `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
 	ShowDate           bool           `gorm:"not null;default:false" json:"show_date" form:"show_date" binding:"omitempty"`
-	DatePub            *time.Time     `gorm:"index;date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
-	DateEnd            *time.Time     `gorm:"index;date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
 	Image              *string        `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
 	Hits               uint           `gorm:"not null;default:0" json:"hits" form:"hits" binding:"-"`
 	Sort               int            `gorm:"index;not null;default:0" json:"sort" form:"sort" binding:"omitempty"`
 	Stars              float32        `gorm:"not null;default:0.0" json:"stars" form:"stars" binding:"-"`
 	GalleriesSnapshot  datatypes.JSON `gorm:"type:jsonb" json:"galleries_snapshot"`
 	InfoBlocksSnapshot datatypes.JSON `gorm:"type:jsonb" json:"info_blocks_snapshot"`
+
+	DatePub *time.Time `gorm:"index;date_pub,date,omitempty" time_format:"02.01.2006" form:"date_pub" binding:"omitempty"`
+	DateEnd *time.Time `gorm:"index;date_end,date,omitempty" time_format:"02.01.2006" form:"date_end" binding:"omitempty"`
 
 	CreatedAt *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
 	UpdatedAt *time.Time `gorm:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`

@@ -56,7 +56,7 @@ func (s *seeder) Seed() error {
 
 	role, _ := s.role.GetByName("superadmin")
 	user := models.User{
-		Avatar:           db.StrPtr("/public/img/user.svg"),
+		Avatar:           db.StrPtr("/static/img/user.svg"),
 		FirstName:        "Admin",
 		LastName:         "Admin",
 		Phone:            &phone,
@@ -93,7 +93,7 @@ func (s *seeder) SeedTest(n int) error {
 		updatedAt := time.Now()
 
 		user := models.User{
-			Avatar:             db.StrPtr("/public/img/user.svg"),
+			Avatar:             db.StrPtr("/static/img/user.svg"),
 			FirstName:          firstName,
 			LastName:           lastName,
 			Phone:              &phone,

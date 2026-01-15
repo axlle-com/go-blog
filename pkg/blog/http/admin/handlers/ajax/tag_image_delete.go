@@ -14,21 +14,22 @@ func (c *tagController) DeleteImage(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		return
 	}
-	post, err := c.tagService.GetByID(id)
+
+	model, err := c.tagService.GetByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
 		ctx.Abort()
 		return
 	}
 
-	err = c.tagService.DeleteImageFile(post)
+	err = c.tagService.DeleteImageFile(model)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		ctx.Abort()
 		return
 	}
 
-	_, err = c.tagService.Update(post)
+	_, err = c.tagService.Update(model, model)
 	if err != nil {
 		logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

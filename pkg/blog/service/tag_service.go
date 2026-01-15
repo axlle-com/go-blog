@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"sync"
+	"unicode/utf8"
 
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
@@ -62,21 +63,81 @@ func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
 	return post, nil
 }
 
-func (s *TagService) Create(postTag *models.PostTag) (*models.PostTag, error) {
-	postTag.Alias = s.api.Alias.Generate(postTag, postTag.Name)
-	if err := s.tagRepo.Create(postTag); err != nil {
-		return nil, err
+func (s *TagService) SaveFromRequest(form *http.TagRequest, found *models.PostTag, user contract.User) (model *models.PostTag, err error) {
+	tagForm := app.LoadStruct(&models.PostTag{}, form).(*models.PostTag)
+
+	if found != nil {
+		model, err = s.Update(tagForm, found)
+	} else {
+		model, err = s.Create(tagForm)
 	}
 
-	return postTag, nil
+	if err != nil {
+		return model, err
+	}
+
+	if len(form.Galleries) > 0 {
+		interfaceSlice := make([]any, len(form.Galleries))
+		for i, galleryRequest := range form.Galleries {
+			interfaceSlice[i] = galleryRequest
+		}
+
+		slice, err := s.api.Gallery.SaveFormBatch(interfaceSlice, model)
+		if err != nil {
+			logger.Errorf("[blog][TagService][SaveFromRequest] Error: %+v", err)
+		}
+		model.Galleries = slice
+	}
+
+	if len(form.InfoBlocks) > 0 {
+		interfaceSlice := make([]any, len(form.InfoBlocks))
+		for i, block := range form.InfoBlocks {
+			interfaceSlice[i] = block
+		}
+
+		slice, err := s.api.InfoBlock.CreateRelationFormBatch(interfaceSlice, model.UUID.String())
+		if err != nil {
+			logger.Errorf("[blog][TagService][SaveFromRequest] Error: %+v", err)
+		}
+		model.InfoBlocks = slice
+	}
+
+	return model, nil
 }
 
-func (s *TagService) Update(postTag *models.PostTag) (*models.PostTag, error) {
-	if err := s.tagRepo.Update(postTag); err != nil {
+func (s *TagService) Create(model *models.PostTag) (*models.PostTag, error) {
+	model.Name = s.trimName(model.Name, 10)
+	model.Alias = s.generateAlias(model)
+
+	if err := s.tagRepo.Create(model); err != nil {
 		return nil, err
 	}
 
-	return postTag, nil
+	if err := s.receivedImage(model); err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
+
+func (s *TagService) Update(model, found *models.PostTag) (*models.PostTag, error) {
+	model.Name = s.trimName(model.Name, 10)
+
+	if model.Alias != found.Alias {
+		model.Alias = s.generateAlias(model)
+	}
+
+	if err := s.tagRepo.Update(model); err != nil {
+		return nil, err
+	}
+
+	if model.Image != nil && (found.Image == nil || *model.Image != *found.Image) {
+		if err := s.receivedImage(model); err != nil {
+			return nil, err
+		}
+	}
+
+	return model, nil
 }
 
 func (s *TagService) Attach(resource contract.Resource, postTag contract.PostTag) error {
@@ -115,82 +176,57 @@ func (s *TagService) DeleteTags(postTags []*models.PostTag) (err error) {
 	return nil
 }
 
-func (s *TagService) SaveFromRequest(form *http.TagRequest, user contract.User) (*models.PostTag, error) {
-	tagForm := app.LoadStruct(&models.PostTag{}, form).(*models.PostTag)
-	model, err := s.Save(tagForm, user)
-	if err != nil {
-		return model, err
-	}
-
-	if len(form.Galleries) > 0 {
-		interfaceSlice := make([]any, len(form.Galleries))
-		for i, galleryRequest := range form.Galleries {
-			interfaceSlice[i] = galleryRequest
-		}
-
-		slice, err := s.api.Gallery.SaveFormBatch(interfaceSlice, model)
-		if err != nil {
-			logger.Error(err)
-		}
-		model.Galleries = slice
-	}
-
-	if len(form.InfoBlocks) > 0 {
-		interfaceSlice := make([]any, len(form.InfoBlocks))
-		for i, block := range form.InfoBlocks {
-			interfaceSlice[i] = block
-		}
-
-		slice, err := s.api.InfoBlock.CreateRelationFormBatch(interfaceSlice, model.UUID.String())
-		if err != nil {
-			logger.Error(err)
-		}
-		model.InfoBlocks = slice
-	}
-
-	return model, nil
-}
-
-func (s *TagService) Save(tag *models.PostTag, user contract.User) (*models.PostTag, error) {
-	var newAlias string
-	if tag.Alias == "" {
-		newAlias = *tag.Title
-	} else {
-		newAlias = tag.Alias
-	}
-
-	tag.Alias = s.api.Alias.Generate(tag, newAlias)
-	if tag.ID == 0 {
-		if err := s.tagRepo.Create(tag); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := s.tagRepo.Update(tag); err != nil {
-			return nil, err
-		}
-	}
-
-	if tag.Image != nil && *tag.Image != "" {
-		err := s.api.File.Received([]string{*tag.Image})
-		if err != nil {
-			return tag, err
-		}
-	}
-
-	return tag, nil
-}
-
 func (s *TagService) DeleteImageFile(tag *models.PostTag) error {
 	if tag.Image == nil {
 		return nil
 	}
+
 	err := s.api.File.DeleteFile(*tag.Image)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		logger.Errorf("[DeleteImageFile] Error: %v", err)
 	}
+
 	tag.Image = nil
+
 	return nil
+}
+
+func (s *TagService) receivedImage(model *models.PostTag) error {
+	if model.Image != nil && *model.Image != "" {
+		return s.api.File.Received([]string{*model.Image})
+	}
+
+	return nil
+}
+
+func (s *TagService) generateAlias(model *models.PostTag) string {
+	var newAlias string
+
+	if model.Alias == "" {
+		if model.Name == "" && model.Title != nil {
+			newAlias = *model.Title
+		} else {
+			newAlias = model.Name
+		}
+	} else {
+		newAlias = model.Alias
+	}
+
+	return s.api.Alias.Generate(model, newAlias)
+}
+
+func (s *TagService) trimName(name string, max int) string {
+	if max <= 0 || name == "" {
+		return ""
+	}
+
+	if utf8.RuneCountInString(name) <= max {
+		return name
+	}
+
+	r := []rune(name)
+
+	return string(r[:max])
 }

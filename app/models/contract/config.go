@@ -25,13 +25,12 @@ type Config interface {
 	SessionKey(string) string
 	UserSessionKey(string) string
 
+	Layout() string
+	Root() string
 	UploadPath() string
 	DataFolder(...string) string
-	Root() string
-	SrcFolder() string
-	SrcFolderBuilder(...string) string
-	PublicFolderBuilder(...string) string
-	Layout() string
+	SrcFolder(...string) string
+	StaticFolder(...string) string
 
 	SMTPActive() bool
 	SMTPPort() int

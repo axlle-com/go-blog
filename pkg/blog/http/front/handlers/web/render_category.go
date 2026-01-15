@@ -11,7 +11,19 @@ import (
 )
 
 func (c *blogController) RenderCategory(ctx *gin.Context, category *models.PostCategory) {
-	category, err := c.categoryService.View(category)
+	filter, validError := models.NewPostFilter().ValidateQuery(ctx)
+	if validError != nil {
+		logger.WithRequest(ctx).Error(validError)
+		filter = models.NewPostFilter()
+	}
+	if filter == nil {
+		filter = models.NewPostFilter()
+	}
+
+	paginator := c.PaginatorFromQuery(ctx)
+	paginator.SetURL(category.GetURL())
+
+	category, err := c.categoryService.View(category, paginator, filter)
 	if category == nil || err != nil {
 		if err != nil {
 			logger.Errorf("[blog][blogController][RenderCategory] error: %v", err)
@@ -32,9 +44,12 @@ func (c *blogController) RenderCategory(ctx *gin.Context, category *models.PostC
 		http.StatusOK,
 		c.view.View(category.GetTemplateName()),
 		gin.H{
-			"settings": c.settings(ctx),
-			"title":    category.Title,
-			"blocks":   blocks,
+			"settings":  c.settings(ctx),
+			"title":     category.Title,
+			"blocks":    blocks,
+			"category":  category,
+			"paginator": paginator,
+			"filter":    filter,
 		},
 	)
 }

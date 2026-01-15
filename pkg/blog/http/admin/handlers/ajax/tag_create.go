@@ -23,7 +23,7 @@ func (c *tagController) Create(ctx *gin.Context) {
 		return
 	}
 
-	tag, err := c.tagService.SaveFromRequest(form, c.GetUser(ctx))
+	tag, err := c.tagService.SaveFromRequest(form, nil, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(
 			http.StatusInternalServerError,

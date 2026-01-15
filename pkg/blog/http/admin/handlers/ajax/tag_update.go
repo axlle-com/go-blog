@@ -37,7 +37,7 @@ func (c *tagController) Update(ctx *gin.Context) {
 
 	form.ID = id
 	form.UUID = found.UUID.String()
-	tag, err := c.tagService.SaveFromRequest(form, c.GetUser(ctx))
+	tag, err := c.tagService.SaveFromRequest(form, found, c.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return

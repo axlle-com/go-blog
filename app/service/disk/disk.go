@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/axlle-com/blog/app/logger"
@@ -19,11 +20,11 @@ import (
 type diskService struct {
 	config      contract.Config
 	servicesFS  embed.FS
-	publicFS    embed.FS
+	staticFS    embed.FS
 	templatesFS embed.FS
 
 	servicesRoot  string // "services"
-	publicRoot    string // "public"
+	staticRoot    string // "static"
 	templatesRoot string // "templates"
 }
 
@@ -31,10 +32,10 @@ func NewDiskService(cfg contract.Config) contract.DiskService {
 	return &diskService{
 		config:        cfg,
 		servicesFS:    src.ServicesFS,
-		publicFS:      src.PublicFS,
+		staticFS:      src.StaticFS,
 		templatesFS:   src.TemplatesFS,
 		servicesRoot:  "services",
-		publicRoot:    "public",
+		staticRoot:    "static",
 		templatesRoot: "templates",
 	}
 }
@@ -52,22 +53,64 @@ func normalizePath(pathString string) string {
 	return pathString
 }
 
-// resolvePath ожидает, что p уже normalizePath(...).
-// Возвращает FS и полный путь внутри неё.
 func (d *diskService) resolvePath(pathString string) (fs.FS, string) {
 	switch {
-	case pathString == "":
-		return nil, ""
 	case strings.HasPrefix(pathString, d.templatesRoot+"/") || pathString == d.templatesRoot:
 		return d.templatesFS, pathString
-	case strings.HasPrefix(pathString, d.publicRoot+"/") || pathString == d.publicRoot:
-		return d.publicFS, pathString
+	case strings.HasPrefix(pathString, d.staticRoot+"/") || pathString == d.staticRoot:
+		return d.staticFS, pathString
 	case strings.HasPrefix(pathString, d.servicesRoot+"/") || pathString == d.servicesRoot:
 		return d.servicesFS, pathString
 	default:
-		// по умолчанию считаем, что это services/<pathString>
-		return d.servicesFS, path.Join(d.servicesRoot, pathString)
+		return nil, ""
 	}
+}
+
+func (d *diskService) ReadDir(pathString string) ([]fs.DirEntry, error) {
+	pathString = normalizePath(pathString)
+	if pathString == "" {
+		return nil, fs.ErrNotExist
+	}
+
+	merged := map[string]fs.DirEntry{}
+
+	// 1) Пробуем embed
+	if fsys, fullPath := d.resolvePath(pathString); fsys != nil {
+		if entries, err := fs.ReadDir(fsys, fullPath); err == nil {
+			for _, e := range entries {
+				merged[e.Name()] = e
+			}
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			return nil, err
+		}
+	}
+
+	// 2) Пробуем диск
+	diskPath := d.config.DataFolder(pathString)
+	if entries, err := os.ReadDir(diskPath); err == nil {
+		for _, e := range entries {
+			merged[e.Name()] = e
+		}
+	} else if !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	if len(merged) == 0 {
+		return nil, fs.ErrNotExist
+	}
+
+	names := make([]string, 0, len(merged))
+	for name := range merged {
+		names = append(names, name)
+	}
+
+	sort.Strings(names)
+
+	out := make([]fs.DirEntry, 0, len(names))
+	for _, name := range names {
+		out = append(out, merged[name])
+	}
+	return out, nil
 }
 
 func (d *diskService) ReadFile(pathString string) ([]byte, error) {
@@ -82,16 +125,17 @@ func (d *diskService) ReadFile(pathString string) ([]byte, error) {
 		if err == nil {
 			return data, nil
 		}
+
 		if !errors.Is(err, fs.ErrNotExist) {
 			return nil, err
 		}
 	}
 
 	// Если не найдено в embed, пытаемся прочитать с диска
-	diskPath := d.config.SrcFolderBuilder(pathString)
+	diskPath := d.config.DataFolder(pathString)
 
 	// Проверяем существование файла на диске
-	if _, err := os.Stat(diskPath); os.IsNotExist(err) {
+	if _, err := os.Stat(diskPath); err != nil {
 		return nil, err
 	}
 
@@ -112,31 +156,28 @@ func (d *diskService) ReadFileString(p string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(b), nil
 }
 
-func (d *diskService) Exists(p string) bool {
-	p = normalizePath(p)
-	if p == "" {
+func (d *diskService) Exists(path string) bool {
+	path = normalizePath(path)
+	if path == "" {
 		return false
 	}
 
-	fsys, fullPath := d.resolvePath(p)
+	fsys, fullPath := d.resolvePath(path)
 	if fsys != nil {
 		if _, err := fs.Stat(fsys, fullPath); err == nil {
 			return true
 		} else if !errors.Is(err, fs.ErrNotExist) {
-			// неожиданные ошибки игнорируем (считаем, что "нет")
 			return false
 		}
 	}
 
-	// disk fallback только в local (dev)
-	if d.config != nil && d.config.IsLocal() {
-		diskPath := d.config.SrcFolderBuilder(p)
-		if _, err := os.Stat(diskPath); err == nil {
-			return true
-		}
+	diskPath := d.config.DataFolder(path)
+	if _, err := os.Stat(diskPath); err == nil {
+		return true
 	}
 
 	return false
@@ -146,8 +187,8 @@ func (d *diskService) GetTemplatesFS() fs.FS {
 	return d.templatesFS
 }
 
-func (d *diskService) GetPublicFS() fs.FS {
-	return d.publicFS
+func (d *diskService) GetStaticFS() fs.FS {
+	return d.staticFS
 }
 
 func (d *diskService) SetupStaticFiles(router *gin.Engine) error {
@@ -158,7 +199,10 @@ func (d *diskService) SetupStaticFiles(router *gin.Engine) error {
 	// Добавляем заголовки Cache-Control для статических файлов
 	router.Use(func(c *gin.Context) {
 		p := c.Request.URL.Path
-		if strings.HasPrefix(p, "/public/") || strings.HasPrefix(p, "/uploads/") || p == "/favicon.ico" {
+		if p == "/favicon.ico" ||
+			strings.HasPrefix(p, "/static/") ||
+			strings.HasPrefix(p, "/uploads/") ||
+			strings.HasPrefix(p, "/public/") {
 			c.Header("Cache-Control", "public, max-age=31536000, immutable")
 		}
 		c.Next()
@@ -166,19 +210,20 @@ func (d *diskService) SetupStaticFiles(router *gin.Engine) error {
 
 	// /uploads/* - всегда с диска (пользовательские загруженные файлы)
 	// Физически файлы в data/uploads, но URL остаются /uploads/
-	router.Static("/uploads", d.config.DataFolder(d.config.UploadPath()))
+	router.Static("/uploads", d.config.DataFolder("uploads"))
+	router.Static("/public", d.config.DataFolder("public"))
 
-	// /public/* - только из embed (статические файлы)
-	publicSub, err := fs.Sub(d.publicFS, "public")
+	// /static/* - только из embed (статические файлы)
+	staticSub, err := fs.Sub(d.staticFS, "static")
 	if err != nil {
-		logger.Fatalf("[disk][SetupStaticFiles] fs.Sub(public) failed: %v", err)
+		logger.Fatalf("[disk][SetupStaticFiles] fs.Sub(static) failed: %v", err)
 		return err
 	}
-	router.StaticFS("/public", http.FS(publicSub))
+	router.StaticFS("/static", http.FS(staticSub))
 
 	// favicon.ico из embed
 	router.GET("/favicon.ico", func(c *gin.Context) {
-		b, err := fs.ReadFile(d.publicFS, "public/favicon.ico")
+		b, err := fs.ReadFile(d.staticFS, "static/favicon.ico")
 		if err != nil {
 			c.Status(http.StatusNotFound)
 			return

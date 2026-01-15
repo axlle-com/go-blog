@@ -32,7 +32,7 @@ func New(cfg contract.Config, diskService contract.DiskService) *Service {
 
 	// Загружаем файлы через DiskService (из embed или с диска)
 	for _, lang := range []string{"en", "ru"} {
-		path := filepath.Join("i18n", "locales", lang+".json")
+		path := filepath.Join("services", "i18n", "locales", lang+".json")
 
 		data, err := diskService.ReadFile(path)
 		if err != nil {

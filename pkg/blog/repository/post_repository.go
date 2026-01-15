@@ -147,6 +147,7 @@ func (r *postRepository) WithPaginate(paginator contract.Paginator, filter *mode
 	if err != nil {
 		return nil, err
 	}
+
 	return posts, nil
 }
 

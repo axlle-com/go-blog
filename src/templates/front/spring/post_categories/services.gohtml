@@ -1,124 +1,30 @@
 {{ define "spring.post_categories.services" }}
     {{ template "spring.header" . }}
 
-    <!--Services Top Slider-->
     <section class="services-hero-section bg-light-blue padding-100">
         <div class="auto-container">
             <div class="sec-title centered">
-                <h2>Наши Услуги</h2>
+                <h1>{{ .category.Title }}</h1>
             </div>
             <div class="services-top-slider-wrapper">
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/education.png" loading="lazy" decoding="async" fetchpriority="low" alt="Образовательный портал">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Образовательный портал</h3>
-                            <p>Предназначенная для предоставления образовательных ресурсов и сервисов, таких как курсы,
-                                вебинары, документы и материалы для самостоятельного изучения.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/medicine.png" loading="lazy" decoding="async" fetchpriority="low" alt="Телемедицинский сервис">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Телемедицинский сервис</h3>
-                            <p>Соединяет пациентов и медицинских специалистов для проведения дистанционных консультаций,
-                                диагностики и мониторинга здоровья.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
+                {{ range .category.Posts }}
+                    <div class="services-top-slide">
+                        <div class="row clearfix service-slide-row">
+                            {{ if ne .Image nil }}
+                                <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
+                                    <img src="{{ .Image }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .Title }}">
+                                </div>
+                            {{ end }}
+                            <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
+                                <h2>{{ .Title }}</h2>
+                                <p>{{ .DescriptionPreview }}</p>
+                                <a href="{{ .URL }}" class="theme-btn btn-style-two">
+                                    See More<span class="icon ti-arrow-circle-right"></span>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/inform.png" loading="lazy" decoding="async" fetchpriority="low" alt="Информационный портал">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Информационный портал</h3>
-                            <p>Для предоставления пользователям актуальной и структурированной информации по
-                                определённой теме или набору тем.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/corp.png" loading="lazy" decoding="async" fetchpriority="low" alt="Корпоративный сайт">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Корпоративный сайт</h3>
-                            <p>Представляет компанию и её услуги, а также способствует взаимодействию с клиентами,
-                                партнёрами и сотрудниками.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/ecom.png" loading="lazy" decoding="async" fetchpriority="low" alt="Интернет магазин">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Интернет магазин</h3>
-                            <p>Позволяет пользователям выбирать, заказывать и оплачивать товары или услуги через
-                                интернет.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/chat.png" loading="lazy" decoding="async" fetchpriority="low" alt="Корпоративные чаты">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Корпоративные чаты</h3>
-                            <p>Предназначенная для эффективного взаимодействия сотрудников внутри компании.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/erp.png" loading="lazy" decoding="async" fetchpriority="low" alt="ERP / CRM / CSS">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>ERP / CRM / CSS</h3>
-                            <p>Кастомные системы, которые адаптируются под уникальные бизнес‑процессы и потребности
-                                организаций.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="services-top-slide">
-                    <div class="row clearfix service-slide-row">
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-image">
-                            <img src="/public/spring/images/services/support.png" loading="lazy" decoding="async" fetchpriority="low" alt="Техподдержка">
-                        </div>
-                        <div class="col-md-6 col-sm-6 col-xs-12 service-slide-text">
-                            <h3>Техподдержка</h3>
-                            <p>Обеспечивает стабильную работу, устранение неполадок и обновления ПО для поддержания
-                                функциональности и безопасности ресурсов.</p>
-                            <a href="/service" class="theme-btn btn-style-two">See More <span
-                                        class="icon ti-arrow-circle-right"></span></a>
-                        </div>
-                    </div>
-                </div>
+                {{ end }}
             </div>
         </div>
     </section>

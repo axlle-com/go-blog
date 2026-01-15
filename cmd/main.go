@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -14,15 +13,10 @@ import (
 	"github.com/axlle-com/blog/app/db"
 	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/app/routes"
-	"github.com/axlle-com/blog/app/service/minify"
 	user "github.com/axlle-com/blog/pkg/user/models"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	csrf "github.com/utrack/gin-csrf"
 )
 
 func main() {
@@ -87,26 +81,6 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 		panic(err.Error())
 	}
 
-	router.Use(func(ctx *gin.Context) {
-		if strings.HasPrefix(ctx.Request.URL.Path, "/.well-known/") {
-			ctx.Status(http.StatusNotFound)
-			ctx.Abort()
-			return
-		}
-		ctx.Next()
-	})
-
-	store := models.Store(config)
-	router.Use(sessions.Sessions(config.SessionsName(), store))
-	router.Use(gzip.Gzip(gzip.BestSpeed))
-	router.Use(csrf.Middleware(csrf.Options{
-		Secret: string(config.KeyCookie()),
-		ErrorFunc: func(ctx *gin.Context) {
-			ctx.String(http.StatusForbidden, "CSRF token mismatch")
-			ctx.Abort()
-		},
-	}))
-
 	err = container.Migrator.Migrate()
 	if err != nil {
 		logger.Errorf("[main][Init][Migrator] migrate error: %v", err)
@@ -117,7 +91,7 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 		logger.Errorf("[main][Init][Seeder] seed error: %v", err)
 	}
 
-	err = minify.NewWebMinifier(config).Run()
+	err = container.Minifier.Run()
 	if err != nil {
 		logger.Errorf("[main][Init][WebMinifier] error: %v", err)
 	}
@@ -131,6 +105,7 @@ func Init(config contract.Config, container *di.Container) *gin.Engine {
 	container.View.Load()
 
 	routes.InitApiRoutes(router, container)
-	routes.InitWebRoutes(router, container)
+	routes.InitWebRoutes(router, config, container)
+
 	return router
 }

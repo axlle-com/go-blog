@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -17,10 +16,11 @@ import (
 )
 
 type seeder struct {
-	infoBlockService *service.InfoBlockService
-	api              *api.Api
 	config           contract.Config
 	disk             contract.DiskService
+	seedService      contract.SeedService
+	api              *api.Api
+	infoBlockService *service.InfoBlockService
 }
 
 type InfoBlockSeedData struct {
@@ -34,97 +34,113 @@ type InfoBlockSeedData struct {
 }
 
 func NewSeeder(
-	infoBlockService *service.InfoBlockService,
-	api *api.Api,
 	cfg contract.Config,
 	disk contract.DiskService,
+	seedService contract.SeedService,
+	api *api.Api,
+	infoBlockService *service.InfoBlockService,
 ) contract.Seeder {
 	return &seeder{
-		infoBlockService: infoBlockService,
-		api:              api,
 		config:           cfg,
 		disk:             disk,
+		seedService:      seedService,
+		api:              api,
+		infoBlockService: infoBlockService,
 	}
 }
 
 func (s *seeder) Seed() error {
-	return s.seedFromJSON("info_blocks")
+	return s.seedFromJSON((&models.InfoBlock{}).GetTable())
 }
 
 func (s *seeder) seedFromJSON(moduleName string) error {
-	// Путь относительно src/services
-	seedPath := fmt.Sprintf("db/%s/seed/%s.json", s.config.Layout(), moduleName)
-
-	// Проверяем существование файла
-	if !s.disk.Exists(seedPath) {
-		logger.Infof("[info_block][seeder][seedFromJSON] seed file not found: %s, skipping", seedPath)
-		return nil
-	}
-
-	// Читаем JSON файл через DiskService
-	data, err := s.disk.ReadFile(seedPath)
-	if err != nil {
-		return err
-	}
-
-	var infoBlocksData []InfoBlockSeedData
-	if err := json.Unmarshal(data, &infoBlocksData); err != nil {
-		return err
-	}
-
 	idsUser := s.api.User.GetAllIds()
 	if len(idsUser) == 0 {
 		return nil
 	}
 
-	for _, blockData := range infoBlocksData {
-		resourceName := "info_blocks"
-		var templateID *uint
-		if blockData.Template != "" {
-			tpl, err := s.api.Template.GetByNameAndResource(blockData.Template, resourceName)
-			if err != nil {
-				logger.Errorf("[info_block][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", blockData.Template, resourceName, err)
-				continue
-			}
-			id := tpl.GetID()
-			templateID = &id
-		}
-
-		filter := models.NewInfoBlockFilter()
-		filter.Title = &blockData.Title
-		filter.TemplateID = templateID
-		foundByParams, _ := s.infoBlockService.FindByFilter(filter)
-		if foundByParams != nil {
-			logger.Infof("[info_block][seeder][seedFromJSON] info block with title='%s' and template_id=%v already exists (ID=%d), skipping", blockData.Title, templateID, foundByParams.ID)
-			continue
-		}
-
-		infoBlock := models.InfoBlock{
-			TemplateID:  templateID,
-			Media:       blockData.Media,
-			Title:       blockData.Title,
-			Description: blockData.Description,
-			Image:       blockData.Image,
-			CreatedAt:   db.TimePtr(time.Now()),
-			UpdatedAt:   db.TimePtr(time.Now()),
-		}
-
-		if blockData.UserID != nil {
-			foundUser, _ := s.api.User.GetByID(*blockData.UserID)
-			if foundUser != nil {
-				userID := foundUser.GetID()
-				infoBlock.UserID = &userID
-			}
-		}
-
-		_, err := s.infoBlockService.Create(&infoBlock, nil)
-		if err != nil {
-			logger.Errorf("[info_block][seeder][seedFromJSON] error creating info block: %v", err)
-			continue
-		}
+	files, err := s.seedService.GetFiles(s.config.Layout(), moduleName)
+	if err != nil {
+		return err
+	}
+	if len(files) == 0 {
+		logger.Infof("[info_block][seeder][seedFromJSON] seed files not found for module: %s, skipping", moduleName)
+		return nil
 	}
 
-	logger.Infof("[info_block][seeder][seedFromJSON] seeded %d info blocks from JSON", len(infoBlocksData))
+	for name, seedPath := range files {
+		data, err := s.disk.ReadFile(seedPath)
+		if err != nil {
+			return err
+		}
+
+		ok, err := s.seedService.IsApplied(name)
+		if err != nil {
+			return err
+		}
+		if ok {
+			continue
+		}
+
+		var infoBlocksData []InfoBlockSeedData
+		if err := json.Unmarshal(data, &infoBlocksData); err != nil {
+			return err
+		}
+
+		for _, blockData := range infoBlocksData {
+			resourceName := (&models.InfoBlock{}).GetName()
+			var templateID *uint
+			if blockData.Template != "" {
+				tpl, err := s.api.Template.GetByNameAndResource(blockData.Template, resourceName)
+				if err != nil {
+					logger.Errorf("[info_block][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", blockData.Template, resourceName, err)
+					continue
+				}
+				id := tpl.GetID()
+				templateID = &id
+			}
+
+			filter := models.NewInfoBlockFilter()
+			filter.Title = &blockData.Title
+			filter.TemplateID = templateID
+			foundByParams, _ := s.infoBlockService.FindByFilter(filter)
+			if foundByParams != nil {
+				logger.Infof("[info_block][seeder][seedFromJSON] info block with title='%s' and template_id=%v already exists (ID=%d), skipping", blockData.Title, templateID, foundByParams.ID)
+				continue
+			}
+
+			infoBlock := models.InfoBlock{
+				TemplateID:  templateID,
+				Media:       blockData.Media,
+				Title:       blockData.Title,
+				Description: blockData.Description,
+				Image:       blockData.Image,
+				CreatedAt:   db.TimePtr(time.Now()),
+				UpdatedAt:   db.TimePtr(time.Now()),
+			}
+
+			if blockData.UserID != nil {
+				foundUser, _ := s.api.User.GetByID(*blockData.UserID)
+				if foundUser != nil {
+					userID := foundUser.GetID()
+					infoBlock.UserID = &userID
+				}
+			}
+
+			_, err := s.infoBlockService.Create(&infoBlock, nil)
+			if err != nil {
+				logger.Errorf("[info_block][seeder][seedFromJSON] error creating info block: %v", err)
+				continue
+			}
+		}
+
+		if err := s.seedService.MarkApplied(name); err != nil {
+			return err
+		}
+
+		logger.Infof("[info_block][seeder][seedFromJSON] seeded %d info blocks from JSON (%s)", len(infoBlocksData), name)
+	}
+
 	return nil
 }
 
@@ -145,7 +161,7 @@ func (s *seeder) infoBlocks(n int) error {
 			Media:       db.StrPtr(faker.Word()),
 			Title:       "TitleInfoBlock #" + strconv.Itoa(i),
 			Description: db.StrPtr(faker.Paragraph()),
-			Image:       db.StrPtr("/public/img/404.svg"),
+			Image:       db.StrPtr("/static/img/404.svg"),
 			CreatedAt:   db.TimePtr(time.Now()),
 			UpdatedAt:   db.TimePtr(time.Now()),
 			DeletedAt:   nil,

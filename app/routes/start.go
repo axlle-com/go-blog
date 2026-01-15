@@ -11,7 +11,7 @@ import (
 	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/middleware"
 	"github.com/axlle-com/blog/app/models"
-	"github.com/axlle-com/blog/app/models/cache"
+	"github.com/axlle-com/blog/app/service/cache"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -91,7 +91,7 @@ func SetupTestRouter() *gin.Engine {
 		container.Disk.SetupStaticFiles(router)
 
 		InitApiRoutes(router, container)
-		InitWebRoutes(router, container)
+		InitWebRoutes(router, cfg, container)
 		cache.NewCache().ResetUsersSession()
 	}
 	return router

@@ -8,7 +8,9 @@ import (
 	"html/template"
 	"io/fs"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -27,14 +29,16 @@ type View struct {
 	dynamicTemplates map[string]string
 	tmpl             *template.Template
 	diskService      contract.DiskService
+	minifier         contract.Minifier
 }
 
-func NewView(config contract.Config, diskService contract.DiskService) *View {
+func NewView(config contract.Config, diskService contract.DiskService, minifier contract.Minifier) *View {
 	return &View{
 		config:           config,
 		assetVersions:    make(map[string]int64),
 		dynamicTemplates: make(map[string]string),
 		diskService:      diskService,
+		minifier:         minifier,
 	}
 }
 
@@ -52,11 +56,16 @@ func (v *View) Load() {
 		return
 	}
 
-	templates := v.loadTemplatesFromFS(v.diskService.GetTemplatesFS(), "templates")
+	templates := v.loadTemplatesCombined(
+		v.diskService.GetTemplatesFS(),
+		"templates",
+		v.config.DataFolder("templates"),
+	)
+
 	v.tmpl = templates
 	v.router.SetHTMLTemplate(templates)
 
-	v.loadAssetVersionsFromFS(v.diskService.GetPublicFS(), "public")
+	v.loadAssetVersionsFromFS(v.diskService.GetStaticFS(), "static")
 }
 
 func (v *View) RenderToString(name string, data any) (string, error) {
@@ -82,7 +91,11 @@ func (v *View) AddTemplateFromString(name, tmplStr string) error {
 	fullName := v.View(name)
 	v.dynamicTemplates[fullName] = tmplStr
 
-	baseTmpl := v.loadTemplatesFromFS(v.diskService.GetTemplatesFS(), "templates")
+	baseTmpl := v.loadTemplatesCombined(
+		v.diskService.GetTemplatesFS(),
+		"templates",
+		v.config.DataFolder("templates"),
+	)
 
 	for tName, tStr := range v.dynamicTemplates {
 		newTmpl := baseTmpl.New(tName)
@@ -110,10 +123,11 @@ func (v *View) removeWhitespaceBetweenTags(s string) string {
 	compactHTML := re.ReplaceAllString(s, "><")
 	compactHTML = regexp.MustCompile(`[\n\r\t]+`).ReplaceAllString(compactHTML, " ")
 	compactHTML = regexp.MustCompile(`\s+`).ReplaceAllString(compactHTML, " ")
+
 	return strings.TrimSpace(compactHTML)
 }
 
-func (v *View) loadTemplatesFromFS(fsys fs.FS, templatesRoot string) *template.Template {
+func (v *View) loadTemplatesCombined(embedFS fs.FS, embedRoot string, diskRoot string) *template.Template {
 	tmpl := template.New("")
 
 	funcMap := template.FuncMap{
@@ -127,11 +141,17 @@ func (v *View) loadTemplatesFromFS(fsys fs.FS, templatesRoot string) *template.T
 		"ptrUint":    ptrUint,
 		"json":       jsonFunc,
 		"collapseID": collapseID,
-		"asset":      v.asset,
-		"css":        v.css,
-		"js":         v.js,
 		"hasPrefix":  strings.HasPrefix,
 
+		"concatSlice":    concatSlice,
+		"stringsToSlice": stringsToSlice,
+
+		"js":             v.js,
+		"css":            v.css,
+		"asset":          v.asset,
+		"bundleJs":       v.bundleJs,
+		"bundleCss":      v.bundleCss,
+		"bundleCssSlice": v.bundleCssSlice,
 		"render": func(name string, data any) template.HTML {
 			var buf bytes.Buffer
 			name = v.View(name)
@@ -139,14 +159,123 @@ func (v *View) loadTemplatesFromFS(fsys fs.FS, templatesRoot string) *template.T
 				logger.Errorf("[app][template][render] render template %q failed: %v", name, err)
 				return template.HTML(fmt.Sprintf("<!-- render %q error: %v -->", name, err))
 			}
+
 			return template.HTML(buf.String())
 		},
 	}
 
 	tmpl = tmpl.Funcs(funcMap)
 
-	var files []string
-	err := fs.WalkDir(fsys, templatesRoot, func(p string, d fs.DirEntry, err error) error {
+	embedFiles, err := listTemplateFilesFS(embedFS, embedRoot)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(embedFiles) != 0 {
+		if _, err := tmpl.ParseFS(embedFS, embedFiles...); err != nil {
+			panic(err)
+		}
+	}
+
+	if diskRoot != "" {
+		if st, err := os.Stat(diskRoot); err == nil && st.IsDir() {
+			diskFiles, err := listTemplateFilesDisk(diskRoot)
+			if err != nil {
+				panic(err)
+			}
+
+			if len(diskFiles) > 0 {
+				if _, err := tmpl.ParseFiles(diskFiles...); err != nil {
+					panic(err)
+				}
+
+				logger.Infof("[view][loadTemplatesCombined] loaded %d disk templates from %s", len(diskFiles), diskRoot)
+			}
+		} else {
+			logger.Infof("[view][loadTemplatesCombined] disk templates dir not found: %s", diskRoot)
+		}
+	}
+
+	return tmpl
+}
+
+func (v *View) css(p string) template.HTML {
+	href := v.asset(p)
+
+	return template.HTML(
+		`<link rel="preload" href="` + href + `" as="style" ` +
+			`onload="this.onload=null;this.rel='stylesheet'">` +
+			`<noscript><link rel="stylesheet" href="` + href + `"></noscript>`,
+	)
+}
+
+func (v *View) js(p string) template.HTML {
+	return template.HTML(`<script src="` + v.asset(p) + `" defer></script>`)
+}
+
+func (v *View) bundleJs(paths ...string) template.HTML {
+	if v.config.IsLocal() {
+		var b strings.Builder
+		for _, p := range paths {
+			src := v.asset(p)
+			b.WriteString(`<script src="`)
+			b.WriteString(src)
+			b.WriteString(`" defer></script>` + "\n")
+		}
+
+		return template.HTML(b.String())
+	}
+
+	href, err := v.minifier.Bundle("application/javascript", paths)
+	if err != nil {
+		logger.Errorf("[template][bundleJs] %v", err)
+
+		return template.HTML(fmt.Sprintf("<!-- bundleJs error: %v -->", err))
+	}
+
+	return template.HTML(`<script src="` + href + `" defer></script>`)
+}
+
+func (v *View) bundleCss(paths ...string) template.HTML {
+	if v.config.IsLocal() {
+		var b strings.Builder
+		for _, p := range paths {
+			href := v.asset(p)
+			b.WriteString(`<link rel="stylesheet" href="`)
+			b.WriteString(href)
+			b.WriteString(`">` + "\n")
+		}
+
+		return template.HTML(b.String())
+	}
+
+	href, err := v.minifier.Bundle("text/css", paths)
+	if err != nil {
+		logger.Errorf("[template][bundleCss] %v", err)
+
+		return template.HTML(fmt.Sprintf("<!-- bundleCss error: %v -->", err))
+	}
+
+	return template.HTML(
+		`<link rel="preload" href="` + href + `" as="style" ` +
+			`onload="this.onload=null;this.rel='stylesheet'">` +
+			`<noscript><link rel="stylesheet" href="` + href + `"></noscript>`,
+	)
+}
+
+func (v *View) loadAssetVersionsFromFS(fsys fs.FS, staticRoot string) {
+	v.versionsMutex.Lock()
+	defer v.versionsMutex.Unlock()
+
+	v.assetVersions = make(map[string]int64)
+
+	// проверим, что директория существует
+	if _, err := fs.Stat(fsys, staticRoot); err != nil {
+		logger.Errorf("[template][loadAssetVersions] static directory not found in FS: %s (%v)", staticRoot, err)
+		return
+	}
+
+	err := fs.WalkDir(fsys, staticRoot, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -154,24 +283,57 @@ func (v *View) loadTemplatesFromFS(fsys fs.FS, templatesRoot string) *template.T
 			return nil
 		}
 
-		if strings.HasSuffix(p, ".gohtm") || strings.HasSuffix(p, ".gohtml") {
-			files = append(files, p)
+		ext := strings.ToLower(path.Ext(p))
+		if ext != ".js" && ext != ".css" {
+			return nil
 		}
 
+		b, err := fs.ReadFile(fsys, p)
+		if err != nil {
+			return err
+		}
+
+		sum := crc32.ChecksumIEEE(b) // uint32
+		rel := strings.TrimPrefix(p, staticRoot+"/")
+		assetPath := "/static/" + rel
+
+		v.assetVersions[assetPath] = int64(sum)
 		return nil
 	})
+
 	if err != nil {
-		panic(err)
-	}
-	if len(files) == 0 {
-		panic("no templates found (embed) in " + templatesRoot)
+		logger.Errorf("[template][loadAssetVersions] error walking static directory: %v", err)
 	}
 
-	if _, err := tmpl.ParseFS(fsys, files...); err != nil {
-		panic(err)
+	logger.Infof("[template][loadAssetVersions] loaded %d asset versions", len(v.assetVersions))
+}
+
+func (v *View) asset(p string) string {
+	v.versionsMutex.RLock()
+	defer v.versionsMutex.RUnlock()
+
+	normalizedPath := normalizeAssetPath(p)
+
+	version, exists := v.assetVersions[normalizedPath]
+	if !exists {
+		logger.Debugf("[template][asset] file not found in cache: %s", normalizedPath)
+		return normalizedPath
 	}
 
-	return tmpl
+	return fmt.Sprintf("%s?v=%d", normalizedPath, version)
+}
+
+func (v *View) render(tmpl *template.Template, name string, data any) template.HTML {
+	var buf bytes.Buffer
+	name = v.View(name)
+
+	if err := tmpl.ExecuteTemplate(&buf, name, data); err != nil {
+		logger.Errorf("[app][template][render] render template %q failed: %v", name, err)
+
+		return template.HTML(fmt.Sprintf("<!-- render %q error: %v -->", name, err))
+	}
+
+	return template.HTML(buf.String())
 }
 
 func add(x, y int) int { return x + y }
@@ -234,78 +396,6 @@ func dict(values ...any) (map[string]any, error) {
 	return m, nil
 }
 
-func splitFirst(s string) (first, next string) {
-	parts := strings.SplitN(s, ".", 2)
-	first = parts[0]
-	if len(parts) > 1 {
-		next = parts[1]
-	}
-	return
-}
-
-// loadAssetVersionsFromFS загружает версии (hash) всех статических JS/CSS файлов при старте
-// В embed.FS нет ModTime, поэтому версия = crc32 от содержимого.
-func (v *View) loadAssetVersionsFromFS(fsys fs.FS, publicRoot string) {
-	v.versionsMutex.Lock()
-	defer v.versionsMutex.Unlock()
-
-	v.assetVersions = make(map[string]int64)
-
-	// проверим, что директория существует
-	if _, err := fs.Stat(fsys, publicRoot); err != nil {
-		logger.Errorf("[template][loadAssetVersions] public directory not found in FS: %s (%v)", publicRoot, err)
-		return
-	}
-
-	err := fs.WalkDir(fsys, publicRoot, func(p string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-
-		ext := strings.ToLower(path.Ext(p))
-		if ext != ".js" && ext != ".css" {
-			return nil
-		}
-
-		b, err := fs.ReadFile(fsys, p)
-		if err != nil {
-			return err
-		}
-
-		sum := crc32.ChecksumIEEE(b) // uint32
-		rel := strings.TrimPrefix(p, publicRoot+"/")
-		assetPath := "/public/" + rel
-
-		v.assetVersions[assetPath] = int64(sum)
-		return nil
-	})
-
-	if err != nil {
-		logger.Errorf("[template][loadAssetVersions] error walking public directory: %v", err)
-	}
-
-	logger.Infof("[template][loadAssetVersions] loaded %d asset versions", len(v.assetVersions))
-}
-
-// asset возвращает путь к файлу с версией на основе хеша содержимого
-func (v *View) asset(p string) string {
-	v.versionsMutex.RLock()
-	defer v.versionsMutex.RUnlock()
-
-	normalizedPath := normalizeAssetPath(p)
-
-	version, exists := v.assetVersions[normalizedPath]
-	if !exists {
-		logger.Debugf("[template][asset] file not found in cache: %s", normalizedPath)
-		return normalizedPath
-	}
-
-	return fmt.Sprintf("%s?v=%d", normalizedPath, version)
-}
-
 func normalizeAssetPath(p string) string {
 	// URL пути должны быть с /
 	p = strings.ReplaceAll(p, `\`, `/`)
@@ -317,16 +407,54 @@ func normalizeAssetPath(p string) string {
 	return p
 }
 
-func (v *View) css(p string) template.HTML {
-	href := v.asset(p)
-	return template.HTML(
-		`<link rel="preload" href="` + href + `" as="style" ` +
-			`onload="this.onload=null;this.rel='stylesheet'">` +
-			`<noscript><link rel="stylesheet" href="` + href + `"></noscript>`,
-	)
+func listTemplateFilesFS(fsys fs.FS, root string) ([]string, error) {
+	var files []string
+	err := fs.WalkDir(fsys, root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(p, ".gohtm") || strings.HasSuffix(p, ".gohtml") {
+			files = append(files, p)
+		}
+		return nil
+	})
+	return files, err
 }
 
-func (v *View) js(p string) template.HTML {
-	href := v.asset(p)
-	return template.HTML(`<script src="` + href + `" defer></script>`)
+func listTemplateFilesDisk(root string) ([]string, error) {
+	var files []string
+	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		low := strings.ToLower(p)
+		if strings.HasSuffix(low, ".gohtm") || strings.HasSuffix(low, ".gohtml") {
+			files = append(files, p)
+		}
+
+		return nil
+	})
+
+	return files, err
+}
+
+func stringsToSlice(items ...string) []string { return items }
+
+func concatSlice(a, b []string) []string {
+	out := make([]string, 0, len(a)+len(b))
+	out = append(out, a...)
+	out = append(out, b...)
+	return out
+}
+
+func (v *View) bundleCssSlice(paths []string) template.HTML {
+	return v.bundleCss(paths...)
 }

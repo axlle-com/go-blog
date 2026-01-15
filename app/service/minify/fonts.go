@@ -66,16 +66,16 @@ func findFontInResources(fontName string) (string, error) {
 	return "", os.ErrNotExist
 }
 
-// copyFontToPublic копирует шрифт в src/public/fonts
-func copyFontToPublic(fontSourcePath string, fontName string) error {
-	publicFontsDir := config.Config().PublicFolderBuilder("fonts")
+// copyFontToStatic копирует шрифт в src/static/fonts
+func copyFontToStatic(fontSourcePath string, fontName string) error {
+	staticFontsDir := config.Config().StaticFolder("fonts")
 
 	// Создаем директорию если её нет
-	if err := os.MkdirAll(publicFontsDir, 0755); err != nil {
+	if err := os.MkdirAll(staticFontsDir, 0755); err != nil {
 		return err
 	}
 
-	destPath := filepath.Join(publicFontsDir, fontName)
+	destPath := filepath.Join(staticFontsDir, fontName)
 
 	// Читаем исходный файл
 	sourceData, err := os.ReadFile(fontSourcePath)
@@ -88,7 +88,7 @@ func copyFontToPublic(fontSourcePath string, fontName string) error {
 		return err
 	}
 
-	logger.Debugf("[web][copyFontToPublic] copied font: %s -> %s", fontSourcePath, destPath)
+	logger.Debugf("[web][copyFontToStatic] copied font: %s -> %s", fontSourcePath, destPath)
 	return nil
 }
 
@@ -106,16 +106,16 @@ func processFontsInCSS(cssContent string, cssFilePath string) (string, error) {
 			continue
 		}
 
-		// Копируем в public/fonts
-		if err := copyFontToPublic(fontSourcePath, fontName); err != nil {
+		// Копируем в static/fonts
+		if err := copyFontToStatic(fontSourcePath, fontName); err != nil {
 			logger.Errorf("[web][processFontsInCSS] failed to copy font %s: %v", fontName, err)
 			continue
 		}
 
-		// Обновляем пути в CSS на /public/fonts/fontName
+		// Обновляем пути в CSS на /static/fonts/fontName
 		// Заменяем различные варианты путей: fonts/font.woff, ../fonts/font.woff, font.woff и т.д.
 		oldPattern := regexp.MustCompile(`url\(['"]?([^'")]*` + regexp.QuoteMeta(fontName) + `)['"]?\)`)
-		newPath := "/public/fonts/" + fontName
+		newPath := "/static/fonts/" + fontName
 		processedCSS = oldPattern.ReplaceAllStringFunc(processedCSS, func(match string) string {
 			// Извлекаем текущий путь
 			submatch := regexp.MustCompile(`url\(['"]?([^'")]+)['"]?\)`).FindStringSubmatch(match)

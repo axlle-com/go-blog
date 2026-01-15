@@ -8,14 +8,28 @@
 
         <title>Spring - Software, App, Saas & Product Showcase Landing HTML5 Template | Home Version One</title>
         <!-- Stylesheets -->
-        <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/public/fonts/Play.woff" }}">
-        <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/public/fonts/Play-Bold.woff" }}">
-        <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ asset "/public/fonts/Heebo-700.woff2" }}">
+        <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/static/fonts/Play.woff" }}">
+        <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/static/fonts/Play-Bold.woff" }}">
+        <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ asset "/static/fonts/Heebo-700.woff2" }}">
 
-        {{ css "/public/spring/css/app.css" }}
+        {{ bundleCss
+        "static/spring/css/font.css"
+        "static/spring/css/bootstrap.css"
+        "static/spring/css/font-awesome.css"
+        "static/spring/css/themify-icons.css"
+        "static/spring/css/linear-icons.css"
+        "static/spring/css/animate.css"
+        "static/spring/css/owl.css"
+        "static/spring/css/jquery.fancybox.css"
+        "static/spring/css/style.css"
+        "static/spring/css/responsive.css"
+        "static/resources/plugins/noty/noty.min.css"
+        "static/resources/plugins/noty/themes/relax.min.css"
+        "static/spring/css/common.css"
+        }}
 
-        <link rel="shortcut icon" href="/public/spring/images/favicon.png" type="image/x-icon">
-        <link rel="icon" href="/public/spring/images/favicon.png" type="image/x-icon">
+        <link rel="shortcut icon" href="/static/spring/images/favicon.png" type="image/x-icon">
+        <link rel="icon" href="/static/spring/images/favicon.png" type="image/x-icon">
     </head>
 
     <body>
@@ -30,7 +44,7 @@
                         <!--Logo Box-->
                         <div class="logo-box">
                             <div class="logo">
-                                <a href="/"><img src="/public/spring/images/logo.png" alt="logo" style="height: 50px;"></a>
+                                <a href="/"><img src="/static/spring/images/logo.png" alt="logo" style="height: 50px;"></a>
                             </div>
                         </div>
 

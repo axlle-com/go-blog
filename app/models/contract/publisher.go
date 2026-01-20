@@ -8,5 +8,8 @@ type Publisher interface {
 	GetUUID() uuid.UUID
 	GetURL() string
 	GetTitle() string
+	GetImage() string
+	GetMetaTitle() string
+	GetMetaDescription() string
 	GetTable() string
 }

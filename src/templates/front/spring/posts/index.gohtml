@@ -3,20 +3,22 @@
     <section class="main-banner banner-one" id="banner" style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
         <div class="auto-container">
             <div class="row clearfix">
-                <!--Text Column-->
+
                 <div class="text-column col-md-6 col-sm-12 col-xs-12">
                     <div class="inner">
-                        <h2>Give yourself the best chance of success with All Rights Reserved</h2>
-                        <p>Sulation is an easy to use tool for eCommerce. With the help of our system you can present your products. It is all very easy!</p>
+                        <h1>{{ .model.Title }}</h1>
+                        <p>{{ .model.Description }}</p>
                         <a href="#" class="theme-btn btn-style-two" data-toggle="modal" data-target="#myModalMd">Request A Demo <span class="icon ti-arrow-circle-right"></span></a>
                     </div>
                 </div>
 
-                <div class="image-column col-md-6 col-sm-12 col-xs-12">
-                    <div class="inner">
-                        <figure class="image"><img src="/static/spring/images/index.png" loading="lazy" decoding="async" fetchpriority="low" alt=""></figure>
+                {{ if ne .model.Image nil }}
+                    <div class="image-column col-md-6 col-sm-12 col-xs-12">
+                        <div class="inner">
+                            <figure class="image"><img src="{{ .model.Image }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .model.Title }}"></figure>
+                        </div>
                     </div>
-                </div>
+                {{ end }}
 
             </div>
         </div>

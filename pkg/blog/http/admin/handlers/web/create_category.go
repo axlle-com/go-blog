@@ -38,7 +38,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 				"title":     "Страница категории",
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+				"menu":      menu.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 			},
 		},
 	)

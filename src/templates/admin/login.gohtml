@@ -9,8 +9,24 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/static/admin/app.css">
         <title>{{ .Title }}</title>
+
+        {{ bundleCss
+        "static/resources/font/inter/inter.min.css"
+        "static/resources/font/play/play.css"
+        "static/resources/plugins/material-design-icons-iconfont/material-design-icons.min.css"
+        "static/resources/plugins/fontawesome-free/css/all.min.css"
+        "static/resources/plugins/simplebar/simplebar.min.css"
+        "static/resources/plugins/summernote/summernote-bs4.min.css"
+        "static/resources/plugins/select2/css/select2.min.css"
+        "static/resources/plugins/flatpickr/flatpickr.min.css"
+        "static/resources/plugins/noty/noty.min.css"
+        "static/resources/plugins/noty/themes/relax.min.css"
+        "static/resources/plugins/fancybox/fancybox.css"
+        "static/resources/plugins/sweetalert2/sweetalert2.min.css"
+        "static/admin/style.css"
+        "static/admin/sidebar-dark.min.css"
+        }}
     </head>
 
     <body class="login-page">

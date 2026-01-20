@@ -520,12 +520,13 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	)
 
 	frontWebPostController := postFrontWeb.NewFrontWebController(
+		cfg,
+		newApi,
 		newView,
 		newPostService,
 		newPostCollectionService,
 		categoryService,
 		newCategoriesService,
-		newApi,
 	)
 
 	frontAjaxMessageController := messageFrontWeb.NewMessageController(

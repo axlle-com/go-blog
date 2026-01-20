@@ -52,7 +52,7 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      menuModels.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+				"menu":      menuModels.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 			},
 		},
 	)

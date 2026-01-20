@@ -196,8 +196,8 @@ func (s *seeder) createMenuItem(menuID uint, parentID *uint, itemData MenuItemSe
 		}
 
 		if foundPublisher != nil {
-			uuid := foundPublisher.GetUUID()
-			publisherUUID = &uuid
+			newUuid := foundPublisher.GetUUID()
+			publisherUUID = &newUuid
 			itemURL = foundPublisher.GetURL()
 			title = foundPublisher.GetTitle()
 		} else {

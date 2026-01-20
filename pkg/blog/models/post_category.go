@@ -72,6 +72,27 @@ func (c *PostCategory) GetTitle() string {
 	return c.Title
 }
 
+func (c *PostCategory) GetImage() string {
+	if c.Image != nil {
+		return *c.Image
+	}
+	return ""
+}
+
+func (c *PostCategory) GetMetaTitle() string {
+	if c.MetaTitle != nil {
+		return *c.MetaTitle
+	}
+	return ""
+}
+
+func (c *PostCategory) GetMetaDescription() string {
+	if c.MetaDescription != nil {
+		return *c.MetaDescription
+	}
+	return ""
+}
+
 func (c *PostCategory) UpdatedFields() []string {
 	return []string{
 		"UserID",
@@ -120,9 +141,11 @@ func (c *PostCategory) SetAlias() {
 	if c.Alias != "" {
 		return
 	}
+
 	if c.UUID == uuid.Nil {
 		c.SetUUID()
 	}
+
 	c.Alias = c.UUID.String()
 }
 

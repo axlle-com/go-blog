@@ -7,20 +7,26 @@ import (
 
 func FromContract(publisher contract.Publisher) contract.Publisher {
 	return &Publisher{
-		ID:    publisher.GetID(),
-		UUID:  publisher.GetUUID(),
-		URL:   publisher.GetURL(),
-		Title: publisher.GetTitle(),
-		Table: publisher.GetTable(),
+		ID:              publisher.GetID(),
+		UUID:            publisher.GetUUID(),
+		URL:             publisher.GetURL(),
+		Title:           publisher.GetTitle(),
+		Image:           publisher.GetImage(),
+		MetaTitle:       publisher.GetMetaTitle(),
+		MetaDescription: publisher.GetMetaDescription(),
+		Table:           publisher.GetTable(),
 	}
 }
 
 type Publisher struct {
-	ID    uint      `json:"id"`
-	UUID  uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
-	URL   string    `json:"url"`
-	Title string    `json:"title"`
-	Table string    `json:"table"`
+	ID              uint      `json:"id"`
+	UUID            uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
+	URL             string    `json:"url"`
+	Title           string    `json:"title"`
+	Image           string    `json:"image,omitempty"`
+	MetaTitle       string    `json:"meta_title,omitempty"`
+	MetaDescription string    `json:"meta_description,omitempty"`
+	Table           string    `json:"table"`
 }
 
 func (p *Publisher) GetTable() string {
@@ -41,4 +47,16 @@ func (p *Publisher) GetURL() string {
 
 func (p *Publisher) GetTitle() string {
 	return p.Title
+}
+
+func (p *Publisher) GetImage() string {
+	return p.Image
+}
+
+func (p *Publisher) GetMetaTitle() string {
+	return p.MetaTitle
+}
+
+func (p *Publisher) GetMetaDescription() string {
+	return p.MetaDescription
 }

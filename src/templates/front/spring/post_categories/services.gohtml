@@ -4,10 +4,10 @@
     <section class="services-hero-section bg-light-blue padding-100">
         <div class="auto-container">
             <div class="sec-title centered">
-                <h1>{{ .category.Title }}</h1>
+                <h1>{{ .model.Title }}</h1>
             </div>
             <div class="services-top-slider-wrapper">
-                {{ range .category.Posts }}
+                {{ range .model.Posts }}
                     <div class="services-top-slide">
                         <div class="row clearfix service-slide-row">
                             {{ if ne .Image nil }}

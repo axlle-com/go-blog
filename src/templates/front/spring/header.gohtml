@@ -6,7 +6,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ .settings.csrfToken }}"/>
 
-        <title>Spring - Software, App, Saas & Product Showcase Landing HTML5 Template | Home Version One</title>
+        <title>{{ .settings.metaTitle }}</title>
+        <meta name="description" content="{{ .settings.metaDescription }}" />
+
+        <link rel="canonical" href="{{ .settings.metaURL }}">
+
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="{{ .settings.metaTitle }}" />
+        <meta property="og:description" content="{{ .settings.metaDescription }}" />
+        <meta property="og:url" content="{{ .settings.metaURL }}" />
+        <meta property="og:image" content="{{ .settings.metaImage }}" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="{{ .settings.metaTitle }}" />
+        <meta name="twitter:description" content="{{ .settings.metaDescription }}" />
+        <meta name="twitter:image" content="{{ .settings.metaImage }}" />
+
         <!-- Stylesheets -->
         <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/static/fonts/Play.woff" }}">
         <link rel="preload" as="font" type="font/woff" crossorigin href="{{ asset "/static/fonts/Play-Bold.woff" }}">

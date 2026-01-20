@@ -5,9 +5,11 @@
     "is_main": true,
     "menu_items": [
       {
+        "title": "Home",
         "publisher_url": "/"
       },
       {
+        "title": "Services",
         "publisher_url": "/services"
       }
     ]

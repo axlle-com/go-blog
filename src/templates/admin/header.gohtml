@@ -29,18 +29,16 @@
 <body class="a-block">
 <div class="sidebar">
     <div class="sidebar-header">
-        <a href="/" class="logo">
-
-        </a>
+        <a href="/" class="logo">Home</a>
         <a href="#" class="nav-link nav-icon rounded-circle ml-auto" data-toggle="sidebar">
             <i class="material-icons">close</i>
         </a>
     </div>
     <div class="sidebar-body">
         <ul class="nav treeview mb-4" data-accordion>
-            {{range .menu}}
+            {{ range .menu }}
                 <li class="nav-item">
-                    <a class="nav-link has-icon {{if .IsActive}}active{{end}}"
+                    <a class="nav-link has-icon {{ if .IsActive }}active{{ end }}"
                        href="{{ .Path }}">
                         {{ .Ico}} {{ .Name }}
                     </a>

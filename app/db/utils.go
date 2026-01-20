@@ -165,7 +165,6 @@ func IndexName(table string, columns ...string) string {
 }
 
 // HashIndex создаёт HASH индекс по колонке: CREATE INDEX IF NOT EXISTS idx_<table>_<col> ON <table> USING hash (<col>);
-// Важно: HASH индексы в PostgreSQL применяются к одной колонке. Для нескольких колонок создавайте отдельные индексы.
 func HashIndex(table string, column string) string {
 	name := IndexName(table, column)
 	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING hash (%s);", name, table, column)
@@ -199,7 +198,6 @@ func LikePrefixIndex(table string, column string) string {
 }
 
 // LtreeGistIndex создаёт GiST индекс для ltree колонки
-// Пример: CREATE INDEX IF NOT EXISTS idx_table_path_ltree ON table USING gist (path_ltree);
 func LtreeGistIndex(table string, column string) string {
 	name := IndexName(table, column)
 	return fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s USING gist (%s);", name, table, column)

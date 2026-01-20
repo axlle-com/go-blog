@@ -9,7 +9,11 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-const CtxLocKey = "loc"
+const (
+	CtxLocKey  = "loc"
+	CtxLangKey = "lang"
+	CtxTKey    = "T"
+)
 
 func NewLanguage(i18nService *i18nsvc.Service) *Language {
 	return &Language{i18n: i18nService}
@@ -40,6 +44,7 @@ func (l *Language) Handler() gin.HandlerFunc {
 			}
 		}
 
+		// локализатор выбирается по приоритету: query -> cookie -> accept
 		loc := l.i18n.Localizer(qLang, cLang, accept)
 
 		if qOk {
@@ -61,16 +66,13 @@ func (l *Language) Handler() gin.HandlerFunc {
 		}
 
 		ctx.Set(CtxLocKey, loc)
-		ctx.Set("lang", cLang)
-
-		// функция T для шаблонов
-		ctx.Set("T", buildT(loc))
+		ctx.Set(CtxLangKey, cLang)
+		ctx.Set(CtxTKey, buildT(loc))
 
 		ctx.Next()
 	}
 }
 
-// buildT создаёт функцию-переводчик для шаблонов
 func buildT(loc *i18n.Localizer) func(id string, data map[string]any, n ...int) string {
 	return func(id string, data map[string]any, n ...int) string {
 		if loc == nil {

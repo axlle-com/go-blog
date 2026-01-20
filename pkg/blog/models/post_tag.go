@@ -98,6 +98,20 @@ func (pt *PostTag) GetImage() string {
 	return ""
 }
 
+func (pt *PostTag) GetMetaTitle() string {
+	if pt.MetaTitle != nil {
+		return *pt.MetaTitle
+	}
+	return ""
+}
+
+func (pt *PostTag) GetMetaDescription() string {
+	if pt.MetaDescription != nil {
+		return *pt.MetaDescription
+	}
+	return ""
+}
+
 func (pt *PostTag) GetTemplateTitle() string {
 	var title string
 	if pt.Template != nil {

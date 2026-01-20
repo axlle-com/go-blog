@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net/http"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,17 @@ import (
 func (c *blogController) RenderByURL(ctx *gin.Context) {
 	alias := ctx.Param("alias")
 	if !isValidAlias(alias) {
-		c.Render404(ctx, c.view.View("error"), nil)
+		c.RenderHTML(
+			ctx,
+			http.StatusNotFound,
+			c.view.View("error"),
+			gin.H{
+				"title":    "Page not found",
+				"error":    "404",
+				"settings": c.settings(ctx, nil),
+			},
+		)
+		ctx.Abort()
 		return
 	}
 
@@ -26,15 +37,17 @@ func (c *blogController) RenderByURL(ctx *gin.Context) {
 		return
 	}
 
-	c.Render404(
+	c.RenderHTML(
 		ctx,
+		http.StatusNotFound,
 		c.view.View("error"),
 		gin.H{
 			"title":    "Page not found",
 			"error":    "404",
-			"settings": c.settings(ctx),
+			"settings": c.settings(ctx, nil),
 		},
 	)
+	ctx.Abort()
 	return
 }
 

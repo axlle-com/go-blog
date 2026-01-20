@@ -83,8 +83,25 @@ func (p *Post) GetName() string {
 	return p.GetTable()
 }
 
-func (p *Post) GetImage() *string {
-	return p.Image
+func (p *Post) GetImage() string {
+	if p.Image != nil {
+		return *p.Image
+	}
+	return ""
+}
+
+func (p *Post) GetMetaTitle() string {
+	if p.MetaTitle != nil {
+		return *p.MetaTitle
+	}
+	return ""
+}
+
+func (p *Post) GetMetaDescription() string {
+	if p.MetaDescription != nil {
+		return *p.MetaDescription
+	}
+	return ""
 }
 
 func (p *Post) GetTemplateName() string {

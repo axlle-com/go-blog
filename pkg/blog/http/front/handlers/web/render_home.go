@@ -12,32 +12,52 @@ import (
 func (c *blogController) RenderHome(ctx *gin.Context) {
 	var blocks []dto.InfoBlock
 
-	post, err := c.postService.FindByParam("is_main", true)
-	if post == nil || err != nil {
-		c.Render404(ctx, c.view.View("error"), nil)
+	model, err := c.postService.FindByParam("is_main", true)
+	if model == nil || err != nil {
+		c.RenderHTML(
+			ctx,
+			http.StatusNotFound,
+			c.view.View("error"),
+			gin.H{
+				"title":    "Page not found",
+				"error":    "404",
+				"settings": c.settings(ctx, nil),
+			},
+		)
+		ctx.Abort()
 		return
 	}
 
-	post, err = c.postService.View(post)
-	if post == nil || err != nil {
+	model, err = c.postService.View(model)
+	if model == nil || err != nil {
 		if err != nil {
 			logger.Errorf("[blog][blogController][RenderHome] Error: %v", err)
 		}
-		c.Render404(ctx, c.view.View("error"), nil)
+		c.RenderHTML(
+			ctx,
+			http.StatusNotFound,
+			c.view.View("error"),
+			gin.H{
+				"title":    "Page not found",
+				"error":    "404",
+				"settings": c.settings(ctx, nil),
+			},
+		)
+		ctx.Abort()
 		return
 	}
 
-	if len(post.InfoBlocksSnapshot) > 0 {
-		err = json.Unmarshal(post.InfoBlocksSnapshot, &blocks)
+	if len(model.InfoBlocksSnapshot) > 0 {
+		err = json.Unmarshal(model.InfoBlocksSnapshot, &blocks)
 	}
 
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
-		c.view.View(post.GetTemplateName()),
+		c.view.View(model.GetTemplateName()),
 		gin.H{
-			"settings": c.settings(ctx),
-			"post":     post,
+			"settings": c.settings(ctx, model),
+			"model":    model,
 			"blocks":   blocks,
 		},
 	)

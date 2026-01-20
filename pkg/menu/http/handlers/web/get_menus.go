@@ -48,7 +48,7 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 			"title":     "Страница меню",
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
-			"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+			"menu":      models.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 		},
 	})
 }

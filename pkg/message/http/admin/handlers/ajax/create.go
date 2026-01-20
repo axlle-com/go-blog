@@ -24,7 +24,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 			"user":          user,
 			"templateModel": template,
 			"resources":     app.NewResources().Resources(),
-			"menu":          menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+			"menu":          menu.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 		},
 	)
 }

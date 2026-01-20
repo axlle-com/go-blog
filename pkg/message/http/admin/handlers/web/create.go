@@ -27,7 +27,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      menu.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+				"menu":      menu.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 			},
 		},
 	)

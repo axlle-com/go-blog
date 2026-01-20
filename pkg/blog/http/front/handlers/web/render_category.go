@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *blogController) RenderCategory(ctx *gin.Context, category *models.PostCategory) {
+func (c *blogController) RenderCategory(ctx *gin.Context, model *models.PostCategory) {
 	filter, validError := models.NewPostFilter().ValidateQuery(ctx)
 	if validError != nil {
 		logger.WithRequest(ctx).Error(validError)
@@ -21,33 +21,43 @@ func (c *blogController) RenderCategory(ctx *gin.Context, category *models.PostC
 	}
 
 	paginator := c.PaginatorFromQuery(ctx)
-	paginator.SetURL(category.GetURL())
+	paginator.SetURL(model.GetURL())
 
-	category, err := c.categoryService.View(category, paginator, filter)
-	if category == nil || err != nil {
+	model, err := c.categoryService.View(model, paginator, filter)
+	if model == nil || err != nil {
 		if err != nil {
 			logger.Errorf("[blog][blogController][RenderCategory] error: %v", err)
 		}
 
-		c.Render404(ctx, c.view.View("error"), nil)
+		c.RenderHTML(
+			ctx,
+			http.StatusNotFound,
+			c.view.View("error"),
+			gin.H{
+				"title":    "Page not found",
+				"error":    "404",
+				"settings": c.settings(ctx, nil),
+			},
+		)
+		ctx.Abort()
 		return
 	}
 
 	var blocks []dto.InfoBlock
-	if len(category.InfoBlocksSnapshot) > 0 {
-		if err := json.Unmarshal(category.InfoBlocksSnapshot, &blocks); err != nil {
-			logger.Errorf("[blog][blogController][RenderCategory] id=%v: %v", category.ID, err)
+	if len(model.InfoBlocksSnapshot) > 0 {
+		if err := json.Unmarshal(model.InfoBlocksSnapshot, &blocks); err != nil {
+			logger.Errorf("[blog][blogController][RenderCategory] id=%v: %v", model.ID, err)
 		}
 	}
 
-	c.RenderHTML(ctx,
+	c.RenderHTML(
+		ctx,
 		http.StatusOK,
-		c.view.View(category.GetTemplateName()),
+		c.view.View(model.GetTemplateName()),
 		gin.H{
-			"settings":  c.settings(ctx),
-			"title":     category.Title,
+			"settings":  c.settings(ctx, model),
+			"model":     model,
 			"blocks":    blocks,
-			"category":  category,
 			"paginator": paginator,
 			"filter":    filter,
 		},

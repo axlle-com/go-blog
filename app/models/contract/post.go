@@ -9,7 +9,7 @@ type Post interface {
 	GetUUID() uuid.UUID
 	GetTitle() string
 	GetDescription() *string
-	GetImage() *string
+	GetImage() string
 	GetURL() string
 	Date() string
 }

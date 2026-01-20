@@ -6,17 +6,18 @@
             <div class="row clearfix">
                 <div class="text-column col-md-6 col-sm-12 col-xs-12">
                     <div class="inner">
-                        <h2>Give yourself the best chance of success with All Rights Reserved</h2>
-                        <p>Sulation is an easy to use tool for eCommerce. With the help of our system you can present your products. It is all very easy!</p>
+                        <h1>{{ .model.Title }}</h1>
+                        <p>{{ .model.Description }}</p>
                     </div>
                 </div>
 
-                <div class="image-column col-md-6 col-sm-12 col-xs-12">
-                    <div class="inner">
-                        <figure class="image"><img src="/static/spring/images/services/support.png" loading="lazy" decoding="async" fetchpriority="low" alt=""></figure>
+                {{ if ne .model.Image nil }}
+                    <div class="image-column col-md-6 col-sm-12 col-xs-12">
+                        <div class="inner">
+                            <figure class="image"><img src="{{ .model.Image }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .model.Title }}"></figure>
+                        </div>
                     </div>
-                </div>
-
+                {{ end }}
             </div>
         </div>
     </section>

@@ -10,30 +10,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *blogController) RenderPost(ctx *gin.Context, post *models.Post) {
-	post, err := c.postService.View(post)
-	if post == nil || err != nil {
+func (c *blogController) RenderPost(ctx *gin.Context, model *models.Post) {
+	model, err := c.postService.View(model)
+	if model == nil || err != nil {
 		if err != nil {
 			logger.Errorf("[blog][blogController][RenderPost] error: %v", err)
 		}
 
-		c.Render404(ctx, c.view.View("error"), nil)
+		c.RenderHTML(
+			ctx,
+			http.StatusNotFound,
+			c.view.View("error"),
+			gin.H{
+				"title":    "Page not found",
+				"error":    "404",
+				"settings": c.settings(ctx, nil),
+			},
+		)
+		ctx.Abort()
 		return
 	}
 
 	var blocks []dto.InfoBlock
-	if post.InfoBlocksSnapshot != nil && len(post.InfoBlocksSnapshot) > 0 {
-		if err := json.Unmarshal(post.InfoBlocksSnapshot, &blocks); err != nil {
-			logger.Errorf("[blog][blogController][RenderPost] id=%v: %v", post.ID, err)
+	if model.InfoBlocksSnapshot != nil && len(model.InfoBlocksSnapshot) > 0 {
+		if err := json.Unmarshal(model.InfoBlocksSnapshot, &blocks); err != nil {
+			logger.Errorf("[blog][blogController][RenderPost] id=%v: %v", model.ID, err)
 		}
 	}
 
 	c.RenderHTML(ctx,
 		http.StatusOK,
-		c.view.View(post.GetTemplateName()),
+		c.view.View(model.GetTemplateName()),
 		gin.H{
-			"settings": c.settings(ctx),
-			"title":    "Home Page",
+			"settings": c.settings(ctx, model),
+			"model":    model,
 			"blocks":   blocks,
 		},
 	)

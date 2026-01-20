@@ -67,12 +67,15 @@ type PostSeedData struct {
 }
 
 type CategorySeedData struct {
-	UserID      *uint               `json:"user_id"`
-	Template    string              `json:"template"`
-	IsPublished *bool               `json:"is_published"`
-	InSitemap   *bool               `json:"in_sitemap"`
-	Title       string              `json:"title"`
-	InfoBlocks  []InfoBlockSeedItem `json:"info_blocks"`
+	UserID          *uint               `json:"user_id"`
+	Template        string              `json:"template"`
+	IsPublished     *bool               `json:"is_published"`
+	InSitemap       *bool               `json:"in_sitemap"`
+	Alias           string              `json:"alias"`
+	Title           string              `json:"title"`
+	MetaTitle       string              `json:"meta_title,omitempty"`
+	MetaDescription string              `json:"meta_description,omitempty"`
+	InfoBlocks      []InfoBlockSeedItem `json:"info_blocks"`
 }
 
 func NewSeeder(
@@ -345,14 +348,17 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 			}
 
 			category := models.PostCategory{
-				UUID:        uuid.New(),
-				TemplateID:  templateID,
-				IsPublished: &isPublished,
-				InSitemap:   inSitemap,
-				Title:       categoryData.Title,
-				CreatedAt:   db.TimePtr(time.Now()),
-				UpdatedAt:   db.TimePtr(time.Now()),
-				DeletedAt:   nil,
+				UUID:            uuid.New(),
+				TemplateID:      templateID,
+				IsPublished:     &isPublished,
+				InSitemap:       inSitemap,
+				Alias:           categoryData.Alias,
+				Title:           categoryData.Title,
+				MetaTitle:       db.StrPtr(categoryData.MetaTitle),
+				MetaDescription: db.StrPtr(categoryData.MetaDescription),
+				CreatedAt:       db.TimePtr(time.Now()),
+				UpdatedAt:       db.TimePtr(time.Now()),
+				DeletedAt:       nil,
 			}
 
 			var userF contract.User

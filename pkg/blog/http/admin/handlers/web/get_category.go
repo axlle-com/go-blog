@@ -50,7 +50,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
-				"menu":      models.NewMenu(ctx.FullPath(), c.BuildT(ctx)),
+				"menu":      models.NewMenu(ctx.FullPath(), c.GetT(ctx)),
 			},
 		},
 	)

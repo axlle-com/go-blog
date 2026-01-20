@@ -1,10 +1,6 @@
 package ajax
 
 import (
-	"net/http"
-	"os"
-	"path/filepath"
-
 	"github.com/axlle-com/blog/app/api"
 	app "github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/pkg/template/service"
@@ -38,22 +34,4 @@ type templateController struct {
 	templateService           *service.TemplateService
 	templateCollectionService *service.TemplateCollectionService
 	api                       *api.Api
-}
-
-func ShowIndexPageTest(ctx *gin.Context) {
-	fileName := filepath.Base("index.gohtml")
-	templatePath := filepath.Join("templates", fileName)
-	data, err := os.ReadFile(templatePath)
-	if err != nil {
-		ctx.String(http.StatusInternalServerError, "Ошибка чтения файла: %s", err.Error())
-		return
-	}
-
-	var base app.BaseAjax
-	tFunc := base.BuildT(ctx)
-	templateData := app.PrepareTemplateData(ctx, gin.H{
-		"title":   "Home Page",
-		"payload": string(data),
-	}, tFunc)
-	ctx.HTML(http.StatusOK, "test", templateData)
 }

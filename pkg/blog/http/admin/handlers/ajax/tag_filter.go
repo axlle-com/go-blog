@@ -37,7 +37,7 @@ func (c *tagController) Filter(ctx *gin.Context) {
 	users := c.api.User.GetAll()
 
 	data := gin.H{
-		"title":     "Страница тэгов",
+		"title":     c.T(ctx, "ui.page.tags"),
 		"tag":       empty,
 		"tags":      tags,
 		"templates": c.templates(ctx),

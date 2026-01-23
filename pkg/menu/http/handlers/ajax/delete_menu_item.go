@@ -13,7 +13,6 @@ import (
 func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 	id := c.GetID(ctx)
 
-	// Если ID = 0, элемент еще не сохранен, просто возвращаем успех
 	if id == 0 {
 		ctx.JSON(
 			http.StatusOK,
@@ -21,14 +20,13 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 				response.Body{
 					"status": true,
 				},
-				"Элемент удален",
+				c.T(ctx, "ui.success.item_deleted"),
 				nil,
 			),
 		)
 		return
 	}
 
-	// Получаем элемент меню для получения menu_id
 	menuItem, err := c.menuItemService.GetByID(id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": errutil.ResourceNotfound})
@@ -37,14 +35,12 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 
 	menuID := menuItem.MenuID
 
-	// Удаляем элемент меню и всех связанных потомков
 	if err := c.menuItemService.Delete(id); err != nil {
 		logger.WithRequest(ctx).Error(err)
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	// Получаем обновленное меню
 	menu, err := c.menuService.GetByID(menuID)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
@@ -52,7 +48,6 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 		return
 	}
 
-	// Агрегируем меню для получения всех элементов
 	menu, err = c.menuService.Aggregate(menu)
 	if err != nil {
 		logger.WithRequest(ctx).Error(err)
@@ -60,7 +55,6 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 		return
 	}
 
-	// Рендерим обновленную страницу меню
 	data := response.Body{
 		"model":     menu,
 		"templates": c.templates(ctx),
@@ -73,7 +67,7 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.menu_inner", data, ctx),
 			},
-			"Элемент меню удален",
+			c.T(ctx, "ui.success.menu_item_deleted"),
 			nil,
 		),
 	)

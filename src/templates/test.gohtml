@@ -19,7 +19,7 @@
     <h1>Редактирование шаблона: test </h1>
     <textarea id="code" name="code">{{.payload}}</textarea>
     <br>
-    <button onclick="saveCode()">Сохранить</button>
+    <button onclick="saveCode()">{{ call .T "ui.button.save" nil }}</button>
 
     <!-- Подключаем скрипты CodeMirror -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
@@ -53,8 +53,8 @@
                     alert(data); // выводим ответ сервера
                 })
                 .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Произошла ошибка при сохранении');
+                    console.error('{{ call .T "ui.error.generic" nil }}:', error);
+                    alert('{{ call .T "ui.error.save_failed" nil }}');
                 });
         }
     </script>

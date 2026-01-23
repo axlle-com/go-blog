@@ -22,7 +22,7 @@ func (c *templateWebController) CreateTemplate(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.template",
 		gin.H{
-			"title":         "Страница шаблона",
+			"title":         c.T(ctx, "ui.page.template"),
 			"templateModel": template,
 			"resources":     resources.Resources(),
 			"themes":        resources.Themes(),

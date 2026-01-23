@@ -44,7 +44,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 	posts := c.postCollectionService.Aggregates(postsTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.posts", gin.H{
-		"title":      "Страница постов",
+		"title":      c.T(ctx, "ui.page.posts"),
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,

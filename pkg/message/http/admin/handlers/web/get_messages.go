@@ -47,7 +47,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 	}
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.messages", gin.H{
-		"title":     "Страница сообщений",
+		"title":     c.T(ctx, "ui.page.messages"),
 		"message":   empty,
 		"messages":  messages,
 		"unviewed":  cnt,

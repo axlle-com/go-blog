@@ -99,7 +99,7 @@
                         class="btn btn-link btn-icon text-danger js-menu-item-delete" 
                         data-id="{{ $it.ID }}"
                         data-action="/admin/ajax/menus/menus-items/{{ $it.ID }}"
-                        title="Удалить элемент меню">
+                        title="{{ call $T "ui.button.delete_menu_item" nil }}">
                     <i class="material-icons">delete</i>
                 </button>
             </div>

@@ -57,7 +57,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	data := response.Body{
-		"title":      "Страница инфо блоков",
+		"title":      c.T(ctx, "ui.page.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
 		"templates":  c.templates(ctx),
@@ -72,7 +72,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.info_blocks_inner", data, ctx),
 			},
-			"Запись удалена",
+			c.T(ctx, "ui.success.record_deleted"),
 			paginator,
 		),
 	)

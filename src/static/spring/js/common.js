@@ -18,7 +18,7 @@ const _message = {
                 if (response && response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success('Сообщение успешно отправлено!');
+                    _glob.noty.success(_glob.t('ui.success.message_sent', 'Message sent successfully'));
                 }
             });
         });

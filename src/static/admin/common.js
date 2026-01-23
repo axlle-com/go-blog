@@ -574,13 +574,13 @@ const _menu = {
                     <button class="btn dropdown-toggle collapsed" type="button"
                             data-toggle="collapse" data-target="#collapse-menu-item-${count}"
                             aria-expanded="false" aria-controls="collapse-menu-item-${count}">
-                        New menu item
+                        ${_glob.t('ui.label.menu_item_new', 'New menu item')}
                     </button>
                     <button type="button" 
                             class="btn btn-link btn-icon text-danger js-menu-item-delete" 
                             data-id="0"
                             data-action=""
-                            title="Удалить элемент меню">
+                            title="${_glob.t('ui.button.delete_menu_item', 'Delete menu item')}">
                         <i class="material-icons">delete</i>
                     </button>
                 </div>
@@ -589,25 +589,25 @@ const _menu = {
                         <div class="row">
                             <div class="col-md-6">
                                 <fieldset class="form-block js-menu-items-publisher-url">
-                                    <legend>Menu item parameters</legend>
+                                    <legend>${_glob.t('ui.label.menu_item_params', 'Menu item parameters')}</legend>
                                     <input type="hidden" name="menu_items[${count}][menu_id]" value="${menuId}">
         
                                     <div class="form-group small">
-                                        <label>Title</label>
+                                        <label>${_glob.t('ui.label.title', 'Title')}</label>
                                         <input 
                                             class="form-control form-shadow"
                                             data-validator-required
                                             data-validator-name="title"
                                             name="menu_items[${count}][title]" 
                                             value="" 
-                                            placeholder="Title">
+                                            placeholder="${_glob.t('ui.label.title', 'Title')}">
                                         <div class="invalid-feedback"></div>
                                     </div>
         
                                     <div class="form-group small">
-                                        <label>Publisher</label>
+                                        <label>${_glob.t('ui.label.publisher', 'Publisher')}</label>
                                         <select class="form-control select2 select2-search"
-                                                data-placeholder="..."
+                                                data-placeholder="${_glob.t('ui.placeholder.select_publisher', 'Select publisher')}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
                                                 data-action="/admin/publishers"
@@ -619,13 +619,13 @@ const _menu = {
                                     </div>
         
                                     <div class="form-group small">
-                                        <label>Custom link</label>
+                                        <label>${_glob.t('ui.label.custom_link', 'Custom link')}</label>
                                         <input 
                                             class="form-control form-shadow" 
                                             name="menu_items[${count}][url]" 
                                             data-validator-name="url"
                                             value="" 
-                                            placeholder="Custom link">
+                                            placeholder="${_glob.t('ui.label.custom_link', 'Custom link')}">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </fieldset>
@@ -633,11 +633,11 @@ const _menu = {
         
                             <div class="col-md-6">
                                 <fieldset class="form-block">
-                                    <legend>Hierarchy and sort</legend>
+                                    <legend>${_glob.t('ui.label.hierarchy_sort', 'Hierarchy and sort')}</legend>
                                     <div class="form-group small">
-                                        <label>Parent menu item</label>
+                                        <label>${_glob.t('ui.label.parent_menu_item', 'Parent menu item')}</label>
                                         <select class="form-control select2 select2-search"
-                                                data-placeholder="Parent menu item"
+                                                data-placeholder="${_glob.t('ui.placeholder.parent', 'Parent element')}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
                                                 data-action="/admin/ajax/menus/menus-items?menu_id=${menuId}"
@@ -649,8 +649,8 @@ const _menu = {
                                     </div>
         
                                     <div class="form-group small">
-                                        <label>Sort</label>
-                                        <input class="form-control form-shadow" type="number" name="menu_items[${count}][sort]" value="0" placeholder="Sort">
+                                        <label>${_glob.t('ui.label.sort', 'Sort')}</label>
+                                        <input class="form-control form-shadow" type="number" name="menu_items[${count}][sort]" value="0" placeholder="${_glob.t('ui.label.sort', 'Sort')}">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </fieldset>

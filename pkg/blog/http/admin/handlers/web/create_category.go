@@ -35,7 +35,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 				"relationURL":         category.AdminURL(),
 			},
 			"settings": gin.H{
-				"title":     "Страница категории",
+				"title":     c.T(ctx, "ui.page.category"),
 				"csrfToken": csrf.GetToken(ctx),
 				"user":      user,
 				"menu":      menu.NewMenu(ctx.FullPath(), c.GetT(ctx)),

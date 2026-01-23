@@ -38,7 +38,7 @@ func (c *categoryController) GetCategory(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.category",
 		gin.H{
-			"title":      "Страница категории",
+			"title":      c.T(ctx, "ui.page.category"),
 			"categories": categories,
 			"templates":  c.templates(ctx),
 			"category":   category,

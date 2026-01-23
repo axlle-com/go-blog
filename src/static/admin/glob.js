@@ -2,6 +2,13 @@ const _cl_ = (p) => {
     console.log(p);
 }
 const _glob = {
+    i18n: (typeof window !== 'undefined' && window.__i18n) ? window.__i18n : {},
+    t: function (key, fallback = '') {
+        if (key && this.i18n && Object.prototype.hasOwnProperty.call(this.i18n, key)) {
+            return this.i18n[key];
+        }
+        return fallback || key;
+    },
     ERROR_MESSAGE: 'An error occurred, please try again later!',
     ERROR_FIELD: 'Field is required',
     spareParts: [],
@@ -15,7 +22,7 @@ const _glob = {
             if (message) {
                 console.log(`%c ${message} `, `background: #d43f3a; color: #eee`);
             } else {
-                console.log(`%c ${_glob.ERROR_MESSAGE} `, `background: #d43f3a; color: #eee`);
+                console.log(`%c ${_glob.t('ui.error.generic', _glob.ERROR_MESSAGE)} `, `background: #d43f3a; color: #eee`);
             }
         },
         info: function (message) {
@@ -25,7 +32,7 @@ const _glob = {
     noty: {
         config: function (type, message) {
             if (typeof Noty !== 'undefined') {
-                const text = '<h5>Attention</h5>' + message;
+                const text = `<h5>${_glob.t('ui.notice.attention', 'Attention')}</h5>` + message;
                 const _config = {type, text, timeout: 4000, theme: 'relax'};
                 new Noty(_config).show();
             } else {
@@ -33,14 +40,14 @@ const _glob = {
                 alert(message);
             }
         },
-        error: function (message = 'An error occurred!') {
-            this.config('error', message);
+        error: function (message = null) {
+            this.config('error', message || _glob.t('ui.error.generic', _glob.ERROR_MESSAGE));
         },
-        success: function (message = 'Operation completed successfully!') {
-            this.config('success', message);
+        success: function (message = null) {
+            this.config('success', message || _glob.t('ui.success.generic', 'Operation completed successfully!'));
         },
-        info: function (message = 'Please note!') {
-            this.config('info', message);
+        info: function (message = null) {
+            this.config('info', message || _glob.t('ui.notice.info', 'Please note!'));
         }
     },
     preloader: {
@@ -119,7 +126,7 @@ const _glob = {
                 } else if (object instanceof FormData) {
                     this.payload = object;
                 } else {
-                    _glob.console.error('Не известные данные');
+                    _glob.console.error(_glob.t('ui.error.unknown_data', 'Unknown data'));
                 }
             }
             return this;
@@ -243,12 +250,12 @@ const _glob = {
             this.validateForm();
 
             if (this.hasErrors) {
-                _glob.noty.error('Заполнены не все обязательные поля');
+                _glob.noty.error(_glob.t('ui.error.required_fields_missing', 'Not all required fields are filled'));
                 return;
             }
 
             if (this.hasSend) {
-                _glob.console.error('Форма еще отправляется');
+                _glob.console.error(_glob.t('ui.error.form_in_progress', 'Form is still submitting'));
                 return;
             }
 
@@ -306,11 +313,11 @@ const _glob = {
             const _this = this;
             this.validateForm();
             if (this.hasErrors) {
-                _glob.noty.error('Заполнены не все обязательные поля');
+                _glob.noty.error(_glob.t('ui.error.required_fields_missing', 'Not all required fields are filled'));
                 return;
             }
             if (this.hasSend) {
-                _glob.console.error('Форма еще отправляется');
+                _glob.console.error(_glob.t('ui.error.form_in_progress', 'Form is still submitting'));
                 return;
             }
             if (this.preloader) {
@@ -425,10 +432,10 @@ const _glob = {
                     }
                 }
                 _glob.noty.error(
-                    (message ? message + '<br>' : '') + (extraErrors || _glob.ERROR_MESSAGE)
+                    (message ? message + '<br>' : '') + (extraErrors || _glob.t('ui.error.generic', _glob.ERROR_MESSAGE))
                 );
             } else if (response.status === 406) {
-                _glob.noty.error(message ? message : _glob.ERROR_MESSAGE);
+                _glob.noty.error(message ? message : _glob.t('ui.error.generic', _glob.ERROR_MESSAGE));
             } else if (response.status === 500) {
                 _glob.noty.error(message ? message : response.statusText);
             } else {
@@ -585,7 +592,7 @@ const _glob = {
                     help.text('').hide();
                 } else {
                     field.addClass('is-invalid');
-                    help.text(_glob.ERROR_FIELD).show();
+                    help.text(_glob.t('ui.error.field_required', _glob.ERROR_FIELD)).show();
                     err = true;
                 }
             } else {
@@ -594,7 +601,7 @@ const _glob = {
                     help.text('').hide();
                 } else {
                     field.addClass('is-invalid');
-                    help.text(_glob.ERROR_FIELD).show();
+                    help.text(_glob.t('ui.error.field_required', _glob.ERROR_FIELD)).show();
                     err = true;
                 }
             }

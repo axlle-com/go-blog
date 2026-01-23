@@ -65,7 +65,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 				"url":  fmt.Sprintf("/admin/posts/%d", post.ID),
 				"post": post,
 			},
-			"Запись создана",
+			c.T(ctx, "ui.success.record_created"),
 		),
 	)
 }

@@ -61,7 +61,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	data := response.Body{
-		"title":          "Страница постов",
+		"title":          c.T(ctx, "ui.page.posts"),
 		"category":       &models.PostCategory{},
 		"categories":     categories,
 		"postCategories": postCategories,
@@ -77,7 +77,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.categories_inner", data, ctx),
 			},
-			"Запись удалена",
+			c.T(ctx, "ui.success.record_deleted"),
 			paginator,
 		),
 	)

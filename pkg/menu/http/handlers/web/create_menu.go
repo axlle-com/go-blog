@@ -18,7 +18,7 @@ func (c *menuController) CreateMenu(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.menu",
 		gin.H{
-			"title":     "Страница меню",
+			"title":     c.T(ctx, "ui.page.menu"),
 			"templates": c.templates(ctx),
 			"model":     &models.Menu{},
 			"settings": gin.H{

@@ -42,7 +42,7 @@ func (c *postController) GetPost(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":      "Страница поста",
+			"title":      c.T(ctx, "ui.page.post"),
 			"tags":       tags,
 			"categories": categories,
 			"templates":  c.templates(ctx),

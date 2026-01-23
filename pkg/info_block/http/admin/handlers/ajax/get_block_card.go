@@ -34,7 +34,7 @@ func (c *blockController) GetInfoBlockCard(ctx *gin.Context) {
 				"url":       nil,
 				"infoBlock": found,
 			},
-			"Запись найдена",
+			c.T(ctx, "ui.success.record_found"),
 			nil,
 		),
 	)

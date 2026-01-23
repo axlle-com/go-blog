@@ -68,7 +68,7 @@ func (c *menuController) Update(ctx *gin.Context) {
 				"url":  menu.AdminURL(),
 				"menu": menu,
 			},
-			"Запись обновлена",
+			c.T(ctx, "ui.success.record_updated"),
 		),
 	)
 }

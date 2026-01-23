@@ -4,12 +4,16 @@
     "other": "All rights reserved"
   },
   {
-    "id": "front.label.business_card",
-    "other": "Business Card"
+    "id": "ui.button.add_block",
+    "other": "Add block"
   },
   {
     "id": "ui.button.archive",
     "other": "Archive"
+  },
+  {
+    "id": "ui.button.close",
+    "other": "Close"
   },
   {
     "id": "ui.button.copy",
@@ -18,6 +22,10 @@
   {
     "id": "ui.button.delete",
     "other": "Delete"
+  },
+  {
+    "id": "ui.button.delete_menu_item",
+    "other": "Delete menu item"
   },
   {
     "id": "ui.button.exit",
@@ -50,10 +58,6 @@
   {
     "id": "ui.button.save",
     "other": "Save"
-  },
-  {
-    "id": "ui.button.add_block",
-    "other": "Add block"
   },
   {
     "id": "ui.checkbox.display_on_main",
@@ -90,6 +94,62 @@
   {
     "id": "ui.checkbox.template_for_all",
     "other": "Template for all"
+  },
+  {
+    "id": "ui.error.field_form_name",
+    "other": "field form_name"
+  },
+  {
+    "id": "ui.error.field_required",
+    "other": "Field is required"
+  },
+  {
+    "id": "ui.error.file_read_error",
+    "other": "File read error"
+  },
+  {
+    "id": "ui.error.file_write_error",
+    "other": "File write error"
+  },
+  {
+    "id": "ui.error.forbidden",
+    "other": "Forbidden"
+  },
+  {
+    "id": "ui.error.form_in_progress",
+    "other": "Form is still submitting"
+  },
+  {
+    "id": "ui.error.form_invalid",
+    "other": "Form is invalid!"
+  },
+  {
+    "id": "ui.error.generic",
+    "other": "An error occurred"
+  },
+  {
+    "id": "ui.error.required_fields_missing",
+    "other": "Not all required fields are filled"
+  },
+  {
+    "id": "ui.error.save_failed",
+    "other": "Failed to save"
+  },
+  {
+    "id": "ui.error.server_error",
+    "other": "Server error"
+  },
+  {
+    "id": "ui.error.template_code_missing",
+    "other": "Template content (code) not provided"
+  },
+  {
+    "id": "ui.error.unauthorized",
+    "other": "Unauthorized"
+  },
+  {
+    "id": "ui.error.unknown_data",
+    "other": "Unknown data"
   },
   {
     "id": "ui.fieldset.data_link",
@@ -148,20 +208,36 @@
     "other": "Creation date"
   },
   {
+    "id": "ui.label.custom_link",
+    "other": "Custom link"
+  },
+  {
     "id": "ui.label.details",
     "other": "Details"
   },
   {
-    "id": "ui.label.inbox",
-    "other": "Inbox"
+    "id": "ui.label.hierarchy_sort",
+    "other": "Hierarchy and sort"
   },
   {
     "id": "ui.label.info_block",
     "other": "Info block"
   },
   {
+    "id": "ui.label.inbox",
+    "other": "Inbox"
+  },
+  {
     "id": "ui.label.login",
     "other": "Login"
+  },
+  {
+    "id": "ui.label.menu_item_new",
+    "other": "New menu item"
+  },
+  {
+    "id": "ui.label.menu_item_params",
+    "other": "Menu item parameters"
   },
   {
     "id": "ui.label.name",
@@ -170,6 +246,10 @@
   {
     "id": "ui.label.number",
     "other": "Number"
+  },
+  {
+    "id": "ui.label.parent_menu_item",
+    "other": "Parent menu item"
   },
   {
     "id": "ui.label.password",
@@ -192,6 +272,10 @@
     "other": "Publication end date"
   },
   {
+    "id": "ui.label.publisher",
+    "other": "Publisher"
+  },
+  {
     "id": "ui.label.resource",
     "other": "Resource"
   },
@@ -206,6 +290,10 @@
   {
     "id": "ui.label.short_description",
     "other": "Short description"
+  },
+  {
+    "id": "ui.label.sort",
+    "other": "Sort"
   },
   {
     "id": "ui.label.template",
@@ -228,24 +316,104 @@
     "other": "Upload photo"
   },
   {
-    "id": "ui.label.menu_item_params",
-    "other": "Menu item parameters"
+    "id": "ui.menu.categories",
+    "other": "Categories"
   },
   {
-    "id": "ui.label.publisher",
-    "other": "Publisher"
+    "id": "ui.menu.dashboard",
+    "other": "Dashboard"
   },
   {
-    "id": "ui.label.custom_link",
-    "other": "Custom link"
+    "id": "ui.menu.info_blocks",
+    "other": "Info Blocks"
   },
   {
-    "id": "ui.label.hierarchy_sort",
-    "other": "Hierarchy and sort"
+    "id": "ui.menu.menus",
+    "other": "Menus"
   },
   {
-    "id": "ui.label.parent_menu_item",
-    "other": "Parent menu item"
+    "id": "ui.menu.messages",
+    "other": "Messages"
+  },
+  {
+    "id": "ui.menu.posts",
+    "other": "Posts"
+  },
+  {
+    "id": "ui.menu.tags",
+    "other": "Tags"
+  },
+  {
+    "id": "ui.menu.templates",
+    "other": "Templates"
+  },
+  {
+    "id": "ui.notice.attention",
+    "other": "Attention"
+  },
+  {
+    "id": "ui.notice.info",
+    "other": "Please note!"
+  },
+  {
+    "id": "ui.page.admin_404",
+    "other": "Admin — 404"
+  },
+  {
+    "id": "ui.page.categories",
+    "other": "Categories page"
+  },
+  {
+    "id": "ui.page.category",
+    "other": "Category page"
+  },
+  {
+    "id": "ui.page.info_block",
+    "other": "Info block page"
+  },
+  {
+    "id": "ui.page.info_blocks",
+    "other": "Info blocks page"
+  },
+  {
+    "id": "ui.page.login",
+    "other": "Login"
+  },
+  {
+    "id": "ui.page.menu",
+    "other": "Menu page"
+  },
+  {
+    "id": "ui.page.messages",
+    "other": "Messages page"
+  },
+  {
+    "id": "ui.page.post",
+    "other": "Post page"
+  },
+  {
+    "id": "ui.page.posts",
+    "other": "Posts page"
+  },
+  {
+    "id": "ui.page.tag",
+    "other": "Tag page"
+  },
+  {
+    "id": "ui.page.tags",
+    "other": "Tags page"
+  },
+  {
+    "id": "ui.page.template",
+    "other": "Template page"
+  },
+  {
+    "id": "ui.page.template_editor",
+    "other": "Template editor: {{.name}}"
+  },
+  {
+    "id": "ui.page.templates",
+    "other": "Templates page"
   },
   {
     "id": "ui.paginator.showing",
@@ -254,6 +422,10 @@
   {
     "id": "ui.placeholder.alias",
     "other": "Alias"
+  },
+  {
+    "id": "ui.placeholder.description",
+    "other": "Description"
   },
   {
     "id": "ui.placeholder.link",
@@ -268,12 +440,24 @@
     "other": "Normal"
   },
   {
+    "id": "ui.placeholder.parent",
+    "other": "Parent element"
+  },
+  {
     "id": "ui.placeholder.search",
     "other": "Search..."
   },
   {
+    "id": "ui.placeholder.select_info_blocks",
+    "other": "Select info blocks"
+  },
+  {
     "id": "ui.placeholder.select_menu",
     "other": "Select menu"
+  },
+  {
+    "id": "ui.placeholder.select_publisher",
+    "other": "Select publisher"
   },
   {
     "id": "ui.placeholder.select_tag",
@@ -282,18 +466,6 @@
   {
     "id": "ui.placeholder.select_widget",
     "other": "Select widget"
-  },
-  {
-    "id": "ui.placeholder.select_info_blocks",
-    "other": "Select info blocks"
-  },
-  {
-    "id": "ui.placeholder.description",
-    "other": "Description"
-  },
-  {
-    "id": "ui.placeholder.parent",
-    "other": "Parent element"
   },
   {
     "id": "ui.placeholder.seo_description",
@@ -320,6 +492,58 @@
     "other": "Specify date"
   },
   {
+    "id": "ui.success.file_deleted",
+    "other": "File deleted successfully"
+  },
+  {
+    "id": "ui.success.file_saved",
+    "other": "File saved successfully"
+  },
+  {
+    "id": "ui.success.generic",
+    "other": "Operation completed successfully!"
+  },
+  {
+    "id": "ui.success.image_attached",
+    "other": "Image attached"
+  },
+  {
+    "id": "ui.success.image_deleted",
+    "other": "Image deleted"
+  },
+  {
+    "id": "ui.success.images_attached",
+    "other": "Images attached"
+  },
+  {
+    "id": "ui.success.item_deleted",
+    "other": "Item deleted"
+  },
+  {
+    "id": "ui.success.menu_item_deleted",
+    "other": "Menu item deleted"
+  },
+  {
+    "id": "ui.success.message_sent",
+    "other": "Message sent successfully"
+  },
+  {
+    "id": "ui.success.record_created",
+    "other": "Record created"
+  },
+  {
+    "id": "ui.success.record_deleted",
+    "other": "Record deleted"
+  },
+  {
+    "id": "ui.success.record_found",
+    "other": "Record found"
+  },
+  {
+    "id": "ui.success.record_updated",
+    "other": "Record updated"
+  },
+  {
     "id": "ui.tab.gallery",
     "other": "Gallery"
   },
@@ -334,93 +558,5 @@
   {
     "id": "ui.tab.settings",
     "other": "Settings"
-  },
-  {
-    "id": "ui.menu.dashboard",
-    "other": "Dashboard"
-  },
-  {
-    "id": "ui.menu.menus",
-    "other": "Menus"
-  },
-  {
-    "id": "ui.menu.posts",
-    "other": "Posts"
-  },
-  {
-    "id": "ui.menu.tags",
-    "other": "Tags"
-  },
-  {
-    "id": "ui.menu.categories",
-    "other": "Categories"
-  },
-  {
-    "id": "ui.menu.info_blocks",
-    "other": "Info Blocks"
-  },
-  {
-    "id": "ui.menu.templates",
-    "other": "Templates"
-  },
-  {
-    "id": "ui.menu.messages",
-    "other": "Messages"
-  },
-  {
-    "id": "ui.error.server_error",
-    "other": "Server error"
-  },
-  {
-    "id": "ui.error.file_read_error",
-    "other": "File read error"
-  },
-  {
-    "id": "ui.error.file_write_error",
-    "other": "File write error"
-  },
-  {
-    "id": "ui.error.unauthorized",
-    "other": "Unauthorized"
-  },
-  {
-    "id": "ui.error.forbidden",
-    "other": "Forbidden"
-  },
-  {
-    "id": "ui.error.form_invalid",
-    "other": "Form is invalid!"
-  },
-  {
-    "id": "ui.error.template_code_missing",
-    "other": "Template content (code) not provided"
-  },
-  {
-    "id": "ui.success.file_saved",
-    "other": "File saved successfully"
-  },
-  {
-    "id": "ui.success.file_deleted",
-    "other": "File deleted successfully"
-  },
-  {
-    "id": "ui.success.image_attached",
-    "other": "Image attached"
-  },
-  {
-    "id": "ui.success.images_attached",
-    "other": "Images attached"
-  },
-  {
-    "id": "ui.success.image_deleted",
-    "other": "Image deleted"
-  },
-  {
-    "id": "ui.success.message_sent",
-    "other": "Message sent successfully"
-  },
-  {
-    "id": "ui.error.field_form_name",
-    "other": "field form_name"
   }
 ]

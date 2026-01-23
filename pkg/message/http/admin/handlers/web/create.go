@@ -21,7 +21,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.template",
 		gin.H{
-			"title":         "Страница шаблона",
+			"title":         c.T(ctx, "ui.page.template"),
 			"templateModel": template,
 			"resources":     app.NewResources().Resources(),
 			"settings": gin.H{

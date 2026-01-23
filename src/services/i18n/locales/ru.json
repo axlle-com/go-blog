@@ -4,12 +4,16 @@
     "other": "Все права защищены"
   },
   {
-    "id": "front.label.business_card",
-    "other": "Визитка"
+    "id": "ui.button.add_block",
+    "other": "Добавить блок"
   },
   {
     "id": "ui.button.archive",
     "other": "В архив"
+  },
+  {
+    "id": "ui.button.close",
+    "other": "Закрыть"
   },
   {
     "id": "ui.button.copy",
@@ -18,6 +22,10 @@
   {
     "id": "ui.button.delete",
     "other": "Удалить"
+  },
+  {
+    "id": "ui.button.delete_menu_item",
+    "other": "Удалить элемент меню"
   },
   {
     "id": "ui.button.exit",
@@ -50,10 +58,6 @@
   {
     "id": "ui.button.save",
     "other": "Сохранить"
-  },
-  {
-    "id": "ui.button.add_block",
-    "other": "Добавить блок"
   },
   {
     "id": "ui.checkbox.display_on_main",
@@ -90,6 +94,62 @@
   {
     "id": "ui.checkbox.template_for_all",
     "other": "Шаблон для всех"
+  },
+  {
+    "id": "ui.error.field_form_name",
+    "other": "поле form_name"
+  },
+  {
+    "id": "ui.error.field_required",
+    "other": "Поле обязательное для заполнения"
+  },
+  {
+    "id": "ui.error.file_read_error",
+    "other": "Ошибка чтения файла"
+  },
+  {
+    "id": "ui.error.file_write_error",
+    "other": "Ошибка записи файла"
+  },
+  {
+    "id": "ui.error.forbidden",
+    "other": "Доступ запрещён"
+  },
+  {
+    "id": "ui.error.form_in_progress",
+    "other": "Форма еще отправляется"
+  },
+  {
+    "id": "ui.error.form_invalid",
+    "other": "Форма не валидная!"
+  },
+  {
+    "id": "ui.error.generic",
+    "other": "Произошла ошибка"
+  },
+  {
+    "id": "ui.error.required_fields_missing",
+    "other": "Заполнены не все обязательные поля"
+  },
+  {
+    "id": "ui.error.save_failed",
+    "other": "Не удалось сохранить"
+  },
+  {
+    "id": "ui.error.server_error",
+    "other": "Ошибка сервера"
+  },
+  {
+    "id": "ui.error.template_code_missing",
+    "other": "Не передано содержимое шаблона (code)"
+  },
+  {
+    "id": "ui.error.unauthorized",
+    "other": "Не авторизован"
+  },
+  {
+    "id": "ui.error.unknown_data",
+    "other": "Неизвестные данные"
   },
   {
     "id": "ui.fieldset.data_link",
@@ -148,20 +208,36 @@
     "other": "Дата создания"
   },
   {
+    "id": "ui.label.custom_link",
+    "other": "Произвольная ссылка"
+  },
+  {
     "id": "ui.label.details",
     "other": "Детали"
   },
   {
-    "id": "ui.label.inbox",
-    "other": "Входящие"
+    "id": "ui.label.hierarchy_sort",
+    "other": "Иерархия и сортировка"
   },
   {
     "id": "ui.label.info_block",
     "other": "Инфо-блок"
   },
   {
+    "id": "ui.label.inbox",
+    "other": "Входящие"
+  },
+  {
     "id": "ui.label.login",
     "other": "Логин"
+  },
+  {
+    "id": "ui.label.menu_item_new",
+    "other": "Новый пункт меню"
+  },
+  {
+    "id": "ui.label.menu_item_params",
+    "other": "Параметры пункта меню"
   },
   {
     "id": "ui.label.name",
@@ -170,6 +246,10 @@
   {
     "id": "ui.label.number",
     "other": "Номер"
+  },
+  {
+    "id": "ui.label.parent_menu_item",
+    "other": "Родительский пункт меню"
   },
   {
     "id": "ui.label.password",
@@ -192,6 +272,10 @@
     "other": "Дата окончания публикации"
   },
   {
+    "id": "ui.label.publisher",
+    "other": "Публикатор"
+  },
+  {
     "id": "ui.label.resource",
     "other": "Ресурс"
   },
@@ -206,6 +290,10 @@
   {
     "id": "ui.label.short_description",
     "other": "Короткое описание"
+  },
+  {
+    "id": "ui.label.sort",
+    "other": "Сортировка"
   },
   {
     "id": "ui.label.template",
@@ -228,24 +316,104 @@
     "other": "Загрузить фото"
   },
   {
-    "id": "ui.label.menu_item_params",
-    "other": "Параметры пункта меню"
+    "id": "ui.menu.categories",
+    "other": "Категории"
   },
   {
-    "id": "ui.label.publisher",
-    "other": "Публикатор"
+    "id": "ui.menu.dashboard",
+    "other": "Главная"
   },
   {
-    "id": "ui.label.custom_link",
-    "other": "Произвольная ссылка"
+    "id": "ui.menu.info_blocks",
+    "other": "Инфоблоки"
   },
   {
-    "id": "ui.label.hierarchy_sort",
-    "other": "Иерархия и сортировка"
+    "id": "ui.menu.menus",
+    "other": "Меню"
   },
   {
-    "id": "ui.label.parent_menu_item",
-    "other": "Родительский пункт меню"
+    "id": "ui.menu.messages",
+    "other": "Письма"
+  },
+  {
+    "id": "ui.menu.posts",
+    "other": "Посты"
+  },
+  {
+    "id": "ui.menu.tags",
+    "other": "Тэги"
+  },
+  {
+    "id": "ui.menu.templates",
+    "other": "Шаблоны"
+  },
+  {
+    "id": "ui.notice.attention",
+    "other": "Внимание"
+  },
+  {
+    "id": "ui.notice.info",
+    "other": "Обратите внимание!"
+  },
+  {
+    "id": "ui.page.admin_404",
+    "other": "Админка — 404"
+  },
+  {
+    "id": "ui.page.categories",
+    "other": "Страница категорий"
+  },
+  {
+    "id": "ui.page.category",
+    "other": "Страница категории"
+  },
+  {
+    "id": "ui.page.info_block",
+    "other": "Страница инфо блока"
+  },
+  {
+    "id": "ui.page.info_blocks",
+    "other": "Страница инфо блоков"
+  },
+  {
+    "id": "ui.page.login",
+    "other": "Авторизация"
+  },
+  {
+    "id": "ui.page.menu",
+    "other": "Страница меню"
+  },
+  {
+    "id": "ui.page.messages",
+    "other": "Страница сообщений"
+  },
+  {
+    "id": "ui.page.post",
+    "other": "Страница поста"
+  },
+  {
+    "id": "ui.page.posts",
+    "other": "Страница постов"
+  },
+  {
+    "id": "ui.page.tag",
+    "other": "Страница тега"
+  },
+  {
+    "id": "ui.page.tags",
+    "other": "Страница тэгов"
+  },
+  {
+    "id": "ui.page.template",
+    "other": "Страница шаблона"
+  },
+  {
+    "id": "ui.page.template_editor",
+    "other": "Редактирование шаблона: {{.name}}"
+  },
+  {
+    "id": "ui.page.templates",
+    "other": "Страница шаблонов"
   },
   {
     "id": "ui.paginator.showing",
@@ -254,6 +422,10 @@
   {
     "id": "ui.placeholder.alias",
     "other": "Алиас"
+  },
+  {
+    "id": "ui.placeholder.description",
+    "other": "Описание"
   },
   {
     "id": "ui.placeholder.link",
@@ -268,12 +440,24 @@
     "other": "Обычный"
   },
   {
+    "id": "ui.placeholder.parent",
+    "other": "Родительский элемент"
+  },
+  {
     "id": "ui.placeholder.search",
     "other": "Поиск..."
   },
   {
+    "id": "ui.placeholder.select_info_blocks",
+    "other": "Выберите инфо-блоки"
+  },
+  {
     "id": "ui.placeholder.select_menu",
     "other": "Выберете меню"
+  },
+  {
+    "id": "ui.placeholder.select_publisher",
+    "other": "Выберите публикатор"
   },
   {
     "id": "ui.placeholder.select_tag",
@@ -282,18 +466,6 @@
   {
     "id": "ui.placeholder.select_widget",
     "other": "Выберете виджет"
-  },
-  {
-    "id": "ui.placeholder.select_info_blocks",
-    "other": "Выберите инфо-блоки"
-  },
-  {
-    "id": "ui.placeholder.description",
-    "other": "Описание"
-  },
-  {
-    "id": "ui.placeholder.parent",
-    "other": "Родительский элемент"
   },
   {
     "id": "ui.placeholder.seo_description",
@@ -320,6 +492,58 @@
     "other": "Укажите дату"
   },
   {
+    "id": "ui.success.file_deleted",
+    "other": "Файл успешно удален"
+  },
+  {
+    "id": "ui.success.file_saved",
+    "other": "Файл успешно сохранён"
+  },
+  {
+    "id": "ui.success.generic",
+    "other": "Все прошло успешно!"
+  },
+  {
+    "id": "ui.success.image_attached",
+    "other": "Изображение прикреплено"
+  },
+  {
+    "id": "ui.success.image_deleted",
+    "other": "Изображение удалено"
+  },
+  {
+    "id": "ui.success.images_attached",
+    "other": "Изображения прикреплены"
+  },
+  {
+    "id": "ui.success.item_deleted",
+    "other": "Элемент удален"
+  },
+  {
+    "id": "ui.success.menu_item_deleted",
+    "other": "Элемент меню удален"
+  },
+  {
+    "id": "ui.success.message_sent",
+    "other": "Сообщение успешно отправлено"
+  },
+  {
+    "id": "ui.success.record_created",
+    "other": "Запись создана"
+  },
+  {
+    "id": "ui.success.record_deleted",
+    "other": "Запись удалена"
+  },
+  {
+    "id": "ui.success.record_found",
+    "other": "Запись найдена"
+  },
+  {
+    "id": "ui.success.record_updated",
+    "other": "Запись обновлена"
+  },
+  {
     "id": "ui.tab.gallery",
     "other": "Галерея"
   },
@@ -334,93 +558,5 @@
   {
     "id": "ui.tab.settings",
     "other": "Настройки"
-  },
-  {
-    "id": "ui.menu.dashboard",
-    "other": "Главная"
-  },
-  {
-    "id": "ui.menu.menus",
-    "other": "Меню"
-  },
-  {
-    "id": "ui.menu.posts",
-    "other": "Посты"
-  },
-  {
-    "id": "ui.menu.tags",
-    "other": "Тэги"
-  },
-  {
-    "id": "ui.menu.categories",
-    "other": "Категории"
-  },
-  {
-    "id": "ui.menu.info_blocks",
-    "other": "Инфоблоки"
-  },
-  {
-    "id": "ui.menu.templates",
-    "other": "Шаблоны"
-  },
-  {
-    "id": "ui.menu.messages",
-    "other": "Письма"
-  },
-  {
-    "id": "ui.error.server_error",
-    "other": "Ошибка сервера"
-  },
-  {
-    "id": "ui.error.file_read_error",
-    "other": "Ошибка чтения файла"
-  },
-  {
-    "id": "ui.error.file_write_error",
-    "other": "Ошибка записи файла"
-  },
-  {
-    "id": "ui.error.unauthorized",
-    "other": "Не авторизован"
-  },
-  {
-    "id": "ui.error.forbidden",
-    "other": "Доступ запрещён"
-  },
-  {
-    "id": "ui.error.form_invalid",
-    "other": "Форма не валидная!"
-  },
-  {
-    "id": "ui.error.template_code_missing",
-    "other": "Не передано содержимое шаблона (code)"
-  },
-  {
-    "id": "ui.success.file_saved",
-    "other": "Файл успешно сохранён"
-  },
-  {
-    "id": "ui.success.file_deleted",
-    "other": "Файл успешно удален"
-  },
-  {
-    "id": "ui.success.image_attached",
-    "other": "Изображение прикреплено"
-  },
-  {
-    "id": "ui.success.images_attached",
-    "other": "Изображения прикреплены"
-  },
-  {
-    "id": "ui.success.image_deleted",
-    "other": "Изображение удалено"
-  },
-  {
-    "id": "ui.success.message_sent",
-    "other": "Сообщение успешно отправлено"
-  },
-  {
-    "id": "ui.error.field_form_name",
-    "other": "поле form_name"
   }
 ]

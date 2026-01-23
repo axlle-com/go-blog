@@ -44,7 +44,7 @@ func (c *categoryController) GetCategories(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.categories", gin.H{
-		"title":          "Страница категорий",
+		"title":          c.T(ctx, "ui.page.categories"),
 		"postCategories": postCategories,
 		"categories":     categories,
 		"category":       &models.PostCategory{},

@@ -40,7 +40,7 @@ func (c *postController) FilterPosts(ctx *gin.Context) {
 
 	users := c.api.User.GetAll()
 	data := gin.H{
-		"title":      "Страница постов",
+		"title":      c.T(ctx, "ui.page.posts"),
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,

@@ -60,7 +60,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 
 	resources := app.NewResources()
 	data := response.Body{
-		"title":         "Страница шаблонов",
+		"title":         c.T(ctx, "ui.page.templates"),
 		"templateModel": empty,
 		"templates":     templates,
 		"users":         users,
@@ -76,7 +76,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.templates_inner", data, ctx),
 			},
-			"Запись удалена",
+			c.T(ctx, "ui.success.record_deleted"),
 			paginator,
 		),
 	)

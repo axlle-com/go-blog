@@ -28,7 +28,7 @@ func (c *controller) Login(ctx *gin.Context) {
 	c.RenderHTML(ctx, http.StatusOK,
 		"admin.login",
 		gin.H{
-			"Title":  "Авторизация",
+			"Title":  c.T(ctx, "ui.page.login"),
 			"Errors": errorMessages,
 			"settings": gin.H{
 				"csrfToken": csrf.GetToken(ctx),

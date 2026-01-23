@@ -36,7 +36,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 
 	users := c.api.User.GetAll()
 	data := response.Body{
-		"title":      "Страница инфо блоков",
+		"title":      c.T(ctx, "ui.page.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
 		"templates":  c.templates(ctx),

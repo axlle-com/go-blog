@@ -30,7 +30,7 @@ func (c *postController) CreatePost(ctx *gin.Context) {
 	c.RenderHTML(ctx, http.StatusOK,
 		"admin.post",
 		gin.H{
-			"title":      "Страница поста",
+			"title":      c.T(ctx, "ui.page.post"),
 			"categories": categories,
 			"tags":       tags,
 			"templates":  c.templates(ctx),

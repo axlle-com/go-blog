@@ -105,7 +105,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title" id="myModalMdLabel">Заголовок</h3>
-                    <button type="button" class="close modal-close-abs" data-dismiss="modal" aria-label="Закрыть">
+                    <button type="button" class="close modal-close-abs" data-dismiss="modal" aria-label="{{ call .settings.T "ui.button.close" nil }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -133,6 +133,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        window.__i18n = {{ json (dict
+            "ui.success.message_sent" (call .settings.T "ui.success.message_sent" nil)
+        ) }};
+    </script>
 
     {{ bundleJs
     "static/spring/js/jquery.js"

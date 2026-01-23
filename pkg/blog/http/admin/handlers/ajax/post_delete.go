@@ -62,7 +62,7 @@ func (c *postController) DeletePost(ctx *gin.Context) {
 	posts := c.postCollectionService.Aggregates(postsTemp)
 
 	data := response.Body{
-		"title":      "Страница постов",
+		"title":      c.T(ctx, "ui.page.posts"),
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,
@@ -78,7 +78,7 @@ func (c *postController) DeletePost(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.posts_inner", data, ctx),
 			},
-			"Запись удалена",
+			c.T(ctx, "ui.success.record_deleted"),
 			paginator,
 		),
 	)

@@ -39,7 +39,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 	users := c.api.User.GetAll()
 	resources := app.NewResources()
 	data := response.Body{
-		"title":         "Страница шаблонов",
+		"title":         c.T(ctx, "ui.page.templates"),
 		"templateModel": empty,
 		"templates":     templates,
 		"users":         users,

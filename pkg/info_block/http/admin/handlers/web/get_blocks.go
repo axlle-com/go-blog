@@ -42,7 +42,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.info_blocks", gin.H{
-		"title":      "Страница инфо блоков",
+		"title":      c.T(ctx, "ui.page.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  empty,
 		"templates":  c.templates(ctx),

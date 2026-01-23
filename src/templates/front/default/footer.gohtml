@@ -6,6 +6,12 @@
         </div>
     </footer>
 
+    <script>
+        window.__i18n = {{ json (dict
+            "ui.success.message_sent" (call .settings.T "ui.success.message_sent" nil)
+        ) }};
+    </script>
+
     {{ bundleJs
     "static/resources/plugins/jquery-3-6-0/jquery.min.js"
     "static/resources/plugins/bootstrap-5.0.2-dist/js/bootstrap.min.js"

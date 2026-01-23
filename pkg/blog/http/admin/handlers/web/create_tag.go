@@ -27,7 +27,7 @@ func (c *tagController) CreateTag(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.tag",
 		gin.H{
-			"title":     "Страница тэга",
+			"title":     c.T(ctx, "ui.page.tag"),
 			"tags":      tags,
 			"templates": c.templates(ctx),
 			"tag":       tag,

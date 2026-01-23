@@ -40,7 +40,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	data := response.Body{
-		"title":          "Страница категорий",
+		"title":          c.T(ctx, "ui.page.categories"),
 		"category":       &models.PostCategory{},
 		"postCategories": postCategories,
 		"categories":     categories,

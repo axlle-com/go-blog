@@ -38,14 +38,14 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 	}
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.menus", gin.H{
-		"title":     "Страница меню",
+		"title":     c.T(ctx, "ui.page.menu"),
 		"menus":     menus,
 		"model":     empty,
 		"templates": c.templates(ctx),
 		"paginator": paginator,
 		"filter":    filter,
 		"settings": gin.H{
-			"title":     "Страница меню",
+			"title":     c.T(ctx, "ui.page.menu"),
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
 			"menu":      models.NewMenu(ctx.FullPath(), c.GetT(ctx)),

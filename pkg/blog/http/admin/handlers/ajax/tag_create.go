@@ -51,7 +51,7 @@ func (c *tagController) Create(ctx *gin.Context) {
 				"url":  tag.AdminURL(),
 				"tag":  tag,
 			},
-			"Запись создана",
+			c.T(ctx, "ui.success.record_created"),
 		),
 	)
 }

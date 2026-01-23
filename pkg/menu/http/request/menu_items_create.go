@@ -22,23 +22,6 @@ type MenuItemsRequest struct {
 	Sort          int        `json:"sort,omitempty"`
 }
 
-func (r *MenuItemsRequest) ValidateForm(ctx *gin.Context) (*MenuItemsRequest, *errutil.Errors) {
-	err := ctx.Request.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-
-	if len(ctx.Request.PostForm) == 0 {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-
-	if err := ctx.ShouldBind(&r); err != nil {
-		return nil, errutil.NewErrors(err)
-	}
-
-	return r, nil
-}
-
 func (r *MenuItemsRequest) ValidateJSON(ctx *gin.Context) (*MenuItemsRequest, *errutil.Errors) {
 	if err := ctx.ShouldBindJSON(&r); err != nil {
 		return nil, errutil.NewErrors(err)

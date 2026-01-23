@@ -1,0 +1,24 @@
+package models
+
+type CompanyInfo struct {
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+	Phone   string `json:"phone"`
+	Address string `json:"address"`
+}
+
+func (ci *CompanyInfo) GetEmail() string {
+	return ci.Email
+}
+
+func (ci *CompanyInfo) GetName() string {
+	return ci.Name
+}
+
+func (ci *CompanyInfo) GetPhone() string {
+	return ci.Phone
+}
+
+func (ci *CompanyInfo) GetAddress() string {
+	return ci.Address
+}

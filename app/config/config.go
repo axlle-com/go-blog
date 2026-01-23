@@ -291,7 +291,6 @@ func (c *config) DataFolder(parts ...string) string {
 			continue
 		}
 
-		// Нормализуем слэши и чистим путь
 		part = filepath.Clean(filepath.FromSlash(part))
 
 		part = strings.TrimPrefix(part, "."+sep)

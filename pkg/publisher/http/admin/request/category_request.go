@@ -39,20 +39,6 @@ type CategoryRequest struct {
 	InfoBlocks []*InfoBlockRequest `json:"info_blocks" form:"info_blocks" binding:"omitempty"`
 }
 
-func (r *CategoryRequest) ValidateForm(ctx *gin.Context) (*CategoryRequest, *errutil.Errors) {
-	err := ctx.Request.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-	if len(ctx.Request.PostForm) == 0 {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-	if err := ctx.ShouldBind(&r); err != nil {
-		return nil, errutil.NewErrors(err)
-	}
-	return r, nil
-}
-
 func (r *CategoryRequest) ValidateJSON(ctx *gin.Context) (*CategoryRequest, *errutil.Errors) {
 	if err := ctx.ShouldBindJSON(&r); err != nil {
 		return nil, errutil.NewErrors(err)

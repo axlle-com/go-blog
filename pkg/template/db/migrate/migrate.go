@@ -16,15 +16,17 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	model := &models.Template{}
+
 	err := m.db.AutoMigrate(
-		&models.Template{},
+		model,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	m.db.Exec(db.UniqueIndex("templates", "theme", "name", "resource_name"))
+	m.db.Exec(db.UniqueIndex(model.GetTable(), "theme", "name", "resource_name"))
 
 	return nil
 }

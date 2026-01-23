@@ -16,15 +16,17 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	model := &models.File{}
+
 	err := m.db.AutoMigrate(
-		&models.File{},
+		model,
 	)
 	if err != nil {
 		return err
 	}
 
-	m.db.Exec(db.HashIndex("files", "uuid"))
-	m.db.Exec(db.HashIndex("files", "file"))
+	m.db.Exec(db.HashIndex(model.GetTable(), "uuid"))
+	m.db.Exec(db.HashIndex(model.GetTable(), "file"))
 
 	return nil
 }

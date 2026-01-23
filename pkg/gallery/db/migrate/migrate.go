@@ -16,18 +16,21 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	gallery := &models.Gallery{}
+	galleryHasResource := &models.GalleryHasResource{}
+
 	err := m.db.AutoMigrate(
-		&models.Gallery{},
+		gallery,
 		&models.Image{},
-		&models.GalleryHasResource{},
+		galleryHasResource,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	m.db.Exec(db.HashIndex("galleries", "uuid"))
-	m.db.Exec(db.HashIndex("gallery_has_resources", "resource_uuid"))
+	m.db.Exec(db.HashIndex(gallery.GetTable(), "uuid"))
+	m.db.Exec(db.HashIndex(galleryHasResource.GetTable(), "resource_uuid"))
 
 	return nil
 }

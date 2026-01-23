@@ -76,8 +76,6 @@ func (i InfoBlock) GetInfoBlocks() []contract.InfoBlock {
 	return out
 }
 
-// --- helpers ---
-
 func parseUUID(s string) uuid.UUID {
 	u, err := uuid.Parse(s)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	WithTx(tx *gorm.DB) Repository
 	Get(namespace, key, scope string) (*models.Setting, error)
+	GetMany(namespace, scope string, keys []string) ([]models.Setting, error)
 	Upsert(s *models.Setting) error
 	ListNamespace(namespace, scope string) ([]models.Setting, error)
 }
@@ -47,5 +48,15 @@ func (r *repo) ListNamespace(namespace, scope string) ([]models.Setting, error) 
 	if err := q.Order("sort ASC, created_at ASC, key ASC").Find(&list).Error; err != nil {
 		return nil, err
 	}
+
 	return list, nil
+}
+
+func (r *repo) GetMany(namespace, scope string, keys []string) ([]models.Setting, error) {
+	var out []models.Setting
+	err := r.db.
+		Where("namespace = ? AND scope = ? AND key IN ?", namespace, scope, keys).
+		Find(&out).Error
+
+	return out, err
 }

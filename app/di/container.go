@@ -1,6 +1,8 @@
 package di
 
 import (
+	"time"
+
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
@@ -71,7 +73,9 @@ import (
 	publisherAjax "github.com/axlle-com/blog/pkg/publisher/http/admin/handlers/ajax"
 	publisherProvider "github.com/axlle-com/blog/pkg/publisher/provider"
 	publisherService "github.com/axlle-com/blog/pkg/publisher/service"
+	settingsDB "github.com/axlle-com/blog/pkg/settings/db"
 	settingsMigrate "github.com/axlle-com/blog/pkg/settings/db/migrate"
+	settingsProvider "github.com/axlle-com/blog/pkg/settings/provider"
 	settingsRepo "github.com/axlle-com/blog/pkg/settings/repository"
 	settingsService "github.com/axlle-com/blog/pkg/settings/service"
 	templateDB "github.com/axlle-com/blog/pkg/template/db"
@@ -172,7 +176,6 @@ type Container struct {
 	MenuItemCollectionService *menuService.MenuItemCollectionService
 	MenuProvider              apppPovider.MenuProvider
 
-	// Settings
 	SettingsRepo    settingsRepo.Repository
 	SettingsService *settingsService.Service
 
@@ -243,19 +246,19 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newResourceRepo := galleryRepo.NewResourceRepo(db.PostgreSQL())
 	newGalleryRepo := galleryRepo.NewGalleryRepo(db.PostgreSQL())
 
-	// Initialize partial Api with available providers (before creating services that use Api)
 	newApi := &api.Api{
-		File:      fileProv,
-		Image:     newImageProvider,
-		Gallery:   nil, // Will be set later
-		Blog:      nil, // Will be set later
-		Template:  newTemplateProvider,
-		User:      newUserProvider,
-		Alias:     newAliasProvider,
-		InfoBlock: nil, // Will be set later
-		Analytic:  nil, // Will be set later
-		Menu:      nil, // Will be set later
-		Publisher: nil, // Will be set later
+		File:        fileProv,
+		Image:       newImageProvider,
+		Gallery:     nil, // Will be set later
+		Blog:        nil, // Will be set later
+		Template:    newTemplateProvider,
+		User:        newUserProvider,
+		Alias:       newAliasProvider,
+		InfoBlock:   nil, // Will be set later
+		Analytic:    nil, // Will be set later
+		Menu:        nil, // Will be set later
+		Publisher:   nil, // Will be set later
+		CompanyInfo: nil, // Will be set later
 	}
 
 	newImageEvent := galleryService.NewImageEvent(newApi)
@@ -274,9 +277,11 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newMessageCollectionService := messageService.NewMessageCollectionService(newMessageRepo, newMessageService, newApi)
 	newMailService := messageService.NewMailService(cfg, newQueue, newMessageService, newMessageCollectionService, newApi)
 
-	// Settings
 	newSettingsRepo := settingsRepo.NewRepository(db.PostgreSQL())
-	newSettingsService := settingsService.NewService(newSettingsRepo)
+	newSettingsService := settingsService.NewService(newCache, newSettingsRepo, 60*24*time.Minute)
+	newCompanyInfoService := settingsService.NewCompanyInfoService(newCache, newSettingsRepo, newSettingsService, 60*24*time.Minute)
+
+	newApi.CompanyInfo = settingsProvider.NewProvider(newCompanyInfoService)
 
 	newPostRepo := postRepo.NewPostRepo(db.PostgreSQL())
 	newCategoryRepo := postRepo.NewCategoryRepo(db.PostgreSQL())
@@ -289,7 +294,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newApi)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
-	// Update Api with InfoBlock provider
 	newApi.InfoBlock = newBlockProvider
 
 	postTagRepo := postRepo.NewPostTagRepo(db.PostgreSQL())
@@ -305,7 +309,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	categoryService.SetPostCollectionService(newPostCollectionService)
 	newBlogProvider := provider.NewBlogProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 
-	// Update Api with Blog provider
 	newApi.Blog = newBlogProvider
 
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
@@ -313,7 +316,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newApi)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
-	// Update Api with Analytic provider
 	newApi.Analytic = newAnalyticProvider
 
 	menuRepo := menuRepository.NewMenuRepo(db.PostgreSQL())
@@ -331,10 +333,10 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 
 	newApi.Publisher = publisherProvider.NewPublisherProvider(newApi)
 
-	// I18n
 	newI18n := i18nsvc.New(cfg, newDisk)
 
 	menuSeeder := menuDB.NewMenuSeeder(cfg, newDisk, newSeedService, newApi, menuRepo, menuItemRepo)
+	settingsSeeder := settingsDB.NewSettingsSeeder(cfg, newDisk, newSeedService, newSettingsService)
 
 	userMigrator := userMigrate.NewMigrator(db.PostgreSQL())
 	postMigrator := postMigrate.NewMigrator(db.PostgreSQL())
@@ -353,7 +355,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	infoBlockSeeder := infoBlockDB.NewSeeder(cfg, newDisk, newSeedService, newApi, newBlockService)
 	messageSeeder := messageDB.NewMessageSeeder(newMessageService, newApi)
 
-	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder)
+	seeder := migrate.NewSeeder(userSeeder, templateSeeder, infoBlockSeeder, postSeeder, messageSeeder, menuSeeder, settingsSeeder)
 
 	newMigrator := migrate.NewMigrator(
 		db.PostgreSQL(),
@@ -624,7 +626,6 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		MenuItemCollectionService: menuItemCollectionService,
 		MenuProvider:              newMenuProvider,
 
-		// Settings
 		SettingsRepo:    newSettingsRepo,
 		SettingsService: newSettingsService,
 

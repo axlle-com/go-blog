@@ -13,9 +13,14 @@ import (
 
 func NewRedisCache(cfg contract.Config) contract.Cache {
 	logger.Info("[Cache] Redis is up, using Redis")
+
 	c := &redisClient{config: cfg}
 	c.client = client.NewClient(&client.Options{
-		Addr: cfg.RedisHost(),
+		Addr:         cfg.RedisHost(),
+		Password:     cfg.RedisPassword(),
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
 	})
 
 	return c
@@ -33,11 +38,7 @@ func PingRedisCache(cfg contract.Config) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		return err
-	}
-
-	return nil
+	return rdb.Ping(ctx).Err()
 }
 
 type redisClient struct {
@@ -46,15 +47,33 @@ type redisClient struct {
 }
 
 func (r *redisClient) AddCache(key, value string) {
-	err := r.client.Set(context.Background(), key, value, 0).Err()
-	if err != nil {
+	if err := r.client.Set(context.Background(), key, value, 0).Err(); err != nil {
 		logger.Errorf("[RedisClient][AddCache] Error: %v", err)
 	}
 }
 
-func (r *redisClient) DeleteCache(key string) {
-	err := r.client.Del(context.Background(), key).Err()
+func (r *redisClient) AddCacheTTL(key, value string, ttl time.Duration) {
+	if err := r.client.Set(context.Background(), key, value, ttl).Err(); err != nil {
+		logger.Errorf("[RedisClient][AddCacheTTL] Error: %v", err)
+	}
+}
+
+func (r *redisClient) GetCache(key string) (string, bool) {
+	value, err := r.client.Get(context.Background(), key).Result()
+	if errors.Is(err, client.Nil) {
+		return "", false
+	}
+
 	if err != nil {
+		logger.Errorf("[RedisClient][GetCache] Error: %value", err)
+		return "", false
+	}
+
+	return value, true
+}
+
+func (r *redisClient) DeleteCache(key string) {
+	if err := r.client.Del(context.Background(), key).Err(); err != nil {
 		logger.Errorf("[RedisClient][DeleteCache] Error: %v", err)
 	}
 }
@@ -76,47 +95,50 @@ func (r *redisClient) ResetUserSession(userID uint) error {
 		return err
 	}
 
-	err = r.client.Del(context.Background(), sessionID).Err()
-	if err != nil {
+	if err := r.client.Del(context.Background(), sessionID).Err(); err != nil {
 		return err
 	}
 
 	r.DeleteCache(r.GetUserKey(userID))
+
 	return nil
 }
 
+// ResetUsersSession — очищает user->session и сами session ключи
 func (r *redisClient) ResetUsersSession() {
 	var cursor uint64
 	for {
-		var keys []string
-		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, r.config.UserSessionKey("*"), 1000).Result()
+		keys, next, err := r.client.Scan(context.Background(), cursor, r.config.UserSessionKey("*"), 1000).Result()
 		if err != nil {
 			logger.Errorf("[RedisClient][ResetUsersSession] Error: %v", err)
-		}
-
-		if len(keys) == 0 {
-			break
+			return
 		}
 
 		for _, key := range keys {
 			r.DeleteCache(key)
+		}
+
+		cursor = next
+		if cursor == 0 {
+			break
 		}
 	}
+
+	cursor = 0
 	for {
-		var keys []string
-		var err error
-		keys, cursor, err = r.client.Scan(context.Background(), cursor, r.config.SessionKey("*"), 1000).Result()
+		keys, next, err := r.client.Scan(context.Background(), cursor, r.config.SessionKey("*"), 1000).Result()
 		if err != nil {
 			logger.Errorf("[RedisClient][ResetUsersSession] Error: %v", err)
-		}
-
-		if len(keys) == 0 {
-			break
+			return
 		}
 
 		for _, key := range keys {
 			r.DeleteCache(key)
+		}
+
+		cursor = next
+		if cursor == 0 {
+			break
 		}
 	}
 }

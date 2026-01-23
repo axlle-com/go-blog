@@ -21,7 +21,10 @@ type File struct {
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"omitempty"`
 }
 
-func (u *File) Fields() []string {
+func (f *File) GetTable() string {
+	return "files"
+}
+func (f *File) Fields() []string {
 	return []string{
 		"id",
 		"uuid",
@@ -34,12 +37,12 @@ func (u *File) Fields() []string {
 	}
 }
 
-func (u *File) GetUUID() uuid.UUID {
-	return u.UUID
+func (f *File) GetUUID() uuid.UUID {
+	return f.UUID
 }
 
-func (u *File) SetUUID() {
-	if u.UUID == uuid.Nil {
-		u.UUID = uuid.New()
+func (f *File) SetUUID() {
+	if f.UUID == uuid.Nil {
+		f.UUID = uuid.New()
 	}
 }

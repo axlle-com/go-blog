@@ -1,0 +1,26 @@
+[
+  {
+    "namespace": "spring",
+    "key": "email",
+    "type": "string",
+    "value": "info@example.com"
+  },
+  {
+    "namespace": "spring",
+    "key": "name",
+    "type": "string",
+    "value": "Example Company"
+  },
+  {
+    "namespace": "spring",
+    "key": "phone",
+    "type": "string",
+    "value": "+1 555 0100"
+  },
+  {
+    "namespace": "spring",
+    "key": "address",
+    "type": "string",
+    "value": "123 Example Street"
+  }
+]

@@ -25,6 +25,10 @@ type Gallery struct {
 	Images       []*Image  `json:"images,omitempty"`
 }
 
+func (g *Gallery) GetTable() string {
+	return "galleries"
+}
+
 func (g *Gallery) GetID() uint {
 	return g.ID
 }

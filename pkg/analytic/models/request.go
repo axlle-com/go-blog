@@ -19,20 +19,6 @@ type AnalyticRequest struct {
 	Viewed     string `json:"viewed"  form:"viewed" binding:"omitempty"`
 }
 
-func (m *AnalyticRequest) ValidateForm(ctx *gin.Context) (*AnalyticRequest, *errutil.Errors) {
-	err := ctx.Request.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-	if len(ctx.Request.PostForm) == 0 {
-		return nil, &errutil.Errors{Message: "Форма не валидная!"}
-	}
-	if err := ctx.ShouldBind(&m); err != nil {
-		return nil, errutil.NewErrors(err)
-	}
-	return m, nil
-}
-
 func (m *AnalyticRequest) ValidateJSON(ctx *gin.Context) (*AnalyticRequest, *errutil.Errors) {
 	if err := ctx.ShouldBindJSON(&m); err != nil {
 		return nil, errutil.NewErrors(err)

@@ -68,6 +68,5 @@ func (r *Resources) ResourceTemplate(name string) string {
 		return ""
 	}
 
-	// нормализуем переносы/нулевые байты не надо; вернём как есть
-	return strings.TrimPrefix(string(b), "\uFEFF") // на случай BOM
+	return strings.TrimPrefix(string(b), "\uFEFF")
 }

@@ -20,34 +20,6 @@ type Filter struct {
 	context     *gin.Context
 }
 
-func (f *Filter) ValidateForm(ctx *gin.Context, model interface{}) *errutil.Errors {
-	f.context = ctx
-	err := ctx.Request.ParseMultipartForm(32 << 20)
-	if err != nil {
-		return &errutil.Errors{Message: "Форма не валидная!"}
-	}
-
-	if len(ctx.Request.PostForm) == 0 {
-		return &errutil.Errors{Message: "Форма не валидная!"}
-	}
-
-	if err := ctx.ShouldBind(model); err != nil {
-		return errutil.NewErrors(err)
-	}
-
-	f.SetEmptyPointersToNil(model)
-	f.setQuery().
-		setQueryString().
-		setMap(model).
-		addQueryString(f.mapToQueryString())
-
-	if f.IsEmpty() {
-		return &errutil.Errors{Message: "Форма пустая"}
-	}
-
-	return nil
-}
-
 func (f *Filter) ValidateQuery(ctx *gin.Context, model interface{}) *errutil.Errors {
 	f.context = ctx
 	if err := ctx.ShouldBindQuery(model); err != nil {

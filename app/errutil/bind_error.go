@@ -49,7 +49,6 @@ func NewErrors(err error) *Errors {
 		return &Errors{Errors: errs}
 	}
 
-	// 1) Validation errors (go-playground/validator)
 	var vErrs validator.ValidationErrors
 	if errors.As(err, &vErrs) {
 		for _, fe := range vErrs {
@@ -58,7 +57,6 @@ func NewErrors(err error) *Errors {
 		}
 	}
 
-	// 2) Type mismatch during JSON unmarshalling
 	var ute *json.UnmarshalTypeError
 	if errors.As(err, &ute) {
 		// e.g. "menu_items.id" -> "id"
@@ -72,14 +70,12 @@ func NewErrors(err error) *Errors {
 			fmt.Sprintf("expected type %s but received %q", expected, actual))
 	}
 
-	// 3) JSON syntax error
 	var se *json.SyntaxError
 	if errors.As(err, &se) {
 		errs["json"] = append(errs["json"],
 			fmt.Sprintf("JSON syntax error (offset %d)", se.Offset))
 	}
 
-	// 4) If no specific type recognized — keep the raw message
 	if len(errs) == 0 {
 		errs["_error"] = append(errs["_error"], err.Error())
 	}
@@ -90,7 +86,6 @@ func NewErrors(err error) *Errors {
 	}
 }
 
-// lastSegment("MenuItemsRequest.menu_items.id") => "id"
 func lastSegment(path string) string {
 	if path == "" {
 		return ""
@@ -102,7 +97,6 @@ func lastSegment(path string) string {
 	return path
 }
 
-// Returns a human-readable type name
 func humanType(t reflect.Type) string {
 	if t == nil {
 		return "unknown"

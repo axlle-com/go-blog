@@ -29,9 +29,7 @@
         </div>
     </section>
 
-    {{ range .blocks }}
-        {{ render .GetTemplateName . }}
-    {{ end }}
+    {{ template "spring.info_block_inner" . }}
 
     {{ template "spring.footer" . }}
 {{end}}

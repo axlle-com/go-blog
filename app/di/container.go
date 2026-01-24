@@ -525,6 +525,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 		cfg,
 		newApi,
 		newView,
+
 		newPostService,
 		newPostCollectionService,
 		categoryService,

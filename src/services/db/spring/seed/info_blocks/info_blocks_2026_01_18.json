@@ -15,7 +15,7 @@
     "user_id": 1,
     "template": "contact_form",
     "title": "Блок contact_form",
-    "image": "/static/img/404.svg"
+    "image": "/static/spring/images/girls.png"
   },
   {
     "user_id": 1,
@@ -28,5 +28,23 @@
     "template": "clients",
     "title": "Блок clients",
     "image": "/static/img/404.svg"
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "title": "service-educational-portal",
+    "image": "/static/spring/images/services/process.png"
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "title": "service-telemedicine-service",
+    "image": "/static/spring/images/services/process.png"
+  },
+  {
+    "user_id": 1,
+    "template": "service",
+    "title": "service-inform",
+    "image": "/static/spring/images/services/process.png"
   }
 ]

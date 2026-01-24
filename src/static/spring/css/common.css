@@ -702,5 +702,6 @@
 /********** main-service **********/
 .main-service {
     position: relative;
-    padding: 50px 0px;
+    background: linear-gradient(to bottom, #f3f9fe, #ffffff);
+    padding: 50px 0;
 }

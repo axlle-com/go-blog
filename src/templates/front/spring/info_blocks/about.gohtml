@@ -83,8 +83,6 @@
         </div>
     </section>
 
-    {{ range .InfoBlocks }}
-        {{ render .GetTemplateName . }}
-    {{ end }}
+    {{ template "spring.info_block_inner" . }}
 
 {{ end }}

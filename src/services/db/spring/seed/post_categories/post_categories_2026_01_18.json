@@ -16,11 +16,6 @@
         "title": "Блок contact_form",
         "sort": 0,
         "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
-        "position": "bottom"
       }
     ]
   }

@@ -73,7 +73,7 @@ func (c *blogController) settings(ctx *gin.Context, publisher contract.Publisher
 
 	base := joinURL(appHost, pubURL)
 
-	return gin.H{
+	body := gin.H{
 		"menu":      template.HTML(menu),
 		"user":      c.GetAdmin(ctx),
 		"csrfToken": csrf.GetToken(ctx),
@@ -84,6 +84,13 @@ func (c *blogController) settings(ctx *gin.Context, publisher contract.Publisher
 		"metaTitle":       pubTitle,
 		"metaDescription": pubDesc,
 	}
+
+	company, ok := c.api.CompanyInfo.GetCompanyInfo(c.config.Layout(), "global")
+	if company != nil && ok {
+		body["company"] = company
+	}
+
+	return body
 }
 
 func joinURL(base, path string) string {

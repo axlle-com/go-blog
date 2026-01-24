@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"math/rand"
@@ -48,9 +49,10 @@ func (s *seeder) Seed() error {
 	// Если папки нет — ничего не делаем (не падаем)
 	if _, err := fs.Stat(templatesFS, templatesRoot); err != nil {
 		if isNotExistFS(err) {
-			logger.Infof("[template][seeder][Seed] templates root not found in FS: %s", templatesRoot)
+			logger.Errorf("[template][seeder][Seed] templates root not found in FS: %s", templatesRoot)
 			return nil
 		}
+
 		return fmt.Errorf("stat templates root %q: %w", templatesRoot, err)
 	}
 
@@ -111,7 +113,7 @@ func (s *seeder) Seed() error {
 		existing, err := s.template.FindByFilter(filter)
 		if err == nil && existing != nil {
 			logger.Infof(
-				"[template][seeder][Seed] template theme=%s name=%s resource=%s already exists (ID=%info), skipping",
+				"[template][seeder][Seed] template theme=%s name=%s resource=%s already exists (ID=%d), skipping",
 				layout, name, resourceName, existing.ID,
 			)
 			return nil
@@ -211,13 +213,14 @@ func extractTitleFromTemplate(content string) string {
 }
 
 func isNotExistFS(err error) bool {
-	// embed/fs иногда возвращает fs.ErrNotExist, иногда текстовую ошибку
 	if err == nil {
 		return false
 	}
-	if err == fs.ErrNotExist {
+
+	if errors.Is(err, fs.ErrNotExist) {
 		return true
 	}
+
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "file does not exist") || strings.Contains(msg, "no such file")
 }

@@ -1,0 +1,26 @@
+{{ define "spring.info_blocks.service" }}
+
+    <section class="main-service">
+        <div class="auto-container">
+            <div class="row clearfix">
+                {{ if .model.GetImage }}
+                    <div class="image-column col-md-4 col-sm-12 col-xs-12">
+                        <div class="inner">
+                            <figure class="image">
+                                <img src="{{ .model.GetImage }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .model.GetTitle }}"></figure>
+                        </div>
+                    </div>
+                {{ end }}
+                <div class="text-column col-md-8 col-sm-12 col-xs-12">
+                    <div class="inner">
+                        <h2>{{ .model.GetTitle }}</h2>
+                        <div>{{ .model.GetDescription }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{ template "spring.info_block_inner" . }}
+
+{{ end }}

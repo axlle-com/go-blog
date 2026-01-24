@@ -29,11 +29,6 @@
         "position": "bottom"
       },
       {
-        "title": "Блок contact",
-        "sort": 4,
-        "position": "bottom"
-      },
-      {
         "title": "Блок clients",
         "sort": 5,
         "position": "bottom"
@@ -61,8 +56,8 @@
         "position": "bottom"
       },
       {
-        "title": "Блок contact",
-        "sort": 1,
+        "title": "service-educational-portal",
+        "sort": 0,
         "position": "bottom"
       }
     ]
@@ -88,8 +83,8 @@
         "position": "bottom"
       },
       {
-        "title": "Блок contact",
-        "sort": 1,
+        "title": "service-telemedicine-service",
+        "sort": 0,
         "position": "bottom"
       }
     ]
@@ -115,8 +110,8 @@
         "position": "bottom"
       },
       {
-        "title": "Блок contact",
-        "sort": 1,
+        "title": "service-inform",
+        "sort": 0,
         "position": "bottom"
       }
     ]
@@ -140,11 +135,6 @@
         "title": "Блок contact_form",
         "sort": 0,
         "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
-        "position": "bottom"
       }
     ]
   },
@@ -166,11 +156,6 @@
       {
         "title": "Блок contact_form",
         "sort": 0,
-        "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
         "position": "bottom"
       }
     ]
@@ -194,11 +179,6 @@
         "title": "Блок contact_form",
         "sort": 0,
         "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
-        "position": "bottom"
       }
     ]
   },
@@ -221,11 +201,6 @@
         "title": "Блок contact_form",
         "sort": 0,
         "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
-        "position": "bottom"
       }
     ]
   },
@@ -247,11 +222,6 @@
       {
         "title": "Блок contact_form",
         "sort": 0,
-        "position": "bottom"
-      },
-      {
-        "title": "Блок contact",
-        "sort": 1,
         "position": "bottom"
       }
     ]

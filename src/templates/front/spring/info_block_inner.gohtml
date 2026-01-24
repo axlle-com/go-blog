@@ -1,0 +1,6 @@
+{{ define "spring.info_block_inner" }}
+    {{ $settings := $.settings }}
+    {{ range .blocks }}
+        {{ render .GetTemplateName (dict "model" . "settings" $settings) }}
+    {{ end }}
+{{ end }}

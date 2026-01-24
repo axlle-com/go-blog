@@ -42,9 +42,9 @@ func (s *CompanyInfoService) GetCompanyInfo(ns, scope string) (contract.CompanyI
 
 	if s.cache != nil {
 		if raw, ok := s.cache.GetCache(ck); ok && raw != "" {
-			var out *models.CompanyInfo
-			if err := json.Unmarshal([]byte(raw), out); err == nil {
-				return out, true
+			var out models.CompanyInfo
+			if err := json.Unmarshal([]byte(raw), &out); err == nil {
+				return &out, true
 			}
 
 			s.cache.DeleteCache(ck)
@@ -56,7 +56,7 @@ func (s *CompanyInfoService) GetCompanyInfo(ns, scope string) (contract.CompanyI
 			if raw, ok := s.cache.GetCache(ck); ok && raw != "" {
 				var out models.CompanyInfo
 				if e := json.Unmarshal([]byte(raw), &out); e == nil {
-					return out, nil
+					return &out, nil
 				}
 
 				s.cache.DeleteCache(ck)
@@ -81,12 +81,12 @@ func (s *CompanyInfoService) GetCompanyInfo(ns, scope string) (contract.CompanyI
 		return &models.CompanyInfo{}, false
 	}
 
-	out, ok := value.(*models.CompanyInfo)
+	out, ok := value.(models.CompanyInfo)
 	if !ok {
 		return &models.CompanyInfo{}, false
 	}
 
-	return out, true
+	return &out, true
 }
 
 func (s *CompanyInfoService) SaveCompanyInfo(ns, scope string, companyInfo models.CompanyInfo) error {

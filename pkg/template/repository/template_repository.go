@@ -16,7 +16,8 @@ type TemplateRepository interface {
 	Create(template *models.Template) error
 	GetByID(id uint) (*models.Template, error)
 	GetByIDs(ids []uint) ([]*models.Template, error)
-	GetByNameAndResource(name string, resourceName string) (*models.Template, error)
+	GetByNames(names []string) ([]*models.Template, error)
+	GetByName(name string) (*models.Template, error)
 	FindByFilter(filter *models.TemplateFilter) (*models.Template, error)
 	Update(template *models.Template) error
 	Delete(*models.Template) error
@@ -63,17 +64,25 @@ func (r *repository) GetByIDs(ids []uint) ([]*models.Template, error) {
 	return templates, nil
 }
 
-func (r *repository) GetByNameAndResource(name string, resourceName string) (*models.Template, error) {
+func (r *repository) GetByNames(names []string) ([]*models.Template, error) {
+	if len(names) == 0 {
+		return []*models.Template{}, nil
+	}
+	var templates []*models.Template
+	if err := r.db.Where("name IN ?", names).Find(&templates).Error; err != nil {
+		return nil, err
+	}
+	return templates, nil
+}
+
+func (r *repository) GetByName(name string) (*models.Template, error) {
 	var template models.Template
 	query := r.db.Where("name = ?", name)
-	if resourceName != "" {
-		query = query.Where("resource_name = ?", resourceName)
-	} else {
-		query = query.Where("resource_name IS NULL OR resource_name = ''")
-	}
+
 	if err := query.First(&template).Error; err != nil {
 		return nil, err
 	}
+
 	return &template, nil
 }
 
@@ -88,10 +97,6 @@ func (r *repository) FindByFilter(filter *models.TemplateFilter) (*models.Templa
 
 	if filter.Name != nil {
 		query = query.Where("name = ?", *filter.Name)
-	}
-
-	if filter.Theme != nil {
-		query = query.Where("theme = ?", *filter.Theme)
 	}
 
 	if filter.ResourceName != nil {
@@ -122,7 +127,6 @@ func (r *repository) Update(template *models.Template) error {
 		"UserID",
 		"Title",
 		"IsMain",
-		"Theme",
 		"Name",
 		"ResourceName",
 		"HTML",
@@ -199,10 +203,6 @@ func (r *repository) Filter(filter *models.TemplateFilter) ([]*models.Template, 
 
 	if filter.Name != nil {
 		query = query.Where("name = ?", *filter.Name)
-	}
-
-	if filter.Theme != nil {
-		query = query.Where("theme = ?", *filter.Theme)
 	}
 
 	if filter.ResourceName != nil && *filter.ResourceName != "" {

@@ -14,14 +14,14 @@ func NewTagFilter() *TagFilter {
 }
 
 type TagFilter struct {
-	ID         *uint       `json:"id" form:"id" binding:"omitempty"`
-	TemplateID *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
-	Name       *string     `json:"name" form:"name" binding:"omitempty"`
-	Title      *string     `json:"title" form:"title" binding:"omitempty"`
-	Date       *string     `json:"date" form:"date" binding:"omitempty"`
-	URL        *string     `json:"url" form:"url" binding:"omitempty" ignore:"true"`
-	UUIDs      []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
-	Query      *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
+	ID           *uint       `json:"id" form:"id" binding:"omitempty"`
+	TemplateName *string     `json:"template_name" form:"template_name" binding:"omitempty"`
+	Name         *string     `json:"name" form:"name" binding:"omitempty"`
+	Title        *string     `json:"title" form:"title" binding:"omitempty"`
+	Date         *string     `json:"date" form:"date" binding:"omitempty"`
+	URL          *string     `json:"url" form:"url" binding:"omitempty" ignore:"true"`
+	UUIDs        []uuid.UUID `json:"uuids" form:"uuids" binding:"omitempty" ignore:"true"`
+	Query        *string     `json:"query" form:"query" binding:"omitempty" ignore:"true"`
 	models.Filter
 }
 
@@ -30,11 +30,12 @@ func (p *TagFilter) ValidateQuery(ctx *gin.Context) (*TagFilter, *errutil.Errors
 	return p, err
 }
 
-func (p *TagFilter) PrintTemplateID() uint {
-	if p.TemplateID == nil {
-		return 0
+func (p *TagFilter) PrintTemplateName() string {
+	if p.TemplateName == nil {
+		return ""
 	}
-	return *p.TemplateID
+
+	return *p.TemplateName
 }
 
 func (p *TagFilter) GetURL() string {

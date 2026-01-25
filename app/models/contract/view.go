@@ -6,5 +6,6 @@ type View interface {
 	SetRouter(router *gin.Engine)
 	Load()
 	RenderToString(name string, data any) (string, error)
-	View(name string) string
+	ViewStatic(name string) string
+	ViewResource(resource Resource) string
 }

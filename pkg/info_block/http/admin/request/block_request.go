@@ -15,7 +15,7 @@ func NewInfoBlockRequest() *InfoBlockRequest {
 
 type InfoBlockRequest struct {
 	ID             *uint   `json:"id" form:"id" binding:"omitempty"`
-	TemplateID     *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName   *string `json:"template_name" form:"template_name" binding:"omitempty"`
 	UserID         *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
 	PostCategoryID *uint   `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string `json:"title" form:"title" binding:"omitempty"`
@@ -28,11 +28,12 @@ func (p *InfoBlockRequest) ValidateQuery(ctx *gin.Context) (*InfoBlockRequest, *
 	return p, err
 }
 
-func (p *InfoBlockRequest) PrintTemplateID() uint {
-	if p.TemplateID == nil {
-		return 0
+func (p *InfoBlockRequest) PrintTemplateName() string {
+	if p.TemplateName == nil {
+		return ""
 	}
-	return *p.TemplateID
+
+	return *p.TemplateName
 }
 
 func (p *InfoBlockRequest) PrintUserID() uint {
@@ -63,7 +64,7 @@ func (p *InfoBlockRequest) PrintID() string {
 func (p *InfoBlockRequest) ToFilter() *models.InfoBlockFilter {
 	filter := models.NewInfoBlockFilter()
 	filter.ID = p.ID
-	filter.TemplateID = p.TemplateID
+	filter.TemplateName = p.TemplateName
 	filter.UserID = p.UserID
 	filter.PostCategoryID = p.PostCategoryID
 	filter.Title = p.Title

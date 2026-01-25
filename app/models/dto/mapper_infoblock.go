@@ -12,7 +12,6 @@ func MapInfoBlock(src contract.InfoBlock) InfoBlock {
 	out := InfoBlock{
 		ID:          src.GetID(),
 		UUID:        src.GetUUID().String(),
-		TemplateID:  src.GetTemplateID(),
 		InfoBlockID: src.GetInfoBlockID(),
 		Template:    src.GetTemplateName(),
 		Title:       src.GetTitle(),

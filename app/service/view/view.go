@@ -73,7 +73,7 @@ func (v *View) RenderToString(name string, data any) (string, error) {
 		return "", fmt.Errorf("template engine is not initialized")
 	}
 
-	name = v.View(name)
+	name = v.ViewStatic(name)
 
 	var buf bytes.Buffer
 	if err := v.tmpl.ExecuteTemplate(&buf, name, data); err != nil {
@@ -88,7 +88,7 @@ func (v *View) AddTemplateFromString(name, tmplStr string) error {
 		return fmt.Errorf("router is nil")
 	}
 
-	fullName := v.View(name)
+	fullName := v.ViewStatic(name)
 	v.dynamicTemplates[fullName] = tmplStr
 
 	baseTmpl := v.loadTemplatesCombined(
@@ -110,12 +110,29 @@ func (v *View) AddTemplateFromString(name, tmplStr string) error {
 	return nil
 }
 
-func (v *View) View(name string) string {
+func (v *View) ViewStatic(name string) string {
+	parts := strings.Split(name, ".")
+	if len(parts) >= 3 {
+		return name
+	}
+
 	if name == "" {
 		name = "default"
 	}
 
 	return fmt.Sprintf("%s.%s", v.config.Layout(), name)
+}
+
+func (v *View) ViewResource(resource contract.Resource) string {
+	if resource == nil {
+		return ""
+	}
+
+	if resource.GetTemplateName() != "" {
+		return resource.GetTemplateName()
+	}
+
+	return fmt.Sprintf("%s.%s.default", v.config.Layout(), resource.GetName())
 }
 
 func (v *View) removeWhitespaceBetweenTags(s string) string {
@@ -154,7 +171,7 @@ func (v *View) loadTemplatesCombined(embedFS fs.FS, embedRoot string, diskRoot s
 		"bundleCssSlice": v.bundleCssSlice,
 		"render": func(name string, data any) template.HTML {
 			var buf bytes.Buffer
-			name = v.View(name)
+			name = v.ViewStatic(name)
 			if err := tmpl.ExecuteTemplate(&buf, name, data); err != nil {
 				logger.Errorf("[app][template][render] render template %q failed: %v", name, err)
 				return template.HTML(fmt.Sprintf("<!-- render %q error: %v -->", name, err))
@@ -325,7 +342,7 @@ func (v *View) asset(p string) string {
 
 func (v *View) render(tmpl *template.Template, name string, data any) template.HTML {
 	var buf bytes.Buffer
-	name = v.View(name)
+	name = v.ViewStatic(name)
 
 	if err := tmpl.ExecuteTemplate(&buf, name, data); err != nil {
 		logger.Errorf("[app][template][render] render template %q failed: %v", name, err)

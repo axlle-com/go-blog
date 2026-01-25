@@ -8,9 +8,8 @@ import (
 type InfoBlock struct {
 	ID          uint        `json:"id"`
 	UUID        string      `json:"uuid"`
-	TemplateID  *uint       `json:"template_id"`
 	InfoBlockID *uint       `json:"info_block_id"`
-	Template    string      `json:"template,omitempty"`
+	Template    string      `json:"template_name,omitempty"`
 	Title       string      `json:"title"`
 	Description *string     `json:"description,omitempty"`
 	Image       *string     `json:"image,omitempty"`
@@ -22,9 +21,8 @@ type InfoBlock struct {
 	InfoBlocks  []InfoBlock `json:"info_blocks,omitempty"`
 }
 
-func (i InfoBlock) GetID() uint          { return i.ID }
-func (i InfoBlock) GetUUID() uuid.UUID   { return parseUUID(i.UUID) }
-func (i InfoBlock) GetTemplateID() *uint { return i.TemplateID }
+func (i InfoBlock) GetID() uint        { return i.ID }
+func (i InfoBlock) GetUUID() uuid.UUID { return parseUUID(i.UUID) }
 
 func (i InfoBlock) GetTemplateTitle() string { return i.Template }
 func (i InfoBlock) GetTemplateName() string  { return i.Template }

@@ -17,7 +17,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		c.RenderHTML(
 			ctx,
 			http.StatusNotFound,
-			c.view.View("error"),
+			c.view.ViewStatic("error"),
 			gin.H{
 				"title":    "Page not found",
 				"error":    "404",
@@ -36,7 +36,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		c.RenderHTML(
 			ctx,
 			http.StatusNotFound,
-			c.view.View("error"),
+			c.view.ViewStatic("error"),
 			gin.H{
 				"title":    "Page not found",
 				"error":    "404",
@@ -54,7 +54,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
-		c.view.View(model.GetTemplateName()),
+		c.view.ViewResource(model),
 		gin.H{
 			"settings": c.settings(ctx, model),
 			"model":    model,

@@ -157,18 +157,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				continue
 			}
 
-			// Ищем шаблон по name и resource_name
-			resourceName := (&models.Post{}).GetName()
-			var templateID *uint
-			if postData.Template != "" {
-				tpl, err := s.api.Template.GetByNameAndResource(postData.Template, resourceName)
-				if err != nil {
-					logger.Errorf("[blog][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", postData.Template, resourceName, err)
-					continue
-				}
-				id := tpl.GetID()
-				templateID = &id
-			}
+			templateName := postData.Template
 
 			if postData.CategoryAlias != nil {
 				cat, err := s.categoryService.FindByParam("alias", *postData.CategoryAlias)
@@ -195,7 +184,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 
 			post := models.Post{
 				UUID:               uuid.New(),
-				TemplateID:         templateID,
+				TemplateName:       templateName,
 				PostCategoryID:     postData.PostCategoryID,
 				MetaTitle:          postData.MetaTitle,
 				MetaDescription:    postData.MetaDescription,
@@ -325,17 +314,7 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 				continue
 			}
 
-			resourceName := "post_categories"
-			var templateID *uint
-			if categoryData.Template != "" {
-				tpl, err := s.api.Template.GetByNameAndResource(categoryData.Template, resourceName)
-				if err != nil {
-					logger.Errorf("[blog][seeder][seedCategoriesFromJSON] template not found: name=%s, resource=%s, error=%v", categoryData.Template, resourceName, err)
-					continue
-				}
-				id := tpl.GetID()
-				templateID = &id
-			}
+			templateName := categoryData.Template
 
 			isPublished := true
 			if categoryData.IsPublished != nil {
@@ -349,7 +328,7 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 
 			category := models.PostCategory{
 				UUID:            uuid.New(),
-				TemplateID:      templateID,
+				TemplateName:    templateName,
 				IsPublished:     &isPublished,
 				InSitemap:       inSitemap,
 				Alias:           categoryData.Alias,
@@ -411,16 +390,19 @@ func (s *seeder) seedCategoriesFromJSON(moduleName string) error {
 }
 
 func (s *seeder) posts(n int) error {
-	ids := s.api.Template.GetAllIds()
+	templates := s.api.Template.GetAll()
 	idsCategory, _ := s.categoryRepo.GetAllIds()
 	idsUser := s.api.User.GetAllIds()
 	for i := 1; i <= n; i++ {
-		randomID := ids[rand.Intn(len(ids))]
+		var templateName string
+		if len(templates) > 0 {
+			templateName = templates[rand.Intn(len(templates))].GetName()
+		}
 		randomCategoryID := idsCategory[rand.Intn(len(idsCategory))]
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
 		post := models.Post{
 			UUID:               uuid.New(),
-			TemplateID:         &randomID,
+			TemplateName:       templateName,
 			PostCategoryID:     &randomCategoryID,
 			MetaTitle:          db.StrPtr(faker.Sentence()),
 			MetaDescription:    db.StrPtr(faker.Sentence()),
@@ -459,7 +441,7 @@ func (s *seeder) posts(n int) error {
 }
 
 func (s *seeder) categories(n int) error {
-	ids := s.api.Template.GetAllIds()
+	templates := s.api.Template.GetAll()
 	idsUser := s.api.User.GetAllIds()
 
 	for i := 1; i <= n; i++ {
@@ -473,10 +455,13 @@ func (s *seeder) categories(n int) error {
 			}
 		}
 
-		randomID := ids[rand.Intn(len(ids))]
+		var templateName string
+		if len(templates) > 0 {
+			templateName = templates[rand.Intn(len(templates))].GetName()
+		}
 		postCategory := models.PostCategory{
 			UUID:               uuid.New(),
-			TemplateID:         &randomID,
+			TemplateName:       templateName,
 			PostCategoryID:     randomCategoryID,
 			UserID:             &randomUserID,
 			MetaTitle:          db.StrPtr(faker.Sentence()),

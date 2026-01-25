@@ -54,7 +54,7 @@ var Commands = map[string]func(){
 		rollback()
 		migrate()
 		seed()
-		seedTest()
+		//seedTest()
 	},
 }
 

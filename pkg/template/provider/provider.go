@@ -27,9 +27,11 @@ func (p *provider) GetAll() []contract.Template {
 		for _, t := range all {
 			collection = append(collection, t)
 		}
+
 		return collection
 	}
 	logger.Error(err)
+
 	return nil
 }
 
@@ -38,7 +40,9 @@ func (p *provider) GetAllIds() []uint {
 	if err == nil {
 		return t
 	}
+
 	logger.Error(err)
+
 	return nil
 }
 
@@ -47,7 +51,7 @@ func (p *provider) GetByID(id uint) (contract.Template, error) {
 	if err == nil {
 		return model, nil
 	}
-	logger.Error(err)
+
 	return nil, err
 }
 
@@ -58,9 +62,10 @@ func (p *provider) GetByIDs(ids []uint) ([]contract.Template, error) {
 		for _, t := range all {
 			collection = append(collection, t)
 		}
+
 		return collection, nil
 	}
-	logger.Error(err)
+
 	return nil, err
 }
 
@@ -71,16 +76,30 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contract.Template, error) {
 		for _, template := range all {
 			collection[template.ID] = template
 		}
+
 		return collection, nil
 	}
-	logger.Error(err)
+
+	return nil, err
+}
+
+func (p *provider) GetMapByNames(names []string) (map[string]contract.Template, error) {
+	all, err := p.templateRepo.GetByNames(names)
+	if err == nil {
+		collection := make(map[string]contract.Template, len(all))
+		for _, template := range all {
+			collection[template.Name] = template
+		}
+
+		return collection, nil
+	}
+
 	return nil, err
 }
 
 func (p *provider) GetForResources(resource contract.Resource) ([]contract.Template, error) {
 	all, err := p.templateRepo.Filter(models.NewTemplateFilter().SetResourceName(resource.GetName()))
 	if err != nil {
-		logger.Error(err)
 		return nil, err
 	}
 
@@ -88,13 +107,15 @@ func (p *provider) GetForResources(resource contract.Resource) ([]contract.Templ
 	for _, t := range all {
 		collection = append(collection, t)
 	}
+
 	return collection, nil
 }
 
-func (p *provider) GetByNameAndResource(name string, resourceName string) (contract.Template, error) {
-	model, err := p.templateRepo.GetByNameAndResource(name, resourceName)
+func (p *provider) GetByName(name string) (contract.Template, error) {
+	model, err := p.templateRepo.GetByName(name)
 	if err == nil {
 		return model, nil
 	}
+
 	return nil, err
 }

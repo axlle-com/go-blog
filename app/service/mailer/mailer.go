@@ -24,6 +24,7 @@ func (s *Smtp) SendMail(message contract.MailRequest) error {
 
 	m := gomail.NewMessage()
 	m.SetHeader("Email", s.config.SMTPUsername())
+	m.SetHeader("From", s.config.SMTPUsername())
 	m.SetHeader("To", message.GetTo())
 	m.SetHeader("Subject", message.GetSubject())
 	m.SetBody("text/html", message.GetBody())

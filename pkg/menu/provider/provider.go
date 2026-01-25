@@ -35,5 +35,5 @@ func (p *provider) GetMenuString(id uint, url string) (string, error) {
 		CurrentURL: url,
 	}
 
-	return p.view.RenderToString(menu.GetTemplateName(), data)
+	return p.view.RenderToString(p.view.ViewResource(menu), data)
 }

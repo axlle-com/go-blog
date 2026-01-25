@@ -55,7 +55,7 @@ func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.Post
 	var galleries = make([]contract.Gallery, 0)
 	var infoBlocks = make([]contract.InfoBlock, 0)
 
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
@@ -65,6 +65,19 @@ func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.Post
 	go func() {
 		defer wg.Done()
 		infoBlocks = s.api.InfoBlock.GetForResourceUUID(category.UUID.String())
+	}()
+
+	go func() {
+		defer wg.Done()
+		if category.TemplateName == "" {
+			return
+		}
+		tpl, e := s.api.Template.GetByName(category.TemplateName)
+		if e != nil {
+			logger.Errorf("[CategoryService] Error: %v", e)
+			return
+		}
+		category.Template = tpl
 	}()
 
 	wg.Wait()
@@ -298,10 +311,10 @@ func (s *CategoryService) View(
 	}
 
 	// --- template ---
-	if category.TemplateID != nil {
+	if category.TemplateName != "" {
 		service.SafeGo(&wg, func(c *models.PostCategory) func() {
 			return func() {
-				tpl, e := s.api.Template.GetByID(*c.TemplateID)
+				tpl, e := s.api.Template.GetByName(c.TemplateName)
 				if e != nil {
 					agg.Add(fmt.Errorf("get template: %w", e))
 					return

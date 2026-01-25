@@ -62,7 +62,7 @@ func (r *menuItemRepository) GetByIDs(ids []uint) ([]*models.MenuItem, error) {
 }
 
 func (r *menuItemRepository) save(menuItem *models.MenuItem) error {
-	return r.db.Select(menuItem.UpdatedFields()).Save(menuItem).Error
+	return r.db.Select(menuItem.Fields()).Save(menuItem).Error
 }
 
 func (r *menuItemRepository) DeleteByID(id uint) error {
@@ -304,7 +304,7 @@ func (r *menuItemRepository) Update(new *models.MenuItem, _ *models.MenuItem) er
 		// 2.1) если родитель не менялся — обычный save, но path_ltree оставляем прежним
 		if oldParent == newParent {
 			new.PathLtree = old.PathLtree
-			return db.Select(new.UpdatedFields()).Save(new).Error
+			return db.Select(new.Fields()).Save(new).Error
 		}
 
 		// 3) валидируем нового родителя (если перенос не в корень)
@@ -359,7 +359,7 @@ func (r *menuItemRepository) Update(new *models.MenuItem, _ *models.MenuItem) er
 
 		// 5) обновляем сам узел
 		new.PathLtree = newPathLtree
-		return db.Select(new.UpdatedFields()).Save(new).Error
+		return db.Select(new.Fields()).Save(new).Error
 	})
 }
 

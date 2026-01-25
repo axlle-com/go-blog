@@ -45,6 +45,10 @@ type User struct {
 	Permissions []Permission `gorm:"many2many:user_has_permission;" json:"permissions,omitempty"`
 }
 
+func (u *User) GetTable() string {
+	return "users"
+}
+
 func (u *User) Fields() []string {
 	return []string{
 		"id",

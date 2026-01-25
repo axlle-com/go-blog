@@ -9,7 +9,7 @@ const _message = {
     },
     contact: function () {
         const _this = this;
-        $('form[action="/messages"]').on('submit', function (evt) {
+        $('form[action^="/messages/"]').on('submit', function (evt) {
             evt.preventDefault();
             const form = $(this);
             

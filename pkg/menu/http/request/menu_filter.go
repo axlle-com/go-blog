@@ -15,7 +15,7 @@ func NewMenuFilter() *MenuFilter {
 
 type MenuFilter struct {
 	ID             *uint   `json:"id" form:"id" binding:"omitempty"`
-	TemplateID     *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName   *string `json:"template_name" form:"template_name" binding:"omitempty"`
 	UserID         *uint   `json:"user_id" form:"user_id" binding:"omitempty"`
 	MenuCategoryID *uint   `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string `json:"title" form:"title" binding:"omitempty"`
@@ -36,11 +36,12 @@ func (p *MenuFilter) ToFilter() *models.MenuFilter {
 	return filter
 }
 
-func (p *MenuFilter) PrintTemplateID() uint {
-	if p.TemplateID == nil {
-		return 0
+func (p *MenuFilter) PrintTemplateName() string {
+	if p.TemplateName == nil {
+		return ""
 	}
-	return *p.TemplateID
+
+	return *p.TemplateName
 }
 
 func (p *MenuFilter) PrintUserID() uint {

@@ -30,7 +30,7 @@ func (mi *MenuItem) GetTable() string {
 	return "menu_items"
 }
 
-func (mi *MenuItem) UpdatedFields() []string {
+func (mi *MenuItem) Fields() []string {
 	return []string{
 		"UserID",
 		"PublisherUUID",

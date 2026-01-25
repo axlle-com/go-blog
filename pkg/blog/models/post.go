@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
@@ -13,7 +14,7 @@ type Post struct {
 	ID                 uint           `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
 	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	UserID             *uint          `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
-	TemplateID         *uint          `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName       string         `gorm:"size:255;index" json:"template_name" form:"template_name" binding:"omitempty"`
 	PostCategoryID     *uint          `gorm:"index" json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	MetaTitle          *string        `gorm:"size:100" json:"meta_title" form:"meta_title" binding:"omitempty,max=100"`
 	MetaDescription    *string        `gorm:"size:200" json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
@@ -87,6 +88,7 @@ func (p *Post) GetImage() string {
 	if p.Image != nil {
 		return *p.Image
 	}
+
 	return ""
 }
 
@@ -94,6 +96,7 @@ func (p *Post) GetMetaTitle() string {
 	if p.MetaTitle != nil {
 		return *p.MetaTitle
 	}
+
 	return ""
 }
 
@@ -101,15 +104,30 @@ func (p *Post) GetMetaDescription() string {
 	if p.MetaDescription != nil {
 		return *p.MetaDescription
 	}
+
 	return ""
 }
 
 func (p *Post) GetTemplateName() string {
-	if p.Template != nil {
-		return p.Template.GetFullName(p.GetTable())
+	if p.TemplateName != "" {
+		return p.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", p.GetTable())
+	return ""
+}
+
+func (p *Post) GetTitleShort() string {
+	if p.TitleShort != nil && *p.TitleShort != "" {
+		return *p.TitleShort
+	}
+
+	if utf8.RuneCountInString(p.Title) <= contract.MaxShotTitle {
+		return p.Title
+	}
+
+	r := []rune(p.Title)
+
+	return string(r[:contract.MaxShotTitle])
 }
 
 func (p *Post) SetUUID() {
@@ -135,29 +153,24 @@ func (p *Post) GetCategoryID() uint {
 	if p.PostCategoryID != nil {
 		categoryID = *p.PostCategoryID
 	}
-	return categoryID
-}
 
-func (p *Post) GetTemplateID() uint {
-	var templateID uint
-	if p.TemplateID != nil {
-		templateID = *p.TemplateID
-	}
-	return templateID
+	return categoryID
 }
 
 func (p *Post) Date() string {
 	if p.CreatedAt == nil {
 		return ""
 	}
+
 	return p.CreatedAt.Format("02.01.2006 15:04:05")
 }
 
 func (p *Post) GetCategoryTitleShort() string {
 	var titleShort string
-	if p.Category != nil && p.Category.TitleShort != nil {
-		titleShort = *p.Category.TitleShort
+	if p.Category != nil {
+		titleShort = p.Category.GetTitleShort()
 	}
+
 	return titleShort
 }
 
@@ -166,6 +179,7 @@ func (p *Post) GetTemplateTitle() string {
 	if p.Template != nil {
 		title = p.Template.GetTitle()
 	}
+
 	return title
 }
 
@@ -174,6 +188,7 @@ func (p *Post) UserLastName() string {
 	if p.User != nil {
 		lastName = p.User.GetLastName()
 	}
+
 	return lastName
 }
 
@@ -236,5 +251,6 @@ func (p *Post) AdminURL() string {
 	if p.ID == 0 {
 		return "/admin/posts"
 	}
+
 	return fmt.Sprintf("/admin/posts/%d", p.ID)
 }

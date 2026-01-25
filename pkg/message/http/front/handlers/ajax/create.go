@@ -16,13 +16,13 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		userUUID = ctx.GetString("guest_uuid")
 	}
 
-	var name form.Name
-	if err := ctx.ShouldBindBodyWith(&name, binding.JSON); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": c.T(ctx, "ui.error.field_form_name") + ": " + err.Error()})
+	formName := ctx.Param("form")
+	if formName == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": c.T(ctx, "ui.error.field_form_name")})
 		return
 	}
 
-	tempForm, err := name.NewForm()
+	tempForm, err := form.NewForm(formName)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

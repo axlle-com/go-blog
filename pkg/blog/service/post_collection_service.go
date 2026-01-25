@@ -33,21 +33,18 @@ func NewPostCollectionService(
 }
 
 func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post {
-	var templateIDs []uint
 	var userIDs []uint
 	var categoryIDs []uint
+	var templateNames []string
 
-	templateIDsMap := make(map[uint]bool)
 	userIDsMap := make(map[uint]bool)
 	categoryIDsMap := make(map[uint]bool)
+	templateNamesMap := make(map[string]bool)
 
 	for _, post := range posts {
-		if post.TemplateID != nil {
-			id := *post.TemplateID
-			if !templateIDsMap[id] {
-				templateIDs = append(templateIDs, id)
-				templateIDsMap[id] = true
-			}
+		if post.TemplateName != "" && !templateNamesMap[post.TemplateName] {
+			templateNames = append(templateNames, post.TemplateName)
+			templateNamesMap[post.TemplateName] = true
 		}
 		if post.UserID != nil {
 			id := *post.UserID
@@ -68,16 +65,16 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 	var wg sync.WaitGroup
 
 	var users map[uint]contract.User
-	var templates map[uint]contract.Template
+	var templates map[string]contract.Template
 	var categories map[uint]*models.PostCategory
 
 	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
-		if len(templateIDs) > 0 {
+		if len(templateNames) > 0 {
 			var err error
-			templates, err = s.api.Template.GetMapByIDs(templateIDs)
+			templates, err = s.api.Template.GetMapByNames(templateNames)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -109,8 +106,8 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 	wg.Wait()
 
 	for _, post := range posts {
-		if post.TemplateID != nil {
-			post.Template = templates[*post.TemplateID]
+		if templates != nil && post.TemplateName != "" {
+			post.Template = templates[post.TemplateName]
 		}
 		if post.UserID != nil {
 			post.User = users[*post.UserID]

@@ -15,7 +15,7 @@ func NewCategoryFilterFilter() *CategoryFilter {
 
 type CategoryFilter struct {
 	ID             *uint       `json:"id" form:"id" binding:"omitempty"`
-	TemplateID     *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName   *string     `json:"template_name" form:"template_name" binding:"omitempty"`
 	UserID         *uint       `json:"user_id" form:"user_id" binding:"omitempty"`
 	PostCategoryID *uint       `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string     `json:"title" form:"title" binding:"omitempty"`
@@ -31,11 +31,12 @@ func (p *CategoryFilter) ValidateQuery(ctx *gin.Context) (*CategoryFilter, *erru
 	return p, err
 }
 
-func (p *CategoryFilter) PrintTemplateID() uint {
-	if p.TemplateID == nil {
-		return 0
+func (p *CategoryFilter) PrintTemplateName() string {
+	if p.TemplateName == nil {
+		return ""
 	}
-	return *p.TemplateID
+
+	return *p.TemplateName
 }
 
 func (p *CategoryFilter) PrintUserID() uint {

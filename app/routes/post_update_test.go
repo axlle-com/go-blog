@@ -237,9 +237,8 @@ func TestSuccessfulUpdatePost(t *testing.T) {
 
 			var v any
 
-			v, _ = service.ConvertStringToType(post.TemplateID, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, model.TemplateID)
+			assert.Equal(t, post.TemplateName, responseBody.Data.Post.TemplateName)
+			assert.Equal(t, post.TemplateName, model.TemplateName)
 
 			v, _ = service.ConvertStringToType(post.PostCategoryID, responseBody.Data.Post.PostCategoryID)
 			assert.Equal(t, v, responseBody.Data.Post.PostCategoryID)
@@ -442,9 +441,8 @@ func TestSuccessfulUpdatePostAlias(t *testing.T) {
 
 			var v any
 
-			v, _ = service.ConvertStringToType(post.TemplateID, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, model.TemplateID)
+			assert.Equal(t, post.TemplateName, responseBody.Data.Post.TemplateName)
+			assert.Equal(t, post.TemplateName, model.TemplateName)
 
 			v, _ = service.ConvertStringToType(post.PostCategoryID, responseBody.Data.Post.PostCategoryID)
 			assert.Equal(t, v, responseBody.Data.Post.PostCategoryID)

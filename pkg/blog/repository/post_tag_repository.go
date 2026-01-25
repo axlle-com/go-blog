@@ -55,8 +55,8 @@ func (r *postTagRepository) WithPaginate(p contract.Paginator, filter *models.Ta
 		if filter.ID != nil {
 			query = query.Where(fmt.Sprintf("%s.id = ?", table), *filter.ID)
 		}
-		if filter.TemplateID != nil {
-			query = query.Where(fmt.Sprintf("%s.template_id = ?", table), *filter.TemplateID)
+		if filter.TemplateName != nil && *filter.TemplateName != "" {
+			query = query.Where(fmt.Sprintf("%s.template_name = ?", table), *filter.TemplateName)
 		}
 		if filter.Name != nil && *filter.Name != "" {
 			query = query.Where(fmt.Sprintf("%s.name = ?", table), *filter.Name)
@@ -126,7 +126,7 @@ func (r *postTagRepository) Update(postTag *models.PostTag) error {
 	postTag.Updating()
 	return r.db.
 		Select(
-			"TemplateID",
+			"TemplateName",
 			"Name",
 			"Title",
 			"Description",

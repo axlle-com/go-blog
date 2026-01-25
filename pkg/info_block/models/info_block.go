@@ -9,19 +9,19 @@ import (
 )
 
 type InfoBlock struct {
-	ID          uint       `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
-	UUID        uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
-	TemplateID  *uint      `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
-	UserID      *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
-	InfoBlockID *uint      `gorm:"index" json:"info_block_id,omitempty" form:"info_block_id" binding:"omitempty"`
-	PathLtree   string     `gorm:"type:ltree;column:path_ltree;not null" json:"-"`
-	Media       *string    `gorm:"size:255" json:"media" form:"media" binding:"omitempty,max=255"`
-	Title       string     `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
-	Description *string    `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
-	Image       *string    `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
-	CreatedAt   *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
-	DeletedAt   *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
+	ID           uint       `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
+	UUID         uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
+	TemplateName string     `gorm:"size:255;index" json:"template_name" form:"template_name" binding:"omitempty"`
+	UserID       *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
+	InfoBlockID  *uint      `gorm:"index" json:"info_block_id,omitempty" form:"info_block_id" binding:"omitempty"`
+	PathLtree    string     `gorm:"type:ltree;column:path_ltree;not null" json:"-"`
+	Media        *string    `gorm:"size:255" json:"media" form:"media" binding:"omitempty,max=255"`
+	Title        string     `gorm:"size:255;not null" json:"title" form:"title" binding:"required,max=255"`
+	Description  *string    `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
+	Image        *string    `gorm:"size:255" json:"image" form:"image" binding:"omitempty,max=255"`
+	CreatedAt    *time.Time `gorm:"index" json:"created_at,omitempty" form:"created_at" binding:"-" ignore:"true"`
+	UpdatedAt    *time.Time `json:"updated_at,omitempty" form:"updated_at" binding:"-" ignore:"true"`
+	DeletedAt    *time.Time `gorm:"index" json:"deleted_at" form:"deleted_at" binding:"-" ignore:"true"`
 
 	Template  contract.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 	User      contract.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
@@ -43,11 +43,11 @@ func (i *InfoBlock) GetName() string {
 }
 
 func (i *InfoBlock) GetTemplateName() string {
-	if i.Template != nil {
-		return i.Template.GetFullName(i.GetTable())
+	if i.TemplateName != "" {
+		return i.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", i.GetTable())
+	return ""
 }
 
 func (i *InfoBlock) GetPosition() string {
@@ -71,10 +71,6 @@ func (i *InfoBlock) GetID() uint {
 	return i.ID
 }
 
-func (i *InfoBlock) GetTemplateID() *uint {
-	return i.TemplateID
-}
-
 func (i *InfoBlock) GetRelationID() uint {
 	var id uint
 	if i.HasResource != nil {
@@ -93,6 +89,7 @@ func (i *InfoBlock) GetTemplateTitle() string {
 	if i.Template != nil {
 		title = i.Template.GetTitle()
 	}
+
 	return title
 }
 
@@ -129,9 +126,9 @@ func (i *InfoBlock) GetGalleries() []contract.Gallery {
 	return i.Galleries
 }
 
-func (i *InfoBlock) UpdatedFields() []string {
+func (i *InfoBlock) Fields() []string {
 	return []string{
-		"TemplateID",
+		"TemplateName",
 		"InfoBlockID",
 		"Media",
 		"Title",

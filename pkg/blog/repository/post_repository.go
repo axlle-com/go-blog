@@ -57,7 +57,7 @@ func (r *postRepository) Update(post *models.Post) error {
 	post.Updating()
 	return r.db.Select(
 		"UserID",
-		"TemplateID",
+		"TemplateName",
 		"PostCategoryID",
 		"MetaTitle",
 		"MetaDescription",
@@ -111,8 +111,8 @@ func (r *postRepository) WithPaginate(paginator contract.Paginator, filter *mode
 		if filter.ID != nil {
 			query = query.Where(fmt.Sprintf("%s.id = ?", table), *filter.ID)
 		}
-		if filter.TemplateID != nil {
-			query = query.Where(fmt.Sprintf("%s.template_id = ?", table), *filter.TemplateID)
+		if filter.TemplateName != nil && *filter.TemplateName != "" {
+			query = query.Where(fmt.Sprintf("%s.template_name = ?", table), *filter.TemplateName)
 		}
 		if filter.UserID != nil {
 			query = query.Where(fmt.Sprintf("%s.user_id = ?", table), *filter.UserID)

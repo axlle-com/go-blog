@@ -741,7 +741,7 @@ const _glob = {
                 relation_uuid: 'string',
 
                 // общие для контента/шаблонов
-                template_id: 'int',
+                template_name: 'string',
                 post_category_id: 'int',
                 meta_title: 'string',
                 meta_description: 'string',

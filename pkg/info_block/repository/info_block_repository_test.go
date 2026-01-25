@@ -40,8 +40,8 @@ func mustCreateInfoBlock(t *testing.T, repo repository.InfoBlockRepository, b *m
 	if b.Title == "" {
 		b.Title = "title-" + uuid.NewString()
 	}
-	if b.TemplateID == nil {
-		b.TemplateID = ptrUint(1)
+	if b.TemplateName == "" {
+		b.TemplateName = "spring.info_blocks.default"
 	}
 	if b.UserID == nil {
 		b.UserID = ptrUint(1)
@@ -63,25 +63,26 @@ func mustGetInfoBlock(t *testing.T, repo repository.InfoBlockRepository, id uint
 
 func buildInfoBlockTree(t *testing.T, repo repository.InfoBlockRepository, templateID, userID uint) (root, child, grand *models.InfoBlock) {
 	t.Helper()
+	templateIndex := fmt.Sprintf("spring.info_blocks.t%d", templateID)
 
 	root = mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID: ptrUint(templateID),
-		UserID:     ptrUint(userID),
-		Title:      "root-" + uuid.NewString(),
+		TemplateName: templateIndex,
+		UserID:       ptrUint(userID),
+		Title:        "root-" + uuid.NewString(),
 	})
 
 	child = mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(templateID),
-		UserID:      ptrUint(userID),
-		InfoBlockID: ptrUint(root.ID),
-		Title:       "child-" + uuid.NewString(),
+		TemplateName: templateIndex,
+		UserID:       ptrUint(userID),
+		InfoBlockID:  ptrUint(root.ID),
+		Title:        "child-" + uuid.NewString(),
 	})
 
 	grand = mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(templateID),
-		UserID:      ptrUint(userID),
-		InfoBlockID: ptrUint(child.ID),
-		Title:       "grand-" + uuid.NewString(),
+		TemplateName: templateIndex,
+		UserID:       ptrUint(userID),
+		InfoBlockID:  ptrUint(child.ID),
+		Title:        "grand-" + uuid.NewString(),
 	})
 
 	return
@@ -119,19 +120,19 @@ func TestInfoBlock_WithPaginate_FilterByTemplate_NoLeakBetweenTemplates(t *testi
 	repo, _ := setupInfoBlockRepo(t)
 
 	a := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "a-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		Title:        "a-" + uuid.NewString(),
 	})
 	_ = mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID: ptrUint(2),
-		UserID:     ptrUint(10),
-		Title:      "b-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t2",
+		UserID:       ptrUint(10),
+		Title:        "b-" + uuid.NewString(),
 	})
 
 	p := models2.FromQuery(map[string][]string{})
 	filter := &models.InfoBlockFilter{
-		TemplateID: ptrUint(1),
+		TemplateName: ptrString("spring.info_blocks.t1"),
 	}
 	items, err := repo.WithPaginate(p, filter)
 	require.NoError(t, err)
@@ -139,8 +140,8 @@ func TestInfoBlock_WithPaginate_FilterByTemplate_NoLeakBetweenTemplates(t *testi
 
 	// убеждаемся, что все из template=1
 	for _, it := range items {
-		require.NotNil(t, it.TemplateID)
-		require.Equal(t, uint(1), *it.TemplateID)
+		require.NotEmpty(t, it.TemplateName)
+		require.Equal(t, "spring.info_blocks.t1", it.TemplateName)
 	}
 	// и конкретно "a" присутствует
 	foundA := false
@@ -201,8 +202,8 @@ func TestInfoBlock_Update_MoveToRoot_UpdatesSubtree_AndDoesNotTouchOtherTree(t *
 	// sanity count (через Model, чтобы не попасть на soft-delete нюансы)
 	table := (&models.InfoBlock{}).GetTable()
 	var cntA, cntB int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cntA).Error)
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 2, 10).Count(&cntB).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t1", 10).Count(&cntA).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t2", 10).Count(&cntB).Error)
 	require.GreaterOrEqual(t, cntA, int64(3))
 	require.GreaterOrEqual(t, cntB, int64(3))
 }
@@ -212,31 +213,31 @@ func TestInfoBlock_Update_MoveUnderAnotherParent_UpdatesSubtree(t *testing.T) {
 
 	// root
 	root := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "root-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		Title:        "root-" + uuid.NewString(),
 	})
 
 	// two children
 	a := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(1),
-		UserID:      ptrUint(10),
-		InfoBlockID: ptrUint(root.ID),
-		Title:       "a-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		InfoBlockID:  ptrUint(root.ID),
+		Title:        "a-" + uuid.NewString(),
 	})
 	b := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(1),
-		UserID:      ptrUint(10),
-		InfoBlockID: ptrUint(root.ID),
-		Title:       "b-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		InfoBlockID:  ptrUint(root.ID),
+		Title:        "b-" + uuid.NewString(),
 	})
 
 	// grand under a
 	ga := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(1),
-		UserID:      ptrUint(10),
-		InfoBlockID: ptrUint(a.ID),
-		Title:       "ga-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		InfoBlockID:  ptrUint(a.ID),
+		Title:        "ga-" + uuid.NewString(),
 	})
 
 	// move a under b
@@ -277,15 +278,15 @@ func TestInfoBlock_Update_InvalidOldPath_ShouldRefuse(t *testing.T) {
 	repo, gdb := setupInfoBlockRepo(t)
 
 	root := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "r-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		Title:        "r-" + uuid.NewString(),
 	})
 	child := mustCreateInfoBlock(t, repo, &models.InfoBlock{
-		TemplateID:  ptrUint(1),
-		UserID:      ptrUint(10),
-		InfoBlockID: ptrUint(root.ID),
-		Title:       "c-" + uuid.NewString(),
+		TemplateName: "spring.info_blocks.t1",
+		UserID:       ptrUint(10),
+		InfoBlockID:  ptrUint(root.ID),
+		Title:        "c-" + uuid.NewString(),
 	})
 
 	// делаем old path НЕвалидным: последний label НЕ равен child.ID (но ltree литерал валидный)
@@ -309,7 +310,7 @@ func TestInfoBlock_Delete_Subtree(t *testing.T) {
 
 	table := (&models.InfoBlock{}).GetTable()
 	var cnt int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cnt).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t1", 10).Count(&cnt).Error)
 	require.Equal(t, int64(0), cnt)
 }
 
@@ -323,7 +324,7 @@ func TestInfoBlock_Delete_WithOnlyID_DeletesSubtree(t *testing.T) {
 
 	table := (&models.InfoBlock{}).GetTable()
 	var cnt int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cnt).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t1", 10).Count(&cnt).Error)
 	require.Equal(t, int64(0), cnt)
 }
 
@@ -343,12 +344,12 @@ func TestInfoBlock_DeleteByIDs_DeletesSubtrees(t *testing.T) {
 
 	// A must be empty
 	var cntA int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cntA).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t1", 10).Count(&cntA).Error)
 	require.Equal(t, int64(0), cntA)
 
 	// B must still have rootB (childB removed and its subtree)
 	var cntB int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 2, 10).Count(&cntB).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.info_blocks.t2", 10).Count(&cntB).Error)
 	require.Equal(t, int64(1), cntB)
 
 	rootBDB := mustGetInfoBlock(t, repo, rootB.ID)

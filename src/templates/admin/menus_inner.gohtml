@@ -54,13 +54,13 @@
                                         data-allow-clear="true"
                                         data-placeholder="{{ call .T "ui.label.template" nil }}"
                                         data-select2-search="true"
-                                        name="template_id">
+                                        name="template_name">
                                     <option></option>
                                     {{ range .templates }}
-                                        {{ if eq $.filter.PrintTemplateID .ID }}
-                                            <option value="{{ .ID }}" selected>{{ .Title }}</option>
+                                        {{ if eq $.filter.PrintTemplateName .GetName }}
+                                            <option value="{{ .GetName }}" selected>{{ .Title }}</option>
                                         {{ else }}
-                                            <option value="{{ .ID }}">{{ .Title }}</option>
+                                            <option value="{{ .GetName }}">{{ .Title }}</option>
                                         {{ end }}
                                     {{ end }}
                                 </select>

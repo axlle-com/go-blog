@@ -17,9 +17,12 @@ func NewMigrator(db *gorm.DB) contract.Migrator {
 }
 
 func (m *migrator) Migrate() error {
+	model := &models.User{}
+	modelHas := &models.UserHasUser{}
+
 	err := m.db.AutoMigrate(
-		&models.User{},
-		&models.UserHasUser{},
+		model,
+		modelHas,
 		&models.Role{},
 		&models.Permission{},
 	)
@@ -28,9 +31,9 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.HashIndex("users", "uuid"))
-	m.db.Exec(db.HashIndex("user_has_users", "user_uuid"))
-	m.db.Exec(db.HashIndex("user_has_users", "relation_uuid"))
+	m.db.Exec(db.HashIndex(model.GetTable(), "uuid"))
+	m.db.Exec(db.HashIndex(modelHas.GetTable(), "user_uuid"))
+	m.db.Exec(db.HashIndex(modelHas.GetTable(), "relation_uuid"))
 
 	return nil
 }
@@ -49,18 +52,20 @@ func (m *migrator) Rollback() error {
 }
 
 func (m *migrator) dropIntermediateTables() error {
-	migrator := m.db.Migrator()
+	newMigrator := m.db.Migrator()
 	intermediateTables := []string{
 		"user_has_role",
 		"user_has_permission",
 		"role_has_permission",
 	}
+
 	for _, table := range intermediateTables {
-		if err := migrator.DropTable(table); err != nil {
-			logger.Errorf("Error dropping table: %v, %v", table, err)
+		if err := newMigrator.DropTable(table); err != nil {
 			return err
 		}
-		logger.Infof("Dropped intermediate table:%s", table)
+
+		logger.Infof("[user][migrator][dropIntermediateTables] Dropped intermediate table:%s", table)
 	}
+
 	return nil
 }

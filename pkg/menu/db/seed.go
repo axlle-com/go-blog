@@ -126,16 +126,8 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				menu.IsPublished = *menuData.IsPublished
 			}
 
-			// Ищем шаблон, если указан
 			if menuData.Template != nil && *menuData.Template != "" {
-				resourceName := (&models.Menu{}).GetName()
-				tpl, err := s.api.Template.GetByNameAndResource(*menuData.Template, resourceName)
-				if err != nil {
-					logger.Errorf("[menu][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", *menuData.Template, resourceName, err)
-				} else {
-					id := tpl.GetID()
-					menu.TemplateID = &id
-				}
+				menu.TemplateName = *menuData.Template
 			}
 
 			if err := s.menuRepo.Create(menu); err != nil {
@@ -300,7 +292,6 @@ func (s *seeder) createMenuItem(menuID uint, parentID *uint, itemData MenuItemSe
 		return err
 	}
 
-	// Создаем дочерние пункты
 	for _, childData := range itemData.Children {
 		if err := s.createMenuItem(menuID, &menuItem.ID, childData, sortCounter); err != nil {
 			logger.Errorf("[menu][seeder][createMenuItem] error creating child menu item: %v", err)
@@ -321,20 +312,23 @@ func (s *seeder) SeedTest(n int) error {
 }
 
 func (s *seeder) menus(n int) error {
-	ids := s.api.Template.GetAllIds()
+	templates := s.api.Template.GetAll()
 	for i := 1; i <= n; i++ {
-		randomID := ids[rand.Intn(len(ids))]
+		var templateName string
+		if len(templates) > 0 {
+			templateName = templates[rand.Intn(len(templates))].GetName()
+		}
 		menu := &models.Menu{
-			UUID:        uuid.New(),
-			TemplateID:  &randomID,
-			IsPublished: db.RandBool(),
-			IsMain:      db.RandBool(),
-			Title:       "Name #" + strconv.Itoa(i),
-			Ico:         db.StrPtr("Ico #" + strconv.Itoa(i)),
-			Sort:        rand.Intn(100),
-			CreatedAt:   db.TimePtr(time.Now()),
-			UpdatedAt:   db.TimePtr(time.Now()),
-			DeletedAt:   nil,
+			UUID:         uuid.New(),
+			TemplateName: templateName,
+			IsPublished:  db.RandBool(),
+			IsMain:       db.RandBool(),
+			Title:        "Name #" + strconv.Itoa(i),
+			Ico:          db.StrPtr("Ico #" + strconv.Itoa(i)),
+			Sort:         rand.Intn(100),
+			CreatedAt:    db.TimePtr(time.Now()),
+			UpdatedAt:    db.TimePtr(time.Now()),
+			DeletedAt:    nil,
 		}
 
 		err := s.menuRepo.Create(menu)

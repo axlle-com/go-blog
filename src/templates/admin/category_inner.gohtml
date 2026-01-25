@@ -88,12 +88,12 @@
                                                     data-placeholder="{{ call .T "ui.label.template" nil }}"
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
-                                                    name="template_id"
-                                                    data-validator-name="template_id">
+                                                    name="template_name"
+                                                    data-validator-name="template_name">
                                                 <option></option>
                                                 {{ range .templates}}
-                                                    <option value="{{ .ID }}"
-                                                            {{ if eq .ID $.category.GetTemplateID }}selected{{ end }}>
+                                                    <option value="{{ .GetName }}"
+                                                            {{ if eq .GetName $.category.GetTemplateName }}selected{{ end }}>
                                                         {{ .Title }}
                                                     </option>
                                                 {{ end }}

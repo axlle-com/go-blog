@@ -54,7 +54,7 @@ func (r *menuRepository) GetByID(id uint) (*models.Menu, error) {
 func (r *menuRepository) Update(menu *models.Menu) error {
 	menu.Updating()
 	return r.db.Select(
-		"TemplateID",
+		"TemplateName",
 		"Title",
 		"IsPublished",
 		"IsMain",

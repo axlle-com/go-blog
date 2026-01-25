@@ -9,8 +9,10 @@ import (
 
 	"github.com/axlle-com/blog/app/middleware"
 	"github.com/axlle-com/blog/app/models/contract"
+	menu "github.com/axlle-com/blog/pkg/menu/models"
 	user "github.com/axlle-com/blog/pkg/user/models"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 )
 
 type BaseAjax struct{}
@@ -98,7 +100,7 @@ func (c *BaseAjax) PrepareTemplateData(ctx *gin.Context, obj any) gin.H {
 	// T в корень
 	data["T"] = tFunc
 
-	// T внутрь settings (если settings есть и это map)
+	// T внутрь settings (если settings есть и это map), иначе создаём settings
 	if settings, ok := data["settings"]; ok {
 		switch s := settings.(type) {
 		case gin.H:
@@ -106,6 +108,15 @@ func (c *BaseAjax) PrepareTemplateData(ctx *gin.Context, obj any) gin.H {
 		case map[string]any:
 			s["T"] = tFunc
 		}
+
+		return data
+	}
+
+	data["settings"] = gin.H{
+		"T":         tFunc,
+		"user":      c.GetUser(ctx),
+		"menu":      menu.NewMenu(ctx.FullPath(), tFunc),
+		"csrfToken": csrf.GetToken(ctx),
 	}
 
 	return data

@@ -26,7 +26,8 @@ func (m *migrator) Migrate() error {
 		return err
 	}
 
-	m.db.Exec(db.UniqueIndex(model.GetTable(), "theme", "name", "resource_name"))
+	m.db.Exec(db.UniqueIndex(model.GetTable(), "name"))
+	m.db.Exec(db.HashIndex(model.GetTable(), "name"))
 
 	return nil
 }

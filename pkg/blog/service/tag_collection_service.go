@@ -37,33 +37,29 @@ func (s *TagCollectionService) WithPaginate(p contract.Paginator, filter *models
 }
 
 func (s *TagCollectionService) Aggregates(tags []*models.PostTag) []*models.PostTag {
-	var templateIDs []uint
-
-	templateIDsMap := make(map[uint]bool)
+	var templateNames []string
+	templateNamesMap := make(map[string]bool)
 
 	for _, tag := range tags {
-		if tag.TemplateID != nil {
-			id := *tag.TemplateID
-			if !templateIDsMap[id] {
-				templateIDs = append(templateIDs, id)
-				templateIDsMap[id] = true
-			}
+		if tag.TemplateName != "" && !templateNamesMap[tag.TemplateName] {
+			templateNames = append(templateNames, tag.TemplateName)
+			templateNamesMap[tag.TemplateName] = true
 		}
 	}
 
-	var templates map[uint]contract.Template
+	if len(templateNames) == 0 {
+		return tags
+	}
 
-	if len(templateIDs) > 0 {
-		var err error
-		templates, err = s.api.Template.GetMapByIDs(templateIDs)
-		if err != nil {
-			logger.Error(err)
-		}
+	templates, err := s.api.Template.GetMapByNames(templateNames)
+	if err != nil {
+		logger.Error(err)
+		return tags
 	}
 
 	for _, tag := range tags {
-		if tag.TemplateID != nil {
-			tag.Template = templates[*tag.TemplateID]
+		if tag.TemplateName != "" {
+			tag.Template = templates[tag.TemplateName]
 		}
 	}
 

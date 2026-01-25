@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type UserHasUser struct {
@@ -11,4 +12,8 @@ type UserHasUser struct {
 
 	CreatedAt *time.Time `gorm:"index" json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+func (u *UserHasUser) GetTable() string {
+	return "user_has_users"
 }

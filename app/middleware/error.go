@@ -47,14 +47,14 @@ func (e *Error) Handler() gin.HandlerFunc {
 			if isAPI {
 				ctx.JSON(status, gin.H{"message": "Unauthorized"})
 			} else {
-				ctx.HTML(status, e.view.View("error"), gin.H{"title": "Unauthorized", "error": status})
+				ctx.HTML(status, e.view.ViewStatic("error"), gin.H{"title": "Unauthorized", "error": status})
 			}
 
 		case http.StatusForbidden:
 			if isAPI {
 				ctx.JSON(status, gin.H{"message": "Forbidden"})
 			} else {
-				ctx.HTML(status, e.view.View("error"), gin.H{"title": "Forbidden", "error": status})
+				ctx.HTML(status, e.view.ViewStatic("error"), gin.H{"title": "Forbidden", "error": status})
 			}
 
 		case http.StatusInternalServerError:
@@ -62,10 +62,11 @@ func (e *Error) Handler() gin.HandlerFunc {
 			if errMsg == "" {
 				errMsg = "Internal Server Error"
 			}
+
 			if isAPI {
 				ctx.JSON(status, gin.H{"message": errMsg})
 			} else {
-				ctx.HTML(status, e.view.View("error"), gin.H{"message": errMsg, "error": status})
+				ctx.HTML(status, e.view.ViewStatic("error"), gin.H{"message": errMsg, "error": status})
 			}
 		}
 	}

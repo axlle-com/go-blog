@@ -37,30 +37,44 @@ func (s *TagService) GetByID(id uint) (*models.PostTag, error) {
 	return s.tagRepo.GetByID(id)
 }
 
-func (s *TagService) Aggregate(post *models.PostTag) (*models.PostTag, error) {
+func (s *TagService) Aggregate(model *models.PostTag) (*models.PostTag, error) {
 	var wg sync.WaitGroup
 
 	var galleries = make([]contract.Gallery, 0)
 	var infoBlocks = make([]contract.InfoBlock, 0)
 
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
-		galleries = s.api.Gallery.GetForResourceUUID(post.UUID.String())
+		galleries = s.api.Gallery.GetForResourceUUID(model.UUID.String())
 	}()
 
 	go func() {
 		defer wg.Done()
-		infoBlocks = s.api.InfoBlock.GetForResourceUUID(post.UUID.String())
+		infoBlocks = s.api.InfoBlock.GetForResourceUUID(model.UUID.String())
+	}()
+
+	go func() {
+		defer wg.Done()
+		if model.TemplateName == "" {
+			return
+		}
+
+		tpl, err := s.api.Template.GetByName(model.TemplateName)
+		if err != nil {
+			logger.Errorf("[TagService] Error: %+v", err)
+			return
+		}
+		model.Template = tpl
 	}()
 
 	wg.Wait()
 
-	post.Galleries = galleries
-	post.InfoBlocks = infoBlocks
+	model.Galleries = galleries
+	model.InfoBlocks = infoBlocks
 
-	return post, nil
+	return model, nil
 }
 
 func (s *TagService) SaveFromRequest(form *http.TagRequest, found *models.PostTag, user contract.User) (model *models.PostTag, err error) {

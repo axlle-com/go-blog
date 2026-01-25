@@ -12,7 +12,7 @@ func NewTagRequest() *TagRequest {
 type TagRequest struct {
 	ID              uint    `json:"id" form:"id" binding:"omitempty"`
 	UUID            string  `json:"uuid" form:"uuid" binding:"omitempty"`
-	TemplateID      *uint   `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName    string  `json:"template_name" form:"template_name" binding:"omitempty"`
 	Name            string  `json:"name" form:"name" binding:"required,max=10"`
 	Title           *string `json:"title" form:"title" binding:"required,max=255"`
 	Description     *string `json:"description" form:"description" binding:"omitempty"`

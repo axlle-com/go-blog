@@ -1,7 +1,7 @@
 [
   {
     "user_id": 1,
-    "template": "services",
+    "template": "spring.post_categories.services",
     "is_published": true,
     "in_sitemap": true,
     "alias": "services",

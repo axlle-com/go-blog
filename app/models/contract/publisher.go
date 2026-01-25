@@ -2,6 +2,8 @@ package contract
 
 import "github.com/google/uuid"
 
+const MaxShotTitle = 25
+
 // Publisher материал который доступен по URL
 type Publisher interface {
 	GetID() uint
@@ -11,5 +13,6 @@ type Publisher interface {
 	GetImage() string
 	GetMetaTitle() string
 	GetMetaDescription() string
+	GetTemplateName() string
 	GetTable() string
 }

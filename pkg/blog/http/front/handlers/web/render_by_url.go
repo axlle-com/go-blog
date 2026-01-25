@@ -13,7 +13,7 @@ func (c *blogController) RenderByURL(ctx *gin.Context) {
 		c.RenderHTML(
 			ctx,
 			http.StatusNotFound,
-			c.view.View("error"),
+			c.view.ViewStatic("error"),
 			gin.H{
 				"title":    "Page not found",
 				"error":    "404",
@@ -40,7 +40,7 @@ func (c *blogController) RenderByURL(ctx *gin.Context) {
 	c.RenderHTML(
 		ctx,
 		http.StatusNotFound,
-		c.view.View("error"),
+		c.view.ViewStatic("error"),
 		gin.H{
 			"title":    "Page not found",
 			"error":    "404",

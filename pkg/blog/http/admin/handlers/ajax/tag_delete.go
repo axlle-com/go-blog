@@ -40,7 +40,7 @@ func (c *tagController) Delete(ctx *gin.Context) {
 	}
 
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (c *tagController) Delete(ctx *gin.Context) {
 	users := c.api.User.GetAll()
 
 	data := response.Body{
-		"title":     c.T(ctx, "ui.page.tags"),
+		"title":     c.T(ctx, "ui.name.tags"),
 		"tag":       empty,
 		"tags":      tags,
 		"templates": c.templates(ctx),
@@ -72,7 +72,7 @@ func (c *tagController) Delete(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.tags_inner", data, ctx),
 			},
-			c.T(ctx, "ui.success.record_deleted"),
+			c.T(ctx, "ui.message.record_deleted"),
 			paginator,
 		),
 	)

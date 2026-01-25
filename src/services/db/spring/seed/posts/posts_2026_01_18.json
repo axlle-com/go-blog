@@ -1,7 +1,7 @@
 [
   {
     "user_id": 1,
-    "template": "index",
+    "template": "spring.posts.index",
     "is_published": true,
     "in_sitemap": true,
     "is_main": true,
@@ -37,7 +37,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "educational-portal",
@@ -64,7 +64,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "telemedicine-service",
@@ -91,7 +91,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "inform",
@@ -118,7 +118,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "corp",
@@ -140,7 +140,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "ecom",
@@ -162,7 +162,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "chat",
@@ -184,7 +184,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "erp",
@@ -206,7 +206,7 @@
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
     "alias": "support",

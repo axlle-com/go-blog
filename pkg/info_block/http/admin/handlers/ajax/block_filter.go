@@ -21,7 +21,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.error.server_error")))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.message.server_error")))
 		return
 	}
 
@@ -36,7 +36,7 @@ func (c *blockController) FilterInfoBlock(ctx *gin.Context) {
 
 	users := c.api.User.GetAll()
 	data := response.Body{
-		"title":      c.T(ctx, "ui.page.info_blocks"),
+		"title":      c.T(ctx, "ui.name.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
 		"templates":  c.templates(ctx),

@@ -20,7 +20,7 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 				response.Body{
 					"status": true,
 				},
-				c.T(ctx, "ui.success.item_deleted"),
+				c.T(ctx, "ui.message.item_deleted"),
 				nil,
 			),
 		)
@@ -67,7 +67,7 @@ func (c *controllerItem) DeleteMenuItem(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.menu_inner", data, ctx),
 			},
-			c.T(ctx, "ui.success.menu_item_deleted"),
+			c.T(ctx, "ui.message.menu_item_deleted"),
 			nil,
 		),
 	)

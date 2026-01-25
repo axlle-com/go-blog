@@ -57,7 +57,7 @@
         <form class="ml-3 d-md-flex">
                 <span class="input-icon">
                     <i class="material-icons">search</i>
-                    <input type="text" placeholder="{{ call .T "ui.placeholder.search" nil }}"
+                    <input type="text" placeholder="{{ call .T "ui.label.search" nil }}"
                            class="form-control bg-gray-200 border-gray-200 rounded-lg form-shadow">
                 </span>
         </form>
@@ -72,41 +72,42 @@
                     <i class="material-icons">refresh</i>
                 </a>
             </li>
-            <li class="nav-item dropdown nav-notif js-set-credit">
-            </li>
-            <li class="nav-item dropdown ml-2 user">
-                <a class="nav-link nav-link-faded rounded nav-link-img dropdown-toggle px-2" href="#"
-                   data-toggle="dropdown" data-display="static">
-                    <span class="rounded-circle mr-2 avatar"
-                          style="background-image: url({{ .user.Avatar }});; background-size: cover; background-position: center;">
-                    </span>
-                    <span class="d-none d-sm-block"> </span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right pt-0 overflow-hidden user-block">
-                    <div class="media align-items-center bg-primary text-white px-4 py-3 mb-2">
-                        <span class="rounded-circle avatar"
-                              style="background-image: url({{ .user.Avatar }}); background-size: cover;background-position: center;">
+            <li class="nav-item dropdown nav-notif js-set-credit"></li>
+            {{ if .user }}
+                <li class="nav-item dropdown ml-2 user">
+                    <a class="nav-link nav-link-faded rounded nav-link-img dropdown-toggle px-2" href="#"
+                       data-toggle="dropdown" data-display="static">
+                        <span class="rounded-circle mr-2 avatar"
+                              style="background-image: url({{ .user.Avatar }});; background-size: cover; background-position: center;">
                         </span>
-                        <div class="media-body ml-2 text-nowrap">
-                            <h6 class="mb-0">{{ .user.LastName }}</h6>
-                            <ul>
-                                {{ range .user.Roles }}
-                                    <li class="text-gray-400 font-size-sm">{{ .Name }}</li>
-                                {{ end }}
-                            </ul>
+                        <span class="d-none d-sm-block"> </span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right pt-0 overflow-hidden user-block">
+                        <div class="media align-items-center bg-primary text-white px-4 py-3 mb-2">
+                            <span class="rounded-circle avatar"
+                                  style="background-image: url({{ .user.Avatar }}); background-size: cover;background-position: center;">
+                            </span>
+                            <div class="media-body ml-2 text-nowrap">
+                                <h6 class="mb-0">{{ .user.LastName }}</h6>
+                                <ul>
+                                    {{ range .user.Roles }}
+                                        <li class="text-gray-400 font-size-sm">{{ .Name }}</li>
+                                    {{ end }}
+                                </ul>
+                            </div>
                         </div>
+                        <a class="dropdown-item has-icon" href="/admin/user/profile">
+                            <i class="mr-2" data-feather="user"></i>{{ call .T "ui.label.profile" nil }}
+                        </a>
+                        <a class="dropdown-item has-icon" href="javascript:void(0)">
+                            <i class="mr-2" data-feather="settings"></i>Settings
+                        </a>
+                        <a class="dropdown-item has-icon text-danger" href="/admin/logout">
+                            <i class="mr-2" data-feather="log-out"></i>{{ call .T "ui.button.logout" nil }}
+                        </a>
                     </div>
-                    <a class="dropdown-item has-icon" href="/admin/user/profile">
-                        <i class="mr-2" data-feather="user"></i>{{ call .T "ui.label.profile" nil }}
-                    </a>
-                    <a class="dropdown-item has-icon" href="javascript:void(0)">
-                        <i class="mr-2" data-feather="settings"></i>Settings
-                    </a>
-                    <a class="dropdown-item has-icon text-danger" href="/admin/logout">
-                        <i class="mr-2" data-feather="log-out"></i>{{ call .T "ui.button.logout" nil }}
-                    </a>
-                </div>
-            </li>
+                </li>
+            {{ end }}
         </ul>
     </div>
     {{ end }}

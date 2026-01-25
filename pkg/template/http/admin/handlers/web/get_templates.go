@@ -27,7 +27,7 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -44,7 +44,7 @@ func (c *templateWebController) GetTemplates(ctx *gin.Context) {
 	templates := c.templateCollectionService.Aggregates(temp)
 	resources := app.NewResources()
 	c.RenderHTML(ctx, http.StatusOK, "admin.templates", gin.H{
-		"title":         c.T(ctx, "ui.page.templates"),
+		"title":         c.T(ctx, "ui.name.templates"),
 		"templateModel": empty,
 		"resources":     resources.Resources(),
 		"themes":        resources.Themes(),

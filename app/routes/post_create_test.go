@@ -54,7 +54,7 @@ type ImageRequest struct {
 
 type PostRequest struct {
 	ID                 string            `json:"id" form:"id"`
-	TemplateID         string            `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName       string            `json:"template_name" form:"template_name" binding:"omitempty"`
 	PostCategoryID     string            `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	MetaTitle          string            `json:"meta_title" form:"meta_title" binding:"omitempty,max=100"`
 	MetaDescription    string            `json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
@@ -82,7 +82,7 @@ type PostRequest struct {
 type PostResponse struct {
 	ID                 uint                     `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
 	UserID             *uint                    `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
-	TemplateID         *uint                    `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName       string                   `gorm:"size:255" json:"template_name" form:"template_name" binding:"omitempty"`
 	PostCategoryID     *uint                    `gorm:"index" json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	MetaTitle          *string                  `gorm:"size:100" json:"meta_title" form:"meta_title" binding:"omitempty,max=100"`
 	MetaDescription    *string                  `gorm:"size:200" json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`
@@ -264,9 +264,8 @@ func TestSuccessfulCreatePost(t *testing.T) {
 
 			var v any
 
-			v, _ = service.ConvertStringToType(post.TemplateID, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, responseBody.Data.Post.TemplateID)
-			assert.Equal(t, v, model.TemplateID)
+			assert.Equal(t, post.TemplateName, responseBody.Data.Post.TemplateName)
+			assert.Equal(t, post.TemplateName, model.TemplateName)
 
 			v, _ = service.ConvertStringToType(post.PostCategoryID, responseBody.Data.Post.PostCategoryID)
 			assert.Equal(t, v, responseBody.Data.Post.PostCategoryID)
@@ -362,7 +361,7 @@ func TestSuccessfulCreatePost(t *testing.T) {
 
 func newPost() *PostRequest {
 	post := &PostRequest{
-		TemplateID:         db.IntStr(rand.Intn(10)),
+		TemplateName:       "spring.posts.service",
 		PostCategoryID:     db.IntStr(rand.Intn(10)),
 		MetaTitle:          faker.Sentence(),
 		MetaDescription:    faker.Sentence(),

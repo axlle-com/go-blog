@@ -112,8 +112,8 @@ func (r *infoBlockRepository) FindByFilter(filter *models.InfoBlockFilter) (*mod
 		query = query.Where("title = ?", *filter.Title)
 	}
 
-	if filter.TemplateID != nil {
-		query = query.Where("template_id = ?", *filter.TemplateID)
+	if filter.TemplateName != nil && *filter.TemplateName != "" {
+		query = query.Where("template_name = ?", *filter.TemplateName)
 	}
 
 	if filter.ID != nil {
@@ -141,8 +141,8 @@ func (r *infoBlockRepository) WithPaginate(p contract.Paginator, filter *models.
 		if filter.ID != nil {
 			q = q.Where("id = ?", *filter.ID)
 		}
-		if filter.TemplateID != nil {
-			q = q.Where("template_id = ?", *filter.TemplateID)
+		if filter.TemplateName != nil && *filter.TemplateName != "" {
+			q = q.Where("template_name = ?", *filter.TemplateName)
 		}
 		if filter.UserID != nil {
 			q = q.Where("user_id = ?", *filter.UserID)
@@ -207,14 +207,13 @@ func (r *infoBlockRepository) Update(new *models.InfoBlock, _ *models.InfoBlock)
 			return fmt.Errorf("cannot set parent to self: id=%d", old.ID)
 		}
 
-		// подстраховка: не даём случайно занулить чужие поля при Save(new)
-		new.TemplateID = old.TemplateID
+		new.TemplateName = old.TemplateName
 		new.UserID = old.UserID
 
 		// 2.1) если родитель не менялся — обычный save, path_ltree оставляем прежним
 		if oldParent == newParent {
 			new.PathLtree = old.PathLtree
-			return db.Select(new.UpdatedFields()).Save(new).Error
+			return db.Select(new.Fields()).Save(new).Error
 		}
 
 		// 3) валидируем нового родителя (если перенос не в root)
@@ -265,7 +264,7 @@ func (r *infoBlockRepository) Update(new *models.InfoBlock, _ *models.InfoBlock)
 
 		// 5) обновляем сам узел
 		new.PathLtree = newPathLtree
-		return db.Select(new.UpdatedFields()).Save(new).Error
+		return db.Select(new.Fields()).Save(new).Error
 	})
 }
 

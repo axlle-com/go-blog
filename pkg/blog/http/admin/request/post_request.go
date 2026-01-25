@@ -12,7 +12,7 @@ func NewPostRequest() *PostRequest {
 type PostRequest struct {
 	ID                 uint   `json:"id" form:"id" binding:"omitempty"`
 	UUID               string `json:"uuid" form:"uuid" binding:"omitempty"`
-	TemplateID         *uint  `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName       string `json:"template_name" form:"template_name" binding:"omitempty"`
 	PostCategoryID     *uint  `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	MetaTitle          string `json:"meta_title" form:"meta_title" binding:"omitempty,max=100"`
 	MetaDescription    string `json:"meta_description" form:"meta_description" binding:"omitempty,max=200"`

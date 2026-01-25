@@ -47,7 +47,7 @@ func (c *templateController) CreateTemplate(ctx *gin.Context) {
 				"url":      template.AdminURL(),
 				"template": template,
 			},
-			c.T(ctx, "ui.success.record_created"),
+			c.T(ctx, "ui.message.record_created"),
 		),
 	)
 }

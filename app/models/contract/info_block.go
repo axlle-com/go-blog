@@ -7,7 +7,6 @@ import (
 type InfoBlock interface {
 	GetID() uint
 	GetUUID() uuid.UUID
-	GetTemplateID() *uint
 	GetInfoBlockID() *uint
 	GetTemplateTitle() string
 	GetTemplateName() string

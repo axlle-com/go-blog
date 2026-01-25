@@ -48,8 +48,8 @@ func mustCreateCategory(t *testing.T, repo repository.CategoryRepository, c *mod
 	if c.Title == "" {
 		c.Title = "title-" + uuid.NewString()
 	}
-	if c.TemplateID == nil {
-		c.TemplateID = ptrUint(1)
+	if c.TemplateName == "" {
+		c.TemplateName = "spring.post_categories.default"
 	}
 	if c.UserID == nil {
 		c.UserID = ptrUint(1)
@@ -96,18 +96,19 @@ func mustGetCategory(t *testing.T, repo repository.CategoryRepository, id uint) 
 
 func buildCategoryTree(t *testing.T, repo repository.CategoryRepository, templateID, userID uint) (root, child, grand *models.PostCategory) {
 	t.Helper()
+	templateIndex := fmt.Sprintf("spring.post_categories.t%d", templateID)
 
 	root = mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID: ptrUint(templateID),
-		UserID:     ptrUint(userID),
-		Title:      "root-" + uuid.NewString(),
-		URL:        "/root-" + uuid.NewString(),
-		Alias:      "root-" + uuid.NewString(),
-		Sort:       ptrUint(1),
+		TemplateName: templateIndex,
+		UserID:       ptrUint(userID),
+		Title:        "root-" + uuid.NewString(),
+		URL:          "/root-" + uuid.NewString(),
+		Alias:        "root-" + uuid.NewString(),
+		Sort:         ptrUint(1),
 	})
 
 	child = mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(templateID),
+		TemplateName:   templateIndex,
 		UserID:         ptrUint(userID),
 		PostCategoryID: ptrUint(root.ID),
 		Title:          "child-" + uuid.NewString(),
@@ -118,7 +119,7 @@ func buildCategoryTree(t *testing.T, repo repository.CategoryRepository, templat
 	})
 
 	grand = mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(templateID),
+		TemplateName:   templateIndex,
 		UserID:         ptrUint(userID),
 		PostCategoryID: ptrUint(child.ID),
 		Title:          "grand-" + uuid.NewString(),
@@ -162,31 +163,30 @@ func TestCategory_WithPaginate_FilterByTemplateAndUUIDs_NoLeakBetweenTemplates(t
 	repo, _ := setupCategoryRepo(t)
 
 	a := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "a-" + uuid.NewString(),
-		URL:        "/a-" + uuid.NewString(),
-		Alias:      "a-" + uuid.NewString(),
+		TemplateName: "spring.post_categories.t1",
+		UserID:       ptrUint(10),
+		Title:        "a-" + uuid.NewString(),
+		URL:          "/a-" + uuid.NewString(),
+		Alias:        "a-" + uuid.NewString(),
 	})
 	b := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID: ptrUint(2),
-		UserID:     ptrUint(10),
-		Title:      "b-" + uuid.NewString(),
-		URL:        "/b-" + uuid.NewString(),
-		Alias:      "b-" + uuid.NewString(),
+		TemplateName: "spring.post_categories.t2",
+		UserID:       ptrUint(10),
+		Title:        "b-" + uuid.NewString(),
+		URL:          "/b-" + uuid.NewString(),
+		Alias:        "b-" + uuid.NewString(),
 	})
 
 	p := models2.FromQuery(map[string][]string{})
 	filter := &models.CategoryFilter{
-		TemplateID: ptrUint(1),
-		UUIDs:      []uuid.UUID{a.UUID, b.UUID}, // b из другого template — не должен пролезть
+		TemplateName: ptrString("spring.post_categories.t1"),
+		UUIDs:        []uuid.UUID{a.UUID, b.UUID}, // b из другого template — не должен пролезть
 	}
 	items, err := repo.WithPaginate(p, filter)
 	require.NoError(t, err)
 	require.Len(t, items, 1)
 	require.Equal(t, a.ID, items[0].ID)
-	require.NotNil(t, items[0].TemplateID)
-	require.Equal(t, uint(1), *items[0].TemplateID)
+	require.Equal(t, "spring.post_categories.t1", items[0].TemplateName)
 }
 
 func TestCategory_Update_SameParent_DoesNotChangePathLtree(t *testing.T) {
@@ -242,8 +242,8 @@ func TestCategory_Update_MoveToRoot_UpdatesSubtree_AndDoesNotTouchOtherScope(t *
 	// and nothing got "reset" across scopes
 	table := (&models.PostCategory{}).GetTable()
 	var cntA, cntB int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cntA).Error)
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 2, 10).Count(&cntB).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.post_categories.t1", 10).Count(&cntA).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.post_categories.t2", 10).Count(&cntB).Error)
 	require.GreaterOrEqual(t, cntA, int64(3))
 	require.GreaterOrEqual(t, cntB, int64(3))
 }
@@ -253,17 +253,17 @@ func TestCategory_Update_MoveUnderAnotherParent_UpdatesSubtree(t *testing.T) {
 
 	// root
 	root := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "root-" + uuid.NewString(),
-		URL:        "/r-" + uuid.NewString(),
-		Alias:      "r-" + uuid.NewString(),
-		Sort:       ptrUint(1),
+		TemplateName: "spring.post_categories.t1",
+		UserID:       ptrUint(10),
+		Title:        "root-" + uuid.NewString(),
+		URL:          "/r-" + uuid.NewString(),
+		Alias:        "r-" + uuid.NewString(),
+		Sort:         ptrUint(1),
 	})
 
 	// two children
 	a := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(1),
+		TemplateName:   "spring.post_categories.t1",
 		UserID:         ptrUint(10),
 		PostCategoryID: ptrUint(root.ID),
 		Title:          "a-" + uuid.NewString(),
@@ -272,7 +272,7 @@ func TestCategory_Update_MoveUnderAnotherParent_UpdatesSubtree(t *testing.T) {
 		Sort:           ptrUint(2),
 	})
 	b := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(1),
+		TemplateName:   "spring.post_categories.t1",
 		UserID:         ptrUint(10),
 		PostCategoryID: ptrUint(root.ID),
 		Title:          "b-" + uuid.NewString(),
@@ -283,7 +283,7 @@ func TestCategory_Update_MoveUnderAnotherParent_UpdatesSubtree(t *testing.T) {
 
 	// grand under a
 	ga := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(1),
+		TemplateName:   "spring.post_categories.t1",
 		UserID:         ptrUint(10),
 		PostCategoryID: ptrUint(a.ID),
 		Title:          "ga-" + uuid.NewString(),
@@ -313,7 +313,7 @@ func TestCategory_Delete_Subtree(t *testing.T) {
 
 	table := (&models.PostCategory{}).GetTable()
 	var cnt int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cnt).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.post_categories.t1", 10).Count(&cnt).Error)
 	require.Equal(t, int64(0), cnt)
 }
 
@@ -327,7 +327,7 @@ func TestCategory_Delete_WithOnlyID_DeletesSubtree(t *testing.T) {
 
 	table := (&models.PostCategory{}).GetTable()
 	var cnt int64
-	require.NoError(t, gdb.Table(table).Where("template_id = ? AND user_id = ?", 1, 10).Count(&cnt).Error)
+	require.NoError(t, gdb.Table(table).Where("template_name = ? AND user_id = ?", "spring.post_categories.t1", 10).Count(&cnt).Error)
 	require.Equal(t, int64(0), cnt)
 }
 
@@ -357,14 +357,14 @@ func TestCategory_Update_InvalidOldPath_ShouldRefuse(t *testing.T) {
 	repo, gdb := setupCategoryRepo(t)
 
 	root := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID: ptrUint(1),
-		UserID:     ptrUint(10),
-		Title:      "r-" + uuid.NewString(),
-		URL:        "/r-" + uuid.NewString(),
-		Alias:      "r-" + uuid.NewString(),
+		TemplateName: "spring.post_categories.t1",
+		UserID:       ptrUint(10),
+		Title:        "r-" + uuid.NewString(),
+		URL:          "/r-" + uuid.NewString(),
+		Alias:        "r-" + uuid.NewString(),
 	})
 	child := mustCreateCategory(t, repo, &models.PostCategory{
-		TemplateID:     ptrUint(1),
+		TemplateName:   "spring.post_categories.t1",
 		UserID:         ptrUint(10),
 		PostCategoryID: ptrUint(root.ID),
 		Title:          "c-" + uuid.NewString(),

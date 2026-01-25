@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
@@ -13,7 +14,7 @@ type PostCategory struct {
 	ID                 uint           `gorm:"primaryKey" json:"id"`
 	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
 	UserID             *uint          `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
-	TemplateID         *uint          `gorm:"index" json:"template_id,omitempty"`
+	TemplateName       string         `gorm:"size:255;index" json:"template_name" form:"template_name" binding:"omitempty"`
 	PostCategoryID     *uint          `gorm:"index" json:"post_category_id,omitempty"`
 	PathLtree          string         `gorm:"type:ltree;column:path_ltree;not null" json:"-"`
 	MetaTitle          *string        `gorm:"size:100" json:"meta_title,omitempty"`
@@ -66,9 +67,6 @@ func (c *PostCategory) GetURL() string {
 }
 
 func (c *PostCategory) GetTitle() string {
-	if c.TitleShort != nil && *c.TitleShort != "" {
-		return *c.TitleShort
-	}
 	return c.Title
 }
 
@@ -76,6 +74,7 @@ func (c *PostCategory) GetImage() string {
 	if c.Image != nil {
 		return *c.Image
 	}
+
 	return ""
 }
 
@@ -83,6 +82,7 @@ func (c *PostCategory) GetMetaTitle() string {
 	if c.MetaTitle != nil {
 		return *c.MetaTitle
 	}
+
 	return ""
 }
 
@@ -90,13 +90,14 @@ func (c *PostCategory) GetMetaDescription() string {
 	if c.MetaDescription != nil {
 		return *c.MetaDescription
 	}
+
 	return ""
 }
 
-func (c *PostCategory) UpdatedFields() []string {
+func (c *PostCategory) Fields() []string {
 	return []string{
 		"UserID",
-		"TemplateID",
+		"TemplateName",
 		"PostCategoryID",
 		"MetaTitle",
 		"MetaDescription",
@@ -117,36 +118,33 @@ func (c *PostCategory) UpdatedFields() []string {
 }
 
 func (c *PostCategory) GetTemplateName() string {
-	if c.Template != nil {
-		return c.Template.GetFullName(c.GetTable())
+	if c.TemplateName != "" {
+		return c.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", c.GetTable())
+	return ""
+}
+
+func (c *PostCategory) GetTitleShort() string {
+	if c.TitleShort != nil && *c.TitleShort != "" {
+		return *c.TitleShort
+	}
+
+	if utf8.RuneCountInString(c.Title) <= contract.MaxShotTitle {
+		return c.Title
+	}
+
+	r := []rune(c.Title)
+
+	return string(r[:contract.MaxShotTitle])
 }
 
 func (c *PostCategory) AdminURL() string {
 	if c.ID == 0 {
 		return "/admin/post/categories"
 	}
+
 	return fmt.Sprintf("/admin/post/categories/%d", c.ID)
-}
-
-func (c *PostCategory) SetUUID() {
-	if c.UUID == uuid.Nil {
-		c.UUID = uuid.New()
-	}
-}
-
-func (c *PostCategory) SetAlias() {
-	if c.Alias != "" {
-		return
-	}
-
-	if c.UUID == uuid.Nil {
-		c.SetUUID()
-	}
-
-	c.Alias = c.UUID.String()
 }
 
 func (c *PostCategory) GetCategoryID() uint {
@@ -154,22 +152,15 @@ func (c *PostCategory) GetCategoryID() uint {
 	if c.PostCategoryID != nil {
 		categoryID = *c.PostCategoryID
 	}
-	return categoryID
-}
 
-func (c *PostCategory) GetTemplateID() uint {
-	var templateID uint
-	if c.TemplateID != nil {
-		templateID = *c.TemplateID
-	}
-	return templateID
+	return categoryID
 }
 
 func (c *PostCategory) GetCategoryTitleShort() string {
 	var titleShort string
 
-	if c.Category != nil && c.Category.TitleShort != nil {
-		titleShort = *c.Category.TitleShort
+	if c.Category != nil {
+		titleShort = c.Category.GetTitleShort()
 	}
 
 	return titleShort
@@ -180,6 +171,7 @@ func (c *PostCategory) GetTemplateTitle() string {
 	if c.Template != nil {
 		title = c.Template.GetTitle()
 	}
+
 	return title
 }
 
@@ -188,7 +180,16 @@ func (c *PostCategory) UserLastName() string {
 	if c.User != nil {
 		lastName = c.User.GetLastName()
 	}
+
 	return lastName
+}
+
+func (c *PostCategory) Date() string {
+	if c.CreatedAt == nil {
+		return ""
+	}
+
+	return c.CreatedAt.Format("02.01.2006 15:04:05")
 }
 
 func (c *PostCategory) Creating() {
@@ -204,8 +205,8 @@ func (c *PostCategory) Deleting() bool {
 }
 
 func (c *PostCategory) Saving() {
-	c.SetUUID()
-	c.SetAlias()
+	c.setUUID()
+	c.setAlias()
 	c.setTitleShort()
 	c.setURL()
 	c.setInSitemap()
@@ -221,6 +222,7 @@ func (c *PostCategory) setTitleShort() {
 	if c.TitleShort == nil {
 		return
 	}
+
 	if *c.TitleShort == "" {
 		c.TitleShort = nil
 	}
@@ -233,9 +235,20 @@ func (c *PostCategory) setInSitemap() {
 	}
 }
 
-func (c *PostCategory) Date() string {
-	if c.CreatedAt == nil {
-		return ""
+func (c *PostCategory) setUUID() {
+	if c.UUID == uuid.Nil {
+		c.UUID = uuid.New()
 	}
-	return c.CreatedAt.Format("02.01.2006 15:04:05")
+}
+
+func (c *PostCategory) setAlias() {
+	if c.Alias != "" {
+		return
+	}
+
+	if c.UUID == uuid.Nil {
+		c.setUUID()
+	}
+
+	c.Alias = c.UUID.String()
 }

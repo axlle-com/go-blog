@@ -41,7 +41,7 @@ func (c *tagController) GetTag(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.tag",
 		gin.H{
-			"title":     c.T(ctx, "ui.page.tag"),
+			"title":     c.T(ctx, "ui.name.tag"),
 			"templates": c.templates(ctx),
 			"tag":       tag,
 			"collection": gin.H{

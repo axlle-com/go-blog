@@ -82,8 +82,7 @@ func rollback() {
 }
 
 func seedTest() {
-	seed()
-	err := container.Seeder.SeedTest(100)
+	err := container.Seeder.SeedTest(50)
 	if err != nil {
 		logger.Errorf("[cli][seedTest] Error: %v", err)
 	}

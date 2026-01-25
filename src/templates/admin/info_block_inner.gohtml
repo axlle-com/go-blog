@@ -22,7 +22,7 @@
                                    href="#home-page"
                                    role="tab"
                                    aria-controls="home-page"
-                                   aria-selected="false">{{ call .T "ui.tab.main" nil }}</a>
+                                   aria-selected="false">{{ call .T "ui.label.main" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -31,7 +31,7 @@
                                    href="#tab2Faded"
                                    role="tab"
                                    aria-controls="tab2Faded"
-                                   aria-selected="false">{{ call .T "ui.tab.gallery" nil }}</a>
+                                   aria-selected="false">{{ call .T "ui.label.gallery" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -40,7 +40,7 @@
                                    href="#tab4Faded"
                                    role="tab"
                                    aria-controls="tab4Faded"
-                                   aria-selected="true">{{ call .T "ui.tab.settings" nil }}</a>
+                                   aria-selected="true">{{ call .T "ui.label.settings" nil }}</a>
                             </li>
                         </ul>
                     </div>
@@ -52,12 +52,12 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <fieldset class="form-block">
-                                        <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
+                                        <legend>{{ call .T "ui.label.data_link" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="infoBlockParent">{{ call .T "ui.label.parent_info_block" nil }}</label>
+                                            <label for="infoBlockParent">{{ call .T "ui.label.parent" nil }}</label>
                                             <select
                                                     class="form-control select2"
-                                                    data-placeholder="{{ call .T "ui.placeholder.parent" nil }}"
+                                                    data-placeholder="{{ call .T "ui.label.parent" nil }}"
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
                                                     name="info_block_id"
@@ -79,12 +79,12 @@
                                                     data-placeholder="{{ call .T "ui.label.template" nil }}"
                                                     data-select2-search="true"
                                                     data-allow-clear="true"
-                                                    name="template_id"
-                                                    data-validator-name="template_id">
+                                                    name="template_name"
+                                                    data-validator-name="template_name">
                                                 <option></option>
                                                 {{ range .templates}}
-                                                    <option value="{{ .ID }}"
-                                                            {{ if eq .ID (ptrUint $.infoBlock.GetTemplateID) }}selected{{ end }}>
+                                                    <option value="{{ .GetName }}"
+                                                            {{ if eq .GetName $.infoBlock.GetTemplateName }}selected{{ end }}>
                                                         {{ .Title }}
                                                     </option>
                                                 {{ end }}
@@ -95,10 +95,10 @@
                                     <fieldset class="form-block">
                                         <legend>{{ call .T "ui.label.title" nil }}</legend>
                                         <div class="form-group small">
-                                            <label for="blogTitle">{{ call .T "ui.placeholder.normal" nil }}</label>
+                                            <label for="blogTitle">{{ call .T "ui.label.normal" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="{{ call .T "ui.placeholder.normal" nil }}"
+                                                    placeholder="{{ call .T "ui.label.normal" nil }}"
                                                     name="title"
                                                     id="title"
                                                     value="{{ .infoBlock.Title }}"
@@ -116,7 +116,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <fieldset class="form-block">
-                                        <legend>{{ call .T "ui.fieldset.image" nil }}</legend>
+                                        <legend>{{ call .T "ui.label.image" nil }}</legend>
                                         {{ template "admin.image" .infoBlock }}
                                         {{ template "admin.image_empty" . }}
                                     </fieldset>

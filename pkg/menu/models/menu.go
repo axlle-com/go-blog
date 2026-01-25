@@ -9,17 +9,17 @@ import (
 )
 
 type Menu struct {
-	ID          uint       `gorm:"primaryKey" json:"id"`
-	UUID        uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
-	TemplateID  *uint      `gorm:"index" json:"template_id"`
-	Title       string     `gorm:"size:100" json:"title,omitempty"`
-	IsPublished bool       `gorm:"default:true" json:"is_published,omitempty"`
-	IsMain      bool       `gorm:"default:false" json:"is_main,omitempty"`
-	Ico         *string    `gorm:"size:255" json:"ico,omitempty"`
-	Sort        int        `gorm:"default:0" json:"sort,omitempty"`
-	CreatedAt   *time.Time `gorm:"index" json:"created_at,omitempty"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
-	DeletedAt   *time.Time `gorm:"index" json:"deleted_at,omitempty"`
+	ID           uint       `gorm:"primaryKey" json:"id"`
+	UUID         uuid.UUID  `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
+	TemplateName string     `gorm:"size:255;index" json:"template_name" form:"template_name" binding:"omitempty"`
+	Title        string     `gorm:"size:100" json:"title,omitempty"`
+	IsPublished  bool       `gorm:"default:true" json:"is_published,omitempty"`
+	IsMain       bool       `gorm:"default:false" json:"is_main,omitempty"`
+	Ico          *string    `gorm:"size:255" json:"ico,omitempty"`
+	Sort         int        `gorm:"default:0" json:"sort,omitempty"`
+	CreatedAt    *time.Time `gorm:"index" json:"created_at,omitempty"`
+	UpdatedAt    *time.Time `json:"updated_at,omitempty"`
+	DeletedAt    *time.Time `gorm:"index" json:"deleted_at,omitempty"`
 
 	Template  contract.Template `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 	MenuItems []*MenuItem       `gorm:"-" json:"menu_items" form:"menu_items" binding:"-" ignore:"true"`
@@ -30,11 +30,11 @@ func (m *Menu) GetUUID() uuid.UUID {
 }
 
 func (m *Menu) GetTemplateName() string {
-	if m.Template != nil {
-		return m.Template.GetFullName(m.GetTable())
+	if m.TemplateName != "" {
+		return m.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", m.GetTable())
+	return ""
 }
 
 func (m *Menu) GetName() string {
@@ -46,6 +46,7 @@ func (m *Menu) GetTemplateTitle() string {
 	if m.Template != nil {
 		title = m.Template.GetTitle()
 	}
+
 	return title
 }
 
@@ -64,14 +65,6 @@ func (m *Menu) SetUUID() {
 
 func (m *Menu) GetTable() string {
 	return "menus"
-}
-
-func (m *Menu) GetTemplateID() uint {
-	var templateID uint
-	if m.TemplateID != nil {
-		templateID = *m.TemplateID
-	}
-	return templateID
 }
 
 func (m *Menu) Creating() {
@@ -94,5 +87,6 @@ func (m *Menu) AdminURL() string {
 	if m.ID == 0 {
 		return "/admin/menus"
 	}
+
 	return fmt.Sprintf("/admin/menus/%d", m.ID)
 }

@@ -5,11 +5,11 @@ import "time"
 type AnalyticsEvent struct {
 	RequestUUID      string    `json:"request_uuid"`
 	UserUUID         string    `json:"user_uuid"`
+	SessionUUID      string    `json:"session_uuid"`
 	Timestamp        time.Time `json:"timestamp"`
 	Method           string    `json:"method"`
 	Host             string    `json:"host"`
 	Path             string    `json:"path"`
-	Query            string    `json:"query,omitempty"`
 	Status           int       `json:"status"`
 	Latency          int64     `json:"latency"`
 	IP               string    `json:"ip"`

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/axlle-com/blog/pkg/menu/repository"
@@ -9,15 +10,18 @@ import (
 type MenuCollectionService struct {
 	menuRepository repository.MenuRepository
 	menuService    *MenuService
+	api            *api.Api
 }
 
 func NewMenuCollectionService(
 	menuRepository repository.MenuRepository,
 	menuService *MenuService,
+	api *api.Api,
 ) *MenuCollectionService {
 	return &MenuCollectionService{
 		menuRepository: menuRepository,
 		menuService:    menuService,
+		api:            api,
 	}
 }
 

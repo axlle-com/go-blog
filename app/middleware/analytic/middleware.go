@@ -69,11 +69,11 @@ func (a *Analytic) Handler() gin.HandlerFunc {
 		evt := AnalyticsEvent{
 			RequestUUID:      ctx.GetString("request_uuid"),
 			UserUUID:         userUUID,
+			SessionUUID:      ctx.GetString("session_uuid"),
 			Timestamp:        time.Now().UTC(),
 			Method:           ctx.Request.Method,
 			Host:             host,
 			Path:             ctx.Request.URL.Path,
-			Query:            ctx.Request.URL.RawQuery,
 			Status:           ctx.Writer.Status(),
 			Latency:          time.Since(start).Milliseconds(),
 			IP:               ctx.ClientIP(),

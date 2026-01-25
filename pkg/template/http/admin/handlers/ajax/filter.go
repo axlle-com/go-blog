@@ -22,7 +22,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.error.server_error")))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.message.server_error")))
 		return
 	}
 
@@ -39,7 +39,7 @@ func (c *templateController) FilterTemplate(ctx *gin.Context) {
 	users := c.api.User.GetAll()
 	resources := app.NewResources()
 	data := response.Body{
-		"title":         c.T(ctx, "ui.page.templates"),
+		"title":         c.T(ctx, "ui.name.templates"),
 		"templateModel": empty,
 		"templates":     templates,
 		"users":         users,

@@ -48,7 +48,7 @@ func (c *blockController) CreateInfoBlock(ctx *gin.Context) {
 				"url":       fmt.Sprintf("/admin/info-blocks/%d", block.ID),
 				"infoBlock": block,
 			},
-			c.T(ctx, "ui.success.record_created"),
+			c.T(ctx, "ui.message.record_created"),
 		),
 	)
 }

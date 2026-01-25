@@ -56,3 +56,7 @@ func (p *Publisher) GetMetaDescription() string {
 	}
 	return ""
 }
+
+func (p *Publisher) GetTemplateName() string {
+	return ""
+}

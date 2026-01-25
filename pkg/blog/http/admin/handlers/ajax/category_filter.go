@@ -20,7 +20,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.error.server_error")))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.Message(c.T(ctx, "ui.message.server_error")))
 		return
 	}
 
@@ -40,7 +40,7 @@ func (c *categoryController) FilterCategory(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	data := response.Body{
-		"title":          c.T(ctx, "ui.page.categories"),
+		"title":          c.T(ctx, "ui.name.categories"),
 		"category":       &models.PostCategory{},
 		"postCategories": postCategories,
 		"categories":     categories,

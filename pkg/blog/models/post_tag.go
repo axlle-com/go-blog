@@ -12,7 +12,7 @@ import (
 type PostTag struct {
 	ID                 uint           `gorm:"primaryKey" json:"id" form:"id" binding:"-"`
 	UUID               uuid.UUID      `gorm:"type:uuid;index,using:hash" json:"uuid" form:"uuid" binding:"-"`
-	TemplateID         *uint          `gorm:"index" json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName       string         `gorm:"size:255;index" json:"template_name" form:"template_name" binding:"omitempty"`
 	Name               string         `gorm:"size:10;not null;unique" json:"name" form:"name" binding:"required,max=10"`
 	Title              *string        `gorm:"size:255" json:"title" form:"title" binding:"required,max=255"`
 	Description        *string        `gorm:"type:text" json:"description" form:"description" binding:"omitempty"`
@@ -57,6 +57,7 @@ func (pt *PostTag) GetTitle() string {
 	if pt.Title == nil {
 		return ""
 	}
+
 	return *pt.Title
 }
 
@@ -67,20 +68,12 @@ func (pt *PostTag) AdminURL() string {
 	return fmt.Sprintf("/admin/post/tags/%d", pt.ID)
 }
 
-func (pt *PostTag) GetTemplateID() uint {
-	var templateID uint
-	if pt.TemplateID != nil {
-		templateID = *pt.TemplateID
-	}
-	return templateID
-}
-
 func (pt *PostTag) GetTemplateName() string {
-	if pt.Template != nil {
-		return pt.Template.GetFullName(pt.GetTable())
+	if pt.TemplateName != "" {
+		return pt.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", pt.GetTable())
+	return ""
 }
 
 func (pt *PostTag) GetGalleries() []contract.Gallery {
@@ -95,6 +88,7 @@ func (pt *PostTag) GetImage() string {
 	if pt.Image != nil {
 		return *pt.Image
 	}
+
 	return ""
 }
 
@@ -102,6 +96,7 @@ func (pt *PostTag) GetMetaTitle() string {
 	if pt.MetaTitle != nil {
 		return *pt.MetaTitle
 	}
+
 	return ""
 }
 
@@ -109,6 +104,7 @@ func (pt *PostTag) GetMetaDescription() string {
 	if pt.MetaDescription != nil {
 		return *pt.MetaDescription
 	}
+
 	return ""
 }
 
@@ -117,6 +113,7 @@ func (pt *PostTag) GetTemplateTitle() string {
 	if pt.Template != nil {
 		title = pt.Template.GetTitle()
 	}
+
 	return title
 }
 
@@ -128,6 +125,7 @@ func (pt *PostTag) Date() string {
 	if pt.CreatedAt == nil {
 		return ""
 	}
+
 	return pt.CreatedAt.Format("02.01.2006 15:04:05")
 }
 

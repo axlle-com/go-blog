@@ -40,7 +40,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 	}
 
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -61,7 +61,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	data := response.Body{
-		"title":          c.T(ctx, "ui.page.posts"),
+		"title":          c.T(ctx, "ui.name.posts"),
 		"category":       &models.PostCategory{},
 		"categories":     categories,
 		"postCategories": postCategories,
@@ -77,7 +77,7 @@ func (c *categoryController) DeleteCategory(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.categories_inner", data, ctx),
 			},
-			c.T(ctx, "ui.success.record_deleted"),
+			c.T(ctx, "ui.message.record_deleted"),
 			paginator,
 		),
 	)

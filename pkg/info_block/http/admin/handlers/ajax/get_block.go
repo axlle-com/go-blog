@@ -29,7 +29,7 @@ func (c *blockController) GetInfoBlock(ctx *gin.Context) {
 				"url":       nil,
 				"infoBlock": found,
 			},
-			c.T(ctx, "ui.success.record_created"),
+			c.T(ctx, "ui.message.record_created"),
 			nil,
 		),
 	)

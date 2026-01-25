@@ -10,13 +10,13 @@ func NewMenuRequest() *MenuRequest {
 }
 
 type MenuRequest struct {
-	ID          uint    `json:"id"`
-	TemplateID  *uint   `json:"template_id"`
-	Title       string  `json:"title"`
-	IsPublished *bool   `json:"is_published,omitempty"`
-	IsMain      *bool   `json:"is_main,omitempty"`
-	Ico         *string `json:"ico,omitempty"`
-	Sort        int     `json:"sort,omitempty"`
+	ID           uint    `json:"id"`
+	TemplateName string  `json:"template_name"`
+	Title        string  `json:"title"`
+	IsPublished  *bool   `json:"is_published,omitempty"`
+	IsMain       *bool   `json:"is_main,omitempty"`
+	Ico          *string `json:"ico,omitempty"`
+	Sort         int     `json:"sort,omitempty"`
 
 	MenuItems []*MenuItemsRequest `json:"menu_items" form:"menu_items"`
 }

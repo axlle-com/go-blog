@@ -26,7 +26,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 	empty := &models.InfoBlock{}
@@ -42,7 +42,7 @@ func (c *infoBlockWebController) GetInfoBlocks(ctx *gin.Context) {
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.info_blocks", gin.H{
-		"title":      c.T(ctx, "ui.page.info_blocks"),
+		"title":      c.T(ctx, "ui.name.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  empty,
 		"templates":  c.templates(ctx),

@@ -58,20 +58,18 @@ func (s *InfoBlockCollectionService) WithPaginate(paginator contract.Paginator, 
 }
 
 func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) []*models.InfoBlock {
-	var templateIDs []uint
+	var templateNames []string
 	var userIDs []uint
 
-	templateIDsMap := make(map[uint]bool)
+	templateNamesMap := make(map[string]bool)
 	userIDsMap := make(map[uint]bool)
 
 	for _, infoBlock := range infoBlocks {
-		if infoBlock.TemplateID != nil {
-			id := *infoBlock.TemplateID
-			if !templateIDsMap[id] {
-				templateIDs = append(templateIDs, id)
-				templateIDsMap[id] = true
-			}
+		if infoBlock.TemplateName != "" && !templateNamesMap[infoBlock.TemplateName] {
+			templateNames = append(templateNames, infoBlock.TemplateName)
+			templateNamesMap[infoBlock.TemplateName] = true
 		}
+
 		if infoBlock.UserID != nil {
 			id := *infoBlock.UserID
 			if !userIDsMap[id] {
@@ -84,20 +82,9 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 	var wg sync.WaitGroup
 
 	var users map[uint]contract.User
-	var templates map[uint]contract.Template
+	var templates map[string]contract.Template
 
 	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		if len(templateIDs) > 0 {
-			var err error
-			templates, err = s.api.Template.GetMapByIDs(templateIDs)
-			if err != nil {
-				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
-			}
-		}
-	}()
 
 	go func() {
 		defer wg.Done()
@@ -110,12 +97,24 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 		}
 	}()
 
+	go func() {
+		defer wg.Done()
+		if len(templateNames) > 0 {
+			var err error
+			templates, err = s.api.Template.GetMapByNames(templateNames)
+			if err != nil {
+				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
+			}
+		}
+	}()
+
 	wg.Wait()
 
 	for _, infoBlock := range infoBlocks {
-		if infoBlock.TemplateID != nil {
-			infoBlock.Template = templates[*infoBlock.TemplateID]
+		if templates != nil && infoBlock.TemplateName != "" {
+			infoBlock.Template = templates[infoBlock.TemplateName]
 		}
+
 		if infoBlock.UserID != nil {
 			infoBlock.User = users[*infoBlock.UserID]
 		}
@@ -219,17 +218,17 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 		}
 
 		respByID[n.ID] = &models.InfoBlockResponse{
-			ID:          n.ID,
-			UUID:        n.UUID,
-			TemplateID:  n.TemplateID,
-			InfoBlockID: n.InfoBlockID,
-			UserID:      n.UserID,
-			Media:       n.Media,
-			Title:       n.Title,
-			Description: n.Description,
-			Image:       n.Image,
-			PathLtree:   n.PathLtree,
-			Sort:        n.Sort,
+			ID:           n.ID,
+			UUID:         n.UUID,
+			TemplateName: n.TemplateName,
+			InfoBlockID:  n.InfoBlockID,
+			UserID:       n.UserID,
+			Media:        n.Media,
+			Title:        n.Title,
+			Description:  n.Description,
+			Image:        n.Image,
+			PathLtree:    n.PathLtree,
+			Sort:         n.Sort,
 		}
 	}
 
@@ -339,10 +338,10 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 		return
 	}
 
-	templateIDs := make([]uint, 0)
+	templateNames := make([]string, 0)
 	userIDs := make([]uint, 0)
 
-	templateIDsMap := make(map[uint]bool)
+	templateNamesMap := make(map[string]bool)
 	userIDsMap := make(map[uint]bool)
 
 	resources := make([]contract.Resource, 0, len(infoBlocks))
@@ -352,13 +351,11 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 		}
 		resources = append(resources, ib)
 
-		if ib.TemplateID != nil {
-			id := *ib.TemplateID
-			if !templateIDsMap[id] {
-				templateIDs = append(templateIDs, id)
-				templateIDsMap[id] = true
-			}
+		if ib.TemplateName != "" && !templateNamesMap[ib.TemplateName] {
+			templateNames = append(templateNames, ib.TemplateName)
+			templateNamesMap[ib.TemplateName] = true
 		}
+
 		if ib.UserID != nil {
 			id := *ib.UserID
 			if !userIDsMap[id] {
@@ -372,20 +369,8 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 	wg.Add(3)
 
 	var users map[uint]contract.User
-	var templates map[uint]contract.Template
+	var templates map[string]contract.Template
 	var galleries map[uuid.UUID][]contract.Gallery
-
-	go func() {
-		defer wg.Done()
-		if len(templateIDs) == 0 {
-			return
-		}
-		var err error
-		templates, err = s.api.Template.GetMapByIDs(templateIDs)
-		if err != nil {
-			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
-		}
-	}()
 
 	go func() {
 		defer wg.Done()
@@ -404,20 +389,35 @@ func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*mode
 		galleries = s.api.Gallery.GetIndexesForResources(resources)
 	}()
 
+	go func() {
+		defer wg.Done()
+		if len(templateNames) == 0 {
+			return
+		}
+		var err error
+		templates, err = s.api.Template.GetMapByNames(templateNames)
+		if err != nil {
+			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
+		}
+	}()
+
 	wg.Wait()
 
 	for _, ib := range infoBlocks {
 		if ib == nil {
 			continue
 		}
+
 		if galleries != nil {
 			if g, ok := galleries[ib.UUID]; ok {
 				ib.Galleries = g
 			}
 		}
-		if templates != nil && ib.TemplateID != nil {
-			ib.Template = templates[*ib.TemplateID]
+
+		if templates != nil && ib.TemplateName != "" {
+			ib.Template = templates[ib.TemplateName]
 		}
+
 		if users != nil && ib.UserID != nil {
 			ib.User = users[*ib.UserID]
 		}

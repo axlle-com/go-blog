@@ -71,7 +71,7 @@ func (r *categoryRepository) GetByIDs(ids []uint) ([]*models.PostCategory, error
 }
 
 func (r *categoryRepository) save(category *models.PostCategory) error {
-	return r.db.Select(category.UpdatedFields()).Save(category).Error
+	return r.db.Select(category.Fields()).Save(category).Error
 }
 
 func (r *categoryRepository) DeleteByID(id uint) error {
@@ -114,8 +114,8 @@ func (r *categoryRepository) WithPaginate(p contract.Paginator, filter *models.C
 		if filter.ID != nil {
 			query = query.Where(fmt.Sprintf("%s.id = ?", table), *filter.ID)
 		}
-		if filter.TemplateID != nil {
-			query = query.Where(fmt.Sprintf("%s.template_id = ?", table), *filter.TemplateID)
+		if filter.TemplateName != nil && *filter.TemplateName != "" {
+			query = query.Where(fmt.Sprintf("%s.template_name = ?", table), *filter.TemplateName)
 		}
 		if filter.UserID != nil {
 			query = query.Where(fmt.Sprintf("%s.user_id = ?", table), *filter.UserID)
@@ -306,13 +306,13 @@ func (r *categoryRepository) Update(new *models.PostCategory, _ *models.PostCate
 		// (опционально, но рекомендую оставить)
 		// чтобы случайно не занулить pointer-поля при Save(new),
 		// копируем из old как в MenuItem new.MenuID = old.MenuID
-		new.TemplateID = old.TemplateID
+		new.TemplateName = old.TemplateName
 		new.UserID = old.UserID
 
 		// 2.1) если родитель не менялся — обычный save, path_ltree оставляем прежним
 		if oldParent == newParent {
 			new.PathLtree = old.PathLtree
-			return db.Select(new.UpdatedFields()).Save(new).Error
+			return db.Select(new.Fields()).Save(new).Error
 		}
 
 		// 3) валидируем нового родителя (если перенос не в root)
@@ -362,7 +362,7 @@ func (r *categoryRepository) Update(new *models.PostCategory, _ *models.PostCate
 
 		// 5) обновляем сам узел
 		new.PathLtree = newPathLtree
-		return db.Select(new.UpdatedFields()).Save(new).Error
+		return db.Select(new.Fields()).Save(new).Error
 	})
 }
 

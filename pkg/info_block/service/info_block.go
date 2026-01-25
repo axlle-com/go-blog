@@ -49,9 +49,9 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 
 	go func() {
 		defer wg.Done()
-		if infoBlock.TemplateID != nil && *infoBlock.TemplateID != 0 {
+		if infoBlock.UserID != nil && *infoBlock.UserID != 0 {
 			var err error
-			infoBlock.Template, err = s.api.Template.GetByID(*infoBlock.TemplateID)
+			infoBlock.User, err = s.api.User.GetByID(*infoBlock.UserID)
 			if err != nil {
 				logger.Error(err)
 			}
@@ -60,12 +60,13 @@ func (s *InfoBlockService) Aggregate(infoBlock *models.InfoBlock) *models.InfoBl
 
 	go func() {
 		defer wg.Done()
-		if infoBlock.UserID != nil && *infoBlock.UserID != 0 {
-			var err error
-			infoBlock.User, err = s.api.User.GetByID(*infoBlock.UserID)
+		if infoBlock.TemplateName != "" {
+			tpl, err := s.api.Template.GetByName(infoBlock.TemplateName)
 			if err != nil {
 				logger.Error(err)
+				return
 			}
+			infoBlock.Template = tpl
 		}
 	}()
 

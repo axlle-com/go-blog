@@ -88,35 +88,25 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 		}
 
 		for _, blockData := range infoBlocksData {
-			resourceName := (&models.InfoBlock{}).GetName()
-			var templateID *uint
-			if blockData.Template != "" {
-				tpl, err := s.api.Template.GetByNameAndResource(blockData.Template, resourceName)
-				if err != nil {
-					logger.Errorf("[info_block][seeder][seedFromJSON] template not found: name=%s, resource=%s, error=%v", blockData.Template, resourceName, err)
-					continue
-				}
-				id := tpl.GetID()
-				templateID = &id
-			}
+			templateName := blockData.Template
 
 			filter := models.NewInfoBlockFilter()
 			filter.Title = &blockData.Title
-			filter.TemplateID = templateID
+			filter.TemplateName = &templateName
 			foundByParams, _ := s.infoBlockService.FindByFilter(filter)
 			if foundByParams != nil {
-				logger.Infof("[info_block][seeder][seedFromJSON] info block with title='%s' and template_id=%v already exists (ID=%d), skipping", blockData.Title, templateID, foundByParams.ID)
+				logger.Infof("[info_block][seeder][seedFromJSON] info block with title='%s' and template='%s' already exists (ID=%d), skipping", blockData.Title, templateName, foundByParams.ID)
 				continue
 			}
 
 			infoBlock := models.InfoBlock{
-				TemplateID:  templateID,
-				Media:       blockData.Media,
-				Title:       blockData.Title,
-				Description: blockData.Description,
-				Image:       blockData.Image,
-				CreatedAt:   db.TimePtr(time.Now()),
-				UpdatedAt:   db.TimePtr(time.Now()),
+				TemplateName: templateName,
+				Media:        blockData.Media,
+				Title:        blockData.Title,
+				Description:  blockData.Description,
+				Image:        blockData.Image,
+				CreatedAt:    db.TimePtr(time.Now()),
+				UpdatedAt:    db.TimePtr(time.Now()),
 			}
 
 			if blockData.UserID != nil {
@@ -150,22 +140,25 @@ func (s *seeder) SeedTest(n int) error {
 
 func (s *seeder) infoBlocks(n int) error {
 	idsUser := s.api.User.GetAllIds()
-	ids := s.api.Template.GetAllIds()
+	templates := s.api.Template.GetAll()
 
 	for i := 1; i <= n; i++ {
-		randomID := ids[rand.Intn(len(ids))]
+		var templateName string
+		if len(templates) > 0 {
+			templateName = templates[rand.Intn(len(templates))].GetName()
+		}
 		randomUserID := idsUser[rand.Intn(len(idsUser))]
 
 		infoBlock := models.InfoBlock{
-			TemplateID:  &randomID,
-			Media:       db.StrPtr(faker.Word()),
-			Title:       "TitleInfoBlock #" + strconv.Itoa(i),
-			Description: db.StrPtr(faker.Paragraph()),
-			Image:       db.StrPtr("/static/img/404.svg"),
-			CreatedAt:   db.TimePtr(time.Now()),
-			UpdatedAt:   db.TimePtr(time.Now()),
-			DeletedAt:   nil,
-			UserID:      &randomUserID,
+			TemplateName: templateName,
+			Media:        db.StrPtr(faker.Word()),
+			Title:        "TitleInfoBlock #" + strconv.Itoa(i),
+			Description:  db.StrPtr(faker.Paragraph()),
+			Image:        db.StrPtr("/static/img/404.svg"),
+			CreatedAt:    db.TimePtr(time.Now()),
+			UpdatedAt:    db.TimePtr(time.Now()),
+			DeletedAt:    nil,
+			UserID:       &randomUserID,
 		}
 
 		_, err := s.infoBlockService.Create(&infoBlock, nil)

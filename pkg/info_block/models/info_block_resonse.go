@@ -1,23 +1,21 @@
 package models
 
 import (
-	"fmt"
-
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 )
 
 type InfoBlockResponse struct {
-	ID          uint      `json:"id" form:"id" binding:"-"`
-	UUID        uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
-	TemplateID  *uint     `json:"template_id" form:"template_id" binding:"omitempty"`
-	InfoBlockID *uint     `json:"info_block_id" form:"info_block_id" binding:"omitempty"`
-	PathLtree   string    `json:"path_ltree" form:"path_ltree" binding:"omitempty"`
-	UserID      *uint     `json:"user_id" form:"user_id" binding:"omitempty"`
-	Media       *string   `json:"media" form:"media" binding:"omitempty,max=255"`
-	Title       string    `json:"title" form:"title" binding:"required,max=255"`
-	Description *string   `json:"description" form:"description" binding:"omitempty"`
-	Image       *string   `json:"image" form:"image" binding:"omitempty,max=255"`
+	ID           uint      `json:"id" form:"id" binding:"-"`
+	UUID         uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
+	TemplateName string    `json:"template_name" form:"template_name" binding:"omitempty"`
+	InfoBlockID  *uint     `json:"info_block_id" form:"info_block_id" binding:"omitempty"`
+	PathLtree    string    `json:"path_ltree" form:"path_ltree" binding:"omitempty"`
+	UserID       *uint     `json:"user_id" form:"user_id" binding:"omitempty"`
+	Media        *string   `json:"media" form:"media" binding:"omitempty,max=255"`
+	Title        string    `json:"title" form:"title" binding:"required,max=255"`
+	Description  *string   `json:"description" form:"description" binding:"omitempty"`
+	Image        *string   `json:"image" form:"image" binding:"omitempty,max=255"`
 
 	Template  contract.Template  `gorm:"-" json:"template" form:"template" binding:"-" ignore:"true"`
 	User      contract.User      `gorm:"-" json:"user" form:"user" binding:"-" ignore:"true"`
@@ -39,11 +37,11 @@ func (i *InfoBlockResponse) GetName() string {
 }
 
 func (i *InfoBlockResponse) GetTemplateName() string {
-	if i.Template != nil {
-		return i.Template.GetFullName(i.GetName())
+	if i.TemplateName != "" {
+		return i.TemplateName
 	}
 
-	return fmt.Sprintf("%s.default", i.GetName())
+	return ""
 }
 
 func (i *InfoBlockResponse) GetPosition() string {
@@ -67,15 +65,12 @@ func (i *InfoBlockResponse) GetID() uint {
 	return i.ID
 }
 
-func (i *InfoBlockResponse) GetTemplateID() *uint {
-	return i.TemplateID
-}
-
 func (i *InfoBlockResponse) GetTemplateTitle() string {
 	var title string
 	if i.Template != nil {
 		title = i.Template.GetTitle()
 	}
+
 	return title
 }
 

@@ -1,23 +1,18 @@
 package form
 
-import (
-	"errors"
-	"reflect"
-)
+import "errors"
 
-var Registry = map[string]reflect.Type{
-	(&Contact{}).Name(): reflect.TypeOf(Contact{}),
+type Factory func() any
+
+var Registry = map[string]Factory{
+	(&Contact{}).Name(): func() any { return &Contact{} },
 }
 
-type Name struct {
-	FormName string `json:"form_name" binding:"required"`
-}
-
-func (n *Name) NewForm() (any, error) {
-	typ, ok := Registry[n.FormName]
+func NewForm(name string) (any, error) {
+	constructor, ok := Registry[name]
 	if !ok {
-		return nil, errors.New("unknown form: " + n.FormName)
+		return nil, errors.New("unknown form: " + name)
 	}
 
-	return reflect.New(typ).Interface(), nil
+	return constructor(), nil
 }

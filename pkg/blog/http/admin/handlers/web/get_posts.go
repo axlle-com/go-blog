@@ -25,7 +25,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 	paginator := c.PaginatorFromQuery(ctx)
@@ -44,7 +44,7 @@ func (c *postController) GetPosts(ctx *gin.Context) {
 	posts := c.postCollectionService.Aggregates(postsTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.posts", gin.H{
-		"title":      c.T(ctx, "ui.page.posts"),
+		"title":      c.T(ctx, "ui.name.posts"),
 		"post":       &models.Post{},
 		"posts":      posts,
 		"categories": categories,

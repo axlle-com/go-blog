@@ -15,7 +15,7 @@ type InfoBlockFilter struct {
 	ID             *uint       `json:"id" form:"id" binding:"omitempty"`
 	IDs            []uint      `json:"ids" form:"ids" binding:"omitempty"`
 	UUIDs          []uuid.UUID `json:"uuid" form:"uuid" binding:"-"`
-	TemplateID     *uint       `json:"template_id" form:"template_id" binding:"omitempty"`
+	TemplateName   *string     `json:"template_name" form:"template_name" binding:"omitempty"`
 	UserID         *uint       `json:"user_id" form:"user_id" binding:"omitempty"`
 	PostCategoryID *uint       `json:"post_category_id" form:"post_category_id" binding:"omitempty"`
 	Title          *string     `json:"title" form:"title" binding:"omitempty"`
@@ -26,11 +26,12 @@ type InfoBlockFilter struct {
 	models.Filter
 }
 
-func (p *InfoBlockFilter) PrintTemplateID() uint {
-	if p.TemplateID == nil {
-		return 0
+func (p *InfoBlockFilter) PrintTemplateName() string {
+	if p.TemplateName == nil {
+		return ""
 	}
-	return *p.TemplateID
+
+	return *p.TemplateName
 }
 
 func (p *InfoBlockFilter) PrintUserID() uint {

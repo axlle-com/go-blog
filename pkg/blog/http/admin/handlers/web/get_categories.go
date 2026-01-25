@@ -25,7 +25,7 @@ func (c *categoryController) GetCategories(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 	paginator := c.PaginatorFromQuery(ctx)
@@ -44,7 +44,7 @@ func (c *categoryController) GetCategories(ctx *gin.Context) {
 	postCategories := c.categoriesService.GetAggregates(postCategoriesTemp)
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.categories", gin.H{
-		"title":          c.T(ctx, "ui.page.categories"),
+		"title":          c.T(ctx, "ui.name.categories"),
 		"postCategories": postCategories,
 		"categories":     categories,
 		"category":       &models.PostCategory{},

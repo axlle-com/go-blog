@@ -9,7 +9,7 @@ const _message = {
     },
     contact: function () {
         const _this = this;
-        $('form[action="/messages"]').on('submit', function (evt) {
+        $('form[action^="/messages/"]').on('submit', function (evt) {
             evt.preventDefault();
             const form = $(this);
             
@@ -18,7 +18,7 @@ const _message = {
                 if (response && response.message) {
                     _glob.noty.success(response.message);
                 } else {
-                    _glob.noty.success(_glob.t('ui.success.message_sent', 'Message sent successfully'));
+                    _glob.noty.success(_glob.t('ui.message.message_sent', 'Message sent successfully'));
                 }
             });
         });

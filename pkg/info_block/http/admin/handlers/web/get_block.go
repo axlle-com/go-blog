@@ -45,7 +45,7 @@ func (c *infoBlockWebController) GetInfoBlock(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.info_block",
 		gin.H{
-			"title":      c.T(ctx, "ui.page.info_block"),
+			"title":      c.T(ctx, "ui.name.info_block"),
 			"templates":  c.templates(ctx),
 			"infoBlocks": infoBlocks,
 			"infoBlock":  block,

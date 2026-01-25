@@ -53,8 +53,8 @@
                     alert(data); // выводим ответ сервера
                 })
                 .catch(error => {
-                    console.error('{{ call .T "ui.error.generic" nil }}:', error);
-                    alert('{{ call .T "ui.error.save_failed" nil }}');
+                    console.error('{{ call .T "ui.message.generic" nil }}:', error);
+                    alert('{{ call .T "ui.message.save_failed" nil }}');
                 });
         }
     </script>

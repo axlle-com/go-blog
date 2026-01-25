@@ -324,7 +324,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	menuItemAggregateService := menuService.NewMenuItemAggregateService(menuItemRepo, newApi)
 	menuItemCollectionService := menuService.NewMenuItemCollectionService(menuItemRepo, menuItemService)
 	newMenuService := menuService.NewMenuService(menuRepo, menuItemService, menuItemCollectionService, menuItemAggregateService)
-	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService)
+	newMenuCollectionService := menuService.NewMenuCollectionService(menuRepo, newMenuService, newApi)
 	newMenuProvider := menuProvider.NewMenuProvider(newView, newMenuService)
 
 	newApi.Menu = newMenuProvider

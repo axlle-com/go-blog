@@ -41,7 +41,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	}
 
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 	blocks := c.blockCollectionService.Aggregates(blocksTemp)
 
 	data := response.Body{
-		"title":      c.T(ctx, "ui.page.info_blocks"),
+		"title":      c.T(ctx, "ui.name.info_blocks"),
 		"infoBlocks": blocks,
 		"infoBlock":  &models.InfoBlock{},
 		"templates":  c.templates(ctx),
@@ -72,7 +72,7 @@ func (c *blockController) DeleteInfoBlock(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.info_blocks_inner", data, ctx),
 			},
-			c.T(ctx, "ui.success.record_deleted"),
+			c.T(ctx, "ui.message.record_deleted"),
 			paginator,
 		),
 	)

@@ -24,7 +24,7 @@
                                    href="#home-page"
                                    role="tab"
                                    aria-controls="home-page"
-                                   aria-selected="false">{{ call .T "ui.tab.main" nil }}</a>
+                                   aria-selected="false">{{ call .T "ui.label.main" nil }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link nav-link-faded"
@@ -33,7 +33,7 @@
                                    href="#tab2Faded"
                                    role="tab"
                                    aria-controls="tab2Faded"
-                                   aria-selected="false">{{ call .T "ui.tab.settings" nil }}</a>
+                                   aria-selected="false">{{ call .T "ui.label.settings" nil }}</a>
                             </li>
                         </ul>
                     </div>
@@ -45,7 +45,7 @@
                             <div class="row">
                                 <div class="col-md-8">
                                     <fieldset class="form-block">
-                                        <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
+                                        <legend>{{ call .T "ui.label.data_link" nil }}</legend>
                                         <div class="form-group small">
                                             <label for="blogTitle">{{ call .T "ui.label.resource" nil }}</label>
                                             <select
@@ -68,12 +68,12 @@
                                         </div>
                                     </fieldset>
                                     <fieldset class="form-block">
-                                        <legend>{{ call .T "ui.fieldset.identification" nil }}</legend>
+                                        <legend>{{ call .T "ui.label.identification" nil }}</legend>
                                         <div class="form-group small">
                                             <label for="blogTitle">{{ call .T "ui.label.title" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="{{ call .T "ui.placeholder.normal" nil }}"
+                                                    placeholder="{{ call .T "ui.label.normal" nil }}"
                                                     name="title"
                                                     id="title"
                                                     value="{{ .templateModel.Title }}"
@@ -86,7 +86,7 @@
                                             <label for="blogTitle">{{ call .T "ui.label.name" nil }}</label>
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="{{ call .T "ui.placeholder.normal" nil }}"
+                                                    placeholder="{{ call .T "ui.label.normal" nil }}"
                                                     name="name"
                                                     id="name"
                                                     value="{{ .templateModel.Name }}"
@@ -102,7 +102,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <fieldset class="form-block">
-                                        <legend>{{ call .T "ui.fieldset.identification" nil }}</legend>
+                                        <legend>{{ call .T "ui.label.identification" nil }}</legend>
                                         <div class="form-group small">
                                             <div class="custom-control custom-checkbox">
                                                 <input

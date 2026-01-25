@@ -11,11 +11,11 @@ import (
 type Analytic struct {
 	RequestUUID      string    `json:"request_uuid"`
 	UserUUID         string    `json:"user_uuid"`
+	SessionUUID      string    `json:"session_uuid"`
 	Timestamp        time.Time `json:"timestamp"`
 	Method           string    `json:"method"`
 	Host             string    `json:"host"`
 	Path             string    `json:"path"`
-	Query            string    `json:"query,omitempty"`
 	Status           int       `json:"status"`
 	Latency          int64     `json:"latency"`
 	IP               string    `json:"ip"`
@@ -37,8 +37,9 @@ type Analytic struct {
 
 func (m *Analytic) Model() *models.Analytic {
 	var (
-		reqUUID  *uuid.UUID
-		userUUID *uuid.UUID
+		reqUUID     *uuid.UUID
+		userUUID    *uuid.UUID
+		sessionUUID *uuid.UUID
 	)
 
 	if m.RequestUUID != "" {
@@ -57,14 +58,22 @@ func (m *Analytic) Model() *models.Analytic {
 		}
 	}
 
+	if m.SessionUUID != "" {
+		if u, err := uuid.Parse(m.SessionUUID); err != nil {
+			logger.Errorf("[analytic][Model] invalid session_uuid: %v", err)
+		} else {
+			sessionUUID = &u
+		}
+	}
+
 	return &models.Analytic{
 		RequestUUID:      reqUUID,
 		UserUUID:         userUUID,
+		SessionUUID:      sessionUUID,
 		Timestamp:        m.Timestamp,
 		Method:           m.Method,
 		Host:             m.Host,
 		Path:             m.Path,
-		Query:            m.Query,
 		Status:           m.Status,
 		Latency:          m.Latency,
 		IP:               m.IP,

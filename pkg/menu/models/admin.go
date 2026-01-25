@@ -17,14 +17,14 @@ type AdminMenu struct {
 // Если нет - возвращает ключи переводов, которые можно перевести в шаблоне
 func NewMenu(currentRoute string, tFunc func(id string, data map[string]any, n ...int) string) []AdminMenu {
 	var routes = []AdminMenu{
-		{Path: "/admin/", Name: "ui.menu.dashboard", Ico: template.HTML("<i data-feather=\"globe\"></i>")},
-		{Path: "/admin/menus", Name: "ui.menu.menus", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/posts", Name: "ui.menu.posts", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/post/tags", Name: "ui.menu.tags", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/post/categories", Name: "ui.menu.categories", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/info-blocks", Name: "ui.menu.info_blocks", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/templates", Name: "ui.menu.templates", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
-		{Path: "/admin/messages", Name: "ui.menu.messages", Ico: template.HTML("<i class=\"material-icons\">mail_outline</i>")},
+		{Path: "/admin/", Name: "ui.name.dashboard", Ico: template.HTML("<i data-feather=\"globe\"></i>")},
+		{Path: "/admin/menus", Name: "ui.name.menus", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/posts", Name: "ui.name.posts", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/post/tags", Name: "ui.name.tags", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/post/categories", Name: "ui.name.categories", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/info-blocks", Name: "ui.name.info_blocks", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/templates", Name: "ui.name.templates", Ico: template.HTML("<i class=\"material-icons\">list_alt</i>")},
+		{Path: "/admin/messages", Name: "ui.name.messages", Ico: template.HTML("<i class=\"material-icons\">mail_outline</i>")},
 	}
 
 	// Если передана функция перевода, переводим названия

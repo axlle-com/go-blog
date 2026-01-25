@@ -7,6 +7,7 @@ import (
 	"github.com/axlle-com/blog/app/di"
 	"github.com/axlle-com/blog/app/middleware"
 	analyticMiddleware "github.com/axlle-com/blog/app/middleware/analytic"
+	"github.com/axlle-com/blog/app/models"
 	"github.com/axlle-com/blog/app/models/contract"
 	menu "github.com/axlle-com/blog/pkg/menu/models"
 	"github.com/gin-contrib/gzip"
@@ -48,7 +49,7 @@ func InitWebRoutes(r *gin.Engine, config contract.Config, container *di.Containe
 	r.GET("/", container.FrontWebPostController.RenderHome)
 	r.GET("/login", container.FrontWebUserController.Login)
 	r.POST("/auth", container.FrontWebUserController.Auth)
-	r.POST("/messages", container.FrontAjaxMessageController.CreateMessage)
+	r.POST("/messages/:form", container.FrontAjaxMessageController.CreateMessage)
 
 	InitAdminRoutes(r, container)
 
@@ -56,26 +57,26 @@ func InitWebRoutes(r *gin.Engine, config contract.Config, container *di.Containe
 
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
+		base := models.BaseAjax{}
+
+		var tpl string
+		var body gin.H
 
 		if strings.HasPrefix(path, "/admin") {
-			ctx.HTML(
-				http.StatusNotFound,
-				"admin.404",
-				gin.H{
-					"title": "Page not found",
-					"error": "404",
-					"menu":  menu.NewMenu(ctx.FullPath(), nil),
-				},
-			)
+			tpl = "admin.404"
+			body = gin.H{
+				"title": "Page not found",
+				"error": "404",
+				"menu":  menu.NewMenu(ctx.FullPath(), nil),
+			}
 		} else {
-			ctx.HTML(
-				http.StatusNotFound,
-				container.View.View("error"),
-				gin.H{
-					"title": "Page not found",
-					"error": "404",
-				},
-			)
+			tpl = container.View.ViewStatic("error")
+			body = gin.H{
+				"title": "Page not found",
+				"error": "404",
+			}
 		}
+
+		base.RenderHTML(ctx, http.StatusNotFound, tpl, body)
 	})
 }

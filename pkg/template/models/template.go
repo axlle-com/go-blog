@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/contract"
 )
 
@@ -13,7 +12,6 @@ type Template struct {
 	UserID       *uint      `gorm:"index" json:"user_id" form:"user_id" binding:"omitempty"`
 	Title        string     `gorm:"size:255;not null" json:"title"`
 	IsMain       bool       `gorm:"index;not null;default:false" json:"is_main" form:"is_main" binding:"omitempty"`
-	Theme        *string    `gorm:"size:255;not null" json:"theme"`
 	Name         string     `gorm:"size:255;not null" json:"name"`
 	ResourceName *string    `gorm:"size:255" json:"resource_name,omitempty"`
 	HTML         *string    `gorm:"type:text" json:"html" binding:"omitempty"`
@@ -52,24 +50,12 @@ func (t *Template) GetName() string {
 	return t.Name
 }
 
-func (t *Template) GetFullName(resourceName string) string {
-	return fmt.Sprintf("%s.%s", resourceName, t.GetName())
-}
-
 func (t *Template) GetResourceName() string {
 	if t.ResourceName != nil {
 		return *t.ResourceName
 	}
 
 	return ""
-}
-
-func (t *Template) GetThemeName() string {
-	if t.Theme != nil {
-		return *t.Theme
-	}
-
-	return "default"
 }
 
 func (t *Template) UserLastName() string {
@@ -87,12 +73,7 @@ func (t *Template) Date() string {
 	return t.CreatedAt.Format("02.01.2006 15:04:05")
 }
 
-func (t *Template) Saving() {
-	if t.Theme == nil || *t.Theme == "" {
-		v := config.Config().Layout()
-		t.Theme = &v
-	}
-}
+func (t *Template) Saving() {}
 
 func (t *Template) Creating() {
 	t.Saving()

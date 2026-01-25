@@ -25,7 +25,7 @@ func (c *blockController) DetachInfoBlock(ctx *gin.Context) {
 		http.StatusOK,
 		response.OK(
 			nil,
-			c.T(ctx, "ui.success.record_deleted"),
+			c.T(ctx, "ui.message.record_deleted"),
 			nil,
 		),
 	)

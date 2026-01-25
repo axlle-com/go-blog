@@ -1,14 +1,14 @@
 {{ define "default.footer" }}
     <footer class="bg-dark text-white text-center py-3">
         <div class="container">
-            <p>&copy; 2024 {{ call .settings.T "front.label.business_card" nil }}
-                . {{ call .settings.T "front.label.all_rights_reserved" nil }}</p>
+            <p>&copy; 2024 {{ call .settings.T "ui.label.business_card" nil }}
+                . {{ call .settings.T "ui.label.all_rights_reserved" nil }}</p>
         </div>
     </footer>
 
     <script>
         window.__i18n = {{ json (dict
-            "ui.success.message_sent" (call .settings.T "ui.success.message_sent" nil)
+            "ui.message.message_sent" (call .settings.T "ui.message.message_sent" nil)
         ) }};
     </script>
 

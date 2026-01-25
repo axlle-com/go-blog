@@ -10,7 +10,7 @@
                                 <div class="form-group mr-3 w-50">
                                     <select
                                             class="form-control select2 js-info-blocks-select"
-                                            data-placeholder="{{ call $root.T "ui.placeholder.select_info_blocks" nil }}"
+                                            data-placeholder="{{ call $root.T "ui.label.select_info_blocks" nil }}"
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             name="info_block">
@@ -163,7 +163,7 @@
                                                     <div class="form-group small">
                                                         <input
                                                                 class="form-control form-shadow"
-                                                                placeholder="{{ call $root.T "ui.placeholder.sort" nil }}"
+                                                                placeholder="{{ call $root.T "ui.label.sort" nil }}"
                                                                 type="number"
                                                                 name="info_blocks[{{ $index }}][sort]"
                                                                 value="{{ .GetSort }}">

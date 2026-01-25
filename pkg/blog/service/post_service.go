@@ -61,7 +61,7 @@ func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 	var tags = make([]*models.PostTag, 0)
 	var err error
 
-	wg.Add(3)
+	wg.Add(4)
 
 	go func() {
 		defer wg.Done()
@@ -79,6 +79,20 @@ func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
 		if err != nil {
 			logger.Errorf("[PostService] Error: %v", err)
 		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if post.TemplateName == "" {
+			return
+		}
+
+		tpl, e := s.api.Template.GetByName(post.TemplateName)
+		if e != nil {
+			logger.Errorf("[PostService] Error: %v", e)
+			return
+		}
+		post.Template = tpl
 	}()
 
 	wg.Wait()
@@ -167,7 +181,11 @@ func (s *PostService) View(post *models.Post) (*models.Post, error) {
 	// --- template ---
 	service.SafeGo(&wg, func(p *models.Post) func() {
 		return func() {
-			tpl, e := s.api.Template.GetByID(*p.TemplateID)
+			if p.TemplateName == "" {
+				return
+			}
+
+			tpl, e := s.api.Template.GetByName(p.TemplateName)
 			if e != nil {
 				agg.Add(fmt.Errorf("get template: %w", e))
 				return

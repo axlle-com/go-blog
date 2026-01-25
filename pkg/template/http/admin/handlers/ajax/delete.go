@@ -42,7 +42,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 	}
 
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -60,7 +60,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 
 	resources := app.NewResources()
 	data := response.Body{
-		"title":         c.T(ctx, "ui.page.templates"),
+		"title":         c.T(ctx, "ui.name.templates"),
 		"templateModel": empty,
 		"templates":     templates,
 		"users":         users,
@@ -76,7 +76,7 @@ func (c *templateController) DeleteTemplate(ctx *gin.Context) {
 			response.Body{
 				"view": c.RenderView("admin.templates_inner", data, ctx),
 			},
-			c.T(ctx, "ui.success.record_deleted"),
+			c.T(ctx, "ui.message.record_deleted"),
 			paginator,
 		),
 	)

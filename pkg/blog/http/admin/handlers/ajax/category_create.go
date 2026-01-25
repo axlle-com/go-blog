@@ -58,7 +58,7 @@ func (c *categoryController) CreateCategory(ctx *gin.Context) {
 				"url":      category.AdminURL(),
 				"category": category,
 			},
-			c.T(ctx, "ui.success.record_created"),
+			c.T(ctx, "ui.message.record_created"),
 		),
 	)
 }

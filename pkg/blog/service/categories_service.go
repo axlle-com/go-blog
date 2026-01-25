@@ -27,22 +27,20 @@ func NewCategoriesService(
 }
 
 func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*models.PostCategory {
-	var templateIDs []uint
+	var templateNames []string
 	var userIDs []uint
 	var categoryIDs []uint
 
-	templateIDsMap := make(map[uint]bool)
+	templateNamesMap := make(map[string]bool)
 	userIDsMap := make(map[uint]bool)
 	categoryIDsMap := make(map[uint]bool)
 
 	for _, category := range categories {
-		if category.TemplateID != nil {
-			id := *category.TemplateID
-			if !templateIDsMap[id] {
-				templateIDs = append(templateIDs, id)
-				templateIDsMap[id] = true
-			}
+		if category.TemplateName != "" && !templateNamesMap[category.TemplateName] {
+			templateNames = append(templateNames, category.TemplateName)
+			templateNamesMap[category.TemplateName] = true
 		}
+
 		if category.UserID != nil {
 			id := *category.UserID
 			if !userIDsMap[id] {
@@ -50,6 +48,7 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 				userIDsMap[id] = true
 			}
 		}
+
 		if category.PostCategoryID != nil {
 			id := *category.PostCategoryID
 			if !categoryIDsMap[id] {
@@ -62,21 +61,10 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 	var wg sync.WaitGroup
 
 	var users map[uint]contract.User
-	var templates map[uint]contract.Template
+	var templates map[string]contract.Template
 	var parents map[uint]*models.PostCategory
 
 	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-		if len(templateIDs) > 0 {
-			var err error
-			templates, err = s.api.Template.GetMapByIDs(templateIDs)
-			if err != nil {
-				logger.Error(err)
-			}
-		}
-	}()
 
 	go func() {
 		defer wg.Done()
@@ -100,15 +88,28 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 		}
 	}()
 
+	go func() {
+		defer wg.Done()
+		if len(templateNames) > 0 {
+			var err error
+			templates, err = s.api.Template.GetMapByNames(templateNames)
+			if err != nil {
+				logger.Error(err)
+			}
+		}
+	}()
+
 	wg.Wait()
 
 	for _, category := range categories {
-		if category.TemplateID != nil {
-			category.Template = templates[*category.TemplateID]
+		if templates != nil && category.TemplateName != "" {
+			category.Template = templates[category.TemplateName]
 		}
+
 		if category.UserID != nil {
 			category.User = users[*category.UserID]
 		}
+
 		if category.PostCategoryID != nil {
 			category.Category = parents[*category.PostCategoryID]
 		}

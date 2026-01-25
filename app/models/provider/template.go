@@ -8,6 +8,7 @@ type TemplateProvider interface {
 	GetAllIds() []uint
 	GetByIDs(ids []uint) ([]contract.Template, error)
 	GetMapByIDs(ids []uint) (map[uint]contract.Template, error)
+	GetMapByNames(names []string) (map[string]contract.Template, error)
 	GetForResources(resource contract.Resource) ([]contract.Template, error)
-	GetByNameAndResource(name string, resourceName string) (contract.Template, error)
+	GetByName(name string) (contract.Template, error)
 }

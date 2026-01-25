@@ -607,7 +607,7 @@ const _menu = {
                                     <div class="form-group small">
                                         <label>${_glob.t('ui.label.publisher', 'Publisher')}</label>
                                         <select class="form-control select2 select2-search"
-                                                data-placeholder="${_glob.t('ui.placeholder.select_publisher', 'Select publisher')}"
+                                                data-placeholder="${_glob.t('ui.label.select_publisher', 'Select publisher')}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
                                                 data-action="/admin/publishers"
@@ -635,9 +635,9 @@ const _menu = {
                                 <fieldset class="form-block">
                                     <legend>${_glob.t('ui.label.hierarchy_sort', 'Hierarchy and sort')}</legend>
                                     <div class="form-group small">
-                                        <label>${_glob.t('ui.label.parent_menu_item', 'Parent menu item')}</label>
+                                        <label>${_glob.t('ui.label.parent', 'Parent')}</label>
                                         <select class="form-control select2 select2-search"
-                                                data-placeholder="${_glob.t('ui.placeholder.parent', 'Parent element')}"
+                                                data-placeholder="${_glob.t('ui.label.parent', 'Parent')}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
                                                 data-action="/admin/ajax/menus/menus-items?menu_id=${menuId}"

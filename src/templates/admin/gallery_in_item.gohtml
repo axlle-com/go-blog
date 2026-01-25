@@ -62,7 +62,7 @@
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="{{ call $root.T "ui.placeholder.description" nil }}"
+                                                    placeholder="{{ call $root.T "ui.label.description" nil }}"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][description]"
                                                     value="{{ ptrStr .GetDescription }}">
                                             <div class="invalid-feedback"></div>
@@ -70,7 +70,7 @@
                                         <div class="form-group small">
                                             <input
                                                     class="form-control form-shadow"
-                                                    placeholder="{{ call $root.T "ui.placeholder.sort" nil }}"
+                                                    placeholder="{{ call $root.T "ui.label.sort" nil }}"
                                                     type="number"
                                                     name="galleries[{{ $index }}][images][{{ $indexImages }}][sort]"
                                                     value="{{ .GetSort }}">

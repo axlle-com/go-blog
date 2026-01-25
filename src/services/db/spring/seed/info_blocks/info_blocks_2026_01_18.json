@@ -1,49 +1,49 @@
 [
   {
     "user_id": 1,
-    "template": "about",
+    "template": "spring.info_blocks.about",
     "title": "Блок about",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
-    "template": "services",
+    "template": "spring.info_blocks.services",
     "title": "Блок services",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
-    "template": "contact_form",
+    "template": "spring.info_blocks.contact_form",
     "title": "Блок contact_form",
     "image": "/static/spring/images/girls.png"
   },
   {
     "user_id": 1,
-    "template": "contact",
+    "template": "spring.info_blocks.contact",
     "title": "Блок contact",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
-    "template": "clients",
+    "template": "spring.info_blocks.clients",
     "title": "Блок clients",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.info_blocks.service",
     "title": "service-educational-portal",
     "image": "/static/spring/images/services/process.png"
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.info_blocks.service",
     "title": "service-telemedicine-service",
     "image": "/static/spring/images/services/process.png"
   },
   {
     "user_id": 1,
-    "template": "service",
+    "template": "spring.info_blocks.service",
     "title": "service-inform",
     "image": "/static/spring/images/services/process.png"
   }

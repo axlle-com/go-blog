@@ -20,7 +20,7 @@ func (c *messageController) CreateMessage(ctx *gin.Context) {
 		http.StatusOK,
 		"admin.template",
 		gin.H{
-			"title":         c.T(ctx, "ui.page.template"),
+			"title":         c.T(ctx, "ui.name.template"),
 			"user":          user,
 			"templateModel": template,
 			"resources":     app.NewResources().Resources(),

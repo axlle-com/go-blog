@@ -33,6 +33,6 @@ func (c *controller) DeleteImage(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
-		"message": c.T(ctx, "ui.success.file_deleted"),
+		"message": c.T(ctx, "ui.message.file_deleted"),
 	})
 }

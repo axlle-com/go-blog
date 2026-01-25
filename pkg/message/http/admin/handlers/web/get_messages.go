@@ -25,7 +25,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -47,7 +47,7 @@ func (c *messageController) GetMessages(ctx *gin.Context) {
 	}
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.messages", gin.H{
-		"title":     c.T(ctx, "ui.page.messages"),
+		"title":     c.T(ctx, "ui.name.messages"),
 		"message":   empty,
 		"messages":  messages,
 		"unviewed":  cnt,

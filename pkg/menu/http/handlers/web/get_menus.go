@@ -25,7 +25,7 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 	empty := &models.Menu{}
@@ -38,14 +38,14 @@ func (c *menuController) GetMenus(ctx *gin.Context) {
 	}
 
 	c.RenderHTML(ctx, http.StatusOK, "admin.menus", gin.H{
-		"title":     c.T(ctx, "ui.page.menu"),
+		"title":     c.T(ctx, "ui.name.menu"),
 		"menus":     menus,
 		"model":     empty,
 		"templates": c.templates(ctx),
 		"paginator": paginator,
 		"filter":    filter,
 		"settings": gin.H{
-			"title":     c.T(ctx, "ui.page.menu"),
+			"title":     c.T(ctx, "ui.name.menu"),
 			"csrfToken": csrf.GetToken(ctx),
 			"user":      user,
 			"menu":      models.NewMenu(ctx.FullPath(), c.GetT(ctx)),

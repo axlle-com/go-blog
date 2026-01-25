@@ -30,7 +30,7 @@ type InfoBlockRequest struct {
 	Sort        int     `json:"sort" form:"sort" binding:"omitempty"`
 	Position    string  `json:"position" form:"position" binding:"omitempty"`
 
-	GalleryID  *uint `json:"gallery_id" form:"gallery_id" binding:"omitempty"`
-	TemplateID *uint `json:"template_id" form:"template_id" binding:"omitempty"`
-	RelationID uint  `json:"relation_id" form:"relation_id" binding:"omitempty"`
+	GalleryID    *uint  `json:"gallery_id" form:"gallery_id" binding:"omitempty"`
+	TemplateName string `json:"template_name" form:"template_name" binding:"omitempty"`
+	RelationID   uint   `json:"relation_id" form:"relation_id" binding:"omitempty"`
 }

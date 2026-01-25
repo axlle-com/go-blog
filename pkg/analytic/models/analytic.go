@@ -11,11 +11,11 @@ type Analytic struct {
 	ID               uint       `gorm:"primaryKey" json:"id"`
 	RequestUUID      *uuid.UUID `gorm:"index" json:"request_uuid"`
 	UserUUID         *uuid.UUID `gorm:"index" json:"user_uuid"`
+	SessionUUID      *uuid.UUID `gorm:"index" json:"session_uuid"`
 	Timestamp        time.Time  `gorm:"index" json:"timestamp"`
 	Method           string     `gorm:"index" json:"method"`
 	Host             string     `gorm:"index" json:"host"`
 	Path             string     `gorm:"index" json:"path"`
-	Query            string     `json:"query,omitempty"`
 	Status           int        `gorm:"index" json:"status"`
 	Latency          int64      `json:"latency"` // Milliseconds
 	IP               string     `gorm:"index" json:"ip"`

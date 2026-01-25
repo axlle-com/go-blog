@@ -20,7 +20,7 @@ func (c *tagController) Filter(ctx *gin.Context) {
 		return
 	}
 	if filter == nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.error.server_error")})
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": c.T(ctx, "ui.message.server_error")})
 		return
 	}
 
@@ -37,7 +37,7 @@ func (c *tagController) Filter(ctx *gin.Context) {
 	users := c.api.User.GetAll()
 
 	data := gin.H{
-		"title":     c.T(ctx, "ui.page.tags"),
+		"title":     c.T(ctx, "ui.name.tags"),
 		"tag":       empty,
 		"tags":      tags,
 		"templates": c.templates(ctx),

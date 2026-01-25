@@ -78,14 +78,17 @@ func buildT(loc *i18n.Localizer) func(id string, data map[string]any, n ...int) 
 		if loc == nil {
 			return id
 		}
+
 		cfg := &i18n.LocalizeConfig{MessageID: id, TemplateData: data}
 		if len(n) > 0 {
 			cfg.PluralCount = n[0]
 		}
+
 		s, err := loc.Localize(cfg)
 		if err != nil || s == "" {
 			return id
 		}
+
 		return s
 	}
 }

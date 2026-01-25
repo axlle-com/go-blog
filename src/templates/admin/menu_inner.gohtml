@@ -24,19 +24,19 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <fieldset class="form-block">
-                                    <legend>{{ call .T "ui.fieldset.data_link" nil }}</legend>
+                                    <legend>{{ call .T "ui.label.data_link" nil }}</legend>
                                     <div class="form-group small">
                                         <label>{{ call .T "ui.label.template" nil }}</label>
                                         <select class="form-control select2"
                                                 data-placeholder="{{ call .T "ui.label.template" nil }}"
                                                 data-select2-search="true"
                                                 data-allow-clear="true"
-                                                name="template_id"
-                                                data-validator-name="template_id">
+                                                name="template_name"
+                                                data-validator-name="template_name">
                                             <option></option>
                                             {{ range .templates }}
-                                                <option value="{{ .ID }}"
-                                                        {{ if eq .ID $.model.GetTemplateID }}selected{{ end }}>
+                                                <option value="{{ .GetName }}"
+                                                        {{ if eq .GetName $.model.GetTemplateName }}selected{{ end }}>
                                                     {{ .Title }}
                                                 </option>
                                             {{ end }}
@@ -48,9 +48,9 @@
                                 <fieldset class="form-block">
                                     <legend>{{ call .T "ui.label.title" nil }}</legend>
                                     <div class="form-group small">
-                                        <label>{{ call .T "ui.placeholder.normal" nil }}</label>
+                                        <label>{{ call .T "ui.label.normal" nil }}</label>
                                         <input class="form-control form-shadow"
-                                               placeholder="{{ call .T "ui.placeholder.normal" nil }}"
+                                               placeholder="{{ call .T "ui.label.normal" nil }}"
                                                name="title"
                                                id="title"
                                                value="{{ .model.Title }}"
@@ -161,9 +161,9 @@
                                 <legend>{{ call $T "ui.label.hierarchy_sort" nil }}</legend>
 
                                 <div class="form-group small">
-                                    <label>{{ call $T "ui.label.parent_menu_item" nil }}</label>
+                                    <label>{{ call $T "ui.label.parent" nil }}</label>
                                     <select class="form-control select2 select2-search"
-                                            data-placeholder="{{ call $T "ui.placeholder.parent" nil }}"
+                                            data-placeholder="{{ call $T "ui.label.parent" nil }}"
                                             data-select2-search="true"
                                             data-allow-clear="true"
                                             data-action="{{ $it.AdminAjaxFilterURL }}?for_not_menu_item_id={{ $it.ID }}&menu_id={{ $it.MenuID }}"
@@ -179,12 +179,12 @@
                                 </div>
 
                                 <div class="form-group small">
-                                    <label>{{ call $T "ui.placeholder.sort" nil }}</label>
+                                    <label>{{ call $T "ui.label.sort" nil }}</label>
                                     <input class="form-control form-shadow"
                                            type="number"
                                            name="menu_items[{{ $it.ID }}][sort]"
                                            value="{{ $it.Sort }}"
-                                           placeholder="{{ call $T "ui.placeholder.sort" nil }}">
+                                           placeholder="{{ call $T "ui.label.sort" nil }}">
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </fieldset>

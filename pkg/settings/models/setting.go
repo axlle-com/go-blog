@@ -16,6 +16,7 @@ const (
 	CompanyNameKey    = "name"
 	CompanyPhoneKey   = "phone"
 	CompanyAddressKey = "address"
+	PolicyKey         = "policy"
 )
 
 type Setting struct {

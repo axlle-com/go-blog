@@ -8,6 +8,7 @@ type Cache interface {
 	GetCache(key string) (string, bool)
 	GetUserKey(id uint) string
 	DeleteCache(key string)
+	DeleteByPrefix(prefix string)
 	AddUserSession(id uint, sessionID string)
 	ResetUserSession(userID uint) error
 	ResetUsersSession()

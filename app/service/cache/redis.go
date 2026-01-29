@@ -78,6 +78,28 @@ func (r *redisClient) DeleteCache(key string) {
 	}
 }
 
+func (r *redisClient) DeleteByPrefix(prefix string) {
+	if prefix == "" {
+		return
+	}
+	var cursor uint64
+	pattern := prefix + "*"
+	for {
+		keys, next, err := r.client.Scan(context.Background(), cursor, pattern, 1000).Result()
+		if err != nil {
+			logger.Errorf("[RedisClient][DeleteByPrefix] Error: %v", err)
+			return
+		}
+		for _, key := range keys {
+			r.DeleteCache(key)
+		}
+		cursor = next
+		if cursor == 0 {
+			break
+		}
+	}
+}
+
 func (r *redisClient) GetUserKey(id uint) string {
 	return fmt.Sprintf(r.config.UserSessionKey("%d"), id)
 }

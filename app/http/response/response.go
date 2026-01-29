@@ -46,6 +46,7 @@ func Fail(code int, message string, errors map[string][]string) map[string]any {
 		"successful": false,
 		"code":       code,
 	}
+
 	body := Body{
 		"result":     result,
 		"data":       nil,

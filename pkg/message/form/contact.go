@@ -8,12 +8,13 @@ import (
 )
 
 type Contact struct {
-	Email    *string `json:"email" binding:"required,email"`
-	UserName *string `json:"user_name" binding:"required"`
-	To       *string `json:"to" binding:"omitempty,email"`
-	Subject  *string `json:"subject" binding:"required"`
-	Body     *string `json:"body" binding:"required"`
-	UserUUID string  `json:"user_uuid" binding:"omitempty"`
+	Email     *string `json:"email" binding:"required,email"`
+	UserName  *string `json:"user_name" binding:"required"`
+	To        *string `json:"to" binding:"omitempty,email"`
+	Subject   *string `json:"subject" binding:"required"`
+	Body      *string `json:"body" binding:"required"`
+	Agreement *bool   `json:"agreement" binding:"required"`
+	UserUUID  string  `json:"user_uuid" binding:"omitempty"`
 }
 
 func (c *Contact) Data() string {

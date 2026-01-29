@@ -134,6 +134,22 @@
         </div>
     </div>
 
+    <div class="modal fade js-custom-modal" id="agreement" tabindex="-1" role="dialog" aria-modal="true"
+         data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                {{ .settings.company.GetPolicy }}
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm js-custom-modal-close"
+                            data-dismiss="modal">
+                        {{ call .settings.T "ui.button.close" nil }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.__i18n = {{ json (dict
             "ui.message.message_sent" (call .settings.T "ui.message.message_sent" nil)

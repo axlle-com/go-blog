@@ -31,9 +31,39 @@ const _message = {
         this.contact();
     }
 };
+const _agree = {
+    openAgreementModal: function () {
+        $('body').on('click', '.js-custom-modal-open', function (e) {
+            e.preventDefault();
+            const selector = $(this).data('modalName');
+            const modal = $(selector);
+            if (typeof modal.modal === 'function') {
+                modal.modal('show');
+                return;
+            }
+            modal.addClass('modal-agreement');
+        });
+    },
+    closeAgreementModal: function () {
+        $('body').on('click', '.js-custom-modal-close', function (e) {
+            e.preventDefault();
+            const modal = $(this).closest('.js-custom-modal');
+            if (typeof modal.modal === 'function') {
+                modal.modal('hide');
+                return;
+            }
+            modal.removeClass('modal-agreement');
+        });
+    },
+    run: function () {
+        this.openAgreementModal();
+        this.closeAgreementModal();
+    }
+};
 const _config = {
     run: function () {
         _message.run();
+        _agree.run();
     }
 }
 

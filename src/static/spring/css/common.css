@@ -40,6 +40,55 @@
     padding: 15px 30px;
 }
 
+.agree {
+    margin: 10px 0;
+}
+
+.agree-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.agree-label input[type="checkbox"] {
+    margin: 0;
+}
+
+a.link {
+    color: #1f8ceb;
+    text-decoration: none;
+    border-bottom: 1px dotted;
+}
+
+.modal-agreement {
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: block !important;
+    padding-right: 8px;
+}
+
+.modal-agreement .modal-content,
+.modal-agreement .modal-title {
+    color: #333;
+}
+
+.modal-agreement .modal-body {
+    font-size: 14px;
+    padding: 30px;
+}
+
+.modal-agreement .btn-outline-primary {
+    border-color: #333;
+    background-color: transparent;
+    color: #333;
+}
+
+.modal-agreement .btn-outline-primary:hover {
+    background-color: #333;
+    color: #fff;
+}
+
 /* на md и выше начинаем новую строку каждые 3 плитки */
 @media (min-width: 992px) {
     .services-page-section .service-style-three:nth-child(3n+1) {

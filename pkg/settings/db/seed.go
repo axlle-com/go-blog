@@ -106,6 +106,8 @@ func (s *settingsSeeder) seedFromJSON(moduleName string) error {
 			}
 		}
 
+		s.settingsService.ResetCache()
+
 		if err := s.seedService.MarkApplied(name); err != nil {
 			return err
 		}

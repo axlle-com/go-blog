@@ -110,6 +110,9 @@ func (s *CompanyInfoService) SaveCompanyInfo(ns, scope string, companyInfo model
 	if err := s.settings.SaveString(ns, models.CompanyAddressKey, scope, companyInfo.Address); err != nil {
 		return err
 	}
+	if err := s.settings.SaveString(ns, models.PolicyKey, scope, companyInfo.Policy); err != nil {
+		return err
+	}
 
 	s.InvalidateCompanyInfo(ns, scope)
 
@@ -125,7 +128,7 @@ func (s *CompanyInfoService) InvalidateCompanyInfo(ns, scope string) {
 }
 
 func (s *CompanyInfoService) cacheKeyCompanyInfo(ns, scope string) string {
-	return "settings_obj|company_info|" + ns + "|" + scope
+	return "settings|company_info|" + ns + "|" + scope
 }
 
 func (s *CompanyInfoService) getCompanyInfoFromDB(ns, scope string) (models.CompanyInfo, bool) {
@@ -134,6 +137,7 @@ func (s *CompanyInfoService) getCompanyInfoFromDB(ns, scope string) (models.Comp
 		models.CompanyNameKey,
 		models.CompanyPhoneKey,
 		models.CompanyAddressKey,
+		models.PolicyKey,
 	}
 
 	rows, err := s.repo.GetMany(ns, scope, keys)
@@ -160,6 +164,9 @@ func (s *CompanyInfoService) getCompanyInfoFromDB(ns, scope string) (models.Comp
 		case models.CompanyPhoneKey:
 			out.Phone = value
 			okAny = true
+		case models.PolicyKey:
+			out.Policy = value
+			okAny = true
 		case models.CompanyAddressKey:
 			out.Address = value
 			okAny = true
@@ -177,5 +184,6 @@ func companyInfoEquals(a, b models.CompanyInfo) bool {
 	return a.Email == b.Email &&
 		a.Name == b.Name &&
 		a.Phone == b.Phone &&
+		a.Policy == b.Policy &&
 		a.Address == b.Address
 }

@@ -76,6 +76,20 @@ func (m *inMemoryCache) DeleteCache(key string) {
 	m.mu.Unlock()
 }
 
+func (m *inMemoryCache) DeleteByPrefix(prefix string) {
+	if prefix == "" {
+		return
+	}
+	m.mu.Lock()
+	for k := range m.data {
+		if strings.HasPrefix(k, prefix) {
+			delete(m.data, k)
+			delete(m.exp, k)
+		}
+	}
+	m.mu.Unlock()
+}
+
 func (m *inMemoryCache) GetUserKey(id uint) string {
 	return fmt.Sprintf(m.config.UserSessionKey("%d"), id)
 }

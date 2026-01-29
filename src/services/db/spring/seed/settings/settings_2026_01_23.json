@@ -22,5 +22,11 @@
     "key": "address",
     "type": "string",
     "value": "123 Example Street"
+  },
+  {
+    "namespace": "spring",
+    "key": "policy",
+    "type": "string",
+    "value": "<div class=\"modal-header\"><h4 class=\"modal-title\">Personal Data Processing Agreement</h4></div><div class=\"modal-body\"><h3>Personal data</h3><p>Personal data in this Agreement means any information related to an identified or identifiable individual (user), including name, date of birth, address, education, occupation, and other information (Federal Law No. 152-FZ).</p><h3>Processing of personal data</h3><p>When you submit a request via this website, personal data is collected, including name, email address, phone number, and other information. The personal data you provide is stored on our servers.</p><h3>Use of personal data</h3><p>Your personal data provided in the form is used solely to:</p><ul><li>Respond to your requests via email or phone;</li><li>Process and resolve requests submitted through the website;</li><li>Collect your feedback and suggestions.</li></ul><h3>Consent to personal data processing</h3><p>By submitting a request through this website, you consent to the processing of your personal data under the terms of this Agreement.</p><p>If you do not agree with any terms of this Agreement, please do not submit requests via the website.</p></div>"
   }
 ]

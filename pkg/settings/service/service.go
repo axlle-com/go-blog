@@ -37,7 +37,16 @@ func (s *Service) Invalidate(ns, key, scope string) {
 	if s.cache == nil {
 		return
 	}
+
 	s.cache.DeleteCache(s.cacheKey(ns, key, scope))
+}
+
+func (s *Service) ResetCache() {
+	if s.cache == nil {
+		return
+	}
+
+	s.cache.DeleteByPrefix("settings|")
 }
 
 func (s *Service) GetSetting(ns, key, scope string) (models.Setting, bool) {

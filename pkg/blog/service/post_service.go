@@ -1,46 +1,41 @@
 package service
 
 import (
-	"encoding/json"
-	"fmt"
-	"sync"
-
 	"github.com/axlle-com/blog/app/api"
-	"github.com/axlle-com/blog/app/errutil"
-	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	"github.com/axlle-com/blog/app/models/dto"
-	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/blog/models"
+	"github.com/axlle-com/blog/pkg/blog/queue/job"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	"github.com/google/uuid"
-	"gorm.io/datatypes"
 )
 
 type PostService struct {
-	queue                contract.Queue
+	queue contract.Queue
+	api   *api.Api
+
 	postRepo             repository.PostRepository
-	categoriesService    *CategoriesService
+	postAggregateService *PostAggregateService
+	categoriesService    *CategoryCollectionService
 	categoryService      *CategoryService
 	tagCollectionService *TagCollectionService
-	api                  *api.Api
 }
 
 func NewPostService(
 	queue contract.Queue,
+	api *api.Api,
 	postRepo repository.PostRepository,
-	categoriesService *CategoriesService,
+	postAggregateService *PostAggregateService,
+	categoriesService *CategoryCollectionService,
 	categoryService *CategoryService,
 	tagCollectionService *TagCollectionService,
-	api *api.Api,
 ) *PostService {
 	return &PostService{
 		queue:                queue,
+		api:                  api,
 		postRepo:             postRepo,
+		postAggregateService: postAggregateService,
 		categoriesService:    categoriesService,
 		categoryService:      categoryService,
 		tagCollectionService: tagCollectionService,
-		api:                  api,
 	}
 }
 
@@ -50,153 +45,11 @@ func (s *PostService) FindAggregateByID(id uint) (*models.Post, error) {
 		return nil, err
 	}
 
-	return s.Aggregate(post)
-}
-
-func (s *PostService) Aggregate(post *models.Post) (*models.Post, error) {
-	var wg sync.WaitGroup
-
-	var galleries = make([]contract.Gallery, 0)
-	var infoBlocks = make([]contract.InfoBlock, 0)
-	var tags = make([]*models.PostTag, 0)
-	var err error
-
-	wg.Add(4)
-
-	go func() {
-		defer wg.Done()
-		galleries = s.api.Gallery.GetForResourceUUID(post.UUID.String())
-	}()
-
-	go func() {
-		defer wg.Done()
-		infoBlocks = s.api.InfoBlock.GetForResourceUUID(post.UUID.String())
-	}()
-
-	go func() {
-		defer wg.Done()
-		tags, err = s.tagCollectionService.GetForResource(post)
-		if err != nil {
-			logger.Errorf("[PostService] Error: %v", err)
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		if post.TemplateName == "" {
-			return
-		}
-
-		tpl, e := s.api.Template.GetByName(post.TemplateName)
-		if e != nil {
-			logger.Errorf("[PostService] Error: %v", e)
-			return
-		}
-		post.Template = tpl
-	}()
-
-	wg.Wait()
-
-	post.Galleries = galleries
-	post.InfoBlocks = infoBlocks
-	post.PostTags = tags
-
-	return post, nil
+	return s.postAggregateService.Aggregate(post)
 }
 
 func (s *PostService) View(post *models.Post) (*models.Post, error) {
-	var wg sync.WaitGroup
-	agg := errutil.New()
-
-	// --- InfoBlocks snapshot ---
-	if post.InfoBlocksSnapshot == nil {
-		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
-			return func() {
-				blocks := s.api.InfoBlock.GetForResourceUUID(id.String())
-
-				mapped := dto.MapInfoBlocks(blocks)
-				if mapped == nil {
-					mapped = []dto.InfoBlock{}
-				}
-
-				raw, e := json.Marshal(mapped)
-				if e != nil {
-					agg.Add(fmt.Errorf("marshal info_blocks_snapshot: %w", e))
-					return
-				}
-
-				v := datatypes.JSON(raw)
-				patch := map[string]any{"info_blocks_snapshot": v}
-				if _, e = s.postRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
-					agg.Add(fmt.Errorf("update info_blocks_snapshot: %w", e))
-					return
-				}
-
-				p.InfoBlocksSnapshot = v
-			}
-		}(post, post.UUID))
-	}
-
-	// --- Galleries snapshot ---
-	if post.GalleriesSnapshot == nil {
-		service.SafeGo(&wg, func(p *models.Post, id uuid.UUID) func() {
-			return func() {
-				galleries := s.api.Gallery.GetForResourceUUID(id.String())
-
-				mapped := dto.MapGalleries(galleries)
-				if mapped == nil {
-					mapped = []dto.Gallery{}
-				}
-
-				raw, e := json.Marshal(mapped)
-				if e != nil {
-					agg.Add(fmt.Errorf("marshal galleries_snapshot: %w", e))
-					return
-				}
-
-				v := datatypes.JSON(raw)
-				patch := map[string]any{"galleries_snapshot": v}
-				if _, e = s.postRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
-					agg.Add(fmt.Errorf("update galleries_snapshot: %w", e))
-					return
-				}
-
-				p.GalleriesSnapshot = v
-			}
-		}(post, post.UUID))
-	}
-
-	// --- Tags ---
-	service.SafeGo(&wg, func(p *models.Post) func() {
-		return func() {
-			ts, e := s.tagCollectionService.GetForResource(p)
-			if e != nil {
-				agg.Add(fmt.Errorf("get tags: %w", e))
-				return
-			}
-			p.PostTags = ts
-		}
-	}(post))
-
-	// --- template ---
-	service.SafeGo(&wg, func(p *models.Post) func() {
-		return func() {
-			if p.TemplateName == "" {
-				return
-			}
-
-			tpl, e := s.api.Template.GetByName(p.TemplateName)
-			if e != nil {
-				agg.Add(fmt.Errorf("get template: %w", e))
-				return
-			}
-			p.Template = tpl
-		}
-	}(post))
-
-	wg.Wait()
-
-	return post, agg.Error()
+	return s.postAggregateService.AggregateView(post)
 }
 
 func (s *PostService) FindByParam(field string, value any) (*models.Post, error) {
@@ -227,6 +80,26 @@ func (s *PostService) receivedImage(model *models.Post) error {
 	if model.Image != nil && *model.Image != "" {
 		return s.api.File.Received([]string{*model.Image})
 	}
+
+	return nil
+}
+
+func (s *PostService) PostDelete(post *models.Post) error {
+	err := s.api.Gallery.DetachResource(post)
+	if err != nil {
+		return err
+	}
+
+	err = s.api.InfoBlock.DetachResourceUUID(post.UUID.String())
+	if err != nil {
+		return err
+	}
+
+	if err := s.postRepo.Delete(post); err != nil {
+		return err
+	}
+
+	s.queue.Enqueue(job.NewPostJob(post, "delete"), 0)
 
 	return nil
 }

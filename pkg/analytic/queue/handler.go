@@ -14,8 +14,8 @@ import (
 )
 
 func NewAnalyticQueueHandler(
-	analyticService *service.AnalyticService,
-	analyticCollectionService *service.AnalyticCollectionService,
+	analyticService *service.Service,
+	analyticCollectionService *service.CollectionService,
 ) contract.QueueHandler {
 	return &queueHandler{
 		analyticService:           analyticService,
@@ -24,8 +24,8 @@ func NewAnalyticQueueHandler(
 }
 
 type queueHandler struct {
-	analyticService           *service.AnalyticService
-	analyticCollectionService *service.AnalyticCollectionService
+	analyticService           *service.Service
+	analyticCollectionService *service.CollectionService
 }
 
 func (qh *queueHandler) Run(data []byte) {

@@ -14,8 +14,8 @@ type TemplateWebController interface {
 }
 
 func NewTemplateWebController(
-	templateService *service.TemplateService,
-	templateCollectionService *service.TemplateCollectionService,
+	templateService *service.Service,
+	templateCollectionService *service.CollectionService,
 	api *api.Api,
 ) TemplateWebController {
 	return &templateWebController{
@@ -28,7 +28,7 @@ func NewTemplateWebController(
 type templateWebController struct {
 	*app.BaseAjax
 
-	templateService           *service.TemplateService
-	templateCollectionService *service.TemplateCollectionService
+	templateService           *service.Service
+	templateCollectionService *service.CollectionService
 	api                       *api.Api
 }

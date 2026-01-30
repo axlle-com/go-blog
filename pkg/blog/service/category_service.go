@@ -1,44 +1,37 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/axlle-com/blog/app/api"
-	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
-	"github.com/axlle-com/blog/app/models/dto"
-	"github.com/axlle-com/blog/app/service"
 	app "github.com/axlle-com/blog/app/service/struct"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
-	"github.com/google/uuid"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type CategoryService struct {
-	categoryRepo          repository.CategoryRepository
-	postCollectionService *PostCollectionService
-	api                   *api.Api
+	api              *api.Api
+	categoryRepo     repository.CategoryRepository
+	aggregateService *CategoryAggregateService
 }
 
 func NewCategoryService(
-	categoryRepo repository.CategoryRepository,
 	api *api.Api,
+	categoryRepo repository.CategoryRepository,
 ) *CategoryService {
 	return &CategoryService{
-		categoryRepo: categoryRepo,
 		api:          api,
+		categoryRepo: categoryRepo,
 	}
 }
 
-func (s *CategoryService) SetPostCollectionService(postCollectionService *PostCollectionService) {
-	s.postCollectionService = postCollectionService
+func (s *CategoryService) SetAggregateService(aggregateService *CategoryAggregateService) {
+	s.aggregateService = aggregateService
 }
 
 func (s *CategoryService) GetAggregateByID(id uint) (*models.PostCategory, error) {
@@ -46,46 +39,8 @@ func (s *CategoryService) GetAggregateByID(id uint) (*models.PostCategory, error
 	if err != nil {
 		return nil, err
 	}
-	return s.Aggregate(category)
-}
 
-func (s *CategoryService) Aggregate(category *models.PostCategory) (*models.PostCategory, error) {
-	var wg sync.WaitGroup
-
-	var galleries = make([]contract.Gallery, 0)
-	var infoBlocks = make([]contract.InfoBlock, 0)
-
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-		galleries = s.api.Gallery.GetForResourceUUID(category.UUID.String())
-	}()
-
-	go func() {
-		defer wg.Done()
-		infoBlocks = s.api.InfoBlock.GetForResourceUUID(category.UUID.String())
-	}()
-
-	go func() {
-		defer wg.Done()
-		if category.TemplateName == "" {
-			return
-		}
-		tpl, e := s.api.Template.GetByName(category.TemplateName)
-		if e != nil {
-			logger.Errorf("[CategoryService] Error: %v", e)
-			return
-		}
-		category.Template = tpl
-	}()
-
-	wg.Wait()
-
-	category.Galleries = galleries
-	category.InfoBlocks = infoBlocks
-
-	return category, nil
+	return s.aggregateService.Aggregate(category)
 }
 
 func (s *CategoryService) SaveFromRequest(
@@ -115,6 +70,7 @@ func (s *CategoryService) SaveFromRequest(
 		if err != nil {
 			logger.Error(err)
 		}
+
 		model.Galleries = slice
 	}
 
@@ -128,6 +84,7 @@ func (s *CategoryService) SaveFromRequest(
 		if err != nil {
 			logger.Error(err)
 		}
+
 		model.InfoBlocks = slice
 	}
 
@@ -226,107 +183,12 @@ func (s *CategoryService) DeleteImageFile(category *models.PostCategory) error {
 	return nil
 }
 
-func (s *CategoryService) View(
-	category *models.PostCategory,
-	paginator contract.Paginator,
-	filter *models.PostFilter,
-) (*models.PostCategory, error) {
-	var wg sync.WaitGroup
-	agg := errutil.New()
-
-	// --- Posts with pagination ---
-	if s.postCollectionService != nil && paginator != nil {
-		service.SafeGo(&wg, func(c *models.PostCategory, p contract.Paginator, f *models.PostFilter) func() {
-			return func() {
-				postFilter := models.NewPostFilter()
-				if f != nil {
-					*postFilter = *f
-				}
-				categoryID := c.ID
-				postFilter.PostCategoryID = &categoryID
-
-				posts, e := s.postCollectionService.WithPaginate(p, postFilter)
-				if e != nil {
-					agg.Add(fmt.Errorf("get posts: %w", e))
-					return
-				}
-
-				c.Posts = posts
-			}
-		}(category, paginator, filter))
+func (s *CategoryService) View(category *models.PostCategory, paginator contract.Paginator, filter *models.PostFilter) (*models.PostCategory, error) {
+	if s.aggregateService == nil {
+		return nil, fmt.Errorf("category aggregate service is nil")
 	}
 
-	// --- InfoBlocks snapshot ---
-	if category.InfoBlocksSnapshot == nil {
-		service.SafeGo(&wg, func(c *models.PostCategory, id uuid.UUID) func() {
-			return func() {
-				blocks := s.api.InfoBlock.GetForResourceUUID(id.String())
-				if len(blocks) == 0 {
-					return
-				}
-
-				raw, e := json.Marshal(dto.MapInfoBlocks(blocks))
-				if e != nil {
-					agg.Add(fmt.Errorf("marshal info_blocks_snapshot: %w", e))
-					return
-				}
-
-				v := datatypes.JSON(raw)
-				patch := map[string]any{"info_blocks_snapshot": v}
-				if _, e = s.categoryRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
-					agg.Add(fmt.Errorf("update info_blocks_snapshot: %w", e))
-					return
-				}
-
-				c.InfoBlocksSnapshot = v
-			}
-		}(category, category.UUID))
-	}
-
-	// --- Galleries snapshot ---
-	if category.GalleriesSnapshot == nil {
-		service.SafeGo(&wg, func(c *models.PostCategory, id uuid.UUID) func() {
-			return func() {
-				galleries := s.api.Gallery.GetForResourceUUID(id.String())
-				if len(galleries) == 0 {
-					return
-				}
-
-				raw, e := json.Marshal(dto.MapGalleries(galleries))
-				if e != nil {
-					agg.Add(fmt.Errorf("marshal galleries_snapshot: %w", e))
-					return
-				}
-
-				v := datatypes.JSON(raw)
-				patch := map[string]any{"galleries_snapshot": v}
-				if _, e = s.categoryRepo.UpdateFieldsByUUIDs([]uuid.UUID{id}, patch); e != nil {
-					agg.Add(fmt.Errorf("update galleries_snapshot: %w", e))
-					return
-				}
-
-				c.GalleriesSnapshot = v
-			}
-		}(category, category.UUID))
-	}
-
-	// --- template ---
-	if category.TemplateName != "" {
-		service.SafeGo(&wg, func(c *models.PostCategory) func() {
-			return func() {
-				tpl, e := s.api.Template.GetByName(c.TemplateName)
-				if e != nil {
-					agg.Add(fmt.Errorf("get template: %w", e))
-					return
-				}
-				c.Template = tpl
-			}
-		}(category))
-	}
-
-	wg.Wait()
-
-	return category, agg.Error()
+	return s.aggregateService.AggregateView(category, paginator, filter)
 }
 
 // @todo переделать на фильтр везде

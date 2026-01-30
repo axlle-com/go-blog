@@ -42,6 +42,7 @@ func (s *GalleryService) CreateGallery(gallery *models.Gallery) (*models.Gallery
 	}
 
 	err := s.galleryImageUpdate(gallery)
+
 	return gallery, err
 }
 
@@ -69,8 +70,10 @@ func (s *GalleryService) Attach(resource contract.Resource, gallery contract.Gal
 				GalleryID:    gallery.GetID(),
 			},
 		)
+
 		return err
 	}
+
 	return nil
 }
 
@@ -115,11 +118,13 @@ func (s *GalleryService) DeleteForResource(resource contract.Resource) error {
 		if err != nil {
 			return err
 		}
+
 		err = s.DeleteGalleries(galleries)
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -171,7 +176,6 @@ func (s *GalleryService) galleryImageUpdate(gallery *models.Gallery) error {
 		item.GalleryID = gallery.ID
 		image, err := s.imageService.SaveImage(item)
 		if err != nil {
-			logger.Errorf("[GalleryService][galleryImageUpdate] Error: %v", err)
 			errSlice = append(errSlice, err)
 			continue
 		}

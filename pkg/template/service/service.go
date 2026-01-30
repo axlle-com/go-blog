@@ -10,26 +10,26 @@ import (
 	templateRepository "github.com/axlle-com/blog/pkg/template/repository"
 )
 
-type TemplateService struct {
-	templateRepo templateRepository.TemplateRepository
+type Service struct {
 	api          *api.Api
+	templateRepo templateRepository.TemplateRepository
 }
 
-func NewTemplateService(
-	templateRepo templateRepository.TemplateRepository,
+func NewService(
 	api *api.Api,
-) *TemplateService {
-	return &TemplateService{
-		templateRepo: templateRepo,
+	templateRepo templateRepository.TemplateRepository,
+) *Service {
+	return &Service{
 		api:          api,
+		templateRepo: templateRepo,
 	}
 }
 
-func (s *TemplateService) GetByID(id uint) (*models.Template, error) {
+func (s *Service) GetByID(id uint) (*models.Template, error) {
 	return s.templateRepo.GetByID(id)
 }
 
-func (s *TemplateService) Aggregate(template *models.Template) *models.Template {
+func (s *Service) Aggregate(template *models.Template) *models.Template {
 	if template.UserID != nil && *template.UserID != 0 {
 		var err error
 		template.User, err = s.api.User.GetByID(*template.UserID)
@@ -41,11 +41,11 @@ func (s *TemplateService) Aggregate(template *models.Template) *models.Template 
 	return template
 }
 
-func (s *TemplateService) GetByIDs(ids []uint) ([]*models.Template, error) {
+func (s *Service) GetByIDs(ids []uint) ([]*models.Template, error) {
 	return s.templateRepo.GetByIDs(ids)
 }
 
-func (s *TemplateService) Create(template *models.Template, user contract.User) (*models.Template, error) {
+func (s *Service) Create(template *models.Template, user contract.User) (*models.Template, error) {
 	if user != nil {
 		id := user.GetID()
 		template.UserID = &id
@@ -56,7 +56,7 @@ func (s *TemplateService) Create(template *models.Template, user contract.User) 
 	return template, nil
 }
 
-func (s *TemplateService) Update(template *models.Template) (*models.Template, error) {
+func (s *Service) Update(template *models.Template) (*models.Template, error) {
 	if err := s.templateRepo.Update(template); err != nil {
 		return nil, err
 	}
@@ -64,11 +64,11 @@ func (s *TemplateService) Update(template *models.Template) (*models.Template, e
 	return template, nil
 }
 
-func (s *TemplateService) Delete(template *models.Template) (err error) {
+func (s *Service) Delete(template *models.Template) (err error) {
 	return s.templateRepo.Delete(template) // @todo обновить связи
 }
 
-func (s *TemplateService) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contract.User) (template *models.Template, err error) {
+func (s *Service) SaveFromRequest(form *request.TemplateRequest, found *models.Template, user contract.User) (template *models.Template, err error) {
 	templateForm := app.LoadStruct(&models.Template{}, form).(*models.Template)
 
 	if found == nil {

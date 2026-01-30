@@ -4,45 +4,46 @@ import (
 	"context"
 	"time"
 
-	appConfig "github.com/axlle-com/blog/app/config"
 	"github.com/axlle-com/blog/app/models/contract"
 	"gopkg.in/gomail.v2"
 )
 
 func NewMailerJob(
+	config contract.Config,
 	message contract.MailRequest,
 ) contract.Job {
 	return &MailerJob{
+		config:  config,
 		message: message,
 		start:   time.Now(),
 	}
 }
 
 type MailerJob struct {
+	config  contract.Config
 	message contract.MailRequest
 	start   time.Time
 }
 
 func (j *MailerJob) Run(ctx context.Context) error {
-	config := appConfig.Config()
-	if !config.SMTPActive() {
+	if !j.config.SMTPActive() {
 		return nil
 	}
 
-	m := gomail.NewMessage()
-	m.SetHeader("GetFrom", j.message.GetFrom())
-	m.SetHeader("GetTo", j.message.GetTo())
-	m.SetHeader("GetSubject", j.message.GetSubject())
-	m.SetBody("text/html", j.message.GetBody())
+	message := gomail.NewMessage()
+	message.SetHeader("From", j.message.GetFrom())
+	message.SetHeader("To", j.message.GetTo())
+	message.SetHeader("Subject", j.message.GetSubject())
+	message.SetBody("text/html", j.message.GetBody())
 
-	d := gomail.NewDialer(config.SMTPHost(), config.SMTPPort(), config.SMTPUsername(), config.SMTPPassword())
+	dialer := gomail.NewDialer(
+		j.config.SMTPHost(),
+		j.config.SMTPPort(),
+		j.config.SMTPUsername(),
+		j.config.SMTPPassword(),
+	)
 
-	err := d.DialAndSend(m)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return dialer.DialAndSend(message)
 }
 
 func (j *MailerJob) GetData() []byte {
@@ -63,5 +64,6 @@ func (j *MailerJob) GetAction() string {
 
 func (j *MailerJob) Duration() float64 {
 	elapsed := time.Since(j.start)
+
 	return float64(elapsed.Nanoseconds()) / 1e6
 }

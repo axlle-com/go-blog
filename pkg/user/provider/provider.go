@@ -31,9 +31,12 @@ func (p *provider) GetAll() []contract.User {
 		for _, item := range all {
 			users = append(users, item)
 		}
+
 		return users
 	}
+
 	logger.Error(err)
+
 	return nil
 }
 
@@ -42,7 +45,9 @@ func (p *provider) GetAllIds() []uint {
 	if err == nil {
 		return t
 	}
+
 	logger.Error(err)
+
 	return nil
 }
 
@@ -51,7 +56,7 @@ func (p *provider) GetByID(id uint) (contract.User, error) {
 	if err == nil {
 		return t, nil
 	}
-	logger.Error(err)
+
 	return nil, err
 }
 
@@ -61,7 +66,6 @@ func (p *provider) GetByUUID(uuid uuid.UUID) (contract.User, error) {
 		return t, nil
 	}
 
-	logger.Error(err)
 	return nil, err
 }
 
@@ -74,7 +78,7 @@ func (p *provider) GetByIDs(ids []uint) ([]contract.User, error) {
 		}
 		return collection, nil
 	}
-	logger.Error(err)
+
 	return nil, err
 }
 
@@ -90,7 +94,6 @@ func (p *provider) GetMapByIDs(ids []uint) (map[uint]contract.User, error) {
 		return users, nil
 	}
 
-	logger.Error(err)
 	return nil, err
 }
 
@@ -106,7 +109,6 @@ func (p *provider) GetMapByUUIDs(uuids []uuid.UUID) (map[uuid.UUID]contract.User
 		return users, nil
 	}
 
-	logger.Error(err)
 	return nil, err
 }
 

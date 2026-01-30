@@ -10,8 +10,8 @@ import (
 )
 
 func NewAnalyticProvider(
-	analyticService *service.AnalyticService,
-	analyticCollectionService *service.AnalyticCollectionService,
+	analyticService *service.Service,
+	analyticCollectionService *service.CollectionService,
 ) appProvider.AnalyticProvider {
 	return &provider{
 		analyticService:           analyticService,
@@ -20,8 +20,8 @@ func NewAnalyticProvider(
 }
 
 type provider struct {
-	analyticService           *service.AnalyticService
-	analyticCollectionService *service.AnalyticCollectionService
+	analyticService           *service.Service
+	analyticCollectionService *service.CollectionService
 }
 
 func (p *provider) SaveForm(raw any) (contract.Analytic, error) {

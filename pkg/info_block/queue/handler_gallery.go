@@ -16,9 +16,9 @@ import (
 )
 
 func NewGalleryQueueHandler(
-	infoBlockService *service.InfoBlockService,
-	infoBlockCollectionService *service.InfoBlockCollectionService,
-	infoBlockEventService *service.InfoBlockEventService,
+	infoBlockService *service.Service,
+	infoBlockCollectionService *service.CollectionService,
+	infoBlockEventService *service.EventService,
 ) contract.QueueHandler {
 	return &queueHandler{
 		infoBlockService:           infoBlockService,
@@ -28,9 +28,9 @@ func NewGalleryQueueHandler(
 }
 
 type queueHandler struct {
-	infoBlockService           *service.InfoBlockService
-	infoBlockCollectionService *service.InfoBlockCollectionService
-	infoBlockEventService      *service.InfoBlockEventService
+	infoBlockService           *service.Service
+	infoBlockCollectionService *service.CollectionService
+	infoBlockEventService      *service.EventService
 }
 
 func (qh *queueHandler) Run(data []byte) {

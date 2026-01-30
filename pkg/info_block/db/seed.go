@@ -20,7 +20,7 @@ type seeder struct {
 	disk             contract.DiskService
 	seedService      contract.SeedService
 	api              *api.Api
-	infoBlockService *service.InfoBlockService
+	infoBlockService *service.Service
 }
 
 type InfoBlockSeedData struct {
@@ -38,7 +38,7 @@ func NewSeeder(
 	disk contract.DiskService,
 	seedService contract.SeedService,
 	api *api.Api,
-	infoBlockService *service.InfoBlockService,
+	infoBlockService *service.Service,
 ) contract.Seeder {
 	return &seeder{
 		config:           cfg,

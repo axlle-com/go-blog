@@ -9,55 +9,55 @@ import (
 	"github.com/google/uuid"
 )
 
-type AnalyticCollectionService struct {
-	analyticRepo    repository.AnalyticRepository
-	analyticService *AnalyticService
+type CollectionService struct {
 	api             *api.Api
+	repo            repository.AnalyticRepository
+	analyticService *Service
 }
 
-func NewAnalyticCollectionService(
-	analyticRepo repository.AnalyticRepository,
-	analyticService *AnalyticService,
+func NewCollectionService(
 	api *api.Api,
-) *AnalyticCollectionService {
-	return &AnalyticCollectionService{
-		analyticService: analyticService,
-		analyticRepo:    analyticRepo,
+	analyticRepo repository.AnalyticRepository,
+	analyticService *Service,
+) *CollectionService {
+	return &CollectionService{
 		api:             api,
+		repo:            analyticRepo,
+		analyticService: analyticService,
 	}
 }
 
-func (s *AnalyticCollectionService) GetAll() ([]*models.Analytic, error) {
-	return s.analyticRepo.GetAll()
+func (s *CollectionService) GetAll() ([]*models.Analytic, error) {
+	return s.repo.GetAll()
 }
 
-func (s *AnalyticCollectionService) GetAllIds() ([]uint, error) {
-	return s.analyticRepo.GetAllIds()
+func (s *CollectionService) GetAllIds() ([]uint, error) {
+	return s.repo.GetAllIds()
 }
 
-func (s *AnalyticCollectionService) GetByIDs(ids []uint) ([]*models.Analytic, error) {
-	return s.analyticRepo.GetByIDs(ids)
+func (s *CollectionService) GetByIDs(ids []uint) ([]*models.Analytic, error) {
+	return s.repo.GetByIDs(ids)
 }
 
-func (s *AnalyticCollectionService) Delete(analytics []*models.Analytic) (err error) {
+func (s *CollectionService) Delete(analytics []*models.Analytic) (err error) {
 	var ids []uint
 	for _, infoBlock := range analytics {
 		ids = append(ids, infoBlock.ID)
 	}
 
 	if len(ids) > 0 {
-		if err = s.analyticRepo.DeleteByIDs(ids); err == nil {
+		if err = s.repo.DeleteByIDs(ids); err == nil {
 			return nil
 		}
 	}
 	return err
 }
 
-func (s *AnalyticCollectionService) WithPaginate(p contract.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
-	return s.analyticRepo.WithPaginate(p, filter)
+func (s *CollectionService) WithPaginate(p contract.Paginator, filter *models.AnalyticFilter) ([]*models.Analytic, error) {
+	return s.repo.WithPaginate(p, filter)
 }
 
-func (s *AnalyticCollectionService) Aggregates(analytics []*models.Analytic) []*models.Analytic {
+func (s *CollectionService) Aggregates(analytics []*models.Analytic) []*models.Analytic {
 	var userUUIDs []uuid.UUID
 
 	userUUIDsMap := make(map[uuid.UUID]bool)

@@ -15,7 +15,7 @@ import (
 func NewBlogProvider(
 	postService *service.PostService,
 	postCollectionService *service.PostCollectionService,
-	categoriesService *service.CategoriesService,
+	categoriesService *service.CategoryCollectionService,
 	tagCollectionService *service.TagCollectionService,
 ) appProvider.BlogProvider {
 	return &provider{
@@ -29,7 +29,7 @@ func NewBlogProvider(
 type provider struct {
 	postService           *service.PostService
 	postCollectionService *service.PostCollectionService
-	categoriesService     *service.CategoriesService
+	categoriesService     *service.CategoryCollectionService
 	tagCollectionService  *service.TagCollectionService
 }
 

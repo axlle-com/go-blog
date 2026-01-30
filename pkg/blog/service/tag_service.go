@@ -8,6 +8,7 @@ import (
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	app "github.com/axlle-com/blog/app/service/struct"
 	http "github.com/axlle-com/blog/pkg/blog/http/admin/request"
 	"github.com/axlle-com/blog/pkg/blog/models"
@@ -43,20 +44,15 @@ func (s *TagService) Aggregate(model *models.PostTag) (*models.PostTag, error) {
 	var galleries = make([]contract.Gallery, 0)
 	var infoBlocks = make([]contract.InfoBlock, 0)
 
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		galleries = s.api.Gallery.GetForResourceUUID(model.UUID.String())
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		infoBlocks = s.api.InfoBlock.GetForResourceUUID(model.UUID.String())
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if model.TemplateName == "" {
 			return
 		}
@@ -67,7 +63,7 @@ func (s *TagService) Aggregate(model *models.PostTag) (*models.PostTag, error) {
 			return
 		}
 		model.Template = tpl
-	}()
+	})
 
 	wg.Wait()
 

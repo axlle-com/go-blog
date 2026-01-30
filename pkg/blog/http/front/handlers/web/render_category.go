@@ -1,11 +1,9 @@
 package web
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/dto"
 	models "github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
 )
@@ -43,13 +41,6 @@ func (c *blogController) RenderCategory(ctx *gin.Context, model *models.PostCate
 		return
 	}
 
-	var blocks []dto.InfoBlock
-	if len(model.InfoBlocksSnapshot) > 0 {
-		if err := json.Unmarshal(model.InfoBlocksSnapshot, &blocks); err != nil {
-			logger.Errorf("[blog][blogController][RenderCategory] id=%v: %v", model.ID, err)
-		}
-	}
-
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
@@ -57,7 +48,7 @@ func (c *blogController) RenderCategory(ctx *gin.Context, model *models.PostCate
 		gin.H{
 			"settings":  c.settings(ctx, model),
 			"model":     model,
-			"blocks":    blocks,
+			"blocks":    model.InfoBlocks,
 			"paginator": paginator,
 			"filter":    filter,
 		},

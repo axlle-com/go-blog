@@ -29,7 +29,12 @@ func (s *Smtp) SendMail(message contract.MailRequest) error {
 	m.SetHeader("Subject", message.GetSubject())
 	m.SetBody("text/html", message.GetBody())
 
-	d := gomail.NewDialer(s.config.SMTPHost(), s.config.SMTPPort(), s.config.SMTPUsername(), s.config.SMTPPassword())
+	d := gomail.NewDialer(
+		s.config.SMTPHost(),
+		s.config.SMTPPort(),
+		s.config.SMTPUsername(),
+		s.config.SMTPPassword(),
+	)
 
 	err := d.DialAndSend(m)
 	if err != nil {

@@ -17,8 +17,8 @@ type InfoBlockWebController interface {
 }
 
 func NewInfoBlockWebController(
-	blockService *service.InfoBlockService,
-	blockCollectionService *service.InfoBlockCollectionService,
+	blockService *service.Service,
+	blockCollectionService *service.CollectionService,
 	api *api.Api,
 ) InfoBlockWebController {
 	return &infoBlockWebController{
@@ -31,8 +31,8 @@ func NewInfoBlockWebController(
 type infoBlockWebController struct {
 	*app.BaseAjax
 
-	blockService           *service.InfoBlockService
-	blockCollectionService *service.InfoBlockCollectionService
+	blockService           *service.Service
+	blockCollectionService *service.CollectionService
 	api                    *api.Api
 }
 

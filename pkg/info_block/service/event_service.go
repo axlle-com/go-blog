@@ -14,22 +14,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type InfoBlockEventService struct {
+type EventService struct {
 	queue         contract.Queue
 	infoBlockRepo repository.InfoBlockRepository
 }
 
-func NewInfoBlockEventService(
+func NewEventService(
 	queue contract.Queue,
 	infoBlockRepo repository.InfoBlockRepository,
-) *InfoBlockEventService {
-	return &InfoBlockEventService{
+) *EventService {
+	return &EventService{
 		queue:         queue,
 		infoBlockRepo: infoBlockRepo,
 	}
 }
 
-func (s *InfoBlockEventService) Created(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+func (s *EventService) Created(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
 	var ids []uint
 	var err error
 
@@ -53,7 +53,7 @@ func (s *InfoBlockEventService) Created(infoBlock *models.InfoBlock) (*models.In
 	return infoBlock, err
 }
 
-func (s *InfoBlockEventService) Updated(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
+func (s *EventService) Updated(infoBlock *models.InfoBlock) (*models.InfoBlock, error) {
 	var ids []uint
 	var err error
 
@@ -77,7 +77,7 @@ func (s *InfoBlockEventService) Updated(infoBlock *models.InfoBlock) (*models.In
 	return infoBlock, err
 }
 
-func (s *InfoBlockEventService) UpdatedByFilter(filter *models.InfoBlockFilter) error {
+func (s *EventService) UpdatedByFilter(filter *models.InfoBlockFilter) error {
 	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (s *InfoBlockEventService) UpdatedByFilter(filter *models.InfoBlockFilter) 
 	return err
 }
 
-func (s *InfoBlockEventService) Deleted(infoBlock *models.InfoBlock) error {
+func (s *EventService) Deleted(infoBlock *models.InfoBlock) error {
 	var ids []uint
 	var err error
 
@@ -112,7 +112,7 @@ func (s *InfoBlockEventService) Deleted(infoBlock *models.InfoBlock) error {
 	return err
 }
 
-func (s *InfoBlockEventService) DeletedByFilter(filter *models.InfoBlockFilter) error {
+func (s *EventService) DeletedByFilter(filter *models.InfoBlockFilter) error {
 	collection, err := s.infoBlockRepo.GetForResourceByFilter(filter)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (s *InfoBlockEventService) DeletedByFilter(filter *models.InfoBlockFilter) 
 	return err
 }
 
-func (s *InfoBlockEventService) Attached(resourceUUID uuid.UUID) error {
+func (s *EventService) Attached(resourceUUID uuid.UUID) error {
 	filter := models.NewInfoBlockFilter()
 	filter.ResourceUUID = &resourceUUID
 
@@ -137,7 +137,7 @@ func (s *InfoBlockEventService) Attached(resourceUUID uuid.UUID) error {
 	return err
 }
 
-func (s *InfoBlockEventService) startJob(collection []*models.InfoBlockResponse, action string) {
+func (s *EventService) startJob(collection []*models.InfoBlockResponse, action string) {
 	if len(collection) == 0 {
 		return
 	}

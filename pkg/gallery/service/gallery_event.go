@@ -43,6 +43,7 @@ func (e *GalleryEvent) DeletingGallery(g *models.Gallery) (err error) {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

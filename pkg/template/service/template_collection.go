@@ -6,34 +6,35 @@ import (
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/template/http/request"
 	"github.com/axlle-com/blog/pkg/template/models"
 	"github.com/axlle-com/blog/pkg/template/repository"
 )
 
-type TemplateCollectionService struct {
-	templateService *TemplateService
-	templateRepo    repository.TemplateRepository
+type CollectionService struct {
 	api             *api.Api
+	templateRepo    repository.TemplateRepository
+	templateService *Service
 }
 
-func NewTemplateCollectionService(
-	templateService *TemplateService,
-	templateRepo repository.TemplateRepository,
+func NewCollectionService(
 	api *api.Api,
-) *TemplateCollectionService {
-	return &TemplateCollectionService{
-		templateService: templateService,
-		templateRepo:    templateRepo,
+	templateRepo repository.TemplateRepository,
+	templateService *Service,
+) *CollectionService {
+	return &CollectionService{
 		api:             api,
+		templateRepo:    templateRepo,
+		templateService: templateService,
 	}
 }
 
-func (s *TemplateCollectionService) GetAll() ([]*models.Template, error) {
+func (s *CollectionService) GetAll() ([]*models.Template, error) {
 	return s.templateRepo.GetAll()
 }
 
-func (s *TemplateCollectionService) DeleteTemplates(templates []*models.Template) (err error) {
+func (s *CollectionService) DeleteTemplates(templates []*models.Template) (err error) {
 	var ids []uint
 	for _, infoBlock := range templates {
 		ids = append(ids, infoBlock.ID)
@@ -47,11 +48,11 @@ func (s *TemplateCollectionService) DeleteTemplates(templates []*models.Template
 	return err
 }
 
-func (s *TemplateCollectionService) WithPaginate(p contract.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
+func (s *CollectionService) WithPaginate(p contract.Paginator, filter *request.TemplateFilter) ([]*models.Template, error) {
 	return s.templateRepo.WithPaginate(p, filter)
 }
 
-func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*models.Template {
+func (s *CollectionService) Aggregates(templates []*models.Template) []*models.Template {
 	var userIDs []uint
 
 	userIDsMap := make(map[uint]bool)
@@ -70,10 +71,7 @@ func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*
 
 	var users map[uint]contract.User
 
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(userIDs) > 0 {
 			var err error
 			users, err = s.api.User.GetMapByIDs(userIDs)
@@ -81,7 +79,7 @@ func (s *TemplateCollectionService) Aggregates(templates []*models.Template) []*
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 

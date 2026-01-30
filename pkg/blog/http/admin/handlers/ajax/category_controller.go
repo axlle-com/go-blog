@@ -20,7 +20,7 @@ type CategoryController interface {
 }
 
 func NewCategoryController(
-	categoriesService *service.CategoriesService,
+	categoriesService *service.CategoryCollectionService,
 	categoryService *service.CategoryService,
 	api *api.Api,
 ) CategoryController {
@@ -34,7 +34,7 @@ func NewCategoryController(
 type categoryController struct {
 	*app.BaseAjax
 
-	categoriesService *service.CategoriesService
+	categoriesService *service.CategoryCollectionService
 	categoryService   *service.CategoryService
 	api               *api.Api
 }

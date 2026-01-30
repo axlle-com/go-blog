@@ -1,11 +1,9 @@
 package web
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/dto"
 	models "github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/gin-gonic/gin"
 )
@@ -31,20 +29,13 @@ func (c *blogController) RenderPost(ctx *gin.Context, model *models.Post) {
 		return
 	}
 
-	var blocks []dto.InfoBlock
-	if model.InfoBlocksSnapshot != nil && len(model.InfoBlocksSnapshot) > 0 {
-		if err := json.Unmarshal(model.InfoBlocksSnapshot, &blocks); err != nil {
-			logger.Errorf("[blog][blogController][RenderPost] id=%v: %v", model.ID, err)
-		}
-	}
-
 	c.RenderHTML(ctx,
 		http.StatusOK,
 		c.view.ViewResource(model),
 		gin.H{
 			"settings": c.settings(ctx, model),
 			"model":    model,
-			"blocks":   blocks,
+			"blocks":   model.InfoBlocks,
 		},
 	)
 }

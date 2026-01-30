@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	apppPovider "github.com/axlle-com/blog/app/models/provider"
+	appservice "github.com/axlle-com/blog/app/service"
 	app "github.com/axlle-com/blog/app/service/struct"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/service"
@@ -13,8 +14,8 @@ import (
 )
 
 func NewProvider(
-	blockService *service.InfoBlockService,
-	collectionService *service.InfoBlockCollectionService,
+	blockService *service.Service,
+	collectionService *service.CollectionService,
 ) apppPovider.InfoBlockProvider {
 	return &provider{
 		blockService:      blockService,
@@ -23,8 +24,8 @@ func NewProvider(
 }
 
 type provider struct {
-	blockService      *service.InfoBlockService
-	collectionService *service.InfoBlockCollectionService
+	blockService      *service.Service
+	collectionService *service.CollectionService
 }
 
 func (p *provider) GetForResourceUUID(resourceUUID string) []contract.InfoBlock {
@@ -98,36 +99,39 @@ func (p *provider) Attach(infoBlockID uint, resourceUUID string) (infoBlocks []c
 	return infoBlocks, nil
 }
 
-func (p *provider) CreateRelationFormBatch(blocks []any, resourceUUID string) (infoBlock []contract.InfoBlock, err error) {
+func (p *provider) CreateRelationFormBatch(blocks []any, resourceUUID string) (infoBlocks []contract.InfoBlock, err error) {
 	newUUID, err := uuid.Parse(resourceUUID)
 	if err != nil {
-		logger.Errorf("[info_block][provider] invalid resource_uuid: %v", err)
 		return
 	}
 
 	var wg sync.WaitGroup
+	sem := make(chan struct{}, 10)
 
 	for _, block := range blocks {
-		wg.Add(1)
-		// Передаём block как параметр, чтобы избежать проблем замыкания
-		go func(b any) {
-			defer wg.Done()
-			iBlock := app.LoadStruct(&models.InfoBlockResponse{}, b).(*models.InfoBlockResponse)
+		newBlock := block
+		sem <- struct{}{}
+
+		appservice.SafeGo(&wg, func() {
+			defer func() { <-sem }()
+			iBlock := app.LoadStruct(&models.InfoBlockResponse{}, newBlock).(*models.InfoBlockResponse)
 			if err := p.blockService.Attach(newUUID, iBlock); err != nil {
 				logger.Error(err)
 			}
-		}(block)
+		})
 	}
 
 	wg.Wait()
 
-	infoBlocks := p.GetForResourceUUID(resourceUUID)
-	return infoBlocks, nil
+	infoBlocks = p.GetForResourceUUID(resourceUUID)
+
+	return
 }
 
 func (p *provider) FindByTitle(title string) (contract.InfoBlock, error) {
 	filter := models.NewInfoBlockFilter()
 	filter.Title = &title
+
 	infoBlock, err := p.blockService.FindByFilter(filter)
 	if err != nil {
 		return nil, err

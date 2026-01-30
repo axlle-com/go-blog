@@ -63,6 +63,7 @@ func (e *ErrUtil) Error() error {
 			parts = append(parts, msg)
 		}
 	}
+
 	return errors.New(strings.Join(parts, "; "))
 }
 

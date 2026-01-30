@@ -108,7 +108,7 @@ type Container struct {
 	I18n        *i18nsvc.Service
 
 	FileUploadService     *fileService.UploadService
-	FileService           *fileService.FileService
+	FileService           *fileService.Service
 	FileCollectionService *fileService.CollectionService
 	FileProvider          apppPovider.FileProvider
 
@@ -128,13 +128,13 @@ type Container struct {
 	PostsService      *postService.PostCollectionService
 	PostProvider      apppPovider.BlogProvider
 	CategoryRepo      postRepo.CategoryRepository
-	CategoriesService *postService.CategoriesService
+	CategoriesService *postService.CategoryCollectionService
 	CategoryService   *postService.CategoryService
 
 	TemplateProvider          apppPovider.TemplateProvider
 	TemplateRepo              templateRepo.TemplateRepository
-	TemplateService           *templateService.TemplateService
-	TemplateCollectionService *templateService.TemplateCollectionService
+	TemplateService           *templateService.Service
+	TemplateCollectionService *templateService.CollectionService
 
 	UserRepo        userRepository.UserRepository
 	UserProvider    apppPovider.UserProvider
@@ -149,8 +149,8 @@ type Container struct {
 
 	InfoBlockHasResourceRepo   infoBlockRepo.InfoBlockHasResourceRepository
 	InfoBlockRepo              infoBlockRepo.InfoBlockRepository
-	InfoBlockService           *infoBlockService.InfoBlockService
-	InfoBlockCollectionService *infoBlockService.InfoBlockCollectionService
+	InfoBlockService           *infoBlockService.Service
+	InfoBlockCollectionService *infoBlockService.CollectionService
 	InfoBlockProvider          apppPovider.InfoBlockProvider
 
 	PostTagRepo              postRepo.PostTagRepository
@@ -164,8 +164,8 @@ type Container struct {
 	MailService              *messageService.MailService
 
 	AnalyticRepo              analyticRepo.AnalyticRepository
-	AnalyticService           *analyticService.AnalyticService
-	AnalyticCollectionService *analyticService.AnalyticCollectionService
+	AnalyticService           *analyticService.Service
+	AnalyticCollectionService *analyticService.CollectionService
 	AnalyticProvider          apppPovider.AnalyticProvider
 
 	MenuRepo                  menuRepository.MenuRepository
@@ -221,7 +221,7 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newView := view.NewView(cfg, newDisk, newMinifier)
 
 	newFileRepo := fileRepo.NewFileRepo(db.PostgreSQL())
-	newFileService := fileService.NewFileService(newFileRepo)
+	newFileService := fileService.NewService(newFileRepo)
 	newStorageService := storage.NewLocalStorageService(cfg)
 	uploadService := fileService.NewUploadService(newFileService, newStorageService)
 	fileCollectionService := fileService.NewCollectionService(newFileRepo, newFileService, uploadService)
@@ -269,8 +269,8 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newGalleryProvider := galleryProvider.NewProvider(newGalleryRepo, newGalleryService)
 	newApi.Gallery = newGalleryProvider
 
-	newTemplateService := templateService.NewTemplateService(newTemplateRepo, newApi)
-	newTemplateCollectionService := templateService.NewTemplateCollectionService(newTemplateService, newTemplateRepo, newApi)
+	newTemplateService := templateService.NewService(newApi, newTemplateRepo)
+	newTemplateCollectionService := templateService.NewCollectionService(newApi, newTemplateRepo, newTemplateService)
 
 	newMessageRepo := messageRepo.NewMessageRepo(db.PostgreSQL())
 	newMessageService := messageService.NewMessageService(newMessageRepo, newApi)
@@ -289,9 +289,11 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	newInfoBlockHasResourceRepo := infoBlockRepo.NewResourceRepo(db.PostgreSQL())
 	newInfoBlockRepo := infoBlockRepo.NewInfoBlockRepo(db.PostgreSQL())
 
-	newBlockCollectionService := infoBlockService.NewInfoBlockCollectionService(newInfoBlockRepo, newInfoBlockHasResourceRepo, newApi)
-	newBlockEventService := infoBlockService.NewInfoBlockEventService(newQueue, newInfoBlockRepo)
-	newBlockService := infoBlockService.NewInfoBlockService(newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newApi)
+	newBlockCollectionAggregateService := infoBlockService.NewCollectionAggregateService(newApi, newInfoBlockRepo, newInfoBlockHasResourceRepo)
+	newBlockCollectionService := infoBlockService.NewCollectionService(newApi, newInfoBlockRepo, newInfoBlockHasResourceRepo, newBlockCollectionAggregateService)
+	newBlockEventService := infoBlockService.NewEventService(newQueue, newInfoBlockRepo)
+	newBlockAggregateService := infoBlockService.NewAggregateService(newApi)
+	newBlockService := infoBlockService.NewService(newApi, newInfoBlockRepo, newBlockCollectionService, newInfoBlockHasResourceRepo, newBlockEventService, newBlockAggregateService)
 	newBlockProvider := infoBlockProvider.NewProvider(newBlockService, newBlockCollectionService)
 
 	newApi.InfoBlock = newBlockProvider
@@ -301,19 +303,21 @@ func NewContainer(cfg contract.Config, db contract.DB) *Container {
 	postTagService := postService.NewTagService(postTagRepo, postTagResourceRepo, newApi)
 	postTagCollectionService := postService.NewTagCollectionService(postTagService, postTagRepo, postTagResourceRepo, newApi)
 
-	newCategoriesService := postService.NewCategoriesService(newCategoryRepo, newApi)
-	categoryService := postService.NewCategoryService(newCategoryRepo, newApi)
+	newCategoriesService := postService.NewCategoryCollectionService(newCategoryRepo, newApi)
+	categoryService := postService.NewCategoryService(newApi, newCategoryRepo)
 
-	newPostService := postService.NewPostService(newQueue, newPostRepo, newCategoriesService, categoryService, postTagCollectionService, newApi)
+	newPostAggregateService := postService.NewPostAggregateService(newApi, newPostRepo, newCategoriesService, categoryService, postTagCollectionService)
+	newPostService := postService.NewPostService(newQueue, newApi, newPostRepo, newPostAggregateService, newCategoriesService, categoryService, postTagCollectionService)
 	newPostCollectionService := postService.NewPostCollectionService(newPostRepo, newCategoriesService, categoryService, newApi)
-	categoryService.SetPostCollectionService(newPostCollectionService)
+	newCategoryAggregateService := postService.NewCategoryAggregateService(newApi, newCategoryRepo, newPostCollectionService)
+	categoryService.SetAggregateService(newCategoryAggregateService)
 	newBlogProvider := provider.NewBlogProvider(newPostService, newPostCollectionService, newCategoriesService, postTagCollectionService)
 
 	newApi.Blog = newBlogProvider
 
 	newAnalyticRepo := analyticRepo.NewAnalyticRepo(db.PostgreSQL())
-	newAnalyticService := analyticService.NewAnalyticService(newAnalyticRepo, newApi)
-	analyticCollectionService := analyticService.NewAnalyticCollectionService(newAnalyticRepo, newAnalyticService, newApi)
+	newAnalyticService := analyticService.NewService(newApi, newAnalyticRepo)
+	analyticCollectionService := analyticService.NewCollectionService(newApi, newAnalyticRepo, newAnalyticService)
 	newAnalyticProvider := analyticProvider.NewAnalyticProvider(newAnalyticService, analyticCollectionService)
 
 	newApi.Analytic = newAnalyticProvider

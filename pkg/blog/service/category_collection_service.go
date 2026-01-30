@@ -6,27 +6,28 @@ import (
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/google/uuid"
 )
 
-type CategoriesService struct {
+type CategoryCollectionService struct {
 	categoryRepo repository.CategoryRepository
 	api          *api.Api
 }
 
-func NewCategoriesService(
+func NewCategoryCollectionService(
 	categoryRepo repository.CategoryRepository,
 	api *api.Api,
-) *CategoriesService {
-	return &CategoriesService{
+) *CategoryCollectionService {
+	return &CategoryCollectionService{
 		categoryRepo: categoryRepo,
 		api:          api,
 	}
 }
 
-func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*models.PostCategory {
+func (s *CategoryCollectionService) GetAggregates(categories []*models.PostCategory) []*models.PostCategory {
 	var templateNames []string
 	var userIDs []uint
 	var categoryIDs []uint
@@ -64,10 +65,7 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 	var templates map[string]contract.Template
 	var parents map[uint]*models.PostCategory
 
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(userIDs) > 0 {
 			var err error
 			users, err = s.api.User.GetMapByIDs(userIDs)
@@ -75,10 +73,9 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(categoryIDs) > 0 {
 			var err error
 			parents, err = s.GetMapByIDs(categoryIDs)
@@ -86,10 +83,9 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(templateNames) > 0 {
 			var err error
 			templates, err = s.api.Template.GetMapByNames(templateNames)
@@ -97,7 +93,7 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 
@@ -118,19 +114,19 @@ func (s *CategoriesService) GetAggregates(categories []*models.PostCategory) []*
 	return categories
 }
 
-func (s *CategoriesService) GetAll() ([]*models.PostCategory, error) {
+func (s *CategoryCollectionService) GetAll() ([]*models.PostCategory, error) {
 	return s.categoryRepo.GetAll()
 }
 
-func (s *CategoriesService) GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error) {
+func (s *CategoryCollectionService) GetAllForParent(parent *models.PostCategory) ([]*models.PostCategory, error) {
 	return s.categoryRepo.GetAllForParent(parent)
 }
 
-func (s *CategoriesService) WithPaginate(p contract.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
+func (s *CategoryCollectionService) WithPaginate(p contract.Paginator, filter *models.CategoryFilter) ([]*models.PostCategory, error) {
 	return s.categoryRepo.WithPaginate(p, filter)
 }
 
-func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error) {
+func (s *CategoryCollectionService) GetMapByIDs(ids []uint) (map[uint]*models.PostCategory, error) {
 	categories, err := s.categoryRepo.GetByIDs(ids)
 	if err != nil {
 		return nil, err
@@ -142,6 +138,6 @@ func (s *CategoriesService) GetMapByIDs(ids []uint) (map[uint]*models.PostCatego
 	return collection, nil
 }
 
-func (s *CategoriesService) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
+func (s *CategoryCollectionService) UpdateFieldsByUUIDs(uuids []uuid.UUID, patch map[string]any) (int64, error) {
 	return s.categoryRepo.UpdateFieldsByUUIDs(uuids, patch)
 }

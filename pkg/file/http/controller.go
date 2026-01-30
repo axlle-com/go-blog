@@ -14,7 +14,7 @@ type Controller interface {
 
 func NewFileController(
 	uploadService *service.UploadService,
-	fileService *service.FileService,
+	fileService *service.Service,
 ) Controller {
 	return &controller{
 		uploadService: uploadService,
@@ -26,5 +26,5 @@ type controller struct {
 	*models.BaseAjax
 
 	uploadService *service.UploadService
-	fileService   *service.FileService
+	fileService   *service.Service
 }

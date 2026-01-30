@@ -6,6 +6,7 @@ import (
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/blog/models"
 	"github.com/axlle-com/blog/pkg/blog/repository"
 	"github.com/google/uuid"
@@ -13,14 +14,14 @@ import (
 
 type PostCollectionService struct {
 	postRepo          repository.PostRepository
-	categoriesService *CategoriesService
+	categoriesService *CategoryCollectionService
 	categoryService   *CategoryService
 	api               *api.Api
 }
 
 func NewPostCollectionService(
 	postRepo repository.PostRepository,
-	categoriesService *CategoriesService,
+	categoriesService *CategoryCollectionService,
 	categoryService *CategoryService,
 	api *api.Api,
 ) *PostCollectionService {
@@ -68,10 +69,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 	var templates map[string]contract.Template
 	var categories map[uint]*models.PostCategory
 
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(templateNames) > 0 {
 			var err error
 			templates, err = s.api.Template.GetMapByNames(templateNames)
@@ -79,10 +77,9 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(userIDs) > 0 {
 			var err error
 			users, err = s.api.User.GetMapByIDs(userIDs)
@@ -90,10 +87,9 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(categoryIDs) > 0 {
 			var err error
 			categories, err = s.categoriesService.GetMapByIDs(categoryIDs)
@@ -101,7 +97,7 @@ func (s *PostCollectionService) Aggregates(posts []*models.Post) []*models.Post 
 				logger.Error(err)
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 

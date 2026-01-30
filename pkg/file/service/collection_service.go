@@ -10,18 +10,18 @@ import (
 
 type CollectionService struct {
 	fileRepo      repository.FileRepository
-	fileService   *FileService
+	service       *Service
 	uploadService *UploadService
 }
 
 func NewCollectionService(
 	fileRepo repository.FileRepository,
-	fileService *FileService,
+	fileService *Service,
 	uploadService *UploadService,
 ) *CollectionService {
 	return &CollectionService{
 		fileRepo:      fileRepo,
-		fileService:   fileService,
+		service:       fileService,
 		uploadService: uploadService,
 	}
 }

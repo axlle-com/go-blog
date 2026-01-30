@@ -20,7 +20,7 @@ func NewWebPostController(
 	service *service.PostService,
 	services *service.PostCollectionService,
 	category *service.CategoryService,
-	categories *service.CategoriesService,
+	categories *service.CategoryCollectionService,
 	tagCollectionService *service.TagCollectionService,
 	api *api.Api,
 ) PostController {
@@ -40,7 +40,7 @@ type postController struct {
 	postService           *service.PostService
 	postCollectionService *service.PostCollectionService
 	categoryService       *service.CategoryService
-	categoriesService     *service.CategoriesService
+	categoriesService     *service.CategoryCollectionService
 	tagCollectionService  *service.TagCollectionService
 	api                   *api.Api
 }

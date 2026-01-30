@@ -12,17 +12,18 @@ import (
 
 	"github.com/axlle-com/blog/app/errutil"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/file/models"
 	"github.com/google/uuid"
 )
 
 type UploadService struct {
-	fileService    *FileService
+	fileService    *Service
 	storageService contract.Storage
 }
 
 func NewUploadService(
-	fileService *FileService,
+	fileService *Service,
 	storageService contract.Storage,
 ) *UploadService {
 	return &UploadService{
@@ -67,28 +68,32 @@ func (s *UploadService) SaveUploadedFile(file *multipart.FileHeader, folder stri
 func (s *UploadService) SaveUploadedFiles(files []*multipart.FileHeader, dist string, user contract.User) ([]string, error) {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
+	sem := make(chan struct{}, 10)
 
 	var paths []string
 	newErr := errutil.New()
 
 	for _, file := range files {
-		wg.Add(1)
+		sem <- struct{}{}
+		service.SafeGo(&wg, func(file *multipart.FileHeader, dist string, user contract.User) func() {
+			return func() {
+				defer func() { <-sem }()
+				path, e := s.SaveUploadedFile(file, dist, user)
+				if e != nil {
+					newErr.Add(e)
+					return
+				}
 
-		go func(file *multipart.FileHeader, dist string, user contract.User) {
-			defer wg.Done()
-			path, e := s.SaveUploadedFile(file, dist, user)
-			if e != nil {
-				newErr.Add(e)
-				return
+				mu.Lock()
+				paths = append(paths, path)
+				mu.Unlock()
 			}
 
-			mu.Lock()
-			paths = append(paths, path)
-			mu.Unlock()
-		}(file, dist, user)
+		}(file, dist, user))
 	}
 
 	wg.Wait()
+
 	return paths, newErr.Error()
 }
 

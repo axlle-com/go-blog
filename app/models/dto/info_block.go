@@ -21,18 +21,41 @@ type InfoBlock struct {
 	InfoBlocks  []InfoBlock `json:"info_blocks,omitempty"`
 }
 
-func (i InfoBlock) GetID() uint        { return i.ID }
-func (i InfoBlock) GetUUID() uuid.UUID { return parseUUID(i.UUID) }
+func (i InfoBlock) GetID() uint {
+	return i.ID
+}
 
-func (i InfoBlock) GetTemplateTitle() string { return i.Template }
-func (i InfoBlock) GetTemplateName() string  { return i.Template }
+func (i InfoBlock) GetUUID() uuid.UUID {
+	return parseUUID(i.UUID)
+}
 
-func (i InfoBlock) GetTitle() string        { return i.Title }
-func (i InfoBlock) GetDescription() *string { return i.Description }
-func (i InfoBlock) GetImage() *string       { return i.Image }
-func (i InfoBlock) GetMedia() *string       { return i.Media }
+func (i InfoBlock) GetTemplateTitle() string {
+	return i.Template
+}
 
-func (i InfoBlock) GetPosition() string { return i.Position }
+func (i InfoBlock) GetTemplateName() string {
+	return i.Template
+}
+
+func (i InfoBlock) GetTitle() string {
+	return i.Title
+}
+
+func (i InfoBlock) GetDescription() *string {
+	return i.Description
+}
+
+func (i InfoBlock) GetImage() *string {
+	return i.Image
+}
+
+func (i InfoBlock) GetMedia() *string {
+	return i.Media
+}
+
+func (i InfoBlock) GetPosition() string {
+	return i.Position
+}
 
 func (i InfoBlock) GetPositions() []string {
 	return []string{
@@ -43,9 +66,13 @@ func (i InfoBlock) GetPositions() []string {
 	}
 }
 
-func (i InfoBlock) GetSort() int { return i.Sort }
+func (i InfoBlock) GetSort() int {
+	return i.Sort
+}
 
-func (i InfoBlock) GetRelationID() uint { return i.RelationID }
+func (i InfoBlock) GetRelationID() uint {
+	return i.RelationID
+}
 
 func (i InfoBlock) GetGalleries() []contract.Gallery {
 	if len(i.Galleries) == 0 {
@@ -79,5 +106,6 @@ func parseUUID(s string) uuid.UUID {
 	if err != nil {
 		return uuid.Nil
 	}
+
 	return u
 }

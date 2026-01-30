@@ -10,7 +10,7 @@ import (
 
 func NewFileProvider(
 	uploadService *service.UploadService,
-	fileService *service.FileService,
+	fileService *service.Service,
 	collectionService *service.CollectionService,
 ) appProvider.FileProvider {
 	return &provider{
@@ -22,7 +22,7 @@ func NewFileProvider(
 
 type provider struct {
 	uploadService     *service.UploadService
-	fileService       *service.FileService
+	fileService       *service.Service
 	collectionService *service.CollectionService
 }
 

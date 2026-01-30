@@ -18,7 +18,7 @@ import (
 )
 
 func NewGalleryQueueHandler(
-	categoriesService *service.CategoriesService,
+	categoriesService *service.CategoryCollectionService,
 	postCollectionService *service.PostCollectionService,
 	tagCollectionService *service.TagCollectionService,
 	api *api.Api,
@@ -32,7 +32,7 @@ func NewGalleryQueueHandler(
 }
 
 type queueGalleryHandler struct {
-	categoriesService     *service.CategoriesService
+	categoriesService     *service.CategoryCollectionService
 	postCollectionService *service.PostCollectionService
 	tagCollectionService  *service.TagCollectionService
 	api                   *api.Api

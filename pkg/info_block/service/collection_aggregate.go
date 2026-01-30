@@ -8,56 +8,31 @@ import (
 	"github.com/axlle-com/blog/app/api"
 	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
+	"github.com/axlle-com/blog/app/service"
 	"github.com/axlle-com/blog/pkg/info_block/models"
 	"github.com/axlle-com/blog/pkg/info_block/repository"
 	"github.com/google/uuid"
 )
 
-type InfoBlockCollectionService struct {
+type CollectionAggregateService struct {
+	api           *api.Api
 	infoBlockRepo repository.InfoBlockRepository
 	resourceRepo  repository.InfoBlockHasResourceRepository
-	api           *api.Api
 }
 
-func NewInfoBlockCollectionService(
+func NewCollectionAggregateService(
+	api *api.Api,
 	infoBlockRepo repository.InfoBlockRepository,
 	resourceRepo repository.InfoBlockHasResourceRepository,
-	api *api.Api,
-) *InfoBlockCollectionService {
-	return &InfoBlockCollectionService{
+) *CollectionAggregateService {
+	return &CollectionAggregateService{
+		api:           api,
 		infoBlockRepo: infoBlockRepo,
 		resourceRepo:  resourceRepo,
-		api:           api,
 	}
 }
 
-func (s *InfoBlockCollectionService) GetAll() ([]*models.InfoBlock, error) {
-	return s.infoBlockRepo.GetAll()
-}
-
-func (s *InfoBlockCollectionService) GetRoots() ([]*models.InfoBlock, error) {
-	return s.infoBlockRepo.GetRoots()
-}
-
-func (s *InfoBlockCollectionService) GetForResourceByFilter(filter *models.InfoBlockFilter) []*models.InfoBlockResponse {
-	infoBlocks, err := s.infoBlockRepo.GetForResourceByFilter(filter)
-	if err != nil {
-		logger.Errorf("[info_block][InfoBlockCollectionService][GetForResourceByFilter] Error: %v", err)
-		return nil
-	}
-
-	return s.AggregatesResponses(infoBlocks)
-}
-
-func (s *InfoBlockCollectionService) GetAllForParent(parent *models.InfoBlock) ([]*models.InfoBlock, error) {
-	return s.infoBlockRepo.GetAllForParent(parent)
-}
-
-func (s *InfoBlockCollectionService) WithPaginate(paginator contract.Paginator, filter *models.InfoBlockFilter) ([]*models.InfoBlock, error) {
-	return s.infoBlockRepo.WithPaginate(paginator, filter)
-}
-
-func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) []*models.InfoBlock {
+func (s *CollectionAggregateService) Aggregates(infoBlocks []*models.InfoBlock) []*models.InfoBlock {
 	var templateNames []string
 	var userIDs []uint
 
@@ -84,29 +59,25 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 	var users map[uint]contract.User
 	var templates map[string]contract.Template
 
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(userIDs) > 0 {
 			var err error
 			users, err = s.api.User.GetMapByIDs(userIDs)
 			if err != nil {
-				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
+				logger.Errorf("[info_block][CollectionService][Aggregates] Error: %v", err)
 			}
 		}
-	}()
+	})
 
-	go func() {
-		defer wg.Done()
+	service.SafeGo(&wg, func() {
 		if len(templateNames) > 0 {
 			var err error
 			templates, err = s.api.Template.GetMapByNames(templateNames)
 			if err != nil {
-				logger.Errorf("[info_block][InfoBlockCollectionService][Aggregates] Error: %v", err)
+				logger.Errorf("[info_block][CollectionService][Aggregates] Error: %v", err)
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 
@@ -123,7 +94,7 @@ func (s *InfoBlockCollectionService) Aggregates(infoBlocks []*models.InfoBlock) 
 	return infoBlocks
 }
 
-func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.InfoBlockResponse) []*models.InfoBlockResponse {
+func (s *CollectionAggregateService) AggregatesResponses(infoBlocks []*models.InfoBlockResponse) []*models.InfoBlockResponse {
 	if len(infoBlocks) == 0 {
 		return []*models.InfoBlockResponse{}
 	}
@@ -141,6 +112,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 		seenRoot[ib.ID] = struct{}{}
 		rootIDs = append(rootIDs, ib.ID)
 	}
+
 	if len(rootIDs) == 0 {
 		return []*models.InfoBlockResponse{}
 	}
@@ -164,7 +136,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 	if len(missingIDs) > 0 {
 		rootModels, err := s.infoBlockRepo.GetByIDs(missingIDs)
 		if err != nil {
-			logger.Errorf("[info_block][InfoBlockCollectionService][AggregatesResponses] Error: %v", err)
+			logger.Errorf("[info_block][CollectionService][AggregatesResponses] Error: %v", err)
 			s.enrichInfoBlockResponses(infoBlocks)
 			return infoBlocks
 		}
@@ -178,7 +150,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 		}
 	}
 
-	paths = collapsePaths(paths)
+	paths = s.collapsePaths(paths)
 	if len(paths) == 0 {
 		s.enrichInfoBlockResponses(infoBlocks)
 		return infoBlocks
@@ -187,7 +159,7 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 	// 3) одним запросом получаем все узлы поддеревьев (включая корни)
 	allNodes, err := s.infoBlockRepo.GetSubtreesByPaths(paths)
 	if err != nil {
-		logger.Errorf("[info_block][InfoBlockCollectionService][AggregatesResponses] Error: %v", err)
+		logger.Errorf("[info_block][CollectionService][AggregatesResponses] Error: %v", err)
 		s.enrichInfoBlockResponses(infoBlocks)
 		return infoBlocks
 	}
@@ -282,14 +254,90 @@ func (s *InfoBlockCollectionService) AggregatesResponses(infoBlocks []*models.In
 			allResponses = append(allResponses, r)
 		}
 	}
+
 	s.enrichInfoBlockResponses(allResponses)
 
 	return infoBlocks
 }
 
+func (s *CollectionAggregateService) enrichInfoBlockResponses(infoBlocks []*models.InfoBlockResponse) {
+	if len(infoBlocks) == 0 {
+		return
+	}
+
+	templateNames := make([]string, 0)
+	userIDs := make([]uint, 0)
+
+	templateNamesMap := make(map[string]bool)
+	userIDsMap := make(map[uint]bool)
+
+	resources := make([]contract.Resource, 0, len(infoBlocks))
+	for _, ib := range infoBlocks {
+		if ib == nil {
+			continue
+		}
+		resources = append(resources, ib)
+
+		if ib.TemplateName != "" && !templateNamesMap[ib.TemplateName] {
+			templateNames = append(templateNames, ib.TemplateName)
+			templateNamesMap[ib.TemplateName] = true
+		}
+
+		if ib.UserID != nil {
+			id := *ib.UserID
+			if !userIDsMap[id] {
+				userIDs = append(userIDs, id)
+				userIDsMap[id] = true
+			}
+		}
+	}
+
+	var users map[uint]contract.User
+	var templates map[string]contract.Template
+	var galleries map[uuid.UUID][]contract.Gallery
+
+	if len(userIDs) != 0 {
+		var err error
+		users, err = s.api.User.GetMapByIDs(userIDs)
+		if err != nil {
+			logger.Errorf("[info_block][CollectionService][enrichInfoBlockResponses] Error: %v", err)
+		}
+	}
+
+	galleries = s.api.Gallery.GetIndexesForResources(resources)
+
+	if len(templateNames) != 0 {
+		var err error
+		templates, err = s.api.Template.GetMapByNames(templateNames)
+		if err != nil {
+			logger.Errorf("[info_block][CollectionService][enrichInfoBlockResponses] Error: %v", err)
+		}
+	}
+
+	for _, ib := range infoBlocks {
+		if ib == nil {
+			continue
+		}
+
+		if galleries != nil {
+			if g, ok := galleries[ib.UUID]; ok {
+				ib.Galleries = g
+			}
+		}
+
+		if templates != nil && ib.TemplateName != "" {
+			ib.Template = templates[ib.TemplateName]
+		}
+
+		if users != nil && ib.UserID != nil {
+			ib.User = users[*ib.UserID]
+		}
+	}
+}
+
 // collapsePaths схлопывает пересечения:
 // если есть "2.7" — путь "2.7.9" не нужен.
-func collapsePaths(paths []string) []string {
+func (s *CollectionAggregateService) collapsePaths(paths []string) []string {
 	uniq := make([]string, 0, len(paths))
 	seen := make(map[string]struct{}, len(paths))
 	for _, p := range paths {
@@ -331,95 +379,4 @@ func collapsePaths(paths []string) []string {
 		}
 	}
 	return out
-}
-
-func (s *InfoBlockCollectionService) enrichInfoBlockResponses(infoBlocks []*models.InfoBlockResponse) {
-	if len(infoBlocks) == 0 {
-		return
-	}
-
-	templateNames := make([]string, 0)
-	userIDs := make([]uint, 0)
-
-	templateNamesMap := make(map[string]bool)
-	userIDsMap := make(map[uint]bool)
-
-	resources := make([]contract.Resource, 0, len(infoBlocks))
-	for _, ib := range infoBlocks {
-		if ib == nil {
-			continue
-		}
-		resources = append(resources, ib)
-
-		if ib.TemplateName != "" && !templateNamesMap[ib.TemplateName] {
-			templateNames = append(templateNames, ib.TemplateName)
-			templateNamesMap[ib.TemplateName] = true
-		}
-
-		if ib.UserID != nil {
-			id := *ib.UserID
-			if !userIDsMap[id] {
-				userIDs = append(userIDs, id)
-				userIDsMap[id] = true
-			}
-		}
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(3)
-
-	var users map[uint]contract.User
-	var templates map[string]contract.Template
-	var galleries map[uuid.UUID][]contract.Gallery
-
-	go func() {
-		defer wg.Done()
-		if len(userIDs) == 0 {
-			return
-		}
-		var err error
-		users, err = s.api.User.GetMapByIDs(userIDs)
-		if err != nil {
-			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		galleries = s.api.Gallery.GetIndexesForResources(resources)
-	}()
-
-	go func() {
-		defer wg.Done()
-		if len(templateNames) == 0 {
-			return
-		}
-		var err error
-		templates, err = s.api.Template.GetMapByNames(templateNames)
-		if err != nil {
-			logger.Errorf("[info_block][InfoBlockCollectionService][enrichInfoBlockResponses] Error: %v", err)
-		}
-	}()
-
-	wg.Wait()
-
-	for _, ib := range infoBlocks {
-		if ib == nil {
-			continue
-		}
-
-		if galleries != nil {
-			if g, ok := galleries[ib.UUID]; ok {
-				ib.Galleries = g
-			}
-		}
-
-		if templates != nil && ib.TemplateName != "" {
-			ib.Template = templates[ib.TemplateName]
-		}
-
-		if users != nil && ib.UserID != nil {
-			ib.User = users[*ib.UserID]
-		}
-	}
 }

@@ -18,7 +18,7 @@ type Controller interface {
 func New(
 	service *service.PostService,
 	category *service.CategoryService,
-	categories *service.CategoriesService,
+	categories *service.CategoryCollectionService,
 	api *api.Api,
 ) Controller {
 	return &controller{
@@ -34,6 +34,6 @@ type controller struct {
 
 	service    *service.PostService
 	category   *service.CategoryService
-	categories *service.CategoriesService
+	categories *service.CategoryCollectionService
 	api        *api.Api
 }

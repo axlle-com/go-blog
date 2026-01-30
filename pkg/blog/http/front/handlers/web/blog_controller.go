@@ -25,7 +25,7 @@ func NewFrontWebController(
 	service *service.PostService,
 	services *service.PostCollectionService,
 	category *service.CategoryService,
-	categories *service.CategoriesService,
+	categories *service.CategoryCollectionService,
 ) BlogController {
 	return &blogController{
 		config:                config,
@@ -47,7 +47,7 @@ type blogController struct {
 	postService           *service.PostService
 	postCollectionService *service.PostCollectionService
 	categoryService       *service.CategoryService
-	categoriesService     *service.CategoriesService
+	categoriesService     *service.CategoryCollectionService
 }
 
 func (c *blogController) settings(ctx *gin.Context, publisher contract.Publisher) map[string]any {

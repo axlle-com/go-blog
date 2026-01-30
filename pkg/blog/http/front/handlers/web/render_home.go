@@ -1,17 +1,13 @@
 package web
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/axlle-com/blog/app/logger"
-	"github.com/axlle-com/blog/app/models/dto"
 	"github.com/gin-gonic/gin"
 )
 
 func (c *blogController) RenderHome(ctx *gin.Context) {
-	var blocks []dto.InfoBlock
-
 	model, err := c.postService.FindByParam("is_main", true)
 	if model == nil || err != nil {
 		c.RenderHTML(
@@ -47,10 +43,6 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		return
 	}
 
-	if len(model.InfoBlocksSnapshot) > 0 {
-		err = json.Unmarshal(model.InfoBlocksSnapshot, &blocks)
-	}
-
 	c.RenderHTML(
 		ctx,
 		http.StatusOK,
@@ -58,7 +50,7 @@ func (c *blogController) RenderHome(ctx *gin.Context) {
 		gin.H{
 			"settings": c.settings(ctx, model),
 			"model":    model,
-			"blocks":   blocks,
+			"blocks":   model.InfoBlocks,
 		},
 	)
 }

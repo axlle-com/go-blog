@@ -1,48 +1,64 @@
 [
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-7177-b030-9cde48d71d0d",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.about",
     "title": "Блок about",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-7585-9cdd-085d5aa6470b",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.services",
     "title": "Блок services",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-73f2-bc19-a1983591ee3d",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.contact_form",
     "title": "Блок contact_form",
     "image": "/static/spring/images/girls.png"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-7d41-bea6-bda1598724bd",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.contact",
     "title": "Блок contact",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-7e28-90d6-64473905e5ac",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.clients",
     "title": "Блок clients",
     "image": "/static/img/404.svg"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-72c5-97c4-0ab9f8975c6e",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.service",
     "title": "service-educational-portal",
     "image": "/static/spring/images/services/process.png"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-7071-85d4-d70b3926eb87",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.service",
     "title": "service-telemedicine-service",
     "image": "/static/spring/images/services/process.png"
   },
   {
     "user_id": 1,
+    "uuid": "019c1662-1824-712a-8c1a-6959bfab4385",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.info_blocks.service",
     "title": "service-inform",
     "image": "/static/spring/images/services/process.png"

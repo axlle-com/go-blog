@@ -1,6 +1,8 @@
 [
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7d5d-8f6f-b2fe663c6eee",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.post_categories.services",
     "is_published": true,
     "in_sitemap": true,

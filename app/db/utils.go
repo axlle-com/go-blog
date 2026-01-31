@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/axlle-com/blog/app/logger"
+	"github.com/google/uuid"
 )
 
 func RandBool() bool {
@@ -144,6 +145,17 @@ func RandomDate() time.Time {
 	delta := endDate.Sub(startDate)
 	randomDuration := time.Duration(rand.Int63n(int64(delta)))
 	return startDate.Add(randomDuration)
+}
+
+func ParseUUID(s string) uuid.UUID {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		logger.Errorf("[app][db][ParseUUID] Error: %+v", err)
+
+		return uuid.Nil
+	}
+
+	return u
 }
 
 // IndexName формирует единый формат имени индекса: idx_<table>_<col1>[_<col2>...]

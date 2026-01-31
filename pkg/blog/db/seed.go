@@ -154,6 +154,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 			}
 			if found != nil {
 				logger.Infof("[blog][seeder][seedFromJSON] post with title='%v' already exists, skipping", postData.Alias)
+
 				continue
 			}
 
@@ -163,6 +164,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				cat, err := s.categoryService.FindByParam("alias", *postData.CategoryAlias)
 				if err != nil {
 					logger.Errorf("[blog][seeder][seedFromJSON] category not found: alias=%s, error=%v", *postData.CategoryAlias, err)
+
 					continue
 				}
 				id := cat.ID
@@ -181,6 +183,8 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 					dateEnd = parsed
 				}
 			}
+
+			now := time.Now()
 
 			post := models.Post{
 				UUID:               uuid.New(),
@@ -207,8 +211,8 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 				Hits:               postData.Hits,
 				Sort:               postData.Sort,
 				Stars:              postData.Stars,
-				CreatedAt:          db.TimePtr(time.Now()),
-				UpdatedAt:          db.TimePtr(time.Now()),
+				CreatedAt:          db.TimePtr(now),
+				UpdatedAt:          db.TimePtr(now),
 				DeletedAt:          nil,
 			}
 
@@ -224,6 +228,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 			createdPost, err := s.postService.Create(&post, userF)
 			if err != nil {
 				logger.Errorf("[blog][seeder][seedFromJSON] error creating post: %v", err)
+
 				continue
 			}
 
@@ -239,6 +244,7 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 					infoBlock, err := s.api.InfoBlock.FindByTitle(infoBlockItem.Title)
 					if err != nil || infoBlock == nil {
 						logger.Infof("[blog][seeder][seedFromJSON] info block with title='%s' not found for post '%s', skipping", infoBlockItem.Title, postData.Title)
+
 						continue
 					}
 
@@ -249,8 +255,10 @@ func (s *seeder) seedFromJSON(moduleName string) error {
 					_, err = s.api.InfoBlock.CreateRelationFormBatch([]any{infoBlockItem}, createdPost.UUID.String())
 					if err != nil {
 						logger.Errorf("[blog][seeder][seedFromJSON] error attaching info block '%s' to post '%s': %v", infoBlockItem.Title, postData.Title, err)
+
 						continue
 					}
+
 					logger.Infof("[blog][seeder][seedFromJSON] attached info block '%s' (ID=%d, Sort=%d, Position=%s) to post '%s'", infoBlockItem.Title, infoBlock.GetID(), infoBlockItem.Sort, infoBlockItem.Position, postData.Title)
 				}
 			}

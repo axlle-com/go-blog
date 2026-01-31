@@ -56,6 +56,7 @@ func (s *seeder) Seed() error {
 
 	role, _ := s.role.GetByName("superadmin")
 	user := models.User{
+		UUID:             db.ParseUUID("019c1660-28e4-7a13-b086-ff3b1f0e8336"),
 		Avatar:           db.StrPtr("/static/img/user.svg"),
 		FirstName:        "Admin",
 		LastName:         "Admin",
@@ -75,7 +76,8 @@ func (s *seeder) Seed() error {
 		return err
 	}
 
-	logger.Info("[Useer][seeder][Seed] Database seeded User successfully!")
+	logger.Info("[user][seeder][Seed] Database seeded User successfully!")
+
 	return err
 }
 

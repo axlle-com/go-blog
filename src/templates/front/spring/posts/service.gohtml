@@ -1,7 +1,10 @@
 {{ define "spring.posts.service" }}
+
     {{ template "spring.header" . }}
 
-    <section class="main-banner banner-one" id="banner" style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
+    <section class="main-banner banner-one"
+             id="banner"
+             style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
         <div class="auto-container">
             <div class="row clearfix">
                 <div class="text-column col-md-6 col-sm-12 col-xs-12">
@@ -14,7 +17,13 @@
                 {{ if ne .model.Image nil }}
                     <div class="image-column col-md-6 col-sm-12 col-xs-12">
                         <div class="inner">
-                            <figure class="image"><img src="{{ .model.Image }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .model.Title }}"></figure>
+                            <figure class="image">
+                                <img src="{{ .model.Image }}"
+                                     loading="lazy"
+                                     decoding="async"
+                                     fetchpriority="low"
+                                     alt="{{ .model.Title }}">
+                            </figure>
                         </div>
                     </div>
                 {{ end }}
@@ -23,6 +32,6 @@
     </section>
 
     {{ template "spring.info_block_inner" . }}
-
     {{ template "spring.footer" . }}
+
 {{end}}

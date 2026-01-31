@@ -1,8 +1,11 @@
 {{ define "spring.post_categories.default" }}
+
     {{ template "spring.header" .}}
 
     <h1>{{ .model.Title }}</h1>
     <p>{{ .model.Description }}</p>
 
+    {{ template "spring.info_block_inner" . }}
     {{ template "spring.footer" . }}
+
 {{ end }}

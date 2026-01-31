@@ -1,19 +1,22 @@
 {{ define "spring.error"}}
+
     {{ template "spring.header" . }}
-    <section class="main-banner banner-one" id="banner"
+
+    <section class="main-banner banner-one"
+             id="banner"
              style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
         <div class="auto-container">
             <div class="row clearfix">
-                <!--Text Column-->
                 <div class="text-column col-md-6 col-sm-12 col-xs-12">
                     <div class="inner">
                         <h2>{{ .title }}</h2>
                         <h2>{{ .error }}</h2>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
+
     {{ template "spring.footer" . }}
-{{ end}}
+
+{{ end }}

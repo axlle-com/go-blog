@@ -1,6 +1,10 @@
 {{ define "spring.posts.index" }}
+
     {{ template "spring.header" . }}
-    <section class="main-banner banner-one" id="banner" style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
+
+    <section class="main-banner banner-one"
+             id="banner"
+             style="background-image:url(/static/spring/images/background/banner-bg-1.webp);">
         <div class="auto-container">
             <div class="row clearfix">
 
@@ -8,14 +12,24 @@
                     <div class="inner">
                         <h1>{{ .model.Title }}</h1>
                         <p>{{ .model.Description }}</p>
-                        <a href="#" class="theme-btn btn-style-two" data-toggle="modal" data-target="#myModalMd">Request A Demo <span class="icon ti-arrow-circle-right"></span></a>
+                        <a href="#"
+                           class="theme-btn btn-style-two"
+                           data-toggle="modal"
+                           data-target="#myModalMd">Request A Demo <span class="icon ti-arrow-circle-right"></span>
+                        </a>
                     </div>
                 </div>
 
                 {{ if ne .model.Image nil }}
                     <div class="image-column col-md-6 col-sm-12 col-xs-12">
                         <div class="inner">
-                            <figure class="image"><img src="{{ .model.Image }}" loading="lazy" decoding="async" fetchpriority="low" alt="{{ .model.Title }}"></figure>
+                            <figure class="image">
+                                <img src="{{ .model.Image }}"
+                                     loading="lazy"
+                                     decoding="async"
+                                     fetchpriority="low"
+                                     alt="{{ .model.Title }}">
+                            </figure>
                         </div>
                     </div>
                 {{ end }}
@@ -25,6 +39,6 @@
     </section>
 
     {{ template "spring.info_block_inner" . }}
-
     {{ template "spring.footer" . }}
+
 {{end}}

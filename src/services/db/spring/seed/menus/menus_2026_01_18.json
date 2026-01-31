@@ -1,6 +1,8 @@
 [
   {
     "user_id": 1,
+    "uuid": "019c1661-d70c-7036-857b-52acabb30821",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "title": "Main",
     "is_main": true,
     "menu_items": [

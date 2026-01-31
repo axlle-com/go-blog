@@ -5,6 +5,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/axlle-com/blog/app/logger"
 	"github.com/axlle-com/blog/app/models/contract"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -131,8 +132,12 @@ func (p *Post) GetTitleShort() string {
 }
 
 func (p *Post) SetUUID() {
+	var err error
 	if p.UUID == uuid.Nil {
-		p.UUID = uuid.New()
+		if p.UUID, err = uuid.NewV7(); err != nil {
+			logger.Errorf("[blog][models][post][SetUUID] Error: %+v", err)
+			p.UUID = uuid.New()
+		}
 	}
 }
 

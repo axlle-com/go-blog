@@ -1,6 +1,8 @@
 [
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7a65-9ceb-74b829d90041",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.index",
     "is_published": true,
     "in_sitemap": true,
@@ -37,6 +39,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7ce0-b87f-eedd5d5a4f5e",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -64,6 +68,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7bd1-bf3e-9f3eaf8aa1f1",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -91,6 +97,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-730c-a225-15291b42a786",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -118,6 +126,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7dd7-8167-318104a0aa6c",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -140,6 +150,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-71f9-9afb-5b5cd6101143",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -162,6 +174,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-760c-b178-083eaecf9e94",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -184,6 +198,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7c96-9859-c83536734131",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
@@ -206,6 +222,8 @@
   },
   {
     "user_id": 1,
+    "uuid": "019c1650-527d-7d72-9d2b-54398afe5d8e",
+    "user_uuid": "019c1660-28e4-7a13-b086-ff3b1f0e8336",
     "template": "spring.posts.service",
     "is_published": true,
     "in_sitemap": true,
